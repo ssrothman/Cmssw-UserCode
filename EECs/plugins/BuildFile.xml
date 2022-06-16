@@ -1,0 +1,3 @@
+<library file="*.cc" name="SRothmanEECsPlugins">
+  <flags EDM_PLUGIN="1"/>
+</library>
