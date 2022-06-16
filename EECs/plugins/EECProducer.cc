@@ -14,15 +14,9 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+#include "DataFormats/JetReco/interface/Jet.h"
 
-#include "CondFormats/DataRecord/interface/GBRDWrapperRcd.h"
-#include "CondFormats/GBRForest/interface/GBRForestD.h"
-#include "RecoEgamma/EgammaTools/interface/EpCombinationTool.h"
-#include "RecoEgamma/EgammaTools/interface/ElectronEnergyCalibrator.h"
-#include "RecoEgamma/EgammaTools/interface/EGEnergySysIndex.h"
-#include "RecoEgamma/EgammaTools/interface/EgammaRandomSeeds.h"
-
-#include "TRandom2.h"
+#include "TH1.h"
 
 #include <memory>
 
@@ -36,7 +30,26 @@ public:
   void produce(edm::Event&, const edm::EventSetup&) override;
 
 private:
-
+  unsigned int maxOrder;
+  edm::InputTag src_;
+  edm::EDGetTokenT<edm::View<reco::Jet>> srcToken_;
 };
+
+EECProducer::EECProducer(const edm::ParameterSet& conf)
+      : maxOrder(conf.getParameter<unsigned int>("maxOrder")),
+        src_(conf.getParameter<edm::InputTag>("jets")),
+        srcToken_(consumes<edm::View<reco::Jet>>(src_)){
+  
+  produces<edm::ValueMap<TH1D>>();
+
+}
+
+void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions){
+
+}
+
+void EECProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
+  
+}
 
 DEFINE_FWK_MODULE(EECProducer);
