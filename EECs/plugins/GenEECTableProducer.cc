@@ -14,24 +14,24 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/Common/interface/ValueMap.h"
-#include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
 
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 //this is a gross hack
 //I need to figure out how to actually link against this
-#include "SRothman/EECs/src/eec_back.cc" 
+#include "SRothman/EECs/src/eec_back.h" 
 
 #include <iostream>
 #include <memory>
 #include <vector>
 
-class EECTableProducer : public edm::stream::EDProducer<> {
+class GenEECTableProducer : public edm::stream::EDProducer<> {
 public:
-  explicit EECTableProducer(const edm::ParameterSet&);
-  ~EECTableProducer() override {}
+  explicit GenEECTableProducer(const edm::ParameterSet&);
+  ~GenEECTableProducer() override {}
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   void produce(edm::Event&, const edm::EventSetup&) override;
 
@@ -42,39 +42,38 @@ private:
   std::string name_;
   
   edm::InputTag src_;
-  edm::EDGetTokenT<edm::View<reco::PFJet>> srcToken_;
-
+  edm::EDGetTokenT<edm::View<reco::GenJet>> srcToken_;
+ 
   edm::InputTag muonSrc_;
   edm::EDGetTokenT<edm::View<reco::Muon>> muonSrcToken_;
 
-
 };
 
-EECTableProducer::EECTableProducer(const edm::ParameterSet& conf)
+GenEECTableProducer::GenEECTableProducer(const edm::ParameterSet& conf)
       : order_(conf.getParameter<unsigned int>("order")),
         minJetPt_(conf.getParameter<double>("minJetPt")),
         name_(conf.getParameter<std::string>("name")),
         src_(conf.getParameter<edm::InputTag>("jets")),
-        srcToken_(consumes<edm::View<reco::PFJet>>(src_)),
+        srcToken_(consumes<edm::View<reco::GenJet>>(src_)),
         muonSrc_(conf.getParameter<edm::InputTag>("muons")),
         muonSrcToken_(consumes<edm::View<reco::Muon>>(muonSrc_)){
   produces<nanoaod::FlatTable>(name_);
 }
 
-void EECTableProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions){
+void GenEECTableProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions){
   edm::ParameterSetDescription desc;
   desc.add<unsigned int>("order");
   desc.add<std::string>("name");
-  desc.add<double>("minJetPt");
   desc.add<edm::InputTag>("jets");
+  desc.add<double>("minJetPt");
   desc.add<edm::InputTag>("muons");
   descriptions.addWithDefaultLabel(desc);
 }
 
-void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
-  edm::Handle<edm::View<reco::PFJet>> jets;
+void GenEECTableProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
+  edm::Handle<edm::View<reco::GenJet>> jets;
   evt.getByToken(srcToken_, jets);
-  
+
   edm::Handle<edm::View<reco::Muon>> muons;
   evt.getByToken(muonSrcToken_, muons);
 
@@ -85,7 +84,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
 
   if(muons->size() == 2){
     for(size_t iJet=0; iJet<nJets; ++iJet){
-      reco::PFJet jet = jets->at(iJet);
+      reco::GenJet jet = jets->at(iJet);
       
       if(jet.pt() < minJetPt_) 
         continue;
@@ -114,7 +113,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
       flatWTs.insert(flatWTs.end(), wts, wts+nDR);
       jetIdx.insert(jetIdx.end(), nDR, iJet);
     } // end for jet
-  }//end if there are two muons
+  }//end if there are two muons 
   
   auto table = std::make_unique<nanoaod::FlatTable>(flatDRs.size(), name_, false);
   table->addColumn<float>("dRs", flatDRs, "Delta R", nanoaod::FlatTable::FloatColumn);
@@ -123,4 +122,4 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
   evt.put(std::move(table), name_);
 }// end produce()
 
-DEFINE_FWK_MODULE(EECTableProducer);
+DEFINE_FWK_MODULE(GenEECTableProducer);

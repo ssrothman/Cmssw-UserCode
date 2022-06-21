@@ -1,26 +1,35 @@
 import FWCore.ParameterSet.Config as cms
 
-def addEECs(process, runOnMC=False, order=2, jetName="ak4PFJetsPuppi"):
-    process.EECTable2 = cms.EDProducer("EECTableProducer",
-        jets = cms.InputTag("ak4PFJetsPuppi"),
-        order=cms.uint32(2),
-        name=cms.string("EEC2")
-    )
-
-    process.EECTable3 = cms.EDProducer("EECTableProducer",
-        jets = cms.InputTag("ak4PFJetsPuppi"),
-        order=cms.uint32(3),
-        name=cms.string("EEC3")
-    )
-
-    process.EECTable4 = cms.EDProducer("EECTableProducer",
-        jets = cms.InputTag("ak4PFJetsPuppi"),
-        order=cms.uint32(4),
-        name=cms.string("EEC4")
-    )
-
-    process.EECTask = cms.Task(process.EECTable2, process.EECTable3, process.EECTable4)
-
+def addEECs(process, runOnMC=False, jetName="ak4PFJetsPuppi", genJetName="ak4GenJetsNoNu", maxOrder=2):
+    process.EECTask = cms.Task()
     process.schedule.associate(process.EECTask)
+
+    for order in range(2, maxOrder+1):
+        setattr(process, "EEC%dTable"%order, 
+            cms.EDProducer("EECTableProducer",
+                jets = cms.InputTag(jetName),
+                order=cms.uint32(order),
+                name=cms.string("EEC%d"%order),
+                minJetPt=cms.double(50),
+                muons = cms.InputTag('finalMuons')
+            )
+        )
+        process.EECTask.add(getattr(process, "EEC%dTable"%order))
+
+    if runOnMC:
+        process.genEECTask = cms.Task()
+        process.schedule.associate(process.genEECTask)
+
+        for order in range(2, maxOrder+1):
+            setattr(process, "GenEEC%dTable"%order, 
+                cms.EDProducer("GenEECTableProducer",
+                    jets = cms.InputTag(genJetName),
+                    order=cms.uint32(order),
+                    name=cms.string("genEEC%d"%order),
+                    minJetPt=cms.double(50),
+                    muons=cms.InputTag('finalMuons')
+                )
+            )
+            process.EECTask.add(getattr(process, "GenEEC%dTable"%order))
 
     return process
