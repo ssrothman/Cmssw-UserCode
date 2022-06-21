@@ -10,7 +10,7 @@ def addEECs(process, runOnMC=False, jetName="ak4PFJetsPuppi", genJetName="ak4Gen
                 jets = cms.InputTag(jetName),
                 order=cms.uint32(order),
                 name=cms.string("EEC%d"%order),
-                minJetPt=cms.double(50),
+                minJetPt=cms.double(30),
                 muons = cms.InputTag('finalMuons')
             )
         )
@@ -26,7 +26,7 @@ def addEECs(process, runOnMC=False, jetName="ak4PFJetsPuppi", genJetName="ak4Gen
                     jets = cms.InputTag(genJetName),
                     order=cms.uint32(order),
                     name=cms.string("genEEC%d"%order),
-                    minJetPt=cms.double(50),
+                    minJetPt=cms.double(30),
                     muons=cms.InputTag('finalMuons')
                 )
             )

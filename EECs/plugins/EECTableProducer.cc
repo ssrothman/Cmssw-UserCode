@@ -86,10 +86,10 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
   if(muons->size() == 2){
     for(size_t iJet=0; iJet<nJets; ++iJet){
       reco::PFJet jet = jets->at(iJet);
-      
+
       if(jet.pt() < minJetPt_) 
         continue;
-      
+
       std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
       size_t nConstituents = constituents.size();
 
@@ -97,7 +97,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
       float* dRs = (float*) malloc(sizeof(float)*nDR);
       float* wts = (float*) malloc(sizeof(float)*nDR);
       float* jetFeat = (float*) malloc(sizeof(float)*3*nConstituents);      size_t i=0;
-      
+
       for(const auto& part : constituents){
         jetFeat[i++] = (float) part->pt()/jet.pt();
         jetFeat[i++] = (float) part->eta();
