@@ -50,6 +50,9 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
     produces<std::vector<float>>("wt"+std::to_string(i));
     produces<std::vector<unsigned>>("nDR"+std::to_string(i));
     //produces<std::vector<TH1F>>("EEC" + std::to_string(i));
+    std::cout << "setting up to produce " << "dR" + std::to_string(i) << std::endl;
+    std::cout << "setting up to produce " << "wt" + std::to_string(i) << std::endl;
+    std::cout << "setting up to produce " << "nDR" + std::to_string(i) << std::endl;
   }
 }
 
@@ -101,6 +104,10 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup &setup){
     evt.put(std::move(flatDRs), "dR"+std::to_string(order));
     evt.put(std::move(flatWTs), "wt"+std::to_string(order));
     evt.put(std::move(nDRs), "nDR"+std::to_string(order));
+    
+    std::cout << "produced " << "dR" + std::to_string(order) << std::endl;
+    std::cout << "produced " << "dR" + std::to_string(order) << std::endl;
+    std::cout << "produced " << "dR" + std::to_string(order) << std::endl;
   } // end for order 
 }// end produce()
 
