@@ -4,7 +4,7 @@ from  PhysicsTools.NanoAOD.common_cff import *
 from Configuration.Eras.Modifier_run2_nanoAOD_94X2016_cff import run2_nanoAOD_94X2016
 from Configuration.Eras.Modifier_run2_nanoAOD_94XMiniAODv2_cff import run2_nanoAOD_94XMiniAODv2
 from Configuration.Eras.Modifier_run2_nanoAOD_102Xv1_cff import run2_nanoAOD_102Xv1
-from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
+from PhysicsTools.PFNano.ak15.jetToolbox_cff import jetToolbox
 
 # ---------------------------------------------------------
 # Cusomtization function for custom jets via jet toolbox
@@ -13,18 +13,19 @@ def setupCustomizedJetToolbox(process, runOnMC=False):
     #### AK4 PUPPI jets
 
     ak4btagdiscriminators = [
-          'pfDeepCSVJetTags:probb',
-          'pfDeepCSVJetTags:probbb',
-          'pfDeepCSVJetTags:probc',
-          'pfDeepCSVJetTags:probudsg',
-          'pfDeepFlavourJetTags:probb',
-          'pfDeepFlavourJetTags:probbb',
-          'pfDeepFlavourJetTags:problepb',
-          'pfDeepFlavourJetTags:probc',
-          'pfDeepFlavourJetTags:probuds',
-          'pfDeepFlavourJetTags:probg',
+        'pfDeepCSVJetTags:probb',
+        'pfDeepCSVJetTags:probbb',
+        'pfDeepCSVJetTags:probc',
+        'pfDeepCSVJetTags:probudsg',
+
+        'pfDeepFlavourJetTags:probb',
+        'pfDeepFlavourJetTags:probbb',
+        'pfDeepFlavourJetTags:problepb',
+        'pfDeepFlavourJetTags:probc',
+        'pfDeepFlavourJetTags:probuds',
+        'pfDeepFlavourJetTags:probg',
     ]
-    ak4btaginfos = [ 'pfDeepCSVTagInfos' ] #'pfDeepFlavourTagInfos'
+    ak4btaginfos = [ 'pfDeepCSVTagInfos', 'pfDeepFlavourTagInfos' ] #'pfDeepFlavourTagInfos'
 
     jetToolbox(process, 'ak4', 'dummyseq', 'noOutput',
                dataTier='nanoAOD',
