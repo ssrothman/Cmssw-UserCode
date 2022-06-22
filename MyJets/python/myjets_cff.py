@@ -13,16 +13,16 @@ def setupCustomizedJetToolbox(process, runOnMC=False):
     #### AK4 PUPPI jets
 
     ak4btagdiscriminators = [
-            'pfDeepCSVJetTags:probb',
-            'pfDeepCSVJetTags:probbb',
-            'pfDeepCSVJetTags:probc',
-            'pfDeepCSVJetTags:probudsg',
-#            'pfDeepFlavourJetTags:probb',
-#            'pfDeepFlavourJetTags:probbb',
-#            'pfDeepFlw['avourJetTags:problepb',
-#            'pfDeepFlavourJetTags:probc',
-#            'pfDeepFlavourJetTags:probuds',
-#            'pfDeepFlavourJetTags:probg',
+          'pfDeepCSVJetTags:probb',
+          'pfDeepCSVJetTags:probbb',
+          'pfDeepCSVJetTags:probc',
+          'pfDeepCSVJetTags:probudsg',
+          'pfDeepFlavourJetTags:probb',
+          'pfDeepFlavourJetTags:probbb',
+          'pfDeepFlavourJetTags:problepb',
+          'pfDeepFlavourJetTags:probc',
+          'pfDeepFlavourJetTags:probuds',
+          'pfDeepFlavourJetTags:probg',
     ]
     ak4btaginfos = [ 'pfDeepCSVTagInfos' ] #'pfDeepFlavourTagInfos'
 
@@ -31,7 +31,7 @@ def setupCustomizedJetToolbox(process, runOnMC=False):
                PUMethod='Puppi', JETCorrPayload='AK4PFPuppi',
                #addQGTagger=True,
                runOnMC=runOnMC,
-               Cut='pt > 15.0',
+               Cut='pt > 30.0',
                bTagDiscriminators=ak4btagdiscriminators,
                bTagInfos=ak4btaginfos,
                verbosity=4

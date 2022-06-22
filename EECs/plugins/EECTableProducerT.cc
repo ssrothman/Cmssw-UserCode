@@ -27,7 +27,7 @@
 #include <memory>
 #include <vector>
 
-#define MAX_CONSTITUENTS 100
+#define MAX_CONSTITUENTS 256
 
 enum EECkind { Projected, Full3Pt, Full4Pt };
 
