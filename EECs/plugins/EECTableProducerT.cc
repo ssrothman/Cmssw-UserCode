@@ -111,7 +111,7 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
 
         std::vector<float> dRs, wts;
 
-        projectedEEC(pt_, eta_, phi_, nConstituents, order_, 10, dRs, wts);
+        projectedEEC(pt_, eta_, phi_, nConstituents, order_, 2, dRs, wts);
 
         flatDRs->insert(flatDRs->end(), dRs.begin(), dRs.end());
         flatWTs->insert(flatWTs->end(), wts.begin(), wts.end());

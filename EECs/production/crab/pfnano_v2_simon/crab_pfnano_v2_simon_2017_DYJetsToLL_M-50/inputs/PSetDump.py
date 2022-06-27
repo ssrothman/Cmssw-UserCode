@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("NANO")
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:test.root'),
+    fileNames = cms.untracked.vstring('file:test2.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 process.AODEventContent = cms.PSet(
@@ -15020,7 +15020,7 @@ process.m = cms.PSet(
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(100)
 )
 
 process.mtdDigitizer = cms.PSet(
@@ -20520,6 +20520,15 @@ process.EEC5Table = cms.EDProducer("ProjectedEECTableProducer",
 )
 
 
+process.EEC6Table = cms.EDProducer("ProjectedEECTableProducer",
+    jets = cms.InputTag("ak4PFJetsPuppi"),
+    minJetPt = cms.double(30),
+    muons = cms.InputTag("finalMuons"),
+    name = cms.string('EEC6'),
+    order = cms.uint32(6)
+)
+
+
 process.Full3PtEECTable = cms.EDProducer("Full3PtEECTableProducer",
     jets = cms.InputTag("ak4PFJetsPuppi"),
     minJetPt = cms.double(30),
@@ -20571,6 +20580,15 @@ process.GenEEC5Table = cms.EDProducer("GenProjectedEECTableProducer",
     muons = cms.InputTag("finalMuons"),
     name = cms.string('genEEC5'),
     order = cms.uint32(5)
+)
+
+
+process.GenEEC6Table = cms.EDProducer("GenProjectedEECTableProducer",
+    jets = cms.InputTag("ak4GenJetsNoNu"),
+    minJetPt = cms.double(30),
+    muons = cms.InputTag("finalMuons"),
+    name = cms.string('genEEC6'),
+    order = cms.uint32(6)
 )
 
 
@@ -21146,7 +21164,7 @@ process.ak4PFJetsPuppi = cms.EDProducer("FastjetJetProducer",
     maxRecoveredHcalCells = cms.uint32(9999999),
     minSeed = cms.uint32(14327),
     rParam = cms.double(0.4),
-    src = cms.InputTag("puppipackedPFCandidates"),
+    src = cms.InputTag("puppi"),
     srcPVs = cms.InputTag(""),
     useDeterministicSeed = cms.bool(True),
     voronoiRfact = cms.double(-0.9)
@@ -22296,6 +22314,165 @@ process.corrT1METJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             compression = cms.string('none'),
             doc = cms.string("pt()*jecFactor(\'Uncorrected\')"),
             expr = cms.string("pt()*jecFactor(\'Uncorrected\')"),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        )
+    )
+)
+
+
+process.customAK4ConstituentsTable = cms.EDProducer("PatJetConstituentTableProducer",
+    candidates = cms.InputTag("packedPFCandidates"),
+    idx_name = cms.string('pFCandsIdx'),
+    idx_nameSV = cms.string('sVIdx'),
+    jet_radius = cms.double(0.4),
+    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+    name = cms.string('selectedPatJetsAK4PFPuppiPFCands'),
+    nameSV = cms.string('selectedPatJetsAK4PFPuppiSVs')
+)
+
+
+process.customConstituentsExtTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    cut = cms.string(''),
+    doc = cms.string('interesting particles from various jet collections'),
+    extension = cms.bool(False),
+    name = cms.string('PFCands'),
+    singleton = cms.bool(False),
+    src = cms.InputTag("packedPFCandidates"),
+    variables = cms.PSet(
+        charge = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('electric charge'),
+            expr = cms.string('charge'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        d0 = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('pf d0'),
+            expr = cms.string('?hasTrackDetails()?dxy():-1'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        d0Err = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('pf d0 err'),
+            expr = cms.string('?hasTrackDetails()?dxyError():-1'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        dz = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('pf dz'),
+            expr = cms.string('?hasTrackDetails()?dz():-1'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        dzErr = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('pf dz err'),
+            expr = cms.string('?hasTrackDetails()?dzError():-1'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        eta = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('eta'),
+            expr = cms.string('eta'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(12),
+            type = cms.string('float')
+        ),
+        lostInnerHits = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('lost inner hits'),
+            expr = cms.string('lostInnerHits()'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        mass = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('mass'),
+            expr = cms.string('mass'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        pdgId = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('PDG code assigned by the event reconstruction (not by MC truth)'),
+            expr = cms.string('pdgId'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        phi = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('phi'),
+            expr = cms.string('phi'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(12),
+            type = cms.string('float')
+        ),
+        pt = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('pt'),
+            expr = cms.string('pt'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('float')
+        ),
+        puppiWeight = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('Puppi weight'),
+            expr = cms.string('puppiWeight()'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        puppiWeightNoLep = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('Puppi weight removing leptons'),
+            expr = cms.string('puppiWeightNoLep()'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        pvAssocQuality = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('primary vertex association quality'),
+            expr = cms.string('pvAssociationQuality()'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        trkChi2 = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('normalized trk chi2'),
+            expr = cms.string('?hasTrackDetails()?pseudoTrack().normalizedChi2():-1'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        trkQuality = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('track quality mask'),
+            expr = cms.string('?hasTrackDetails()?pseudoTrack().qualityMask():0'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        vtxChi2 = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('vertex chi2'),
+            expr = cms.string('?hasTrackDetails()?vertexChi2():-1'),
             mcOnly = cms.bool(False),
             precision = cms.int32(10),
             type = cms.string('float')
@@ -26132,6 +26309,17 @@ process.fsrTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 )
 
 
+process.genAK4ConstituentsTable = cms.EDProducer("GenJetConstituentTableProducer",
+    candidates = cms.InputTag("packedGenParticles"),
+    idx_name = cms.string('pFCandsIdx'),
+    idx_nameSV = cms.string('sVIdx'),
+    jets = cms.InputTag("ak4GenJetsNoNu"),
+    name = cms.string('ak4GenJetsNoNuCands'),
+    nameSV = cms.string('ak4GenJetsNoNuJetSVs'),
+    readBtag = cms.bool(False)
+)
+
+
 process.genJetAK8FlavourAssociation = cms.EDProducer("JetFlavourClustering",
     bHadrons = cms.InputTag("patJetPartons","bHadrons"),
     cHadrons = cms.InputTag("patJetPartons","cHadrons"),
@@ -26243,6 +26431,72 @@ process.genJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             mcOnly = cms.bool(False),
             precision = cms.int32(10),
             type = cms.string('float')
+        ),
+        phi = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('phi'),
+            expr = cms.string('phi'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(12),
+            type = cms.string('float')
+        ),
+        pt = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('pt'),
+            expr = cms.string('pt'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('float')
+        )
+    )
+)
+
+
+process.genJetsAK4Constituents = cms.EDProducer("GenJetPackedConstituentPtrSelector",
+    cut = cms.string('pt > 20'),
+    src = cms.InputTag("ak4GenJetsNoNu")
+)
+
+
+process.genJetsParticleTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    cut = cms.string(''),
+    doc = cms.string('interesting gen particles from various jet collections'),
+    extension = cms.bool(False),
+    name = cms.string('GenCands'),
+    singleton = cms.bool(False),
+    src = cms.InputTag("packedGenParticles"),
+    variables = cms.PSet(
+        charge = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('electric charge'),
+            expr = cms.string('charge'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        eta = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('eta'),
+            expr = cms.string('eta'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(12),
+            type = cms.string('float')
+        ),
+        mass = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('mass'),
+            expr = cms.string('mass'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        pdgId = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('PDG code assigned by the event reconstruction (not by MC truth)'),
+            expr = cms.string('pdgId'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            type = cms.string('int')
         ),
         phi = cms.PSet(
             compression = cms.string('none'),
@@ -35419,73 +35673,6 @@ process.puppiPhoton = cms.EDProducer("PuppiPhoton",
 )
 
 
-process.puppipackedPFCandidates = cms.EDProducer("PuppiProducer",
-    DeltaZCut = cms.double(0.3),
-    DeltaZCutForChargedFromPUVtxs = cms.double(0.2),
-    EtaMaxCharged = cms.double(99999.0),
-    EtaMinUseDeltaZ = cms.double(2.4),
-    MinPuppiWeight = cms.double(0.01),
-    NumOfPUVtxsForCharged = cms.uint32(2),
-    PtMaxCharged = cms.double(20.0),
-    PtMaxNeutrals = cms.double(200.0),
-    PtMaxNeutralsStartSlope = cms.double(20.0),
-    UseDeltaZCut = cms.bool(True),
-    UseFromPVLooseTight = cms.bool(False),
-    algos = cms.VPSet(
-        cms.PSet(
-            EtaMaxExtrap = cms.double(2.0),
-            MedEtaSF = cms.vdouble(1.0),
-            MinNeutralPt = cms.vdouble(0.2),
-            MinNeutralPtSlope = cms.vdouble(0.015),
-            RMSEtaSF = cms.vdouble(1.0),
-            etaMax = cms.vdouble(2.5),
-            etaMin = cms.vdouble(-0.01),
-            ptMin = cms.vdouble(0.0),
-            puppiAlgos = cms.VPSet(cms.PSet(
-                algoId = cms.int32(5),
-                applyLowPUCorr = cms.bool(True),
-                combOpt = cms.int32(0),
-                cone = cms.double(0.4),
-                rmsPtMin = cms.double(0.1),
-                rmsScaleFactor = cms.double(1.0),
-                useCharged = cms.bool(True)
-            ))
-        ), 
-        cms.PSet(
-            EtaMaxExtrap = cms.double(2.0),
-            MedEtaSF = cms.vdouble(0.9, 0.75),
-            MinNeutralPt = cms.vdouble(1.7, 2.0),
-            MinNeutralPtSlope = cms.vdouble(0.08, 0.08),
-            RMSEtaSF = cms.vdouble(1.2, 0.95),
-            etaMax = cms.vdouble(3.0, 10.0),
-            etaMin = cms.vdouble(2.5, 3.0),
-            ptMin = cms.vdouble(0.0, 0.0),
-            puppiAlgos = cms.VPSet(cms.PSet(
-                algoId = cms.int32(5),
-                applyLowPUCorr = cms.bool(True),
-                combOpt = cms.int32(0),
-                cone = cms.double(0.4),
-                rmsPtMin = cms.double(0.5),
-                rmsScaleFactor = cms.double(1.0),
-                useCharged = cms.bool(False)
-            ))
-        )
-    ),
-    applyCHS = cms.bool(True),
-    candName = cms.InputTag("packedPFCandidates"),
-    clonePackedCands = cms.bool(True),
-    invertPuppi = cms.bool(False),
-    puppiDiagnostics = cms.bool(False),
-    puppiForLeptons = cms.bool(False),
-    useExistingWeights = cms.bool(False),
-    useExp = cms.bool(False),
-    useWeightsNoLep = cms.bool(False),
-    vertexName = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    vtxNdofCut = cms.int32(4),
-    vtxZCut = cms.double(24)
-)
-
-
 process.qgtagger = cms.EDProducer("QGTagger",
     jetsLabel = cms.string('QGL_AK4PFchs'),
     srcJets = cms.InputTag("updatedJets"),
@@ -35875,6 +36062,54 @@ process.selectedPatJetsAK4PFPuppiJTBTable = cms.EDProducer("SimpleCandidateFlatT
             compression = cms.string('none'),
             doc = cms.string('jet catchment area, for JECs'),
             expr = cms.string('jetArea()'),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        btagCMVA = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('CMVA V2 btag discriminator'),
+            expr = cms.string("bDiscriminator(\'pfCombinedMVAV2BJetTags\')"),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        btagCSVV2 = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string(' pfCombinedInclusiveSecondaryVertexV2 b-tag discriminator (aka CSVV2)'),
+            expr = cms.string("bDiscriminator(\'pfCombinedInclusiveSecondaryVertexV2BJetTags\')"),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        btagDeepB = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('DeepCSV b+bb tag discriminator'),
+            expr = cms.string("bDiscriminator(\'pfDeepCSVJetTags:probb\')+bDiscriminator(\'pfDeepCSVJetTags:probbb\')"),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        btagDeepC = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('DeepCSV charm btag discriminator'),
+            expr = cms.string("bDiscriminator(\'pfDeepCSVJetTags:probc\')"),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        btagDeepFlavB = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('DeepFlavour b+bb+lepb tag discriminator'),
+            expr = cms.string("bDiscriminator(\'pfDeepFlavourJetTags:probb\')+bDiscriminator(\'pfDeepFlavourJetTags:probbb\')+bDiscriminator(\'pfDeepFlavourJetTags:problepb\')"),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        btagDeepFlavC = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string('DeepFlavour charm tag discriminator'),
+            expr = cms.string("bDiscriminator(\'pfDeepFlavourJetTags:probc\')"),
             mcOnly = cms.bool(False),
             precision = cms.int32(10),
             type = cms.string('float')
@@ -45280,13 +45515,13 @@ process.ak4CaloL1L2L3CorrectorTask = cms.Task(process.ak4CaloL1L2L3Corrector, pr
 process.ak4CaloL1FastL2L3CorrectorTask = cms.Task(process.ak4CaloL1FastL2L3Corrector, process.ak4CaloL1FastjetCorrector, process.ak4CaloL2RelativeCorrector, process.ak4CaloL3AbsoluteCorrector)
 
 
-process.ak4PFPuppiL1FastL2L3ResidualCorrectorTask = cms.Task(process.ak4PFPuppiL1FastL2L3ResidualCorrector, process.ak4PFPuppiL1FastjetCorrector, process.ak4PFPuppiL2RelativeCorrector, process.ak4PFPuppiL3AbsoluteCorrector, process.ak4PFPuppiResidualCorrector)
+process.ak4L1JPTFastjetCorrectorTask = cms.Task(process.ak4CaloL1FastjetCorrector, process.ak4L1JPTFastjetCorrector)
 
 
 process.ak4CaloL2L3L6CorrectorTask = cms.Task(process.ak4CaloL2L3L6Corrector, process.ak4CaloL2RelativeCorrector, process.ak4CaloL3AbsoluteCorrector, process.ak4CaloL6SLBCorrector)
 
 
-process.ak4L1JPTFastjetCorrectorTask = cms.Task(process.ak4CaloL1FastjetCorrector, process.ak4L1JPTFastjetCorrector)
+process.ak4PFPuppiL1FastL2L3ResidualCorrectorTask = cms.Task(process.ak4PFPuppiL1FastL2L3ResidualCorrector, process.ak4PFPuppiL1FastjetCorrector, process.ak4PFPuppiL2RelativeCorrector, process.ak4PFPuppiL3AbsoluteCorrector, process.ak4PFPuppiResidualCorrector)
 
 
 process.patPFMetT2SmearCorrTask = cms.Task(process.patPFMetT1T2SmearCorr, process.patPFMetT2SmearCorr, process.patSmearedJets, process.selectedPatJetsForMetT1T2SmearCorr, process.selectedPatJetsForMetT2SmearCorr)
@@ -45322,7 +45557,7 @@ process.egmGsfElectronIDTask = cms.Task(process.egmGsfElectronIDs, process.elect
 process.ak4TrackL2L3CorrectorTask = cms.Task(process.ak4TrackL2L3Corrector, process.ak4TrackL2RelativeCorrector, process.ak4TrackL3AbsoluteCorrector)
 
 
-process.EECTask = cms.Task(process.EEC2Table, process.EEC3Table, process.EEC4Table, process.EEC5Table, process.Full3PtEECTable, process.Full4PtEECTable, process.GenEEC2Table, process.GenEEC3Table, process.GenEEC4Table, process.GenEEC5Table, process.GenFull3PtEECTable, process.GenFull4PtEECTable)
+process.EECTask = cms.Task(process.EEC2Table, process.EEC3Table, process.EEC4Table, process.EEC5Table, process.EEC6Table, process.Full3PtEECTable, process.Full4PtEECTable, process.GenEEC2Table, process.GenEEC3Table, process.GenEEC4Table, process.GenEEC5Table, process.GenEEC6Table, process.GenFull3PtEECTable, process.GenFull4PtEECTable)
 
 
 process.patPFMetT0CorrTask = cms.Task(process.patPFMetT0Corr, process.type0PFMEtCorrectionPFCandToVertexAssociationTask)
@@ -45344,6 +45579,9 @@ process.ak4PFCHSL1FastL2L3CorrectorTask = cms.Task(process.ak4PFCHSL1FastL2L3Cor
 
 
 process.ak4PFL1L2L3ResidualCorrectorTask = cms.Task(process.ak4PFL1L2L3ResidualCorrector, process.ak4PFL1OffsetCorrector, process.ak4PFL2RelativeCorrector, process.ak4PFL3AbsoluteCorrector, process.ak4PFResidualCorrector)
+
+
+process.customizedPFCandsTask = cms.Task(process.customAK4ConstituentsTable, process.customConstituentsExtTable, process.genAK4ConstituentsTable, process.genJetsAK4Constituents, process.genJetsParticleTable)
 
 
 process.ak4PFL2L3ResidualCorrectorTask = cms.Task(process.ak4PFL2L3ResidualCorrector, process.ak4PFL2RelativeCorrector, process.ak4PFL3AbsoluteCorrector, process.ak4PFResidualCorrector)
@@ -45409,7 +45647,7 @@ process.jetCorrectorsTask = cms.Task(process.ak4CaloL1FastL2L3CorrectorTask, pro
 process.makePatMETsTask = cms.Task(process.patMETCorrectionsTask, process.patMETs)
 
 
-process.patAlgosToolsTask = cms.Task(*[process.ak4CaloL2L3CorrectorPuppi, process.ak4CaloL2L3ResidualCorrectorPuppi, process.ak4CaloL2RelativeCorrectorPuppi, process.ak4CaloL3AbsoluteCorrectorPuppi, process.ak4CaloResidualCorrectorPuppi, process.ak4GenJetsNoNu, process.ak4GenJetsNoNuJTBTable, process.ak4PFCHSL1FastL2L3CorrectorPuppi, process.ak4PFCHSL1FastL2L3ResidualCorrectorPuppi, process.ak4PFCHSL1FastjetCorrectorPuppi, process.ak4PFCHSL2RelativeCorrectorPuppi, process.ak4PFCHSL3AbsoluteCorrectorPuppi, process.ak4PFCHSResidualCorrectorPuppi, process.ak4PFJetsPuppi, process.ak4PFJetsPuppiConstituents, process.ak4PuppiJets, process.basicJetsForMet, process.basicJetsForMetPuppi, process.caloMetT1Puppi, process.caloMetT1T2Puppi, process.cleanedPatJets, process.cleanedPatJetsPuppi, process.corrCaloMetType1Puppi, process.corrCaloMetType2Puppi, process.corrPfMetType1Puppi, process.corrPfMetType2Puppi, process.genMetExtractor, process.genMetExtractorPuppi, process.jetCorrectorsTask, process.jetSelectorForMet, process.jetSelectorForMetPuppi, process.makePatMETsTask, process.metrawCalo, process.metrawCaloPuppi, process.muCaloMetCorrPuppi, process.packedGenParticlesForJetsNoNu, process.particleFlowPtrsPuppi, process.patCHSMet, process.patCaloMet, process.patJetCorrFactorsAK4PFPuppi, process.patJetCorrFactorsAK8WithDeepInfo, process.patJetCorrFactorsPuppi, process.patJetCorrFactorsReapplyJEC, process.patJetCorrFactorsTransientCorrectedAK8WithDeepInfo, process.patJetFlavourAssociationAK4PFPuppi, process.patJetFlavourAssociationLegacyAK4PFPuppi, process.patJetGenJetMatchAK4PFPuppi, process.patJetGenJetMatchPuppi, process.patJetPartonAssociationLegacyAK4PFPuppi, process.patJetPartonMatchAK4PFPuppi, process.patJetPartonMatchPuppi, process.patJetPartonsLegacy, process.patJetsAK4PFPuppi, process.patJetsAK4PFPuppiPATJetswithUserData, process.patJetsAK4PFPuppilooseJetId, process.patJetsAK4PFPuppitightJetId, process.patJetsAK4PFPuppitightJetIdLepVeto, process.patJetsPuppi, process.patJetsReapplyJEC, process.patPFMetPuppi, process.patPFMetT0CorrPuppi, process.patPFMetT0pcT1Puppi, process.patPFMetT0pcT1T2Puppi, process.patPFMetT1, process.patPFMetT1ElectronEnDown, process.patPFMetT1ElectronEnDownPuppi, process.patPFMetT1ElectronEnUp, process.patPFMetT1ElectronEnUpPuppi, process.patPFMetT1JetEnDown, process.patPFMetT1JetEnDownPuppi, process.patPFMetT1JetEnUp, process.patPFMetT1JetEnUpPuppi, process.patPFMetT1JetResDown, process.patPFMetT1JetResDownPuppi, process.patPFMetT1JetResUp, process.patPFMetT1JetResUpPuppi, process.patPFMetT1MuonEnDown, process.patPFMetT1MuonEnDownPuppi, process.patPFMetT1MuonEnUp, process.patPFMetT1MuonEnUpPuppi, process.patPFMetT1PhotonEnDown, process.patPFMetT1PhotonEnDownPuppi, process.patPFMetT1PhotonEnUp, process.patPFMetT1PhotonEnUpPuppi, process.patPFMetT1Puppi, process.patPFMetT1Smear, process.patPFMetT1SmearElectronEnDown, process.patPFMetT1SmearElectronEnDownPuppi, process.patPFMetT1SmearElectronEnUp, process.patPFMetT1SmearElectronEnUpPuppi, process.patPFMetT1SmearJetEnDown, process.patPFMetT1SmearJetEnDownPuppi, process.patPFMetT1SmearJetEnUp, process.patPFMetT1SmearJetEnUpPuppi, process.patPFMetT1SmearJetResDown, process.patPFMetT1SmearJetResDownPuppi, process.patPFMetT1SmearJetResUp, process.patPFMetT1SmearJetResUpPuppi, process.patPFMetT1SmearMuonEnDown, process.patPFMetT1SmearMuonEnDownPuppi, process.patPFMetT1SmearMuonEnUp, process.patPFMetT1SmearMuonEnUpPuppi, process.patPFMetT1SmearPhotonEnDown, process.patPFMetT1SmearPhotonEnDownPuppi, process.patPFMetT1SmearPhotonEnUp, process.patPFMetT1SmearPhotonEnUpPuppi, process.patPFMetT1SmearPuppi, process.patPFMetT1SmearTauEnDown, process.patPFMetT1SmearTauEnDownPuppi, process.patPFMetT1SmearTauEnUp, process.patPFMetT1SmearTauEnUpPuppi, process.patPFMetT1SmearUnclusteredEnDown, process.patPFMetT1SmearUnclusteredEnDownPuppi, process.patPFMetT1SmearUnclusteredEnUp, process.patPFMetT1SmearUnclusteredEnUpPuppi, process.patPFMetT1T2CorrPuppi, process.patPFMetT1T2Puppi, process.patPFMetT1T2SmearCorrPuppi, process.patPFMetT1TauEnDown, process.patPFMetT1TauEnDownPuppi, process.patPFMetT1TauEnUp, process.patPFMetT1TauEnUpPuppi, process.patPFMetT1Txy, process.patPFMetT1TxyPuppi, process.patPFMetT1UnclusteredEnDown, process.patPFMetT1UnclusteredEnDownPuppi, process.patPFMetT1UnclusteredEnUp, process.patPFMetT1UnclusteredEnUpPuppi, process.patPFMetT2CorrPuppi, process.patPFMetT2SmearCorrPuppi, process.patPFMetT2SmearCorrTask, process.patPFMetTxy, process.patPFMetTxyCorrPuppi, process.patPFMetTxyCorrTask, process.patPFMetTxyPuppi, process.patSmearedJetsPuppi, process.patTrkMet, process.pfBoostedDoubleSVAK8TagInfosAK8WithDeepInfo, process.pfCHS, process.pfCandMETcorrPuppi, process.pfCandsForUnclusteredUnc, process.pfCandsForUnclusteredUncPuppi, process.pfCandsNoJets, process.pfCandsNoJetsNoEle, process.pfCandsNoJetsNoEleNoMu, process.pfCandsNoJetsNoEleNoMuNoTau, process.pfCandsNoJetsNoEleNoMuNoTauPuppi, process.pfCandsNoJetsNoEleNoMuPuppi, process.pfCandsNoJetsNoElePuppi, process.pfCandsNoJetsPuppi, process.pfCandsNotInJetsForMetCorrPuppi, process.pfCandsNotInJetsPtrForMetCorrPuppi, process.pfDeepCSVJetTagsAK4PFPuppi, process.pfDeepCSVTagInfosAK4PFPuppi, process.pfDeepDoubleXTagInfosAK8WithDeepInfo, process.pfDeepFlavourJetTagsAK4PFPuppi, process.pfDeepFlavourTagInfosAK4PFPuppi, process.pfElectrons, process.pfElectronsPuppi, process.pfImpactParameterAK8TagInfosAK8WithDeepInfo, process.pfImpactParameterTagInfosAK4PFPuppi, process.pfInclusiveSecondaryVertexFinderAK8TagInfosAK8WithDeepInfo, process.pfInclusiveSecondaryVertexFinderTagInfosAK4PFPuppi, process.pfJetsPtrForMetCorrPuppi, process.pfLeptonsPUPPET, process.pfMassDecorrelatedParticleNetDiscriminatorsJetTagsAK8WithDeepInfo, process.pfMassDecorrelatedParticleNetJetTagsAK8WithDeepInfo, process.pfMassIndependentDeepDoubleBvLV2JetTagsAK8WithDeepInfo, process.pfMassIndependentDeepDoubleCvBV2JetTagsAK8WithDeepInfo, process.pfMassIndependentDeepDoubleCvLV2JetTagsAK8WithDeepInfo, process.pfMet, process.pfMetCHS, process.pfMetPuppi, process.pfMetT1Puppi, process.pfMetT1T2Puppi, process.pfMetTrk, process.pfMuons, process.pfMuonsPuppi, process.pfNoLepPUPPI, process.pfNoPileUp, process.pfNoPileUpPuppi, process.pfParticleNetDiscriminatorsJetTagsAK8WithDeepInfo, process.pfParticleNetJetTagsAK8WithDeepInfo, process.pfParticleNetTagInfosAK8WithDeepInfo, process.pfPhotons, process.pfPhotonsPuppi, process.pfTaus, process.pfTausPuppi, process.pfTrk, process.producePatPFMETCorrectionsTask, process.puppi, process.puppiForMET, process.puppiMerged, process.puppiNoLep, process.puppiPhoton, process.puppipackedPFCandidates, process.selectedPatJetsAK4PFPuppi, process.selectedPatJetsAK4PFPuppiJTBTable, process.selectedPatJetsForMetT1T2CorrPuppi, process.selectedPatJetsForMetT1T2SmearCorrPuppi, process.selectedPatJetsForMetT2CorrPuppi, process.selectedPatJetsForMetT2SmearCorrPuppi, process.selectedPatJetsPuppi, process.selectedPrimaryVertexHighestPtTrackSumForPFMEtCorrType0Puppi, process.selectedUpdatedPatJetsAK8WithDeepInfo, process.selectedVerticesForPFMEtCorrType0Puppi, process.shiftedPatElectronEnDown, process.shiftedPatElectronEnDownPuppi, process.shiftedPatElectronEnUp, process.shiftedPatElectronEnUpPuppi, process.shiftedPatJetEnDown, process.shiftedPatJetEnDownPuppi, process.shiftedPatJetEnUp, process.shiftedPatJetEnUpPuppi, process.shiftedPatJetResDown, process.shiftedPatJetResDownPuppi, process.shiftedPatJetResUp, process.shiftedPatJetResUpPuppi, process.shiftedPatMETCorrElectronEnDown, process.shiftedPatMETCorrElectronEnDownPuppi, process.shiftedPatMETCorrElectronEnUp, process.shiftedPatMETCorrElectronEnUpPuppi, process.shiftedPatMETCorrJetEnDown, process.shiftedPatMETCorrJetEnDownPuppi, process.shiftedPatMETCorrJetEnUp, process.shiftedPatMETCorrJetEnUpPuppi, process.shiftedPatMETCorrJetResDown, process.shiftedPatMETCorrJetResDownPuppi, process.shiftedPatMETCorrJetResUp, process.shiftedPatMETCorrJetResUpPuppi, process.shiftedPatMETCorrMuonEnDown, process.shiftedPatMETCorrMuonEnDownPuppi, process.shiftedPatMETCorrMuonEnUp, process.shiftedPatMETCorrMuonEnUpPuppi, process.shiftedPatMETCorrPhotonEnDown, process.shiftedPatMETCorrPhotonEnDownPuppi, process.shiftedPatMETCorrPhotonEnUp, process.shiftedPatMETCorrPhotonEnUpPuppi, process.shiftedPatMETCorrSmearedJetResDown, process.shiftedPatMETCorrSmearedJetResDownPuppi, process.shiftedPatMETCorrSmearedJetResUp, process.shiftedPatMETCorrSmearedJetResUpPuppi, process.shiftedPatMETCorrTauEnDown, process.shiftedPatMETCorrTauEnDownPuppi, process.shiftedPatMETCorrTauEnUp, process.shiftedPatMETCorrTauEnUpPuppi, process.shiftedPatMETCorrUnclusteredEnDown, process.shiftedPatMETCorrUnclusteredEnDownPuppi, process.shiftedPatMETCorrUnclusteredEnUp, process.shiftedPatMETCorrUnclusteredEnUpPuppi, process.shiftedPatMuonEnDown, process.shiftedPatMuonEnDownPuppi, process.shiftedPatMuonEnUp, process.shiftedPatMuonEnUpPuppi, process.shiftedPatPhotonEnDown, process.shiftedPatPhotonEnDownPuppi, process.shiftedPatPhotonEnUp, process.shiftedPatPhotonEnUpPuppi, process.shiftedPatSmearedJetResDown, process.shiftedPatSmearedJetResDownPuppi, process.shiftedPatSmearedJetResUp, process.shiftedPatSmearedJetResUpPuppi, process.shiftedPatTauEnDown, process.shiftedPatTauEnDownPuppi, process.shiftedPatTauEnUp, process.shiftedPatTauEnUpPuppi, process.shiftedPatUnclusteredEnDown, process.shiftedPatUnclusteredEnDownPuppi, process.shiftedPatUnclusteredEnUp, process.shiftedPatUnclusteredEnUpPuppi, process.slimmedMETs, process.slimmedMETsPuppi, process.updatedPatJetsAK8WithDeepInfo, process.updatedPatJetsTransientCorrectedAK8WithDeepInfo])
+process.patAlgosToolsTask = cms.Task(*[process.ak4CaloL2L3CorrectorPuppi, process.ak4CaloL2L3ResidualCorrectorPuppi, process.ak4CaloL2RelativeCorrectorPuppi, process.ak4CaloL3AbsoluteCorrectorPuppi, process.ak4CaloResidualCorrectorPuppi, process.ak4GenJetsNoNu, process.ak4GenJetsNoNuJTBTable, process.ak4PFCHSL1FastL2L3CorrectorPuppi, process.ak4PFCHSL1FastL2L3ResidualCorrectorPuppi, process.ak4PFCHSL1FastjetCorrectorPuppi, process.ak4PFCHSL2RelativeCorrectorPuppi, process.ak4PFCHSL3AbsoluteCorrectorPuppi, process.ak4PFCHSResidualCorrectorPuppi, process.ak4PFJetsPuppi, process.ak4PFJetsPuppiConstituents, process.ak4PuppiJets, process.basicJetsForMet, process.basicJetsForMetPuppi, process.caloMetT1Puppi, process.caloMetT1T2Puppi, process.cleanedPatJets, process.cleanedPatJetsPuppi, process.corrCaloMetType1Puppi, process.corrCaloMetType2Puppi, process.corrPfMetType1Puppi, process.corrPfMetType2Puppi, process.genMetExtractor, process.genMetExtractorPuppi, process.jetCorrectorsTask, process.jetSelectorForMet, process.jetSelectorForMetPuppi, process.makePatMETsTask, process.metrawCalo, process.metrawCaloPuppi, process.muCaloMetCorrPuppi, process.packedGenParticlesForJetsNoNu, process.particleFlowPtrsPuppi, process.patCHSMet, process.patCaloMet, process.patJetCorrFactorsAK4PFPuppi, process.patJetCorrFactorsAK8WithDeepInfo, process.patJetCorrFactorsPuppi, process.patJetCorrFactorsReapplyJEC, process.patJetCorrFactorsTransientCorrectedAK8WithDeepInfo, process.patJetFlavourAssociationAK4PFPuppi, process.patJetFlavourAssociationLegacyAK4PFPuppi, process.patJetGenJetMatchAK4PFPuppi, process.patJetGenJetMatchPuppi, process.patJetPartonAssociationLegacyAK4PFPuppi, process.patJetPartonMatchAK4PFPuppi, process.patJetPartonMatchPuppi, process.patJetPartonsLegacy, process.patJetsAK4PFPuppi, process.patJetsAK4PFPuppiPATJetswithUserData, process.patJetsAK4PFPuppilooseJetId, process.patJetsAK4PFPuppitightJetId, process.patJetsAK4PFPuppitightJetIdLepVeto, process.patJetsPuppi, process.patJetsReapplyJEC, process.patPFMetPuppi, process.patPFMetT0CorrPuppi, process.patPFMetT0pcT1Puppi, process.patPFMetT0pcT1T2Puppi, process.patPFMetT1, process.patPFMetT1ElectronEnDown, process.patPFMetT1ElectronEnDownPuppi, process.patPFMetT1ElectronEnUp, process.patPFMetT1ElectronEnUpPuppi, process.patPFMetT1JetEnDown, process.patPFMetT1JetEnDownPuppi, process.patPFMetT1JetEnUp, process.patPFMetT1JetEnUpPuppi, process.patPFMetT1JetResDown, process.patPFMetT1JetResDownPuppi, process.patPFMetT1JetResUp, process.patPFMetT1JetResUpPuppi, process.patPFMetT1MuonEnDown, process.patPFMetT1MuonEnDownPuppi, process.patPFMetT1MuonEnUp, process.patPFMetT1MuonEnUpPuppi, process.patPFMetT1PhotonEnDown, process.patPFMetT1PhotonEnDownPuppi, process.patPFMetT1PhotonEnUp, process.patPFMetT1PhotonEnUpPuppi, process.patPFMetT1Puppi, process.patPFMetT1Smear, process.patPFMetT1SmearElectronEnDown, process.patPFMetT1SmearElectronEnDownPuppi, process.patPFMetT1SmearElectronEnUp, process.patPFMetT1SmearElectronEnUpPuppi, process.patPFMetT1SmearJetEnDown, process.patPFMetT1SmearJetEnDownPuppi, process.patPFMetT1SmearJetEnUp, process.patPFMetT1SmearJetEnUpPuppi, process.patPFMetT1SmearJetResDown, process.patPFMetT1SmearJetResDownPuppi, process.patPFMetT1SmearJetResUp, process.patPFMetT1SmearJetResUpPuppi, process.patPFMetT1SmearMuonEnDown, process.patPFMetT1SmearMuonEnDownPuppi, process.patPFMetT1SmearMuonEnUp, process.patPFMetT1SmearMuonEnUpPuppi, process.patPFMetT1SmearPhotonEnDown, process.patPFMetT1SmearPhotonEnDownPuppi, process.patPFMetT1SmearPhotonEnUp, process.patPFMetT1SmearPhotonEnUpPuppi, process.patPFMetT1SmearPuppi, process.patPFMetT1SmearTauEnDown, process.patPFMetT1SmearTauEnDownPuppi, process.patPFMetT1SmearTauEnUp, process.patPFMetT1SmearTauEnUpPuppi, process.patPFMetT1SmearUnclusteredEnDown, process.patPFMetT1SmearUnclusteredEnDownPuppi, process.patPFMetT1SmearUnclusteredEnUp, process.patPFMetT1SmearUnclusteredEnUpPuppi, process.patPFMetT1T2CorrPuppi, process.patPFMetT1T2Puppi, process.patPFMetT1T2SmearCorrPuppi, process.patPFMetT1TauEnDown, process.patPFMetT1TauEnDownPuppi, process.patPFMetT1TauEnUp, process.patPFMetT1TauEnUpPuppi, process.patPFMetT1Txy, process.patPFMetT1TxyPuppi, process.patPFMetT1UnclusteredEnDown, process.patPFMetT1UnclusteredEnDownPuppi, process.patPFMetT1UnclusteredEnUp, process.patPFMetT1UnclusteredEnUpPuppi, process.patPFMetT2CorrPuppi, process.patPFMetT2SmearCorrPuppi, process.patPFMetT2SmearCorrTask, process.patPFMetTxy, process.patPFMetTxyCorrPuppi, process.patPFMetTxyCorrTask, process.patPFMetTxyPuppi, process.patSmearedJetsPuppi, process.patTrkMet, process.pfBoostedDoubleSVAK8TagInfosAK8WithDeepInfo, process.pfCHS, process.pfCandMETcorrPuppi, process.pfCandsForUnclusteredUnc, process.pfCandsForUnclusteredUncPuppi, process.pfCandsNoJets, process.pfCandsNoJetsNoEle, process.pfCandsNoJetsNoEleNoMu, process.pfCandsNoJetsNoEleNoMuNoTau, process.pfCandsNoJetsNoEleNoMuNoTauPuppi, process.pfCandsNoJetsNoEleNoMuPuppi, process.pfCandsNoJetsNoElePuppi, process.pfCandsNoJetsPuppi, process.pfCandsNotInJetsForMetCorrPuppi, process.pfCandsNotInJetsPtrForMetCorrPuppi, process.pfDeepCSVJetTagsAK4PFPuppi, process.pfDeepCSVTagInfosAK4PFPuppi, process.pfDeepDoubleXTagInfosAK8WithDeepInfo, process.pfDeepFlavourJetTagsAK4PFPuppi, process.pfDeepFlavourTagInfosAK4PFPuppi, process.pfElectrons, process.pfElectronsPuppi, process.pfImpactParameterAK8TagInfosAK8WithDeepInfo, process.pfImpactParameterTagInfosAK4PFPuppi, process.pfInclusiveSecondaryVertexFinderAK8TagInfosAK8WithDeepInfo, process.pfInclusiveSecondaryVertexFinderTagInfosAK4PFPuppi, process.pfJetsPtrForMetCorrPuppi, process.pfLeptonsPUPPET, process.pfMassDecorrelatedParticleNetDiscriminatorsJetTagsAK8WithDeepInfo, process.pfMassDecorrelatedParticleNetJetTagsAK8WithDeepInfo, process.pfMassIndependentDeepDoubleBvLV2JetTagsAK8WithDeepInfo, process.pfMassIndependentDeepDoubleCvBV2JetTagsAK8WithDeepInfo, process.pfMassIndependentDeepDoubleCvLV2JetTagsAK8WithDeepInfo, process.pfMet, process.pfMetCHS, process.pfMetPuppi, process.pfMetT1Puppi, process.pfMetT1T2Puppi, process.pfMetTrk, process.pfMuons, process.pfMuonsPuppi, process.pfNoLepPUPPI, process.pfNoPileUp, process.pfNoPileUpPuppi, process.pfParticleNetDiscriminatorsJetTagsAK8WithDeepInfo, process.pfParticleNetJetTagsAK8WithDeepInfo, process.pfParticleNetTagInfosAK8WithDeepInfo, process.pfPhotons, process.pfPhotonsPuppi, process.pfTaus, process.pfTausPuppi, process.pfTrk, process.producePatPFMETCorrectionsTask, process.puppi, process.puppiForMET, process.puppiMerged, process.puppiNoLep, process.puppiPhoton, process.selectedPatJetsAK4PFPuppi, process.selectedPatJetsAK4PFPuppiJTBTable, process.selectedPatJetsForMetT1T2CorrPuppi, process.selectedPatJetsForMetT1T2SmearCorrPuppi, process.selectedPatJetsForMetT2CorrPuppi, process.selectedPatJetsForMetT2SmearCorrPuppi, process.selectedPatJetsPuppi, process.selectedPrimaryVertexHighestPtTrackSumForPFMEtCorrType0Puppi, process.selectedUpdatedPatJetsAK8WithDeepInfo, process.selectedVerticesForPFMEtCorrType0Puppi, process.shiftedPatElectronEnDown, process.shiftedPatElectronEnDownPuppi, process.shiftedPatElectronEnUp, process.shiftedPatElectronEnUpPuppi, process.shiftedPatJetEnDown, process.shiftedPatJetEnDownPuppi, process.shiftedPatJetEnUp, process.shiftedPatJetEnUpPuppi, process.shiftedPatJetResDown, process.shiftedPatJetResDownPuppi, process.shiftedPatJetResUp, process.shiftedPatJetResUpPuppi, process.shiftedPatMETCorrElectronEnDown, process.shiftedPatMETCorrElectronEnDownPuppi, process.shiftedPatMETCorrElectronEnUp, process.shiftedPatMETCorrElectronEnUpPuppi, process.shiftedPatMETCorrJetEnDown, process.shiftedPatMETCorrJetEnDownPuppi, process.shiftedPatMETCorrJetEnUp, process.shiftedPatMETCorrJetEnUpPuppi, process.shiftedPatMETCorrJetResDown, process.shiftedPatMETCorrJetResDownPuppi, process.shiftedPatMETCorrJetResUp, process.shiftedPatMETCorrJetResUpPuppi, process.shiftedPatMETCorrMuonEnDown, process.shiftedPatMETCorrMuonEnDownPuppi, process.shiftedPatMETCorrMuonEnUp, process.shiftedPatMETCorrMuonEnUpPuppi, process.shiftedPatMETCorrPhotonEnDown, process.shiftedPatMETCorrPhotonEnDownPuppi, process.shiftedPatMETCorrPhotonEnUp, process.shiftedPatMETCorrPhotonEnUpPuppi, process.shiftedPatMETCorrSmearedJetResDown, process.shiftedPatMETCorrSmearedJetResDownPuppi, process.shiftedPatMETCorrSmearedJetResUp, process.shiftedPatMETCorrSmearedJetResUpPuppi, process.shiftedPatMETCorrTauEnDown, process.shiftedPatMETCorrTauEnDownPuppi, process.shiftedPatMETCorrTauEnUp, process.shiftedPatMETCorrTauEnUpPuppi, process.shiftedPatMETCorrUnclusteredEnDown, process.shiftedPatMETCorrUnclusteredEnDownPuppi, process.shiftedPatMETCorrUnclusteredEnUp, process.shiftedPatMETCorrUnclusteredEnUpPuppi, process.shiftedPatMuonEnDown, process.shiftedPatMuonEnDownPuppi, process.shiftedPatMuonEnUp, process.shiftedPatMuonEnUpPuppi, process.shiftedPatPhotonEnDown, process.shiftedPatPhotonEnDownPuppi, process.shiftedPatPhotonEnUp, process.shiftedPatPhotonEnUpPuppi, process.shiftedPatSmearedJetResDown, process.shiftedPatSmearedJetResDownPuppi, process.shiftedPatSmearedJetResUp, process.shiftedPatSmearedJetResUpPuppi, process.shiftedPatTauEnDown, process.shiftedPatTauEnDownPuppi, process.shiftedPatTauEnUp, process.shiftedPatTauEnUpPuppi, process.shiftedPatUnclusteredEnDown, process.shiftedPatUnclusteredEnDownPuppi, process.shiftedPatUnclusteredEnUp, process.shiftedPatUnclusteredEnUpPuppi, process.slimmedMETs, process.slimmedMETsPuppi, process.updatedPatJetsAK8WithDeepInfo, process.updatedPatJetsTransientCorrectedAK8WithDeepInfo])
 
 
 process.patTauDiscriminationByIsolationMVArun2v1DBoldDMdR0p3wLTSeq = cms.Sequence(process.patTauDiscriminationByIsolationMVArun2v1DBoldDMdR0p3wLTraw+process.patTauDiscriminationByVVLooseIsolationMVArun2v1DBoldDMdR0p3wLT+process.patTauDiscriminationByVLooseIsolationMVArun2v1DBoldDMdR0p3wLT+process.patTauDiscriminationByLooseIsolationMVArun2v1DBoldDMdR0p3wLT+process.patTauDiscriminationByMediumIsolationMVArun2v1DBoldDMdR0p3wLT+process.patTauDiscriminationByTightIsolationMVArun2v1DBoldDMdR0p3wLT+process.patTauDiscriminationByVTightIsolationMVArun2v1DBoldDMdR0p3wLT+process.patTauDiscriminationByVVTightIsolationMVArun2v1DBoldDMdR0p3wLT)
@@ -45577,7 +45815,7 @@ process.producePatPFMETCorrections = cms.Sequence(process.producePatPFMETCorrect
 process.genParticleSequence = cms.Sequence(process.finalGenParticles)
 
 
-process.dummyseq = cms.Sequence(process.packedGenParticlesForJetsNoNu+process.ak4GenJetsNoNu+process.puppipackedPFCandidates+process.ak4PFJetsPuppi+process.ak4PFJetsPuppiConstituents+process.patJetsAK4PFPuppiPATJetswithUserData+process.ak4GenJetsNoNuJTBTable+process.selectedPatJetsAK4PFPuppiJTBTable)
+process.dummyseq = cms.Sequence(process.packedGenParticlesForJetsNoNu+process.ak4GenJetsNoNu+process.puppi+process.ak4PFJetsPuppi+process.ak4PFJetsPuppiConstituents+process.patJetsAK4PFPuppiPATJetswithUserData+process.ak4GenJetsNoNuJTBTable+process.selectedPatJetsAK4PFPuppiJTBTable)
 
 
 process.muonSequence = cms.Sequence(process.slimmedMuonsUpdated+process.isoForMu+process.ptRatioRelForMu+process.slimmedMuonsWithUserData+process.finalMuons+process.finalLooseMuons)
@@ -45924,4 +46162,4 @@ process.simSiStripDigis = cms.EDAlias(
     )
 )
 
-process.schedule = cms.Schedule(*[ process.nanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step ], tasks=[process.EECTask, process.genEECTask, process.patAlgosToolsTask])
+process.schedule = cms.Schedule(*[ process.nanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step ], tasks=[process.EECTask, process.customizedPFCandsTask, process.genEECTask, process.patAlgosToolsTask])

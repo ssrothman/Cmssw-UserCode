@@ -3,11 +3,11 @@ defaults:
   splitting: FileBased
   reco_version: UL
   year: 2017
-  globaltag: 106X_mc2017_realistic_v9
+  globaltag: 106X_mc2017_realistic_v9-v2
   pset: $CMSSW_BASE/src/test.py
   allowInvalid: True
-  totalUnits: 10
   unitsPerJob: 1
+  #totalUnits: 100
 
 samples:
   DYJetsToLL:
@@ -20,4 +20,4 @@ samples:
       #DYJetsToLL_M-50_HT-800to1200 : /DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM
       #DYJetsToLL_M-50_HT-1200to2500: /DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM
       #DYJetsToLL_M-50_HT-2500toInf : /DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM
-      DYJetsToLL_M-50 : /DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM
+      DYJetsToLL_M-50_take3 : /DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM
