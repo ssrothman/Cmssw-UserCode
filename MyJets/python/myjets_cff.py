@@ -8,7 +8,7 @@ from PhysicsTools.PFNano.ak15.jetToolbox_cff import jetToolbox
 
 # ---------------------------------------------------------
 # Cusomtization function for custom jets via jet toolbox
-def setupCustomizedJetToolbox(process, runOnMC=False):
+def setupCustomizedJetToolbox(process, runOnMC=False, PU="Puppi"):
 
     #### AK4 PUPPI jets
 
@@ -27,9 +27,17 @@ def setupCustomizedJetToolbox(process, runOnMC=False):
     ]
     ak4btaginfos = [ 'pfDeepCSVTagInfos', 'pfDeepFlavourTagInfos' ] #'pfDeepFlavourTagInfos'
 
+    JEC = "AK4PF"
+    if PU=="Puppi" or PU=="CHS":
+      JEC+=PU
+    elif PU=="CS":
+      JEC+="CHS"
+    else:
+      print("ERROR: unsupported PU method")
+      return
     jetToolbox(process, 'ak4', 'dummyseq', 'noOutput',
                dataTier='nanoAOD',
-               PUMethod='Puppi', JETCorrPayload='AK4PFPuppi',
+               PUMethod=PU, #JETCorrPayload=JEC,
                #addQGTagger=True,
                runOnMC=runOnMC,
                Cut='pt > 30.0',
@@ -51,7 +59,7 @@ def addPFCands(process, runOnMC=False, jetsName="selectedPatJetsAK4PFPuppi", gen
     process.customizedPFCandsTask = cms.Task()
     process.schedule.associate(process.customizedPFCandsTask)
 
-    candInput = cms.InputTag("packedPFCandidates")
+    candInput = cms.InputTag("puppi")
 
     # Make constituent table producers
     process.customConstituentsExtTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -93,7 +101,7 @@ def addPFCands(process, runOnMC=False, jetsName="selectedPatJetsAK4PFPuppi", gen
     if runOnMC:
         process.genJetsAK4Constituents = cms.EDProducer("GenJetPackedConstituentPtrSelector",
                                                     src = cms.InputTag(genJetsName),
-                                                    cut = cms.string("pt > 20")
+                                                    cut = cms.string("pt > 10")
                                                     )
 
         genCandInput = cms.InputTag("packedGenParticles")
@@ -109,7 +117,7 @@ def addPFCands(process, runOnMC=False, jetsName="selectedPatJetsAK4PFPuppi", gen
                                                      )
         process.genAK4ConstituentsTable = cms.EDProducer("GenJetConstituentTableProducer",
                                                             candidates = genCandInput,
-                                                            jets = cms.InputTag(genJetsName), # Note: The name has "Constituents" in it, but these are the jets
+                                                            jets = cms.InputTag("genJetsAK4Constituents"), # Note: The name has "Constituents" in it, but these are the jets
                                                             name = cms.string(genJetsName+"Cands"),
                                                             nameSV = cms.string(genJetsName+"JetSVs"),
                                                             idx_name = cms.string("pFCandsIdx"),

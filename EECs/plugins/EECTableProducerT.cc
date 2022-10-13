@@ -29,6 +29,8 @@
 
 #define MAX_CONSTITUENTS 256
 
+#define VERBOSE 
+
 enum EECkind { Projected, Full3Pt, Full4Pt };
 
 template <typename T, EECkind K>
@@ -45,6 +47,9 @@ private:
 
   std::string name_;
 
+  unsigned int verbose_;
+  unsigned int p1_, p2_;
+
   edm::InputTag src_;
   edm::EDGetTokenT<edm::View<T>> srcToken_;
 
@@ -52,6 +57,7 @@ private:
   edm::EDGetTokenT<edm::View<reco::Muon>> muonSrcToken_;
 
   float pt_[MAX_CONSTITUENTS], eta_[MAX_CONSTITUENTS], phi_[MAX_CONSTITUENTS];
+
 };
 
 template <typename T, EECkind K>
@@ -59,11 +65,16 @@ EECTableProducerT<T, K>::EECTableProducerT(const edm::ParameterSet& conf)
     : order_(conf.getParameter<unsigned int>("order")),
       minJetPt_(conf.getParameter<double>("minJetPt")),
       name_(conf.getParameter<std::string>("name")),
+      verbose_(conf.getParameter<unsigned int>("verbose")),
+      p1_(conf.getParameter<unsigned int>("p1")),
+      p2_(conf.getParameter<unsigned int>("p2")),
       src_(conf.getParameter<edm::InputTag>("jets")),
       srcToken_(consumes<edm::View<T>>(src_)),
       muonSrc_(conf.getParameter<edm::InputTag>("muons")),
-      muonSrcToken_(consumes<edm::View<reco::Muon>>(muonSrc_)) {
+      muonSrcToken_(consumes<edm::View<reco::Muon>>(muonSrc_)){
   produces<nanoaod::FlatTable>(name_);
+  if( (p1_!=1 || p2_!=1) && order_!=2)
+    throw cms::Exception("EECTableProducer") << "Only 2-point nonIRC EECs are supported at the moment" << std::endl;
 }
 
 template <typename T, EECkind K>
@@ -74,6 +85,9 @@ void EECTableProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions& d
   desc.add<double>("minJetPt");
   desc.add<edm::InputTag>("jets");
   desc.add<edm::InputTag>("muons");
+  desc.add<unsigned int>("verbose");
+  desc.add<unsigned int>("p1");
+  desc.add<unsigned int>("p2");
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -87,31 +101,47 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
 
   unsigned nJets = jets->size();
 
-
+  if(verbose_)
+    std::cout << name_ << " Event has " << nJets << " jets" << std::endl;
   if (muons->size() == 2) {
+    if(verbose_)
+      std::cout << name_ << "\tEvent has two muons... accepted" << std::endl;
     if constexpr(K==EECkind::Projected){
       auto flatDRs = std::make_unique<std::vector<float>>();
       auto flatWTs = std::make_unique<std::vector<float>>();
       auto jetIdx = std::make_unique<std::vector<int>>();
       for (size_t iJet = 0; iJet < nJets; ++iJet) {
-        T jet = jets->at(iJet);
+        std::vector<float> dRs, wts;
 
-        if (jet.pt() < minJetPt_)
-          continue;
+        T jet = jets->at(iJet);
 
         std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
         size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
 
-        for (size_t i = 0; i < nConstituents; ++i) {
-          auto part = constituents[i];
-          pt_[i] = (float)part->pt() / jet.pt();
-          eta_[i] = (float)part->eta();
-          phi_[i] = (float)part->phi();
-        }
+        if (jet.pt() < minJetPt_ || nConstituents<order_){ //skip jet
+          dRs.push_back(0);
+          wts.push_back(0);
+        } else { //don't skip jet
+        
+          if (verbose_)
+            std::cout << name_ << "\tjet: (" << jet.pt() << ", " << jet.eta() << ", " << jet.phi() << ")" << std::endl;
 
-        std::vector<float> dRs, wts;
 
-        projectedEEC(pt_, eta_, phi_, nConstituents, order_, 2, dRs, wts);
+          for (size_t i = 0; i < nConstituents; ++i) {
+            auto part = constituents[i];
+            pt_[i] = (float)part->pt() / jet.pt();
+            eta_[i] = (float)part->eta();
+            phi_[i] = (float)part->phi();
+            if (verbose_)
+              std::cout << name_ << "\t\tpart: (" << part->pt() << ", " << part->eta() << ", " << part->phi() << ")" << std::endl;
+          }
+
+          if(p1_==1 && p2_==1){
+            projectedEEC(pt_, eta_, phi_, nConstituents, order_, 2, dRs, wts);
+          } else{
+            EECnonIRC(pt_, eta_, phi_, nConstituents, p1_, p2_, dRs, wts);
+          }
+        } //end if not skipping jet
 
         flatDRs->insert(flatDRs->end(), dRs.begin(), dRs.end());
         flatWTs->insert(flatWTs->end(), wts.begin(), wts.end());
@@ -130,24 +160,28 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
       auto jetIdx = std::make_unique<std::vector<int>>();
 
       for (size_t iJet = 0; iJet < nJets; ++iJet) {
+        std::vector<float> dR1, dR2, dR3, wts;
         T jet = jets->at(iJet);
-
-        if (jet.pt() < minJetPt_)
-          continue;
 
         std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
         size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
 
-        for (size_t i = 0; i < nConstituents; ++i) {
-          auto part = constituents[i];
-          pt_[i] = (float)part->pt() / jet.pt();
-          eta_[i] = (float)part->eta();
-          phi_[i] = (float)part->phi();
+        if (jet.pt() < minJetPt_ || nConstituents<3){
+          dR1.push_back(0);
+          dR2.push_back(0);
+          dR3.push_back(0);
+          wts.push_back(0);
+        } else {
+          for (size_t i = 0; i < nConstituents; ++i) {
+            auto part = constituents[i];
+            pt_[i] = (float)part->pt() / jet.pt();
+            eta_[i] = (float)part->eta();
+            phi_[i] = (float)part->phi();
+          }
+
+
+          full3ptEEC(pt_, eta_, phi_, nConstituents, dR1, dR2, dR3, wts);
         }
-
-        std::vector<float> dR1, dR2, dR3, wts;
-
-        full3ptEEC(pt_, eta_, phi_, nConstituents, dR1, dR2, dR3, wts);
 
         flatDR1->insert(flatDR1->end(), dR1.begin(), dR1.end());
         flatDR2->insert(flatDR2->end(), dR2.begin(), dR2.end());
@@ -173,24 +207,32 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
       auto jetIdx = std::make_unique<std::vector<int>>();
 
       for (size_t iJet = 0; iJet < nJets; ++iJet) {
-        T jet = jets->at(iJet);
+        std::vector<float> dR1, dR2, dR3, dR4, dR5, dR6, wts;
 
-        if (jet.pt() < minJetPt_)
-          continue;
+        T jet = jets->at(iJet);
 
         std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
         size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
 
-        for (size_t i = 0; i < nConstituents; ++i) {
-          auto part = constituents[i];
-          pt_[i] = (float)part->pt() / jet.pt();
-          eta_[i] = (float)part->eta();
-          phi_[i] = (float)part->phi();
+        if (jet.pt() < minJetPt_ || nConstituents<4){
+          dR1.push_back(0);
+          dR2.push_back(0);
+          dR3.push_back(0);
+          dR4.push_back(0);
+          dR5.push_back(0);
+          dR6.push_back(0);
+          wts.push_back(0);
+        } else {
+          for (size_t i = 0; i < nConstituents; ++i) {
+            auto part = constituents[i];
+            pt_[i] = (float)part->pt() / jet.pt();
+            eta_[i] = (float)part->eta();
+            phi_[i] = (float)part->phi();
+          }
+
+
+          full4ptEEC(pt_, eta_, phi_, nConstituents, dR1, dR2, dR3, dR4, dR5, dR6, wts);
         }
-
-        std::vector<float> dR1, dR2, dR3, dR4, dR5, dR6, wts;
-
-        full4ptEEC(pt_, eta_, phi_, nConstituents, dR1, dR2, dR3, dR4, dR5, dR6, wts);
 
         flatDR1->insert(flatDR1->end(), dR1.begin(), dR1.end());
         flatDR2->insert(flatDR2->end(), dR2.begin(), dR2.end());
