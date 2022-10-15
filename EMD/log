@@ -1,0 +1,171 @@
+>> Local Products Rules ..... started
+>> Local Products Rules ..... done
+>> Entering Package SRothman/EMD
+>> Creating project symlinks
+>> Compiling edm plugin /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc 
+In file included from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/src/wasserstein/Wasserstein.hh:47,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:26:
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/src/wasserstein/internal/PairwiseEMD.hh:408: warning: ignoring #pragma omp parallel [-Wunknown-pragmas]
+       #pragma omp parallel num_threads(this->num_threads()) default(shared)
+ 
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/src/wasserstein/internal/PairwiseEMD.hh:414: warning: ignoring #pragma omp for [-Wunknown-pragmas]
+         #pragma omp for schedule(dynamic, this->omp_dynamic_chunksize())
+ 
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/indexed.hpp:12,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/algorithm/empty.hpp:11,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/algorithm.hpp:15,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram.hpp:29,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:24:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:325:41: error: return type specified for deduction guide
+ constexpr unsigned rank(const Axis& axis) {
+                                         ^
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:325:11: error: decl-specifier in declaration of deduction guide
+ constexpr unsigned rank(const Axis& axis) {
+           ^~~~~~~~
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:325:1: error: decl-specifier in declaration of deduction guide
+ constexpr unsigned rank(const Axis& axis) {
+ ^~~~~~~~~
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:325:41: error: 'signed' or 'unsigned' invalid for '__dguide_rank'
+ constexpr unsigned rank(const Axis& axis) {
+                                         ^
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:325:20: error: deduction guide for 'boost::rank<T>' must have trailing return type
+ constexpr unsigned rank(const Axis& axis) {
+                    ^~~~
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/type_traits.hpp:139,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/Common/interface/Ref.h:117,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/EgammaCandidates/interface/GsfElectronFwd.h:5,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/EgammaCandidates/interface/GsfElectron.h:4,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:13:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/type_traits/rank.hpp:82:27: note: 'template<class T> struct boost::rank' declared here
+ template <class T> struct rank : public integral_constant<std::size_t, (::boost::detail::rank_imp<T, 0>::value)>{};
+                           ^~~~
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/indexed.hpp:12,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/algorithm/empty.hpp:11,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/algorithm.hpp:15,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram.hpp:29,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:24:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:335:47: error: return type specified for deduction guide
+ unsigned rank(const axis::variant<Ts...>& axis) {
+                                               ^
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:335:1: error: decl-specifier in declaration of deduction guide
+ unsigned rank(const axis::variant<Ts...>& axis) {
+ ^~~~~~~~
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:335:47: error: 'signed' or 'unsigned' invalid for '__dguide_rank'
+ unsigned rank(const axis::variant<Ts...>& axis) {
+                                               ^
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/axis/traits.hpp:335:10: error: deduction guide for 'boost::rank<T>' must have trailing return type
+ unsigned rank(const axis::variant<Ts...>& axis) {
+          ^~~~
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/type_traits.hpp:139,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/Common/interface/Ref.h:117,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/EgammaCandidates/interface/GsfElectronFwd.h:5,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/EgammaCandidates/interface/GsfElectron.h:4,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:13:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/type_traits/rank.hpp:82:27: note: 'template<class T> struct boost::rank' declared here
+ template <class T> struct rank : public integral_constant<std::size_t, (::boost::detail::rank_imp<T, 0>::value)>{};
+                           ^~~~
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/histogram.hpp:15,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/algorithm/project.hpp:15,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/algorithm.hpp:16,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram.hpp:29,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:24:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/detail/fill.hpp: In function 'auto boost::histogram::detail::fill(std::true_type, ArgTraits, std::size_t, S&, A&, const Args&)':
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/detail/fill.hpp:307:26: error: 'rank' is not a member of 'boost::histogram::axis::traits'
+            axis::traits::rank(axis_get<0>(axes)) == ArgTraits::nargs::value)
+                          ^~~~
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/histogram/detail/fill.hpp:307:26: note: suggested alternatives:
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/gcc/8.2.0-pafccj/include/c++/8.3.1/bits/move.h:55,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/gcc/8.2.0-pafccj/include/c++/8.3.1/bits/stl_pair.h:59,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/gcc/8.2.0-pafccj/include/c++/8.3.1/bits/stl_algobase.h:64,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/gcc/8.2.0-pafccj/include/c++/8.3.1/vector:60,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/Provenance/interface/BranchIDList.h:14,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/Provenance/interface/ProvenanceFwd.h:35,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/Common/interface/HandleBase.h:30,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/Common/interface/Handle.h:28,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:1:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/gcc/8.2.0-pafccj/include/c++/8.3.1/type_traits:1293:12: note:   'std::rank'
+     struct rank
+            ^~~~
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/type_traits.hpp:139,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/Common/interface/Ref.h:117,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/EgammaCandidates/interface/GsfElectronFwd.h:5,
+                 from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/src/DataFormats/EgammaCandidates/interface/GsfElectron.h:4,
+                 from /uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:13:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.72.0/include/boost/type_traits/rank.hpp:82:27: note:   'boost::rank'
+ template <class T> struct rank : public integral_constant<std::size_t, (::boost::detail::rank_imp<T, 0>::value)>{};
+                           ^~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc: At global scope:
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:36:13: error: 'emd' does not name a type; did you mean 'read'?
+ using EMD = emd::EMDFloat64<emd::EuclideanEvent2D, emd::YPhiParticleDistance>;
+             ^~~
+             read
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:37:21: error: 'emd' does not name a type; did you mean 'read'?
+ using EMDParticle = emd::EuclideanParticle2D<>;
+                     ^~~
+                     read
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:38:49: error: 'EMDParticle' was not declared in this scope
+ using jetConstituents = std::vector<std::vector<EMDParticle>>;
+                                                 ^~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:38:49: error: template argument 1 is invalid
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:38:49: error: template argument 2 is invalid
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:38:60: error: template argument 1 is invalid
+ using jetConstituents = std::vector<std::vector<EMDParticle>>;
+                                                            ^~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:38:60: error: template argument 2 is invalid
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:56:3: error: 'PairwiseEMD' does not name a type
+   PairwiseEMD emd_obj_;
+   ^~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:59:27: error: 'EMDParticle' was not declared in this scope
+   std::vector<std::vector<EMDParticle>> getConstituents_(edm::Handle<edm::View<T>> jets);
+                           ^~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:59:27: error: template argument 1 is invalid
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:59:27: error: template argument 2 is invalid
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:59:38: error: template argument 1 is invalid
+   std::vector<std::vector<EMDParticle>> getConstituents_(edm::Handle<edm::View<T>> jets);
+                                      ^~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:59:38: error: template argument 2 is invalid
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc: In constructor 'EMDFlowProducer::EMDFlowProducer(const edm::ParameterSet&)':
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:69:7: error: class 'EMDFlowProducer' does not have any field named 'emd_obj_'
+       emd_obj_(0.4, 1.0, false){
+       ^~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:71:22: error: 'pairwise_emd_obj' was not declared in this scope
+         std::cout << pairwise_emd_obj.description() << std::endl;
+                      ^~~~~~~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc: At global scope:
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:83:56: error: 'jetConstituents' has not been declared
+ void getConstituents_(edm::Handle<edm::View<T>>& jets, jetConstituents& out) {
+                                                        ^~~~~~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc: In function 'void getConstituents_(edm::Handle<edm::View<T> >&, int&)':
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:89:17: error: 'EMDParticle' was not declared in this scope
+     std::vector<EMDParticle> singleJet;
+                 ^~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:89:28: error: template argument 1 is invalid
+     std::vector<EMDParticle> singleJet;
+                            ^
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:89:28: error: template argument 2 is invalid
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:93:17: error: request for member 'emplace_back' in 'singleJet', which is of non-class type 'int'
+       singleJet.emplace_back(part->pt()/jet.pt(), part->eta(), part->phi());
+                 ^~~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:96:9: error: request for member 'push_back' in 'out', which is of non-class type 'int'
+     out.push_back(singleJet);
+         ^~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc: In member function 'virtual void EMDFlowProducer::produce(edm::Event&, const edm::EventSetup&)':
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:107:3: error: 'jetConstituents' was not declared in this scope
+   jetConstituents reco;
+   ^~~~~~~~~~~~~~~
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:107:3: note: suggested alternative: 'getConstituents_'
+   jetConstituents reco;
+   ^~~~~~~~~~~~~~~
+   getConstituents_
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:108:40: error: expected primary-expression before ')' token
+   getConstituents_<pat::Jet>(jets, reco);
+                                        ^
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:110:18: error: expected ';' before 'gen'
+   jetConstituents gen;
+                  ^~~~
+                  ;
+/uscms_data/d3/srothman/CMSSW_10_6_26_prod/src/SRothman/EMD/plugins/EMDFlowProducer.cc:111:43: error: 'gen' was not declared in this scope
+   getConstituents_<reco::GenJet>(genJets, gen);
+                                           ^~~
+gmake: *** [config/SCRAM/GMake/Makefile.rules:1733: tmp/slc7_amd64_gcc820/src/SRothman/EMD/plugins/SRothmanEMDsPlugins/EMDFlowProducer.cc.o] Error 1
+gmake: *** [There are compilation/build errors. Please see the detail log above.] Error 2

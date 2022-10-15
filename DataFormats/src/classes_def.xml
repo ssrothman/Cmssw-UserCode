@@ -1,0 +1,5 @@
+<lcgdict>
+ <class name="EMDFlow"/>
+ <class name="std::vector<EMDFlow>"/>
+ <class name="edm::Wrapper<std::vector<EMDFlow> >"/>
+</lcgdict>
