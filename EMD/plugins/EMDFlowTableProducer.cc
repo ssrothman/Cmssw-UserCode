@@ -54,7 +54,7 @@ void EMDFlowTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   std::vector<float> flowvec;
 
   for(auto flow : *flows){
-    for(auto f: flow.flow){
+    for(auto f: *(flow.flowvec)){
       flowvec.emplace_back(f);
       iGen.emplace_back(flow.iGen);
       iReco.emplace_back(flow.iReco);

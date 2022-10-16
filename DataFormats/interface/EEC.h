@@ -1,31 +1,50 @@
-#ifndef DataFormats_EMDFlow_H
-#define DataFormats_EMDFlow_H
+#ifndef DataFormats_EEC_H
+#define DataFormats_EEC_H
 
 #include <vector>
+#include <memory>
+
+using coefs_t = std::vector<std::vector<std::vector<float>>>;
 
 struct ProjectedEEC{
-  int iGen, iReco;
-  int order;
-  std::vector<float> dRvec;
-  std::vector<float> wtvec;
+  int iJet;
 
-  explicit ProjectedEEC(int gen, int reco, std::vector<float> dR, std::vector<float> wt, N):
-    iGen(gen), iReco(reco), dRvec(dR), wtvec(wt), order(N) {}
-  ProjectedEEC() : iGen(-1), iReco(-1), dRvec(), wtvec(), order(-1) {}
+  std::shared_ptr<std::vector<float>> dRvec;
+  std::shared_ptr<std::vector<float>> wtvec;
+
+  int order;
+
+  std::shared_ptr<coefs_t> coefs;
+
+  explicit ProjectedEEC(int jet, 
+      std::shared_ptr<std::vector<float>>&& dR, 
+      std::shared_ptr<std::vector<float>>&& wt, 
+      int N,
+      std::shared_ptr<coefs_t>&& coeficients):
+    iJet(jet), 
+    dRvec(std::move(dR)), wtvec(std::move(wt)), 
+    order(N), 
+    coefs(std::move(coeficients)) {}
+  ProjectedEEC() : iJet(-1), dRvec(nullptr), wtvec(nullptr), order(-1), coefs(nullptr) {}
 };
 
 struct ResolvedEEC{
-  int iGen, iReco;
+  int iJet;
+
+  std::shared_ptr<std::vector<std::vector<float>>> dRvec;
+  std::shared_ptr<std::vector<float>> wtvec;
+
   int order;
-  std::vector<std::vector<float>> dRvec;
-  std::vector<float> wtvec;
 
-  explicit ResolvedEEC(int gen, int reco, std::vector<float> dR, std::vector<float> wt, N):
-    iGen(gen), iReco(reco), dRvec(dR), wtvec(wt), order(N) {}
-  ResolvedEEC() : iGen(-1), iReco(-1), dRvec(), wtvec(), order(-1) {}
+  explicit ResolvedEEC(int jet, 
+      std::shared_ptr<std::vector<std::vector<float>>>&& dR, 
+      std::shared_ptr<std::vector<float>>&& wt, 
+      int N):
+    iJet(jet), 
+    dRvec(std::move(dR)), wtvec(std::move(wt)), 
+    order(N) {}
+  ResolvedEEC() : iJet(-1), dRvec(nullptr), wtvec(nullptr), order(-1) {}
 };
-
-
 
 typedef std::vector<ProjectedEEC> ProjectedEECCollection;
 typedef std::vector<ResolvedEEC> ResolvedEECCollection;

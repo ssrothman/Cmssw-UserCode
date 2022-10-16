@@ -66,7 +66,7 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       getConstituents_<reco::GenJet>(genJet, gen);
 
       float emd = emd_obj_(reco, gen);
-      std::vector<float> flows = emd_obj_.flows();
+      auto flows = std::make_shared<std::vector<float>>(emd_obj_.flows());
 
       printf("Matched (%0.3f, %0.3f, %0.3f) with (%0.3f, %0.3f, %0.3f)\n", 
           recoJet.pt(), recoJet.eta(), recoJet.phi(), 
@@ -76,16 +76,16 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       //flows indexed by (iPReco * nPGen + iPReco)??
       unsigned NPReco = reco.size();
       unsigned NPGen = gen.size();
-      printf("TOTAL SIZE = %zu (=%dx%d)\n", flows.size(), NPReco, NPGen);
+      printf("TOTAL SIZE = %zu (=%dx%d)\n", flows->size(), NPReco, NPGen);
       for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){
         for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
-          flows[iPReco*NPGen + iPGen] /= reco[iPReco].weight();
-          printf("%0.3f\t", flows[iPReco*NPGen + iPGen]);
+          flows->at(iPReco*NPGen + iPGen) /= reco[iPReco].weight();
+          printf("%0.3f\t", flows->at(iPReco*NPGen + iPGen));
         }
         printf("\n");
       }
       printf("\n");
-      result->emplace_back(bestGen, iReco, flows);
+      result->emplace_back(bestGen, iReco, std::move(flows));
     } else{
       printf("Matching failed for (%0.3f, %0.3f, %0.3f)\n",
           recoJet.pt(), recoJet.eta(), recoJet.phi()); 

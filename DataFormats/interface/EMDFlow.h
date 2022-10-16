@@ -2,14 +2,15 @@
 #define DataFormats_EMDFlow_H
 
 #include <vector>
+#include <memory>
 
 struct EMDFlow{
   int iGen, iReco;
-  std::vector<float> flow;
+  std::shared_ptr<std::vector<float>> flowvec;
 
-  explicit EMDFlow(int gen, int reco, std::vector<float> flowvec):
-    iGen(gen), iReco(reco), flow(flowvec) {}
-  EMDFlow() : iGen(-1), iReco(-1), flow() {}
+  explicit EMDFlow(int gen, int reco, std::shared_ptr<std::vector<float>>&& flow):
+    iGen(gen), iReco(reco), flowvec(std::move(flow)) {}
+  EMDFlow() : iGen(-1), iReco(-1), flowvec(nullptr) {}
 };
 
 typedef std::vector<EMDFlow> EMDFlowCollection;

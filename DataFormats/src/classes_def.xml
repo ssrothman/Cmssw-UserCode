@@ -2,4 +2,10 @@
  <class name="EMDFlow"/>
  <class name="std::vector<EMDFlow>"/>
  <class name="edm::Wrapper<std::vector<EMDFlow> >"/>
+ <class name="ProjectedEEC"/>
+ <class name="std::vector<ProjectedEEC>"/>
+ <class name="edm::Wrapper<std::vector<ProjectedEEC> >"/>
+ <class name="ResolvedEEC"/>
+ <class name="std::vector<ResolvedEEC>"/>
+ <class name="edm::Wrapper<std::vector<ResolvedEEC> >"/>
 </lcgdict>
