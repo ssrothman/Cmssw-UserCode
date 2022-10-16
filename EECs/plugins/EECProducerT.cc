@@ -143,12 +143,13 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
 
     if constexpr (std::is_same<K, ProjectedEECCollection>::value){ //projected EEC
       auto dRs = std::make_shared<std::vector<float>>();
+      auto coefs = std::make_shared<std::vector<std::vector<std::vector<float>>>>();
       if(p1_==1 && p2_==1){
-        projectedEEC(pt_, eta_, phi_, nConstituents, 2, *dRs, *wts, order_, nullptr);
+        projectedEEC(pt_, eta_, phi_, nConstituents, 2, *dRs, *wts, order_, coefs.get());
       } else{
         EECnonIRC(pt_, eta_, phi_, nConstituents, p1_, p2_, *dRs, *wts);
       }
-      result->emplace_back(iJet, std::move(dRs), std::move(wts), order_, nullptr);
+      result->emplace_back(iJet, std::move(dRs), std::move(wts), order_, std::move(coefs));
     } else { //resolved EEC
       auto dRs = std::make_shared<std::vector<std::vector<float>>>();
       dRs->resize(choose(order_, 2));

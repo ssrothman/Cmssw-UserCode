@@ -139,7 +139,7 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
   table->addColumn<float>("wts", *flatWTs, "Weight", nanoaod::FlatTable::FloatColumn);
   table->addColumn<int>("jetIdx", *jetIdx, "jet index", nanoaod::FlatTable::IntColumn);
   for(unsigned i=0; i<nDR_; ++i){
-    table->addColumn<float>(vformat("dR%d", i), flatDRs->at(i), vformat("%dth-largest delta R", i), nanoaod::FlatTable::FloatColumn);
+    table->addColumn<float>(vformat("dR%d", i+1), flatDRs->at(i), vformat("%dth-largest delta R", i+1), nanoaod::FlatTable::FloatColumn);
   }
   evt.put(std::move(table), name_);
 }  // end produce()
