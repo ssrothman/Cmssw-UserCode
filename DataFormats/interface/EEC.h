@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 
+//indexed by power, iPart, iDR
 using coefs_t = std::vector<std::vector<std::vector<float>>>;
 
 struct ProjectedEEC{

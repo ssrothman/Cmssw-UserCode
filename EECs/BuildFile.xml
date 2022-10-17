@@ -17,6 +17,7 @@
 <use name="DataFormats/ParticleFlowReco"/>
 <use name="PhysicsTools/TensorFlow" />
 <use name="SRothman/DataFormats" />
+<use name="SRothman/armadillo" />
 <export>
   <lib name="1"/>
 </export>

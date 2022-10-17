@@ -85,7 +85,7 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         printf("\n");
       }
       printf("\n");
-      result->emplace_back(bestGen, iReco, std::move(flows));
+      result->emplace_back(bestGen, iReco, std::move(flows), NPGen, NPReco);
     } else{
       printf("Matching failed for (%0.3f, %0.3f, %0.3f)\n",
           recoJet.pt(), recoJet.eta(), recoJet.phi()); 

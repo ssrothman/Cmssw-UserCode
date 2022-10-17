@@ -29,7 +29,7 @@
 #include <memory>
 #include <vector>
 
-#define MAX_CONSTITUENTS 256
+#define MAX_CONSTITUENTS 128
 
 #define VERBOSE 
 
