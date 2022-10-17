@@ -1,0 +1,5 @@
+<flags CXXFLAGS="-I/uscms/home/srothman/nobackup/CMSSW_10_6_26_prod/src/SRothman/armadillo/include"/>
+<use name="openblas"/>
+<export>
+  <lib name="1"/>
+</export>
