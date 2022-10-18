@@ -32,8 +32,8 @@
 
 #define VERBOSE 
 
-using EMD = emd::EMDFloat32<emd::EuclideanEvent2D, emd::YPhiParticleDistance>;
-using EMDParticle = emd::EuclideanParticle2D<float>;
+using EMD = emd::EMDFloat64<emd::EuclideanEvent2D, emd::YPhiParticleDistance>;
+using EMDParticle = emd::EuclideanParticle2D<double>;
 using jetConstituents = std::vector<EMDParticle>;
 
 class EMDFlowProducer : public edm::stream::EDProducer<> {
@@ -65,7 +65,7 @@ void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
   std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
   size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
 
-  printf("PARTS\n");
+  //printf("PARTS\n");
   double rawpt = 0;
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
     auto part = constituents[iPart];
@@ -74,9 +74,9 @@ void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
     auto part = constituents[iPart];
     out.emplace_back(part->pt()/rawpt, part->eta(), part->phi());
-    printf("(%0.3f, %0.3f, %0.3f)\n", part->pt()/rawpt, part->eta(), part->phi());
+    //printf("(%0.3f, %0.3f, %0.3f)\n", part->pt()/rawpt, part->eta(), part->phi());
   }
-  printf("\n");
+  //printf("\n");
 }
 
 

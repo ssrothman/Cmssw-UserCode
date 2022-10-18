@@ -5,21 +5,21 @@
 #include <memory>
 
 //indexed by power, iPart, iDR
-using coefs_t = std::vector<std::vector<std::vector<float>>>;
+using coefs_t = std::vector<std::vector<std::vector<double>>>;
 
 struct ProjectedEEC{
   int iJet;
 
-  std::shared_ptr<std::vector<float>> dRvec;
-  std::shared_ptr<std::vector<float>> wtvec;
+  std::shared_ptr<std::vector<double>> dRvec;
+  std::shared_ptr<std::vector<double>> wtvec;
 
   int order;
 
   std::shared_ptr<coefs_t> coefs;
 
   explicit ProjectedEEC(int jet, 
-      std::shared_ptr<std::vector<float>>&& dR, 
-      std::shared_ptr<std::vector<float>>&& wt, 
+      std::shared_ptr<std::vector<double>>&& dR, 
+      std::shared_ptr<std::vector<double>>&& wt, 
       int N,
       std::shared_ptr<coefs_t>&& coeficients):
     iJet(jet), 
@@ -32,14 +32,14 @@ struct ProjectedEEC{
 struct ResolvedEEC{
   int iJet;
 
-  std::shared_ptr<std::vector<std::vector<float>>> dRvec;
-  std::shared_ptr<std::vector<float>> wtvec;
+  std::shared_ptr<std::vector<std::vector<double>>> dRvec;
+  std::shared_ptr<std::vector<double>> wtvec;
 
   int order;
 
   explicit ResolvedEEC(int jet, 
-      std::shared_ptr<std::vector<std::vector<float>>>&& dR, 
-      std::shared_ptr<std::vector<float>>&& wt, 
+      std::shared_ptr<std::vector<std::vector<double>>>&& dR, 
+      std::shared_ptr<std::vector<double>>&& wt, 
       int N):
     iJet(jet), 
     dRvec(std::move(dR)), wtvec(std::move(wt)), 

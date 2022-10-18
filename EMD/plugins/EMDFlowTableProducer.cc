@@ -51,7 +51,7 @@ void EMDFlowTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup
 
   std::vector<int> iGen;
   std::vector<int> iReco;
-  std::vector<float> flowvec;
+  std::vector<double> flowvec;
 
   for(auto flow : *flows){
     for(auto f: *(flow.flowvec)){
@@ -62,7 +62,7 @@ void EMDFlowTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   }
 
   auto table = std::make_unique<nanoaod::FlatTable>(flowvec.size(), "EMDFlow", false);
-  table->addColumn<float>("Flows", flowvec, "Energy movers distance optimal flow between jet constituents", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<double>("Flows", flowvec, "Energy movers distance optimal flow between jet constituents", nanoaod::FlatTable::FloatColumn);
   table->addColumn<int>("genJetIdx", iGen, "gen jet index", nanoaod::FlatTable::IntColumn);
   table->addColumn<int>("recoJetIdx", iReco, "reco jet index", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(table), "EMDFlowTable");

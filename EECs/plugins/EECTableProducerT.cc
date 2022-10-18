@@ -106,9 +106,9 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
   edm::Handle<K> EECs;
   evt.getByToken(EECToken_, EECs);
 
-  auto flatDRs = std::make_unique<std::vector<std::vector<float>>>();
+  auto flatDRs = std::make_unique<std::vector<std::vector<double>>>();
   flatDRs->resize(nDR_);
-  auto flatWTs = std::make_unique<std::vector<float>>();
+  auto flatWTs = std::make_unique<std::vector<double>>();
   auto jetIdx = std::make_unique<std::vector<int>>();
 
   int iJet=0;
@@ -136,10 +136,10 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
     ++iJet; //next jet
   }
   auto table = std::make_unique<nanoaod::FlatTable>(flatWTs->size(), name_, false);
-  table->addColumn<float>("wts", *flatWTs, "Weight", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<double>("wts", *flatWTs, "Weight", nanoaod::FlatTable::FloatColumn);
   table->addColumn<int>("jetIdx", *jetIdx, "jet index", nanoaod::FlatTable::IntColumn);
   for(unsigned i=0; i<nDR_; ++i){
-    table->addColumn<float>(vformat("dR%d", i+1), flatDRs->at(i), vformat("%dth-largest delta R", i+1), nanoaod::FlatTable::FloatColumn);
+    table->addColumn<double>(vformat("dR%d", i+1), flatDRs->at(i), vformat("%dth-largest delta R", i+1), nanoaod::FlatTable::FloatColumn);
   }
   evt.put(std::move(table), name_);
 }  // end produce()

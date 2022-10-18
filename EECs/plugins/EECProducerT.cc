@@ -54,7 +54,7 @@ private:
   edm::InputTag muonSrc_;
   edm::EDGetTokenT<edm::View<reco::Muon>> muonSrcToken_;
 
-  float pt_[MAX_CONSTITUENTS], eta_[MAX_CONSTITUENTS], phi_[MAX_CONSTITUENTS];
+  double pt_[MAX_CONSTITUENTS], eta_[MAX_CONSTITUENTS], phi_[MAX_CONSTITUENTS];
 
   size_t fill(const std::vector<reco::Jet::Constituent>& constituents);
 
@@ -64,16 +64,16 @@ template <typename T, typename K>
 size_t EECProducerT<T, K>::fill(const std::vector<reco::Jet::Constituent>& constituents){
   size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
 
-  float rawPt = 0;
+  double rawPt = 0;
   for (size_t i = 0; i < nConstituents; ++i) { //for each constituent
     auto part = constituents[i];
     rawPt += part->pt();
   } //end for each constituent
   for (size_t i = 0; i < nConstituents; ++i) { //for each constituent
     auto part = constituents[i];
-    pt_[i] = (float)part->pt() / rawPt;
-    eta_[i] = (float)part->eta();
-    phi_[i] = (float)part->phi();
+    pt_[i] = (double)part->pt() / rawPt;
+    eta_[i] = (double)part->eta();
+    phi_[i] = (double)part->phi();
   } //end for each constituent
 
   return nConstituents;
@@ -139,11 +139,11 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
       std::cout << "\tjet: (" << jet.pt() << ", " << jet.eta() << ", " << jet.phi() << ")" << std::endl;
     }
 
-    auto wts = std::make_shared<std::vector<float>>();
+    auto wts = std::make_shared<std::vector<double>>();
 
     if constexpr (std::is_same<K, ProjectedEECCollection>::value){ //projected EEC
-      auto dRs = std::make_shared<std::vector<float>>();
-      auto coefs = std::make_shared<std::vector<std::vector<std::vector<float>>>>();
+      auto dRs = std::make_shared<std::vector<double>>();
+      auto coefs = std::make_shared<std::vector<std::vector<std::vector<double>>>>();
       if(p1_==1 && p2_==1){
         projectedEEC(pt_, eta_, phi_, nConstituents, 2, *dRs, *wts, order_, coefs.get());
       } else{
@@ -151,7 +151,7 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
       }
       result->emplace_back(iJet, std::move(dRs), std::move(wts), order_, std::move(coefs));
     } else { //resolved EEC
-      auto dRs = std::make_shared<std::vector<std::vector<float>>>();
+      auto dRs = std::make_shared<std::vector<std::vector<double>>>();
       dRs->resize(choose(order_, 2));
       if(order_==3){
         full3ptEEC(pt_, eta_, phi_, nConstituents, 

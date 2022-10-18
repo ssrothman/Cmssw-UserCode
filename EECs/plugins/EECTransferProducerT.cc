@@ -117,12 +117,13 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
   edm::Handle<EMDFlowCollection> flows;
   evt.getByToken(flowToken_, flows);
 
-  std::vector<std::vector<std::vector<float>>> result;
+  std::vector<std::vector<std::vector<double>>> result;
 
   size_t iEEC;
   for(size_t iFlow=0; iFlow < flows->size(); ++iFlow){
+
     auto flow = flows->at(iFlow);
-    
+
     //find corresponding EECs
     bool found=false;
     for(iEEC=0; iEEC<genEECs->size(); ++iEEC){
@@ -152,21 +153,30 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
     //compute moore-penrose pseudoinversion of recoEEC
     //currently only for second-order correlators
-    arma::fmat Wreco(flow.Nreco, recoEEC.dRvec->size(), arma::fill::zeros); 
+    arma::mat Wreco(flow.Nreco, recoEEC.dRvec->size(), arma::fill::zeros); 
     for(size_t iPart=0; iPart<flow.Nreco; ++iPart){
       for(size_t iDR=0; iDR<recoEEC.dRvec->size(); ++iDR){
         Wreco(iPart, iDR) = recoEEC.coefs->at(0)[iPart][iDR];
       }
     }
 
-    std::cout << "W matrix " << std::endl << Wreco << std::endl;
-    arma::fmat Winv = arma::pinv(Wreco);
-    std::cout << "Winv" << std::endl << Winv << std::endl;
+    arma::mat Winv = arma::pinv(Wreco);
+  
+    bool EEClonger = recoEEC.dRvec->size() > flow.ER->size();
+    size_t size = std::max(recoEEC.dRvec->size(), flow.ER->size());
+    arma::vec EECvec(size, arma::fill::zeros), Evec(size, arma::fill::zeros);
+    for(size_t iDR=0; iDR<recoEEC.dRvec->size(); ++iDR){
+      EECvec[iDR] = recoEEC.wtvec->at(iDR);
+    }
+    for(size_t iPart=0; iPart<flow.ER->size(); ++iPart){
+      Evec[iPart] = flow.ER->at(iPart);
+    }
+
+    arma::mat A = (Evec * Evec.t())/arma::as_scalar(Evec.t() * EECvec);
 
     //NB only implemented for 2nd-order correlators at the moment
-    std::vector<std::vector<float>> transfer;
+    std::vector<std::vector<double>> transfer;
     transfer.resize(genEEC.dRvec->size());
-    printf("FLOW NGEN = %lu NRECO = %lu\n", flow.Ngen, flow.Nreco);
     for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
       transfer[iGenDR].resize(recoEEC.dRvec->size());
       for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
@@ -176,7 +186,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
             if(recoEEC.coefs->at(0)[iPReco][iRecoDR]>0){
               transfer[iGenDR][iRecoDR] += genEEC.coefs->at(0)[iPGen][iGenDR]
                                          * flow.at(iPGen, iPReco) 
-                                         * Winv(iRecoDR, iPReco);
+                                         * A(iPReco, iRecoDR);
             }
           }
         }
@@ -192,7 +202,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       printf("\n");
     }
 
-    std::vector<float> matmul;
+    std::vector<double> matmul;
     matmul.resize(genEEC.dRvec->size());
 
     printf("\n");
