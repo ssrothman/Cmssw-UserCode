@@ -89,7 +89,11 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       //printf("TOTAL SIZE = %zu (=%dx%d)\n", flows->size(), NPReco, NPGen);
       for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){
         for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
-          flows->at(iPReco*NPGen + iPGen) /= reco[iPReco].weight();
+          if(reco[iPReco].weight() > 1e-7){
+            flows->at(iPReco*NPGen + iPGen) /= reco[iPReco].weight();
+          } else{
+            flows->at(iPReco*NPGen + iPGen) = 0;
+          }
           //printf("%0.3f\t", flows->at(iPReco*NPGen + iPGen));
         }
         //printf("\n");

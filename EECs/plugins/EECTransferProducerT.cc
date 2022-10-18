@@ -37,6 +37,7 @@ extern "C" {
 #include "SRothman/armadillo/include/armadillo"
 
 #define MAX_CONSTITUENTS 128
+#define EPSILON 1e-8
 
 #define VERBOSE 
 
@@ -149,28 +150,139 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     }
     auto recoEEC = EECs->at(iEEC);
 
+    size_t NDR_R = recoEEC.dRvec->size();
+    size_t NPart_R = flow.Nreco;
+    size_t max_R = std::max(NDR_R, NPart_R);
+
+    size_t NDR_G = genEEC.dRvec->size();
+    size_t NPart_G = flow.Ngen;
     //compute moore-penrose pseudoinversion of recoEEC
     //currently only for second-order correlators
-    arma::mat Wreco(flow.Nreco, recoEEC.dRvec->size(), arma::fill::zeros); 
-    for(size_t iPart=0; iPart<flow.Nreco; ++iPart){
-      for(size_t iDR=0; iDR<recoEEC.dRvec->size(); ++iDR){
-        Wreco(iPart, iDR) = recoEEC.coefs->at(0)[iPart][iDR];
+
+    //build Wreco
+    arma::mat W_R(NDR_R, NPart_R, arma::fill::zeros); 
+    for(size_t iPart=0; iPart<NPart_R; ++iPart){
+      for(size_t iDR=0; iDR<NDR_R; ++iDR){
+        W_R(iDR, iPart) = recoEEC.coefs->at(0)[iPart][iDR];
       }
     }
 
-    arma::mat Winv = arma::pinv(Wreco);
-  
-    bool EEClonger = recoEEC.dRvec->size() > flow.ER->size();
-    size_t size = std::max(recoEEC.dRvec->size(), flow.ER->size());
-    arma::vec EECvec(size, arma::fill::zeros), Evec(size, arma::fill::zeros);
-    for(size_t iDR=0; iDR<recoEEC.dRvec->size(); ++iDR){
-      EECvec[iDR] = recoEEC.wtvec->at(iDR);
-    }
-    for(size_t iPart=0; iPart<flow.ER->size(); ++iPart){
-      Evec[iPart] = flow.ER->at(iPart);
+    arma::mat W_G(NDR_G, NPart_G, arma::fill::zeros); 
+    for(size_t iPart=0; iPart<NPart_G; ++iPart){
+      for(size_t iDR=0; iDR<NDR_G; ++iDR){
+        W_G(iDR, iPart) = genEEC.coefs->at(0)[iPart][iDR];
+      }
     }
 
-    arma::mat A = (Evec * Evec.t())/arma::as_scalar(Evec.t() * EECvec);
+    arma::mat F(NPart_G, NPart_R, arma::fill::zeros);
+    for(size_t iG=0; iG<NPart_G; ++iG){
+      for(size_t iR=0; iR<NPart_R; ++iR){
+        F(iG, iR) = flow.at(iG, iR);
+      }
+    }
+
+    arma::vec EEC_G(NDR_G, arma::fill::zeros);
+    for(size_t iDR=0; iDR<NDR_G; ++iDR){
+      EEC_G(iDR) = genEEC.wtvec->at(iDR);
+    }
+
+    arma::vec EEC_R(NDR_R, arma::fill::zeros);
+    for(size_t iDR=0; iDR<NDR_R; ++iDR){
+      EEC_R(iDR) = recoEEC.wtvec->at(iDR);
+    }
+
+    arma::vec E_G(NPart_G, arma::fill::zeros);
+    for(size_t iPart=0; iPart<NPart_G; ++iPart){
+      E_G(iPart) = flow.EG->at(iPart);
+    }
+
+    arma::vec E_R(NPart_R, arma::fill::zeros);
+    for(size_t iPart=0; iPart<NPart_R; ++iPart){
+      E_R(iPart) = flow.ER->at(iPart);
+    }
+
+    //validate constructions
+    double WrecoErr = arma::norm(W_R * E_R - EEC_R);
+    double WgenErr = arma::norm(W_G * E_G - EEC_G);
+    double FErr = arma::norm(F*E_R - E_G);
+    double WFErr = arma::norm(W_G * F * E_R - EEC_G);
+    std::cout << "\nConstruction errors" << std::endl;
+    printf("\t|(W_R*E_R) - EEC_R| = %0.3f\n", WrecoErr);
+    printf("\t|(W_G*E_G) - EEC_G| = %0.3f\n", WgenErr);
+    printf("\t|(F*E_R) - E_G| = %0.3f\n", FErr);
+    printf("\t|(W_G*F*E_R) - EEC_G| = %0.3f\n", WFErr);
+
+    //build inverse via projection
+    arma::vec EEC_R_pad = arma::reshape(EEC_R, max_R, 1);
+    arma::vec E_R_pad = arma::reshape(E_R, max_R, 1);
+    double dot = std::abs(arma::as_scalar(EEC_R_pad.t() * E_R_pad));
+    arma::mat Aproj;
+    if(dot > EPSILON){
+      Aproj = E_R * E_R.t()/dot;
+    } else{
+      Aproj = arma::eye(max_R, max_R);
+    }
+    Aproj = arma::reshape(Aproj, NPart_R, NDR_R);
+
+    arma::mat Tproj = W_G * F * Aproj;
+
+    //projection inverse errors
+    double AErr = arma::norm(Aproj * EEC_R - E_R);
+    double FAErr = arma::norm(F * Aproj * EEC_R - E_G);
+    double WFAErr = arma::norm(Tproj * EEC_R - EEC_G);
+    printf("\nProjection inverse:\n");
+    printf("\t|A*EEC_R - E_R| = %0.3f\n", AErr);
+    printf("\t|F*A*EEC_R - E_G| = %0.3f\n", FAErr);
+    printf("\t|Tproj*EEC_R - EEC_G| = %0.3f\n", WFAErr);
+
+    //build inverse with Moore-Penrse
+    arma::mat Winv = arma::pinv(W_R);
+    arma::vec y = E_R - Winv*EEC_R;
+    double dot2 = std::abs(arma::as_scalar(y.t() * E_R));
+    arma::mat AMP;
+    if(dot2 > EPSILON){
+      AMP = Winv + arma::reshape((E_R * E_R.t())/dot, NPart_R, NDR_R);
+    } else{
+      AMP = Winv;
+    }
+
+    arma::mat TMP = W_G*F*AMP;
+
+    //Moore-Penrose inverse errors
+    double AMPErr = arma::norm(AMP * EEC_R - E_R);
+    double FAMPErr = arma::norm(F * AMP * EEC_R - E_G);
+    double WFAMPErr = arma::norm(TMP * EEC_R - EEC_G);
+    printf("\nMoore-Penrose (+projection) inverse:\n");
+    printf("\t|A*EEC_R - E_R| = %0.3f\n", AMPErr);
+    printf("\t|F*A*EEC_R - E_G| = %0.3f\n", FAMPErr);
+    printf("\t|TMP*EEC_R - EEC_G| = %0.3f\n", WFAMPErr);
+
+    //Q ratio "inverse"?
+    //this could be done more cleverly with broadcasting, etc
+    arma::mat Q(NPart_R, NDR_R, arma::fill::zeros);
+    for(size_t iPart=0; iPart<NPart_R; ++iPart){
+      for(size_t iDR=0; iDR<NDR_R; ++iDR){
+        Q(iPart, iDR) = W_R(iDR, iPart) * E_R(iPart);
+      }
+    }
+    arma::vec sums(NPart_R, arma::fill::zeros);
+    for(size_t iPart=0; iPart<NPart_R; ++iPart){
+      for(size_t iDR=0; iDR<NDR_R; ++iDR){
+        sums(iPart) += Q(iPart, iDR);
+      }
+    }
+    for(size_t iPart=0; iPart<NPart_R; ++iPart){
+      for(size_t iDR=0; iDR<NDR_R; ++iDR){
+        Q(iPart, iDR) *= E_R(iPart)/sums(iPart);
+      }
+    }
+
+    arma::mat TQ = W_G*F*Q;
+
+    double QErr = arma::norm(TQ * EEC_R - EEC_G);
+    printf("\nQ \"inverse?\"\n");
+    printf("\t|TQ - EEC_G| = %0.3f\n", QErr);
+
 
     //NB only implemented for 2nd-order correlators at the moment
     auto transfer = std::make_shared<std::vector<std::vector<double>>>();
@@ -181,10 +293,13 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         transfer->at(iGenDR)[iRecoDR] = 0;
         for(size_t iPGen=0; iPGen<flow.Ngen; ++iPGen){//for gen particle
           for(size_t iPReco=0; iPReco<flow.Nreco; ++iPReco){//for reco particle
+            //printf("Index (%lu, %lu) out of ", iPReco, iRecoDR);
+            //printf("\t = %0.3f", B(iPReco, iRecoDR));
             if(recoEEC.coefs->at(0)[iPReco][iRecoDR]>0){
               transfer->at(iGenDR)[iRecoDR] += genEEC.coefs->at(0)[iPGen][iGenDR]
                                              * flow.at(iPGen, iPReco) 
-                                             * A(iPReco, iRecoDR);
+                                             * AMP(iPReco, iRecoDR);
+                                             //* B(iRecoDR, iPReco);
             }
           }
         }
