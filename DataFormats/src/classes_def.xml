@@ -8,4 +8,7 @@
  <class name="ResolvedEEC"/>
  <class name="std::vector<ResolvedEEC>"/>
  <class name="edm::Wrapper<std::vector<ResolvedEEC> >"/>
+ <class name="EECTransfer"/>
+ <class name="std::vector<EECTransfer>"/>
+ <class name="edm::Wrapper<std::vector<EECTransfer> >"/>
 </lcgdict>

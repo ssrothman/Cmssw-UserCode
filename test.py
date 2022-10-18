@@ -134,7 +134,6 @@ process.EEC2TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
     jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     genJets = cms.InputTag("ak4GenJetsNoNu"),
     nDR = cms.uint32(1),
-    name = cms.string("Transfer"),
     EECs = cms.InputTag("EEC2"),
     genEECs = cms.InputTag("genEEC2"),
     flows = cms.InputTag("EMDFlow")
@@ -181,7 +180,6 @@ process.EEC3TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
     jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     genJets = cms.InputTag("ak4GenJetsNoNu"),
     nDR = cms.uint32(1),
-    name = cms.string("Transfer3"),
     EECs = cms.InputTag("EEC3"),
     genEECs = cms.InputTag("genEEC3"),
     flows = cms.InputTag("EMDFlow")
@@ -228,7 +226,6 @@ process.EEC4TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
     jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     genJets = cms.InputTag("ak4GenJetsNoNu"),
     nDR = cms.uint32(1),
-    name = cms.string("Transfer4"),
     EECs = cms.InputTag("EEC4"),
     genEECs = cms.InputTag("genEEC4"),
     flows = cms.InputTag("EMDFlow")
@@ -237,6 +234,11 @@ process.EEC4TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
 process.EECTask4 = cms.Task(process.EEC4, process.genEEC4, process.EEC4TransferTable)
 process.schedule.associate(process.EECTask4)
 
+process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
+    src = cms.InputTag("EEC2TransferTable")
+)
+process.aseq = cms.Sequence(process.analyzer)
+process.nanoAOD_step += process.aseq
 
 # Automatic addition of the customisation function from PhysicsTools.NanoAOD.nano_cff
 from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC 

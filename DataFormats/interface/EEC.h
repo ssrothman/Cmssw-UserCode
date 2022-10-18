@@ -47,7 +47,19 @@ struct ResolvedEEC{
   ResolvedEEC() : iJet(-1), dRvec(nullptr), wtvec(nullptr), order(-1) {}
 };
 
+struct EECTransfer{
+  std::shared_ptr<std::vector<double>> dRgen, dRreco;
+  std::shared_ptr<std::vector<std::vector<double>>> matrix;
+
+  explicit EECTransfer(std::shared_ptr<std::vector<double>> gen,
+                       std::shared_ptr<std::vector<double>> reco,
+                       std::shared_ptr<std::vector<std::vector<double>>> mat) :
+    dRgen(gen), dRreco(reco), matrix(mat) {}
+  EECTransfer() : dRgen(nullptr), dRreco(nullptr), matrix(nullptr) {}
+};
+
 typedef std::vector<ProjectedEEC> ProjectedEECCollection;
 typedef std::vector<ResolvedEEC> ResolvedEECCollection;
+typedef std::vector<EECTransfer> EECTransferCollection;
 
 #endif
