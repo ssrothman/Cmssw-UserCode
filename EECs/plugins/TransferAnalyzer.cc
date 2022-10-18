@@ -81,7 +81,7 @@ TransferAnalyzer::TransferAnalyzer(const edm::ParameterSet& iConfig)
 {
   std::cout << "initializing analyzer" << std::endl;
 
-  hist = new TH2D("histo", "transfer;dRgen;dRreco", 10, 0, 1, 10, 0, 1);
+  hist = new TH2D("histo", "transfer;dRgen;dRreco", 20, 0, 1, 20, 0, 1);
 
    //now do what ever initialization is needed
 }
@@ -103,16 +103,24 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 {
   std::cout << "doing an event in the analyzer" << std::endl;
   auto transfers = iEvent.get(token_);
-  for(const auto& transfer : transfers) {
-    for(size_t iGen; iGen < transfer.dRgen->size(); ++iGen){
-      for(size_t iReco; iReco < transfer.dRreco->size(); ++iReco){
+  size_t i=0;
+  for(const EECTransfer& transfer : transfers) {
+    for(size_t iGen=0; iGen < transfer.dRgen->size(); ++iGen){
+      for(size_t iReco=0; iReco < transfer.dRreco->size(); ++iReco){
         hist->Fill(transfer.dRgen->at(iGen), 
                    transfer.dRreco->at(iReco), 
                    transfer.matrix->at(iGen).at(iReco));
       }
     }
   }
-  std::cout << hist->GetBinContent(0,0) << std::endl;
+  std::cout << std::endl;
+  for(int i=0; i<10; ++i){
+    for(int j=0; j<10; ++j){
+      printf("%0.3f\t", hist->GetBinContent(i,j));
+    }
+    printf("\n");
+  }
+  std::cout << std::endl;
 }
 
 

@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 # Input source
@@ -185,8 +185,8 @@ process.EEC3TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
     flows = cms.InputTag("EMDFlow")
 )
 
-process.EECTask3 = cms.Task(process.EEC3, process.genEEC3, process.EEC3TransferTable)
-process.schedule.associate(process.EECTask3)
+#process.EECTask3 = cms.Task(process.EEC3, process.genEEC3, process.EEC3TransferTable)
+#process.schedule.associate(process.EECTask3)
 
 process.EEC4 = cms.EDProducer("PatProjectedEECProducer",
     jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
@@ -231,8 +231,8 @@ process.EEC4TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
     flows = cms.InputTag("EMDFlow")
 )
 
-process.EECTask4 = cms.Task(process.EEC4, process.genEEC4, process.EEC4TransferTable)
-process.schedule.associate(process.EECTask4)
+#process.EECTask4 = cms.Task(process.EEC4, process.genEEC4, process.EEC4TransferTable)
+#process.schedule.associate(process.EECTask4)
 
 process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
     src = cms.InputTag("EEC2TransferTable")

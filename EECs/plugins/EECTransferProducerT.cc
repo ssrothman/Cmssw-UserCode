@@ -81,6 +81,7 @@ EECTransferProducerT<T, K>::EECTransferProducerT(const edm::ParameterSet& conf)
       flowTag_(conf.getParameter<edm::InputTag>("flows")),
       flowToken_(consumes<EMDFlowCollection>(flowTag_)),
       nDR_(conf.getParameter<unsigned>("nDR")){
+  produces<nanoaod::FlatTable>();
   produces<EECTransferCollection>();
 }
 
@@ -98,7 +99,6 @@ void EECTransferProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions
 
 template <typename T, typename K>
 void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) {
-  std::cout << "producing" << std::endl;
   edm::Handle<edm::View<T>> jets;
   evt.getByToken(jetsToken_, jets);
 
@@ -114,11 +114,11 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
   edm::Handle<EMDFlowCollection> flows;
   evt.getByToken(flowToken_, flows);
 
-  auto result = std::make_unique<EECTransferCollection>();
+  std::vector<std::vector<std::vector<double>>> result;
+  auto result2 = std::make_unique<EECTransferCollection>();
 
   size_t iEEC;
   for(size_t iFlow=0; iFlow < flows->size(); ++iFlow){
-    std::cout << "iFlow " << iFlow << std::endl;
 
     auto flow = flows->at(iFlow);
 
@@ -131,6 +131,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       }
     }
     if (!found){
+      //throw cms::Exception("EECTransferProducer") << "Couldn't find genEEC\n";
       continue;
     }
     auto genEEC = genEECs->at(iEEC);
@@ -143,12 +144,23 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       }
     }
     if (!found){
+      //throw cms::Exception("EECTransferProducer") << "Couldn't find recoEEC\n";
       continue;
     }
     auto recoEEC = EECs->at(iEEC);
 
-    std::cout << "did the setup "<< std::endl;
+    //compute moore-penrose pseudoinversion of recoEEC
+    //currently only for second-order correlators
+    arma::mat Wreco(flow.Nreco, recoEEC.dRvec->size(), arma::fill::zeros); 
+    for(size_t iPart=0; iPart<flow.Nreco; ++iPart){
+      for(size_t iDR=0; iDR<recoEEC.dRvec->size(); ++iDR){
+        Wreco(iPart, iDR) = recoEEC.coefs->at(0)[iPart][iDR];
+      }
+    }
 
+    arma::mat Winv = arma::pinv(Wreco);
+  
+    bool EEClonger = recoEEC.dRvec->size() > flow.ER->size();
     size_t size = std::max(recoEEC.dRvec->size(), flow.ER->size());
     arma::vec EECvec(size, arma::fill::zeros), Evec(size, arma::fill::zeros);
     for(size_t iDR=0; iDR<recoEEC.dRvec->size(); ++iDR){
@@ -160,40 +172,72 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
     arma::mat A = (Evec * Evec.t())/arma::as_scalar(Evec.t() * EECvec);
 
-    std::cout << "made A matrix " << std::endl;
-
     //NB only implemented for 2nd-order correlators at the moment
-    auto transfer = std::shared_ptr<std::vector<std::vector<double>>>();
+    auto transfer = std::make_shared<std::vector<std::vector<double>>>();
     transfer->resize(genEEC.dRvec->size());
     for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
-      std::cout <<"outermost loop" << std::endl;
       transfer->at(iGenDR).resize(recoEEC.dRvec->size());
       for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
-        std::cout <<"second outermost loop" << std::endl;
         transfer->at(iGenDR)[iRecoDR] = 0;
         for(size_t iPGen=0; iPGen<flow.Ngen; ++iPGen){//for gen particle
-          std::cout <<"third outermost loop" << std::endl;
           for(size_t iPReco=0; iPReco<flow.Nreco; ++iPReco){//for reco particle
-            std::cout <<"fourth outermost loop" << std::endl;
             if(recoEEC.coefs->at(0)[iPReco][iRecoDR]>0){
-              std::cout << "(iGenDR, iRecoDR, iPGen, iPReco) ";
-              printf("(%lu, %lu, %lu, %lu)", iGenDR, iRecoDR, iPGen, iPReco);
-              std::cout << std::endl;
-              std::cout << "W " << genEEC.coefs->at(0)[iPGen][iGenDR] << std::endl;
-              std::cout << "F " << flow.at(iPGen, iPReco) << std::endl;
-              std::cout << "A " << A(iPReco, iRecoDR) << std::endl;
               transfer->at(iGenDR)[iRecoDR] += genEEC.coefs->at(0)[iPGen][iGenDR]
-                                         * flow.at(iPGen, iPReco) 
-                                         * A(iPReco, iRecoDR);
+                                             * flow.at(iPGen, iPReco) 
+                                             * A(iPReco, iRecoDR);
             }
           }
         }
       }
     }
-    std::cout << "make transfer" << std::endl;
-    result->emplace_back(genEEC.dRvec, recoEEC.dRvec, transfer);
+    result.push_back(*transfer);
+    result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, transfer);
+    //printf("TRANSFER MATRIX (reco x gen) = (%lu x %lu)\n",
+    //    genEEC.dRvec->size(), recoEEC.dRvec->size());
+    for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
+      for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
+        //printf("%0.3f\t", transfer->at(iGenDR)[iRecoDR]);
+      }
+      //printf("\n");
+    }
+
+    std::vector<double> matmul;
+    matmul.resize(genEEC.dRvec->size());
+
+    //printf("\n");
+    //printf("RECO WEIGHTS\n");
+    for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
+      //printf("%0.3f\t", recoEEC.wtvec->at(iRecoDR));
+    }
+    //printf("\n\n");
+
+    //printf("TRANSFER * RECO = \n");
+    for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
+      matmul[iGenDR] = 0;
+      for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
+        matmul[iGenDR] += transfer->at(iGenDR)[iRecoDR] * recoEEC.wtvec->at(iRecoDR);
+      }
+      //printf("%0.3f\t",matmul[iGenDR]);
+    }
+    //printf("\n\n");
+
+    //printf("GEN WEIGHTS\n");
+    for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
+      //printf("%0.3f\t", genEEC.wtvec->at(iGenDR));
+    }
+    //printf("\n\n");
   }
-  evt.put(std::move(result));
+
+  auto flatDRs = std::make_unique<std::vector<float>>();
+  auto flatWTs = std::make_unique<std::vector<float>>();
+  auto jetIdx = std::make_unique<std::vector<int>>();
+
+  auto table = std::make_unique<nanoaod::FlatTable>(flatWTs->size(), "transfer", false);
+  table->addColumn<float>("wts", *flatWTs, "Weight", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<int>("jetIdx", *jetIdx, "jet index", nanoaod::FlatTable::IntColumn);
+  table->addColumn<float>("dR", *flatDRs, "largest delta R", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(table));
+  evt.put(std::move(result2));
 }  // end produce()
 
 typedef EECTransferProducerT<reco::PFJet, ProjectedEECCollection> ProjectedEECTransferProducer;
