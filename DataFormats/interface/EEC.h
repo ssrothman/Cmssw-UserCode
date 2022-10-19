@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 
+#include "SRothman/armadillo/include/armadillo"
+
 //indexed by power, iPart, iDR
 using coefs_t = std::vector<std::vector<std::vector<double>>>;
 
@@ -49,11 +51,11 @@ struct ResolvedEEC{
 
 struct EECTransfer{
   std::shared_ptr<std::vector<double>> dRgen, dRreco;
-  std::shared_ptr<std::vector<std::vector<double>>> matrix;
+  std::shared_ptr<arma::mat> matrix;
 
   explicit EECTransfer(std::shared_ptr<std::vector<double>> gen,
                        std::shared_ptr<std::vector<double>> reco,
-                       std::shared_ptr<std::vector<std::vector<double>>> mat) :
+                       std::shared_ptr<arma::mat> mat) :
     dRgen(gen), dRreco(reco), matrix(mat) {}
   EECTransfer() : dRgen(nullptr), dRreco(nullptr), matrix(nullptr) {}
 };

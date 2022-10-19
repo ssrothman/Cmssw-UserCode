@@ -115,7 +115,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
   edm::Handle<EMDFlowCollection> flows;
   evt.getByToken(flowToken_, flows);
 
-  std::vector<std::vector<std::vector<double>>> result;
   auto result2 = std::make_unique<EECTransferCollection>();
 
   size_t iEEC;
@@ -273,74 +272,32 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     }
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        Q(iPart, iDR) *= E_R(iPart)/sums(iPart);
+        Q(iPart, iDR) *= 1/sums(iPart);//E_R(iPart)/sums(iPart);
       }
     }
 
-    arma::mat TQ = W_G*F*Q;
+    auto TQ = std::make_shared<arma::mat>();
+    *TQ = W_G*F*Q;
 
-    double QErr = arma::norm(TQ * EEC_R - EEC_G);
+    double QErr = arma::norm(*TQ * EEC_R - EEC_G);
     printf("\nQ \"inverse?\"\n");
     printf("\t|TQ - EEC_G| = %0.3f\n", QErr);
 
-
-    //NB only implemented for 2nd-order correlators at the moment
-    auto transfer = std::make_shared<std::vector<std::vector<double>>>();
-    transfer->resize(genEEC.dRvec->size());
-    for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
-      transfer->at(iGenDR).resize(recoEEC.dRvec->size());
-      for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
-        transfer->at(iGenDR)[iRecoDR] = 0;
-        for(size_t iPGen=0; iPGen<flow.Ngen; ++iPGen){//for gen particle
-          for(size_t iPReco=0; iPReco<flow.Nreco; ++iPReco){//for reco particle
-            //printf("Index (%lu, %lu) out of ", iPReco, iRecoDR);
-            //printf("\t = %0.3f", B(iPReco, iRecoDR));
-            if(recoEEC.coefs->at(0)[iPReco][iRecoDR]>0){
-              transfer->at(iGenDR)[iRecoDR] += genEEC.coefs->at(0)[iPGen][iGenDR]
-                                             * flow.at(iPGen, iPReco) 
-                                             * AMP(iPReco, iRecoDR);
-                                             //* B(iRecoDR, iPReco);
-            }
-          }
-        }
-      }
-    }
-    result.push_back(*transfer);
-    result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, transfer);
-    //printf("TRANSFER MATRIX (reco x gen) = (%lu x %lu)\n",
-    //    genEEC.dRvec->size(), recoEEC.dRvec->size());
-    for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
-      for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
-        //printf("%0.3f\t", transfer->at(iGenDR)[iRecoDR]);
-      }
-      //printf("\n");
-    }
-
-    std::vector<double> matmul;
-    matmul.resize(genEEC.dRvec->size());
-
-    //printf("\n");
-    //printf("RECO WEIGHTS\n");
-    for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
-      //printf("%0.3f\t", recoEEC.wtvec->at(iRecoDR));
-    }
-    //printf("\n\n");
-
-    //printf("TRANSFER * RECO = \n");
-    for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
-      matmul[iGenDR] = 0;
-      for(size_t iRecoDR=0; iRecoDR<recoEEC.dRvec->size(); ++iRecoDR){//for reco DR
-        matmul[iGenDR] += transfer->at(iGenDR)[iRecoDR] * recoEEC.wtvec->at(iRecoDR);
-      }
-      //printf("%0.3f\t",matmul[iGenDR]);
-    }
-    //printf("\n\n");
-
-    //printf("GEN WEIGHTS\n");
-    for(size_t iGenDR=0; iGenDR<genEEC.dRvec->size(); ++iGenDR){//for gen DR
-      //printf("%0.3f\t", genEEC.wtvec->at(iGenDR));
-    }
-    //printf("\n\n");
+    //actuall fill transfer matrix
+    auto transfer = std::make_shared<arma::mat>();
+    result2->emplace_back(genEEC.dRvec, recoEEC.dRvec,TQ);
+  
+    printf("\nRECO\n");
+    std::cout << EEC_R.t() << std::endl;
+    printf("GEN\n");
+    std::cout << EEC_G.t() << std::endl;
+    printf("TQ * RECO\n");
+    std::cout << arma::trans(*TQ * EEC_R) << std::endl;
+    printf("Tproj * RECO\n");
+    std::cout << arma::trans(Tproj * EEC_R) << std::endl;
+    printf("TMP * RECO\n");
+    std::cout << arma::trans(TMP * EEC_R) << std::endl;
+    printf("\n");
   }
 
   auto flatDRs = std::make_unique<std::vector<float>>();

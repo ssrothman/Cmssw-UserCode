@@ -109,7 +109,7 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
       for(size_t iReco=0; iReco < transfer.dRreco->size(); ++iReco){
         hist->Fill(transfer.dRgen->at(iGen), 
                    transfer.dRreco->at(iReco), 
-                   transfer.matrix->at(iGen).at(iReco));
+                   (*transfer.matrix)(iGen,iReco));
       }
     }
   }

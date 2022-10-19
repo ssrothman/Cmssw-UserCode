@@ -9,8 +9,8 @@ EMDFlowProducer::EMDFlowProducer(const edm::ParameterSet& conf)
       genJetsTag_(conf.getParameter<edm::InputTag>("genJets")),
       genJetsToken_(consumes<edm::View<reco::GenJet>>(genJetsTag_)),
       dR2cut_(conf.getParameter<double>("dR2cut")),
-      emd_obj_(1.0, 1.0, true){
-        emd_obj_.preprocess<emd::CenterWeightedCentroid>();
+      emd_obj_(1.0, 2.0, true){
+        //emd_obj_.preprocess<emd::CenterWeightedCentroid>();
         std::cout << emd_obj_.description() << std::endl;
         produces<EMDFlowCollection>();
 }
