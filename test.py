@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(10000)
 )
 
 # Input source
@@ -136,7 +136,8 @@ process.EEC2TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
     nDR = cms.uint32(1),
     EECs = cms.InputTag("EEC2"),
     genEECs = cms.InputTag("genEEC2"),
-    flows = cms.InputTag("EMDFlow")
+    flows = cms.InputTag("EMDFlow"),
+    mode = cms.string("FF"),
 )
 
 process.EECTask = cms.Task(process.EEC2, process.genEEC2, process.EEC2TransferTable)

@@ -66,6 +66,8 @@ private:
   edm::EDGetTokenT<EMDFlowCollection> flowToken_;
 
   unsigned nDR_;
+
+  std::string mode_;
 };
 
 template <typename T, typename K>
@@ -81,7 +83,8 @@ EECTransferProducerT<T, K>::EECTransferProducerT(const edm::ParameterSet& conf)
       genEECToken_(consumes<K>(genEECTag_)),
       flowTag_(conf.getParameter<edm::InputTag>("flows")),
       flowToken_(consumes<EMDFlowCollection>(flowTag_)),
-      nDR_(conf.getParameter<unsigned>("nDR")){
+      nDR_(conf.getParameter<unsigned>("nDR")),
+      mode_(conf.getParameter<std::string>("mode")){
   produces<nanoaod::FlatTable>();
   produces<EECTransferCollection>();
 }
@@ -94,6 +97,7 @@ void EECTransferProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions
   desc.add<edm::InputTag>("EECs");
   desc.add<edm::InputTag>("genEECs");
   desc.add<edm::InputTag>("flows");
+  desc.add<std::string>("mode");
   desc.add<unsigned>("nDR");
   descriptions.addWithDefaultLabel(desc);
 }
@@ -200,17 +204,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       E_R(iPart) = flow.ER->at(iPart);
     }
 
-    //validate constructions
-    double WrecoErr = arma::norm(W_R * E_R - EEC_R);
-    double WgenErr = arma::norm(W_G * E_G - EEC_G);
-    double FErr = arma::norm(F*E_R - E_G);
-    double WFErr = arma::norm(W_G * F * E_R - EEC_G);
-    std::cout << "\nConstruction errors" << std::endl;
-    printf("\t|(W_R*E_R) - EEC_R| = %0.3f\n", WrecoErr);
-    printf("\t|(W_G*E_G) - EEC_G| = %0.3f\n", WgenErr);
-    printf("\t|(F*E_R) - E_G| = %0.3f\n", FErr);
-    printf("\t|(W_G*F*E_R) - EEC_G| = %0.3f\n", WFErr);
-
     //build inverse via projection
     arma::vec EEC_R_pad = arma::reshape(EEC_R, max_R, 1);
     arma::vec E_R_pad = arma::reshape(E_R, max_R, 1);
@@ -223,16 +216,8 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     }
     Aproj = arma::reshape(Aproj, NPart_R, NDR_R);
 
-    arma::mat Tproj = W_G * F * Aproj;
-
-    //projection inverse errors
-    double AErr = arma::norm(Aproj * EEC_R - E_R);
-    double FAErr = arma::norm(F * Aproj * EEC_R - E_G);
-    double WFAErr = arma::norm(Tproj * EEC_R - EEC_G);
-    printf("\nProjection inverse:\n");
-    printf("\t|A*EEC_R - E_R| = %0.3f\n", AErr);
-    printf("\t|F*A*EEC_R - E_G| = %0.3f\n", FAErr);
-    printf("\t|Tproj*EEC_R - EEC_G| = %0.3f\n", WFAErr);
+    auto Tproj = std::make_shared<arma::mat>();
+    *Tproj = W_G * F * Aproj;
 
     //build inverse with Moore-Penrse
     arma::mat Winv = arma::pinv(W_R);
@@ -245,58 +230,73 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       AMP = Winv;
     }
 
-    arma::mat TMP = W_G*F*AMP;
+    auto TMP = std::make_shared<arma::mat>();
+    *TMP = W_G*F*AMP;
 
-    //Moore-Penrose inverse errors
-    double AMPErr = arma::norm(AMP * EEC_R - E_R);
-    double FAMPErr = arma::norm(F * AMP * EEC_R - E_G);
-    double WFAMPErr = arma::norm(TMP * EEC_R - EEC_G);
-    printf("\nMoore-Penrose (+projection) inverse:\n");
-    printf("\t|A*EEC_R - E_R| = %0.3f\n", AMPErr);
-    printf("\t|F*A*EEC_R - E_G| = %0.3f\n", FAMPErr);
-    printf("\t|TMP*EEC_R - EEC_G| = %0.3f\n", WFAMPErr);
-
-    //Q ratio "inverse"?
-    //this could be done more cleverly with broadcasting, etc
-    arma::mat Q(NPart_R, NDR_R, arma::fill::zeros);
+    //Invert with absolute flow
+    arma::mat EEC_G_PP = W_G*F; //gen EEC per reco particle
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
-      for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        Q(iPart, iDR) = W_R(iDR, iPart) * E_R(iPart);
+      for(size_t iDR=0; iDR<NDR_G; ++iDR){
+        EEC_G_PP(iDR, iPart) = EEC_G_PP(iDR, iPart) * E_R(iPart);
       }
     }
-    arma::vec sums(NPart_R, arma::fill::zeros);
+    arma::mat EEC_R_PP(NPart_R, NDR_R, arma::fill::zeros); //reco EEC per reco particle
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        sums(iPart) += Q(iPart, iDR);
-      }
-    }
-    for(size_t iPart=0; iPart<NPart_R; ++iPart){
-      for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        Q(iPart, iDR) *= 1/sums(iPart);//E_R(iPart)/sums(iPart);
+        EEC_R_PP(iPart, iDR) = W_R(iDR, iPart) * E_R(iPart);
       }
     }
 
-    auto TQ = std::make_shared<arma::mat>();
-    *TQ = W_G*F*Q;
+    auto TAF = std::make_shared<arma::mat>(NDR_G, NDR_R, arma::fill::zeros);
+    for(size_t iPart=0; iPart<NPart_R; ++iPart){
+      arma::rowvec R = EEC_R_PP.row(iPart);
+      arma::vec G = EEC_G_PP.col(iPart);
 
-    double QErr = arma::norm(*TQ * EEC_R - EEC_G);
-    printf("\nQ \"inverse?\"\n");
-    printf("\t|TQ - EEC_G| = %0.3f\n", QErr);
+      double den = arma::dot(R, R);
+      arma::rowvec R2 = arma::square(R);
+      *TAF += G * R2 / den;
+    }
+    //fudge by some normalization factor I don't understand at the moment
+    arma::vec pred = *TAF*arma::ones<arma::vec>(NDR_R);
+    //
+    //invert with fractional flow
+    auto TFF = std::make_shared<arma::mat>(NDR_G, NDR_R, arma::fill::zeros);
+    for(size_t iDR_G=0; iDR_G<NDR_G; ++iDR_G){
+      for(size_t iDR_R=0; iDR_R<NDR_R; ++iDR_R){
+        if(EEC_R(iDR_R) > 1e-7){
+          (*TFF)(iDR_G, iDR_R) = (*TAF)(iDR_G, iDR_R)/EEC_R(iDR_R);
+        } else {
+          (*TFF)(iDR_G, iDR_R) = 0;
+        }
+      }
+    }
 
-    //actuall fill transfer matrix
+    //actually fill transfer matrix
     auto transfer = std::make_shared<arma::mat>();
-    result2->emplace_back(genEEC.dRvec, recoEEC.dRvec,TQ);
+    if(mode_ == "proj"){
+      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, Tproj);
+    } else if(mode_ == "MP"){
+      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, TMP);
+    } else if(mode_ == "AF"){
+      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, TAF);
+    } else if(mode_ == "FF"){
+      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, TFF);
+    } else{
+      throw cms::Exception("EECTransferProducer") << "unsupported mode" << std::endl;
+    }
   
     printf("\nRECO\n");
     std::cout << EEC_R.t() << std::endl;
     printf("GEN\n");
     std::cout << EEC_G.t() << std::endl;
-    printf("TQ * RECO\n");
-    std::cout << arma::trans(*TQ * EEC_R) << std::endl;
     printf("Tproj * RECO\n");
-    std::cout << arma::trans(Tproj * EEC_R) << std::endl;
+    std::cout << arma::trans(*Tproj * EEC_R) << std::endl;
     printf("TMP * RECO\n");
-    std::cout << arma::trans(TMP * EEC_R) << std::endl;
+    std::cout << arma::trans(*TMP * EEC_R) << std::endl;
+    std::cout << "TAF * 1s" << std::endl 
+      << arma::trans(*TAF * arma::ones<arma::vec>(NDR_R)) << std::endl;
+    std::cout << "TFF * EEC_R" << std::endl 
+      << arma::trans(*TFF * EEC_R) << std::endl << std::endl;
     printf("\n");
   }
 
