@@ -71,6 +71,8 @@ class TransferAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
 
       double minpt_;
 
+      unsigned nBins_;
+
       TH2D *hist;
       TH1D *gen, *reco;
       TH1D *matchedgen, *matchedreco;
@@ -93,15 +95,16 @@ TransferAnalyzer::TransferAnalyzer(const edm::ParameterSet& iConfig)
    recoEECToken_(consumes<ProjectedEECCollection>(iConfig.getParameter<edm::InputTag>("recoEEC"))),
    recoJetToken_(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("recoJets"))),
    genJetToken_(consumes<edm::View<reco::GenJet>>(iConfig.getParameter<edm::InputTag>("genJets"))),
-   minpt_(iConfig.getParameter<double>("minpt"))
+   minpt_(iConfig.getParameter<double>("minpt")),
+   nBins_(iConfig.getParameter<unsigned>("nBins"))
 {
   std::cout << "initializing analyzer" << std::endl;
 
-  hist = new TH2D("histo", "transfer;dRgen;dRreco", 20, -3, 0, 20, -3, 0);
-  gen = new TH1D("genEEC", "genEEC;dR", 20, -3, 0);
-  reco = new TH1D("recoEEC", "recoEEC;dR", 20, -3, 0);
-  matchedgen = new TH1D("genEEC", "genEEC;dR", 20, -3, 0);
-  matchedreco = new TH1D("recoEEC", "recoEEC;dR", 20, -3, 0);
+  hist = new TH2D("histo", "transfer;dRgen;dRreco", nBins_, -3, 0, nBins_, -3, 0);
+  gen = new TH1D("genEEC", "genEEC;dR", nBins_, -3, 0);
+  reco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -3, 0);
+  matchedgen = new TH1D("genEEC", "genEEC;dR", nBins_, -3, 0);
+  matchedreco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -3, 0);
 }
 
 
@@ -164,14 +167,14 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   }
 
   std::vector<double> matmul;
-  matmul.resize(20, 0.);
+  matmul.resize(nBins_, 0.);
   std::vector<double> matmul2;
-  matmul2.resize(20, 0.);
+  matmul2.resize(nBins_, 0.);
 
   std::cout << std::endl << "TRANSFER" << std::endl;
-  for(int i=0; i<20; ++i){
-    for(int j=0; j<20; ++j){
-      if(reco->GetBinContent(j) > 0.){
+  for(unsigned i=0; i<nBins_; ++i){
+    for(unsigned j=0; j<nBins_; ++j){
+      if(matchedreco->GetBinContent(j) > 0.){
         printf("%0.3f  ", hist->GetBinContent(i,j)/matchedreco->GetBinContent(j));
         if(matchedreco->GetBinContent(j) > 1e-7){
           matmul[i] += hist->GetBinContent(i,j)
@@ -188,31 +191,31 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   std::cout << std::endl;
 
   std::cout << "GEN" << std::endl;
-  for(int j=0; j<20; ++j){
+  for(unsigned j=0; j<nBins_; ++j){
     printf("%0.3f  ", gen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "RECO" << std::endl;
-  for(int j=0; j<20; ++j){
+  for(unsigned j=0; j<nBins_; ++j){
     printf("%0.3f  ", reco->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL" << std::endl;
-  for(int j=0; j<20; ++j){
+  for(unsigned j=0; j<nBins_; ++j){
     printf("%0.3f  ", matmul.at(j));
   }
   printf("\n");
 
   std::cout << "MATCHED GEN" << std::endl;
-  for(int j=0; j<20; ++j){
+  for(unsigned j=0; j<nBins_; ++j){
     printf("%0.3f  ", matchedgen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL2" << std::endl;
-  for(int j=0; j<20; ++j){
+  for(unsigned j=0; j<nBins_; ++j){
     printf("%0.3f  ", matmul2.at(j));
   }
   printf("\n");
@@ -246,6 +249,7 @@ void TransferAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descript
   desc.add<edm::InputTag>("recoJets");
   desc.add<double>("minpt");
   desc.add<edm::InputTag>("genJets");
+  desc.add<unsigned>("nBins");
   descriptions.addDefault(desc);
 
   //Specify that only 'tracks' is allowed

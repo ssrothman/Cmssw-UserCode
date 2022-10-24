@@ -44,6 +44,7 @@ public:
 private:
   unsigned int order_;
   double minJetPt_;
+  double minPartPt_;
 
   unsigned int verbose_;
   unsigned int p1_, p2_;
@@ -69,20 +70,27 @@ size_t EECProducerT<T, K>::fill(const std::vector<reco::Jet::Constituent>& const
     auto part = constituents[i];
     rawPt += part->pt();
   } //end for each constituent
+  size_t j=0;
   for (size_t i = 0; i < nConstituents; ++i) { //for each constituent
     auto part = constituents[i];
-    pt_[i] = (double)part->pt() / rawPt;
-    eta_[i] = (double)part->eta();
-    phi_[i] = (double)part->phi();
+    if(part->pt() < minPartPt_){
+      continue;
+    }
+    pt_[j] = (double)part->pt() / rawPt;
+    eta_[j] = (double)part->eta();
+    phi_[j++] = (double)part->phi();
+    printf("EEC %0.3f\n", part->pt());
   } //end for each constituent
+  printf("EEC %lu\n\n", j);
 
-  return nConstituents;
+  return j;
 }
 
 template <typename T, typename K>
 EECProducerT<T, K>::EECProducerT(const edm::ParameterSet& conf)
     : order_(conf.getParameter<unsigned int>("order")),
       minJetPt_(conf.getParameter<double>("minJetPt")),
+      minPartPt_(conf.getParameter<double>("minPartPt")),
       verbose_(conf.getParameter<unsigned int>("verbose")),
       p1_(conf.getParameter<unsigned int>("p1")),
       p2_(conf.getParameter<unsigned int>("p2")),
@@ -101,6 +109,7 @@ void EECProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions& descri
   edm::ParameterSetDescription desc;
   desc.add<unsigned int>("order");
   desc.add<double>("minJetPt");
+  desc.add<double>("minPartPt");
   desc.add<edm::InputTag>("jets");
   desc.add<edm::InputTag>("muons");
   desc.add<unsigned int>("verbose");

@@ -9,6 +9,8 @@ EMDFlowProducer::EMDFlowProducer(const edm::ParameterSet& conf)
       genJetsTag_(conf.getParameter<edm::InputTag>("genJets")),
       genJetsToken_(consumes<edm::View<reco::GenJet>>(genJetsTag_)),
       dR2cut_(conf.getParameter<double>("dR2cut")),
+      minPartPt_(conf.getParameter<double>("minPartPt")),
+      mode_(conf.getParameter<std::string>("mode")),
       emd_obj_(1.0, 2.0, true){
         //emd_obj_.preprocess<emd::CenterWeightedCentroid>();
         std::cout << emd_obj_.description() << std::endl;
@@ -20,6 +22,8 @@ void EMDFlowProducer::fillDescriptions(edm::ConfigurationDescriptions& descripti
   desc.add<edm::InputTag>("jets");
   desc.add<edm::InputTag>("genJets");
   desc.add<double>("dR2cut");
+  desc.add<double>("minPartPt");
+  desc.add<std::string>("mode");
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -68,6 +72,8 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       unsigned NPReco = reco.size();
       unsigned NPGen = gen.size();
 
+      printf("RECO %u   GEN %u\n\n", NPReco, NPGen);
+
       double emd = emd_obj_(reco, gen);
       auto flows = std::make_shared<std::vector<double>>(emd_obj_.flows());
 
@@ -94,6 +100,7 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           } else{
             flows->at(iPReco*NPGen + iPGen) = 0;
           }
+          printf("FLOW (%u, %u) = %0.3f\n", iPReco, iPGen, flows->at(iPReco*NPGen+iPGen));
           //printf("%0.3f\t", flows->at(iPReco*NPGen + iPGen));
         }
         //printf("\n");
