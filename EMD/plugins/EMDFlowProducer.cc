@@ -2,6 +2,8 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "SRothman/DataFormats/interface/EMDFlow.h"
 
+#define EPSILON 1e-15
+
 EMDFlowProducer::EMDFlowProducer(const edm::ParameterSet& conf)
     : 
       jetsTag_(conf.getParameter<edm::InputTag>("jets")),
@@ -95,7 +97,7 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       //printf("TOTAL SIZE = %zu (=%dx%d)\n", flows->size(), NPReco, NPGen);
       for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){
         for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
-          if(reco[iPReco].weight() > 1e-7){
+          if(reco[iPReco].weight() > EPSILON){
             flows->at(iPReco*NPGen + iPGen) /= reco[iPReco].weight();
           } else{
             flows->at(iPReco*NPGen + iPGen) = 0;

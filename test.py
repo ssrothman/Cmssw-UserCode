@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000000)
+    input = cms.untracked.int32(100)
 )
 
 # Input source
@@ -85,7 +85,9 @@ process = addPFCands(process, runOnMC=True, jetsName="selectedPatJetsAK4PFPuppi"
 process.EMDFlow = cms.EDProducer("EMDFlowProducer",
     jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     genJets = cms.InputTag("ak4GenJetsNoNu"),
-    dR2cut = cms.double(0.4*0.4)
+    dR2cut = cms.double(0.2*0.2),
+    minPartPt = cms.double(0.0),
+    mode = cms.string("Ewt"),
 )
 
 process.EMDFlowTable = cms.EDProducer("EMDFlowTableProducer",
@@ -103,7 +105,8 @@ process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
     muons = cms.InputTag('finalMuons'),
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
-    verbose = cms.uint32(0)
+    verbose = cms.uint32(0),
+    minPartPt = cms.double(0.0),
 )
 
 process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
@@ -113,7 +116,8 @@ process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
     muons = cms.InputTag('finalMuons'),
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
-    verbose = cms.uint32(0)
+    verbose = cms.uint32(0),
+    minPartPt = cms.double(0.0),
 )
 
 process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
@@ -242,6 +246,7 @@ process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
     recoJets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     genJets = cms.InputTag("ak4GenJetsNoNu"),
     minpt = cms.double(50.0),
+    nBins = cms.uint32(20),
 )
 process.aseq = cms.Sequence(process.analyzer)
 process.nanoAOD_step += process.aseq

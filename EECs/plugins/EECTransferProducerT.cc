@@ -37,7 +37,7 @@ extern "C" {
 #include "SRothman/armadillo/include/armadillo"
 
 #define MAX_CONSTITUENTS 128
-#define EPSILON 1e-8
+#define EPSILON 1e-15
 
 #define VERBOSE 
 
@@ -104,9 +104,6 @@ void EECTransferProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions
 
 template <typename T, typename K>
 void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) {
-  printf("Producing in EECTransferProducer()\n");
-  fflush(stdout);
-
   edm::Handle<edm::View<T>> jets;
   evt.getByToken(jetsToken_, jets);
 
@@ -126,8 +123,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
   size_t iEEC;
   for(size_t iFlow=0; iFlow < flows->size(); ++iFlow){
-    printf("Flow %lu/%lu\n", iFlow, flows->size());
-    fflush(stdout);
 
     auto flow = flows->at(iFlow);
 
@@ -141,7 +136,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     }
     if (!found){
       //throw cms::Exception("EECTransferProducer") << "Couldn't find genEEC\n";
-      std::cout << "couldnt find gen EEC" << std::endl;
       continue;
     }
     auto genEEC = genEECs->at(iEEC);
@@ -155,7 +149,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     }
     if (!found){
       //throw cms::Exception("EECTransferProducer") << "Couldn't find recoEEC\n";
-      std::cout << "couldnt find reco EEC" << std::endl;
       continue;
     }
     auto recoEEC = EECs->at(iEEC);
@@ -169,18 +162,36 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     //compute moore-penrose pseudoinversion of recoEEC
     //currently only for second-order correlators
 
+    arma::vec E_R(NPart_R, arma::fill::zeros);
+    for(size_t iPart=0; iPart<NPart_R; ++iPart){
+      E_R(iPart) = flow.ER->at(iPart);
+    }
+
+    arma::vec E_G(NPart_G, arma::fill::zeros);
+    for(size_t iPart=0; iPart<NPart_G; ++iPart){
+      E_G(iPart) = flow.EG->at(iPart);
+    }
+
     //build Wreco
     arma::mat W_R(NDR_R, NPart_R, arma::fill::zeros); 
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        W_R(iDR, iPart) = recoEEC.coefs->at(0)[iPart][iDR];
+        if(E_R[iPart] > EPSILON){
+          W_R(iDR, iPart) = recoEEC.coefs->at(0)[iPart][iDR];// / E_R[iPart];
+        } else{
+          W_R(iDR, iPart) = 0.;
+        }
       }
     }
 
     arma::mat W_G(NDR_G, NPart_G, arma::fill::zeros); 
     for(size_t iPart=0; iPart<NPart_G; ++iPart){
       for(size_t iDR=0; iDR<NDR_G; ++iDR){
-        W_G(iDR, iPart) = genEEC.coefs->at(0)[iPart][iDR];
+        if(E_G[iPart] > EPSILON){
+          W_G(iDR, iPart) = genEEC.coefs->at(0)[iPart][iDR];// / E_G[iPart];
+        } else{
+          W_G(iDR, iPart) = 0.;
+        }
       }
     }
 
@@ -199,16 +210,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     arma::vec EEC_R(NDR_R, arma::fill::zeros);
     for(size_t iDR=0; iDR<NDR_R; ++iDR){
       EEC_R(iDR) = recoEEC.wtvec->at(iDR);
-    }
-
-    arma::vec E_G(NPart_G, arma::fill::zeros);
-    for(size_t iPart=0; iPart<NPart_G; ++iPart){
-      E_G(iPart) = flow.EG->at(iPart);
-    }
-
-    arma::vec E_R(NPart_R, arma::fill::zeros);
-    for(size_t iPart=0; iPart<NPart_R; ++iPart){
-      E_R(iPart) = flow.ER->at(iPart);
     }
 
     //build inverse via projection
@@ -241,22 +242,16 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     *TMP = W_G*F*AMP;
 
     //Invert with absolute flow
-    //arma::mat EEC_G_PP(NDR_G, NPart_R, arma::fill::zeros); //gen EEC per reco particle
-    //W_G * F
-    arma::mat EEC_G_PP = W_G * F;
+    arma::mat EEC_G_PP = W_G*F; //gen EEC per reco particle
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_G; ++iDR){
-        for(size_t iPartG=0; iPartG<NPart_G; ++iPartG){
-          EEC_G_PP(iDR, iPart) = EEC_G_PP(iDR, iPart) * E_R(iPart);
-          //EEC_G_PP(iDR, iPart) += F(iPartG, iPart) * genEEC.coefs->at(1)[iPartG][iDR];
-        }
+        EEC_G_PP(iDR, iPart) = EEC_G_PP(iDR, iPart) * E_R(iPart);
       }
     }
     arma::mat EEC_R_PP(NPart_R, NDR_R, arma::fill::zeros); //reco EEC per reco particle
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_R; ++iDR){
         EEC_R_PP(iPart, iDR) = W_R(iDR, iPart) * E_R(iPart);
-        //EEC_R_PP(iPart, iDR) = recoEEC.coefs->at(1)[iPart][iDR];
       }
     }
 
@@ -269,12 +264,14 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       arma::rowvec R2 = arma::square(R);
       *TAF += G * R2 / den;
     }
-
+    //fudge by some normalization factor I don't understand at the moment
+    arma::vec pred = *TAF*arma::ones<arma::vec>(NDR_R);
+    //
     //invert with fractional flow
     auto TFF = std::make_shared<arma::mat>(NDR_G, NDR_R, arma::fill::zeros);
     for(size_t iDR_G=0; iDR_G<NDR_G; ++iDR_G){
       for(size_t iDR_R=0; iDR_R<NDR_R; ++iDR_R){
-        if(EEC_R(iDR_R) > 1e-7){
+        if(EEC_R(iDR_R) > EPSILON){
           (*TFF)(iDR_G, iDR_R) = (*TAF)(iDR_G, iDR_R)/EEC_R(iDR_R);
         } else {
           (*TFF)(iDR_G, iDR_R) = 0;

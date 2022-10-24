@@ -39,6 +39,8 @@
 #include "TH2.h"
 #include "TH1.h"
 
+#define EPSILON 1e-15
+
 //
 // class declaration
 //
@@ -176,15 +178,15 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     for(unsigned j=0; j<nBins_; ++j){
       if(matchedreco->GetBinContent(j) > 0.){
         printf("%0.3f  ", hist->GetBinContent(i,j)/matchedreco->GetBinContent(j));
-        if(matchedreco->GetBinContent(j) > 1e-7){
+        if(matchedreco->GetBinContent(j) > EPSILON){
           matmul[i] += hist->GetBinContent(i,j)
                       *reco->GetBinContent(j)
                       /matchedreco->GetBinContent(j);
         }
-        matmul2[i] += hist->GetBinContent(i,j);
       } else {
         printf("%0.3f  ", 0.);
       }
+      matmul2[i] += hist->GetBinContent(i,j);
     }
     printf("\n");
   }

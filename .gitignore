@@ -38,3 +38,8 @@
 EECs/production/*
 
 *.root
+ooo
+output*
+*.tar.xz
+config
+ourour
