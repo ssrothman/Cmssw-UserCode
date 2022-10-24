@@ -273,17 +273,22 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
     //actually fill transfer matrix
     auto transfer = std::make_shared<arma::mat>();
+    std::shared_ptr<arma::mat> Tmat;
     if(mode_ == "proj"){
-      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, Tproj);
+      Tmat = Tproj;
     } else if(mode_ == "MP"){
-      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, TMP);
+      Tmat = TMP;
     } else if(mode_ == "AF"){
-      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, TAF);
+      Tmat = TAF;
     } else if(mode_ == "FF"){
-      result2->emplace_back(genEEC.dRvec, recoEEC.dRvec, TFF);
+      Tmat = TFF;
     } else{
       throw cms::Exception("EECTransferProducer") << "unsupported mode" << std::endl;
     }
+    result2->emplace_back(genEEC.iJet, recoEEC.iJet,
+                          genEEC.dRvec, recoEEC.dRvec, 
+                          genEEC.wtvec, recoEEC.wtvec, 
+                          Tmat);
   
     printf("\nRECO\n");
     std::cout << EEC_R.t() << std::endl;

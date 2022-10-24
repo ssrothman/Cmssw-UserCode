@@ -8,20 +8,21 @@
 
 //indexed by power, iPart, iDR
 using coefs_t = std::vector<std::vector<std::vector<double>>>;
+using vecptr_t = std::shared_ptr<std::vector<double>>;
 
 struct ProjectedEEC{
   int iJet;
 
-  std::shared_ptr<std::vector<double>> dRvec;
-  std::shared_ptr<std::vector<double>> wtvec;
+  vecptr_t dRvec;
+  vecptr_t wtvec;
 
   int order;
 
   std::shared_ptr<coefs_t> coefs;
 
   explicit ProjectedEEC(int jet, 
-      std::shared_ptr<std::vector<double>>&& dR, 
-      std::shared_ptr<std::vector<double>>&& wt, 
+      vecptr_t&& dR, 
+      vecptr_t&& wt, 
       int N,
       std::shared_ptr<coefs_t>&& coeficients):
     iJet(jet), 
@@ -35,13 +36,13 @@ struct ResolvedEEC{
   int iJet;
 
   std::shared_ptr<std::vector<std::vector<double>>> dRvec;
-  std::shared_ptr<std::vector<double>> wtvec;
+  vecptr_t wtvec;
 
   int order;
 
   explicit ResolvedEEC(int jet, 
       std::shared_ptr<std::vector<std::vector<double>>>&& dR, 
-      std::shared_ptr<std::vector<double>>&& wt, 
+      vecptr_t&& wt, 
       int N):
     iJet(jet), 
     dRvec(std::move(dR)), wtvec(std::move(wt)), 
@@ -50,14 +51,22 @@ struct ResolvedEEC{
 };
 
 struct EECTransfer{
-  std::shared_ptr<std::vector<double>> dRgen, dRreco;
+  int iJetGen, iJetReco;
+  vecptr_t dRgen, dRreco, wtgen, wtreco;
   std::shared_ptr<arma::mat> matrix;
 
-  explicit EECTransfer(std::shared_ptr<std::vector<double>> gen,
-                       std::shared_ptr<std::vector<double>> reco,
+  explicit EECTransfer(int iGen, int iReco,
+                       vecptr_t& genDR, vecptr_t& recoDR, 
+                       vecptr_t& genWT, vecptr_t& recoWT,
                        std::shared_ptr<arma::mat> mat) :
-    dRgen(gen), dRreco(reco), matrix(mat) {}
-  EECTransfer() : dRgen(nullptr), dRreco(nullptr), matrix(nullptr) {}
+    iJetGen(iGen), iJetReco(iReco),
+    dRgen(genDR), dRreco(recoDR), 
+    wtgen(genWT), wtreco(recoWT), 
+    matrix(mat) {}
+  EECTransfer() : iJetGen(-1), iJetReco(-1),
+                  dRgen(nullptr), dRreco(nullptr), 
+                  wtgen(nullptr), wtreco(nullptr),  
+                  matrix(nullptr) {}
 };
 
 typedef std::vector<ProjectedEEC> ProjectedEECCollection;

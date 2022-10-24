@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(10000000)
 )
 
 # Input source
@@ -137,7 +137,7 @@ process.EEC2TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
     EECs = cms.InputTag("EEC2"),
     genEECs = cms.InputTag("genEEC2"),
     flows = cms.InputTag("EMDFlow"),
-    mode = cms.string("FF"),
+    mode = cms.string("AF"),
 )
 
 process.EECTask = cms.Task(process.EEC2, process.genEEC2, process.EEC2TransferTable)
@@ -236,7 +236,12 @@ process.EEC4TransferTable = cms.EDProducer("PatProjectedEECTransferProducer",
 #process.schedule.associate(process.EECTask4)
 
 process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
-    src = cms.InputTag("EEC2TransferTable")
+    src = cms.InputTag("EEC2TransferTable"),
+    genEEC = cms.InputTag("genEEC2"),
+    recoEEC = cms.InputTag("EEC2"),
+    recoJets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+    genJets = cms.InputTag("ak4GenJetsNoNu"),
+    minpt = cms.double(50.0),
 )
 process.aseq = cms.Sequence(process.analyzer)
 process.nanoAOD_step += process.aseq
