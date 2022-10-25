@@ -85,7 +85,7 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         ER->push_back(reco[iPReco].weight());
       }
       for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
-        EG->push_back(reco[iPGen].weight());
+        EG->push_back(gen[iPGen].weight());
       }
 
       //printf("Matched (%0.3f, %0.3f, %0.3f) with (%0.3f, %0.3f, %0.3f)\n", 

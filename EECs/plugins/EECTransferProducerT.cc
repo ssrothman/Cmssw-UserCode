@@ -166,34 +166,35 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       E_R(iPart) = flow.ER->at(iPart);
     }
+    std::cout << "made E_R" << std::endl;
 
     arma::vec E_G(NPart_G, arma::fill::zeros);
     for(size_t iPart=0; iPart<NPart_G; ++iPart){
       E_G(iPart) = flow.EG->at(iPart);
     }
+    std::cout << "made E_G" << std::endl;
 
     //build Wreco
     arma::mat W_R(NDR_R, NPart_R, arma::fill::zeros); 
+    arma::mat W_R_PP(NDR_R, NPart_R, arma::fill::zeros); 
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        if(E_R[iPart] > EPSILON){
-          W_R(iDR, iPart) = recoEEC.coefs->at(0)[iPart][iDR];// / E_R[iPart];
-        } else{
-          W_R(iDR, iPart) = 0.;
-        }
+        W_R_PP(iDR, iPart) = recoEEC.coefs->at(0)[iPart][iDR];
+        W_R(iDR, iPart) = W_R_PP(iDR, iPart) / E_R[iPart];
       }
     }
+    std::cout << "made W_R" << std::endl;
 
     arma::mat W_G(NDR_G, NPart_G, arma::fill::zeros); 
+    arma::mat W_G_PP(NDR_G, NPart_G, arma::fill::zeros); 
     for(size_t iPart=0; iPart<NPart_G; ++iPart){
       for(size_t iDR=0; iDR<NDR_G; ++iDR){
-        if(E_G[iPart] > EPSILON){
-          W_G(iDR, iPart) = genEEC.coefs->at(0)[iPart][iDR];// / E_G[iPart];
-        } else{
-          W_G(iDR, iPart) = 0.;
-        }
+        W_G_PP(iDR, iPart) = genEEC.coefs->at(0)[iPart][iDR];// / E_G[iPart];
+        W_G(iDR, iPart) = W_G_PP(iDR, iPart) / E_G[iPart];
       }
     }
+    arma::vec WGsum = arma::sum(W_G_PP, 1);
+    std::cout << "made W_G" << std::endl;
 
     arma::mat F(NPart_G, NPart_R, arma::fill::zeros);
     for(size_t iG=0; iG<NPart_G; ++iG){
@@ -201,16 +202,19 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         F(iG, iR) = flow.at(iG, iR);
       }
     }
+    std::cout << "made F" << std::endl;
 
     arma::vec EEC_G(NDR_G, arma::fill::zeros);
     for(size_t iDR=0; iDR<NDR_G; ++iDR){
       EEC_G(iDR) = genEEC.wtvec->at(iDR);
     }
+    std::cout << "made EEC_G" << std::endl;
 
     arma::vec EEC_R(NDR_R, arma::fill::zeros);
     for(size_t iDR=0; iDR<NDR_R; ++iDR){
       EEC_R(iDR) = recoEEC.wtvec->at(iDR);
     }
+    std::cout << "made EEC_R" << std::endl;
 
     //build inverse via projection
     arma::vec EEC_R_pad = arma::reshape(EEC_R, max_R, 1);
@@ -226,6 +230,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
     auto Tproj = std::make_shared<arma::mat>();
     *Tproj = W_G * F * Aproj;
+    std::cout << "made Tproj" << std::endl;
 
     //build inverse with Moore-Penrse
     arma::mat Winv = arma::pinv(W_R);
@@ -240,33 +245,38 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
     auto TMP = std::make_shared<arma::mat>();
     *TMP = W_G*F*AMP;
+    std::cout << "made TMP" << std::endl;
 
     //Invert with absolute flow
-    arma::mat EEC_G_PP = W_G*F; //gen EEC per reco particle
+    arma::mat W_G_PP_R = W_G*F;
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_G; ++iDR){
-        EEC_G_PP(iDR, iPart) = EEC_G_PP(iDR, iPart) * E_R(iPart);
-      }
-    }
-    arma::mat EEC_R_PP(NPart_R, NDR_R, arma::fill::zeros); //reco EEC per reco particle
-    for(size_t iPart=0; iPart<NPart_R; ++iPart){
-      for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        EEC_R_PP(iPart, iDR) = W_R(iDR, iPart) * E_R(iPart);
+        W_G_PP_R(iDR, iPart) *= E_R[iPart];
       }
     }
 
+    arma::mat W_R_PP_R = arma::trans(W_R_PP);
+    arma::rowvec WRsum = arma::sum(W_R_PP_R, 0);
+    std::cout << "made W_G" << std::endl;
+    std::cout << "made W_G_PP_R" << std::endl;
     auto TAF = std::make_shared<arma::mat>(NDR_G, NDR_R, arma::fill::zeros);
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
-      arma::rowvec R = EEC_R_PP.row(iPart);
-      arma::vec G = EEC_G_PP.col(iPart);
+      arma::rowvec R = W_R_PP_R.row(iPart);
+      arma::vec G = W_G_PP_R.col(iPart);
 
-      double den = arma::dot(R, R);
       arma::rowvec R2 = arma::square(R);
+      double den = arma::dot(R, R);
+      arma::mat next = G * R2 / den;
+
+      arma::vec GR = next * arma::ones<arma::vec>(NDR_R);
+
+      std::cout << "G    " << arma::trans(G) << std::endl;
+      std::cout << "GR   " << arma::trans(GR) << std::endl;
+
       *TAF += G * R2 / den;
     }
-    //fudge by some normalization factor I don't understand at the moment
-    arma::vec pred = *TAF*arma::ones<arma::vec>(NDR_R);
-    //
+    std::cout << "made TAF" << std::endl;
+
     //invert with fractional flow
     auto TFF = std::make_shared<arma::mat>(NDR_G, NDR_R, arma::fill::zeros);
     for(size_t iDR_G=0; iDR_G<NDR_G; ++iDR_G){
@@ -278,6 +288,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         }
       }
     }
+    std::cout << "made TFF" << std::endl;
 
     //actually fill transfer matrix
     auto transfer = std::make_shared<arma::mat>();
@@ -300,8 +311,16 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
   
     printf("\nRECO\n");
     std::cout << EEC_R.t() << std::endl;
+    printf("WRsum\n");
+    std::cout << WRsum << std::endl;
     printf("GEN\n");
     std::cout << EEC_G.t() << std::endl;
+    printf("E_G\n");
+    std::cout << arma::trans(E_G) << std::endl;
+    printf("WGsum\n");
+    std::cout << arma::trans(WGsum) << std::endl;
+    printf("W_G * E_G\n");
+    std::cout << arma::trans(W_G * E_G) << std::endl;
     printf("Tproj * RECO\n");
     std::cout << arma::trans(*Tproj * EEC_R) << std::endl;
     printf("TMP * RECO\n");
