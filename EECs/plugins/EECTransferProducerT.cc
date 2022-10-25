@@ -267,44 +267,47 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
     } else if(mode_ == "AF" || mode_ == "FF"){
       //Invert with absolute flow
-      arma::mat W_G_PP_R = W_G*F;
-      for(size_t iPart=0; iPart<NPart_R; ++iPart){
-        for(size_t iDR=0; iDR<NDR_G; ++iDR){
-          W_G_PP_R(iDR, iPart) *= E_R[iPart];
+      arma::mat W_R_PP_G = W_R*arma::trans(F);
+      for(size_t iPart=0; iPart<NPart_G; ++iPart){
+        for(size_t iDR=0; iDR<NDR_R; ++iDR){
+          W_R_PP_G(iDR, iPart) *= E_G[iPart];
         }
       }
+      std::cout << "made W_R_PP_G" << std::endl;
+      arma::vec WRGsum = arma::sum(W_R_PP_G, 1);
 
-      arma::mat W_R_PP_R = arma::trans(W_R_PP);
-      std::cout << "made W_G" << std::endl;
-      std::cout << "made W_G_PP_R" << std::endl;
-      auto TAF = std::make_shared<arma::mat>(NDR_G, NDR_R, arma::fill::zeros);
-      for(size_t iPart=0; iPart<NPart_R; ++iPart){
-        arma::rowvec R = W_R_PP_R.row(iPart);
-        arma::vec G = W_G_PP_R.col(iPart);
+      arma::mat W_G_PP_G = arma::trans(W_G_PP);
+      std::cout << "made W_G_PP_G" << std::endl;
+      arma::rowvec WGsum = arma::sum(W_G_PP_G, 0);
 
-        arma::rowvec R2 = arma::square(R);
-        double den = arma::dot(R, R);
+      auto TAF = std::make_shared<arma::mat>(NDR_R, NDR_G, arma::fill::zeros);
+      for(size_t iPart=0; iPart<NPart_G; ++iPart){
+        arma::rowvec G = W_G_PP_G.row(iPart);
+        arma::vec R = W_R_PP_G.col(iPart);
+
+        arma::rowvec G2 = arma::square(G);
+        double den = arma::dot(G, G);
         if (den>0){
-          arma::mat next = G * R2 / den;
+          arma::mat next = R * G2 / den;
 
-          arma::vec GR = next * arma::ones<arma::vec>(NDR_R);
+          arma::vec RG = next * arma::ones<arma::vec>(NDR_G);
 
-          std::cout << "G    " << arma::trans(G) << std::endl;
-          std::cout << "GR   " << arma::trans(GR) << std::endl;
+          std::cout << "R    " << arma::trans(R) << std::endl;
+          std::cout << "RG   " << arma::trans(RG) << std::endl;
 
-          *TAF += G * R2 / den;
+          *TAF += R * G2 / den;
         }
       }
       std::cout << "made TAF" << std::endl;
 
       //invert with fractional flow
-      auto TFF = std::make_shared<arma::mat>(NDR_G, NDR_R, arma::fill::zeros);
+      auto TFF = std::make_shared<arma::mat>(NDR_R, NDR_G, arma::fill::zeros);
       for(size_t iDR_G=0; iDR_G<NDR_G; ++iDR_G){
         for(size_t iDR_R=0; iDR_R<NDR_R; ++iDR_R){
-          if(EEC_R(iDR_R) > EPSILON){
-            (*TFF)(iDR_G, iDR_R) = (*TAF)(iDR_G, iDR_R)/EEC_R(iDR_R);
+          if(EEC_G(iDR_G) > EPSILON){
+            (*TFF)(iDR_R, iDR_G) = (*TAF)(iDR_R, iDR_G)/EEC_G(iDR_G);
           } else {
-            (*TFF)(iDR_G, iDR_R) = 0;
+            (*TFF)(iDR_R, iDR_G) = 0;
           }
         }
       }
@@ -313,10 +316,23 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       std::cout << "genDR0 " << genEEC.dRvec->at(0) << std::endl;
       std::cout << "recDR0 " << recoEEC.dRvec->at(0) << std::endl;
 
+      std::cout << "E_G" << std::endl << arma::trans(E_G) << std::endl;
+      std::cout << "E_R" << std::endl << arma::trans(E_R) << std::endl;
+      std::cout << "F * E_G" << std::endl 
+        << arma::trans(arma::trans(F) * E_G) << std::endl;
+
+      std::cout << "EEC_G" << std::endl
+        << arma::trans(EEC_G) << std::endl;
+      std::cout << "WGsum" << std::endl
+        << WGsum << std::endl;
+      std::cout << "EEC_R" << std::endl
+        << arma::trans(EEC_R) << std::endl;
+      std::cout << "WRGsum" << std::endl
+        << arma::trans(WRGsum) << std::endl;
       std::cout << "TAF * 1s" << std::endl 
-        << arma::trans(*TAF * arma::ones<arma::vec>(NDR_R)) << std::endl;
-      std::cout << "TFF * EEC_R" << std::endl 
-        << arma::trans(*TFF * EEC_R) << std::endl << std::endl;
+        << arma::trans(*TAF * arma::ones<arma::vec>(NDR_G)) << std::endl;
+      std::cout << "TFF * EEC_G" << std::endl 
+        << arma::trans(*TFF * EEC_G) << std::endl << std::endl;
 
 
       if (mode_ == "AF"){

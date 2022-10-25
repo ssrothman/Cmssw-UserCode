@@ -76,7 +76,7 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
       printf("RECO %u   GEN %u\n\n", NPReco, NPGen);
 
-      double emd = emd_obj_(reco, gen);
+      double emd = emd_obj_(gen, reco);
       auto flows = std::make_shared<std::vector<double>>(emd_obj_.flows());
 
       auto EG = std::make_shared<std::vector<double>>();
@@ -98,11 +98,11 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){
         for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
           if(reco[iPReco].weight() > EPSILON){
-            flows->at(iPReco*NPGen + iPGen) /= reco[iPReco].weight();
+            flows->at(iPGen*NPReco + iPReco) /= gen[iPGen].weight();
           } else{
-            flows->at(iPReco*NPGen + iPGen) = 0;
+            flows->at(iPGen*NPReco + iPReco) = 0;
           }
-          printf("FLOW (%u, %u) = %0.3f\n", iPReco, iPGen, flows->at(iPReco*NPGen+iPGen));
+          //printf("FLOW (%u, %u) = %0.3f\n", iPReco, iPGen, flows->at(iPGen*NPReco+iPReco));
           //printf("%0.3f\t", flows->at(iPReco*NPGen + iPGen));
         }
         //printf("\n");

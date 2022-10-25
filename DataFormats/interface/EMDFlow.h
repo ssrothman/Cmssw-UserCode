@@ -25,7 +25,7 @@ struct EMDFlow{
   //and avoids any innefficient casts
   template <typename T>
   inline T idx(T iPGen, T iPReco){
-    return iPReco*Ngen + iPGen;
+    return iPGen*Nreco + iPReco;
   }
 
   template <typename T>

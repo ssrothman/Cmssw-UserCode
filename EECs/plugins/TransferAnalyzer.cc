@@ -77,7 +77,7 @@ class TransferAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
 
       TH2D *hist;
       TH1D *gen, *reco;
-      TH1D *matchedgen, *matchedreco;
+      TH1D *matchedgen, *matchedreco, *matchedreco2;
 };
 
 //
@@ -102,11 +102,12 @@ TransferAnalyzer::TransferAnalyzer(const edm::ParameterSet& iConfig)
 {
   std::cout << "initializing analyzer" << std::endl;
 
-  hist = new TH2D("histo", "transfer;dRgen;dRreco", nBins_, -3, 0, nBins_, -3, 0);
-  gen = new TH1D("genEEC", "genEEC;dR", nBins_, -3, 0);
-  reco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -3, 0);
-  matchedgen = new TH1D("genEEC", "genEEC;dR", nBins_, -3, 0);
-  matchedreco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -3, 0);
+  hist = new TH2D("histo", "transfer;dRgen;dRreco", nBins_, -5, 5, nBins_, -5, 5);
+  gen = new TH1D("genEEC", "genEEC;dR", nBins_, -5, 5);
+  reco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -5, 5);
+  matchedgen = new TH1D("genEEC", "genEEC;dR", nBins_, -5, 5);
+  matchedreco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -5, 5);
+  matchedreco2 = new TH1D("recoEEC", "recoEEC;dR", nBins_, -5, 5);
 }
 
 
@@ -135,19 +136,20 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     }
     for(size_t iGen=0; iGen < transfer.dRgen->size(); ++iGen){
       for(size_t iReco=0; iReco < transfer.dRreco->size(); ++iReco){
-        hist->Fill(log10(transfer.dRgen->at(iGen)), 
-                   log10(transfer.dRreco->at(iReco)), 
-                   (*transfer.matrix)(iGen,iReco));
-        if(transfer.wtgen->at(iGen)>0){
-          printf("transfer (%0.4lf, %0.4lf) = %0.4lf\n", transfer.dRgen->at(iGen), transfer.dRreco->at(iReco), (*transfer.matrix)(iGen, iReco));
-          fflush(stdout);
-        }
+        hist->Fill(
+            log10(transfer.dRgen->at(iGen)),
+            log10(transfer.dRreco->at(iReco)), 
+            (*transfer.matrix)(iReco,iGen));
+        matchedreco2->Fill(
+            log10(transfer.dRreco->at(iReco)), 
+            (*transfer.matrix)(iReco, iGen));
       }
     }
+
     for(size_t iGen=0; iGen < transfer.dRgen->size(); ++iGen){
       if(transfer.wtgen->at(iGen)>0){
-        printf("matchedgen (%0.4lf) = %0.4lf\n", transfer.dRgen->at(iGen), transfer.wtgen->at(iGen));
-        fflush(stdout);
+        //printf("matchedgen (%0.5lf) = %0.5lf\n", transfer.dRgen->at(iGen), transfer.wtgen->at(iGen));
+        //fflush(stdout);
       }
       matchedgen->Fill(log10(transfer.dRgen->at(iGen)), transfer.wtgen->at(iGen));
     }
@@ -184,17 +186,17 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   std::cout << std::endl << "TRANSFER" << std::endl;
   for(unsigned i=0; i<nBins_; ++i){
     for(unsigned j=0; j<nBins_; ++j){
-      if(matchedreco->GetBinContent(j) > 0.){
-        printf("%0.3f  ", hist->GetBinContent(i,j));///matchedreco->GetBinContent(j));
+      matmul2[j] += hist->GetBinContent(i,j);
+      if(matchedgen->GetBinContent(i) > 0.){
+        printf("%0.5f  ", hist->GetBinContent(i,j));///matchedreco->GetBinContent(j));
         if(matchedreco->GetBinContent(j) > EPSILON){
           matmul[i] += hist->GetBinContent(i,j)
-                      *reco->GetBinContent(j)
-                      /matchedreco->GetBinContent(j);
+                      *gen->GetBinContent(i)
+                      /matchedgen->GetBinContent(i);
         }
       } else {
-        printf("%0.3f  ", 0.);
+        printf("%0.5f  ", 0.);
       }
-      matmul2[i] += hist->GetBinContent(i,j);
     }
     printf("\n");
   }
@@ -202,37 +204,43 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 
   std::cout << "GEN" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.3f  ", gen->GetBinContent(j));
+    printf("%0.5f  ", gen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "RECO" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.3f  ", reco->GetBinContent(j));
+    printf("%0.5f  ", reco->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.3f  ", matmul.at(j));
+    printf("%0.5f  ", matmul.at(j));
   }
   printf("\n");
 
   std::cout << "MATCHED GEN" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.3f  ", matchedgen->GetBinContent(j));
+    printf("%0.5f  ", matchedgen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL2" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.3f  ", matmul2.at(j));
+    printf("%0.5f  ", matmul2.at(j));
   }
   printf("\n");
 
   std::cout << "MATCHED RECO" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.3f  ", matchedreco->GetBinContent(j));
+    printf("%0.5f  ", matchedreco->GetBinContent(j));
+  }
+  printf("\n");
+
+  std::cout << "MATCHED RECO 2" << std::endl;
+  for(unsigned j=0; j<nBins_; ++j){
+    printf("%0.5f  ", matchedreco2->GetBinContent(j));
   }
   printf("\n");
 

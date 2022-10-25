@@ -86,7 +86,7 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
     jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     genJets = cms.InputTag("ak4GenJetsNoNu"),
     dR2cut = cms.double(0.2*0.2),
-    minPartPt = cms.double(1.0),
+    minPartPt = cms.double(0.0),
     mode = cms.string("Ewt"),
 )
 
@@ -106,7 +106,7 @@ process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
     verbose = cms.uint32(0),
-    minPartPt = cms.double(1.0),
+    minPartPt = cms.double(0.0),
 )
 
 process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
@@ -117,7 +117,7 @@ process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
     verbose = cms.uint32(0),
-    minPartPt = cms.double(1.0),
+    minPartPt = cms.double(0.0),
 )
 
 process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
