@@ -138,9 +138,17 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
         hist->Fill(log10(transfer.dRgen->at(iGen)), 
                    log10(transfer.dRreco->at(iReco)), 
                    (*transfer.matrix)(iGen,iReco));
+        if(transfer.wtgen->at(iGen)>0){
+          printf("transfer (%0.4lf, %0.4lf) = %0.4lf\n", transfer.dRgen->at(iGen), transfer.dRreco->at(iReco), (*transfer.matrix)(iGen, iReco));
+          fflush(stdout);
+        }
       }
     }
     for(size_t iGen=0; iGen < transfer.dRgen->size(); ++iGen){
+      if(transfer.wtgen->at(iGen)>0){
+        printf("matchedgen (%0.4lf) = %0.4lf\n", transfer.dRgen->at(iGen), transfer.wtgen->at(iGen));
+        fflush(stdout);
+      }
       matchedgen->Fill(log10(transfer.dRgen->at(iGen)), transfer.wtgen->at(iGen));
     }
     for(size_t iReco=0; iReco < transfer.dRreco->size(); ++iReco){
@@ -177,7 +185,7 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   for(unsigned i=0; i<nBins_; ++i){
     for(unsigned j=0; j<nBins_; ++j){
       if(matchedreco->GetBinContent(j) > 0.){
-        printf("%0.3f  ", hist->GetBinContent(i,j)/matchedreco->GetBinContent(j));
+        printf("%0.3f  ", hist->GetBinContent(i,j));///matchedreco->GetBinContent(j));
         if(matchedreco->GetBinContent(j) > EPSILON){
           matmul[i] += hist->GetBinContent(i,j)
                       *reco->GetBinContent(j)
@@ -222,7 +230,11 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   }
   printf("\n");
 
-
+  std::cout << "MATCHED RECO" << std::endl;
+  for(unsigned j=0; j<nBins_; ++j){
+    printf("%0.3f  ", matchedreco->GetBinContent(j));
+  }
+  printf("\n");
 
   std::cout << std::endl;
 }

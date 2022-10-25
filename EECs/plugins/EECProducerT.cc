@@ -74,11 +74,14 @@ size_t EECProducerT<T, K>::fill(const std::vector<reco::Jet::Constituent>& const
   for (size_t i = 0; i < nConstituents; ++i) { //for each constituent
     auto part = constituents[i];
     if(part->pt() < minPartPt_){
-      continue;
+      pt_[j] = 0.0; //ensure contribution is exactly zero
+      eta_[j] = 999999999.99; //ensure zeroed-out particles are very far away from all the others so they don't participate in min DR computations
+      phi_[j++] = 999999999.99; 
+    } else{
+      pt_[j] = (double)part->pt() / rawPt;
+      eta_[j] = (double)part->eta();
+      phi_[j++] = (double)part->phi();
     }
-    pt_[j] = (double)part->pt() / rawPt;
-    eta_[j] = (double)part->eta();
-    phi_[j++] = (double)part->phi();
     printf("EEC %0.3f\n", part->pt());
   } //end for each constituent
   printf("EEC %lu\n\n", j);
@@ -158,7 +161,9 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
       } else{
         EECnonIRC(pt_, eta_, phi_, nConstituents, p1_, p2_, *dRs, *wts);
       }
-      result->emplace_back(iJet, std::move(dRs), std::move(wts), order_, std::move(coefs));
+      if(std::accumulate(wts->begin(), wts->end(), 0.0) > 0){
+        result->emplace_back(iJet, std::move(dRs), std::move(wts), order_, std::move(coefs));
+      }
     } else { //resolved EEC
       auto dRs = std::make_shared<std::vector<std::vector<double>>>();
       dRs->resize(choose(order_, 2));
@@ -171,7 +176,9 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
             dRs->at(3), dRs->at(4), dRs->at(5),
             *wts);
       }
-      result->emplace_back(iJet, std::move(dRs), std::move(wts), order_);
+      if(std::accumulate(wts->begin(), wts->end(), 0.0) > 0){
+        result->emplace_back(iJet, std::move(dRs), std::move(wts), order_);
+      }
     } //end switch (EEC kind)
   }  // end for jet
   evt.put(std::move(result));

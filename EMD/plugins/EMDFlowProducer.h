@@ -74,9 +74,8 @@ void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
     auto part = constituents[iPart];
     if(part->pt() < minPartPt_){
-      continue;
-    }
-    if(mode_ == "Ewt"){
+      rawpt += 0.0;
+    } else if(mode_ == "Ewt"){
       rawpt += part->pt();
     } else if(mode_ == "nowt"){
       rawpt += 1.;
@@ -86,15 +85,17 @@ void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
   }
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
     auto part = constituents[iPart];
-    if(part->pt() < minPartPt_){
-      continue;
-    }
     printf("EMD %0.3f\n", part->pt());
-    if(mode_ == "Ewt"){
-      out.emplace_back(part->pt()/rawpt, part->eta(), part->phi());
+
+    double wt;
+    if(part->pt() < minPartPt_){
+      wt = 0.0;
+    } else if(mode_ == "Ewt"){
+      wt = part->pt()/rawpt;
     } else if(mode_ == "nowt"){
-      out.emplace_back(1./rawpt, part->eta(), part->phi());
+      wt = 1.0/rawpt;
     }
+    out.emplace_back(wt, part->eta(), part->phi());
     //printf("(%0.3f, %0.3f, %0.3f)\n", part->pt()/rawpt, part->eta(), part->phi());
   }
   printf("\n");
