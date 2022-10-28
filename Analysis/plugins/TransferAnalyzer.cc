@@ -100,14 +100,12 @@ TransferAnalyzer::TransferAnalyzer(const edm::ParameterSet& iConfig)
    minpt_(iConfig.getParameter<double>("minpt")),
    nBins_(iConfig.getParameter<unsigned>("nBins"))
 {
-  std::cout << "initializing analyzer" << std::endl;
-
-  hist = new TH2D("histo", "transfer;dRgen;dRreco", nBins_, -5, 5, nBins_, -5, 5);
-  gen = new TH1D("genEEC", "genEEC;dR", nBins_, -5, 5);
-  reco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -5, 5);
-  matchedgen = new TH1D("genEEC", "genEEC;dR", nBins_, -5, 5);
-  matchedreco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -5, 5);
-  matchedreco2 = new TH1D("recoEEC", "recoEEC;dR", nBins_, -5, 5);
+  hist = new TH2D("histo", "transfer;dRgen;dRreco", nBins_, -3, 0, nBins_, -3, 0);
+  gen = new TH1D("genEEC", "genEEC;dR", nBins_, -3, 0);
+  reco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -3, 0);
+  matchedgen = new TH1D("genEEC", "genEEC;dR", nBins_, -3, 0);
+  matchedreco = new TH1D("recoEEC", "recoEEC;dR", nBins_, -3, 0);
+  matchedreco2 = new TH1D("recoEEC", "recoEEC;dR", nBins_, -3, 0);
 }
 
 
@@ -125,7 +123,6 @@ TransferAnalyzer::~TransferAnalyzer()
 // ------------ method called for each event  ------------
 void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  std::cout << "doing an event in the analyzer" << std::endl;
   auto transfers = iEvent.get(token_);
   auto recoJets = iEvent.get(recoJetToken_);
   auto genJets = iEvent.get(genJetToken_);
@@ -184,18 +181,18 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   matmul2.resize(nBins_, 0.);
 
   std::cout << std::endl << "TRANSFER" << std::endl;
-  for(unsigned i=0; i<nBins_; ++i){
-    for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_; ++j){
+    for(unsigned i=0; i<nBins_; ++i){
       matmul2[j] += hist->GetBinContent(i,j);
       if(matchedgen->GetBinContent(i) > 0.){
-        printf("%0.5f  ", hist->GetBinContent(i,j));///matchedreco->GetBinContent(j));
-        if(matchedreco->GetBinContent(j) > EPSILON){
+        printf("%0.5g, ", hist->GetBinContent(i,j));
+        if(matchedgen->GetBinContent(j) > EPSILON){
           matmul[i] += hist->GetBinContent(i,j)
                       *gen->GetBinContent(i)
                       /matchedgen->GetBinContent(i);
         }
       } else {
-        printf("%0.5f  ", 0.);
+        printf("%0.5g, ", 0.);
       }
     }
     printf("\n");
@@ -204,43 +201,43 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 
   std::cout << "GEN" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.5f  ", gen->GetBinContent(j));
+    printf("%0.5g, ", gen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "RECO" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.5f  ", reco->GetBinContent(j));
+    printf("%0.5g, ", reco->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.5f  ", matmul.at(j));
+    printf("%0.5g, ", matmul.at(j));
   }
   printf("\n");
 
   std::cout << "MATCHED GEN" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.5f  ", matchedgen->GetBinContent(j));
+    printf("%0.5g, ", matchedgen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL2" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.5f  ", matmul2.at(j));
+    printf("%0.5g, ", matmul2.at(j));
   }
   printf("\n");
 
   std::cout << "MATCHED RECO" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.5f  ", matchedreco->GetBinContent(j));
+    printf("%0.5g, ", matchedreco->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATCHED RECO 2" << std::endl;
   for(unsigned j=0; j<nBins_; ++j){
-    printf("%0.5f  ", matchedreco2->GetBinContent(j));
+    printf("%0.5g, ", matchedreco2->GetBinContent(j));
   }
   printf("\n");
 
@@ -251,13 +248,11 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 // ------------ method called once each job just before starting event loop  ------------
 void TransferAnalyzer::beginJob()
 {
-  std::cout << "beginning job" << std::endl;
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void TransferAnalyzer::endJob()
 {
-  std::cout << "ending job" << std::endl;
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
@@ -279,7 +274,6 @@ void TransferAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descript
   //ParameterSetDescription desc;
   //desc.addUntracked<edm::InputTag>("tracks","ctfWithMaterialTracks");
   //descriptions.addDefault(desc);
-  std::cout << "filled descriptions" << std::endl;
 }
 
 //define this as a plug-in

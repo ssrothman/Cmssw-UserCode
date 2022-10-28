@@ -12,6 +12,7 @@ EMDFlowProducer::EMDFlowProducer(const edm::ParameterSet& conf)
       genJetsToken_(consumes<edm::View<reco::GenJet>>(genJetsTag_)),
       dR2cut_(conf.getParameter<double>("dR2cut")),
       minPartPt_(conf.getParameter<double>("minPartPt")),
+      partDR2cut_(conf.getParameter<double>("partDR2cut")),
       mode_(conf.getParameter<std::string>("mode")),
       emd_obj_(1.0, 2.0, true){
         //emd_obj_.preprocess<emd::CenterWeightedCentroid>();
@@ -25,6 +26,7 @@ void EMDFlowProducer::fillDescriptions(edm::ConfigurationDescriptions& descripti
   desc.add<edm::InputTag>("genJets");
   desc.add<double>("dR2cut");
   desc.add<double>("minPartPt");
+  desc.add<double>("partDR2cut");
   desc.add<std::string>("mode");
   descriptions.addWithDefaultLabel(desc);
 }
@@ -74,10 +76,54 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       unsigned NPReco = reco.size();
       unsigned NPGen = gen.size();
 
-      printf("RECO %u   GEN %u\n\n", NPReco, NPGen);
+      std::shared_ptr<std::vector<double>> flows(nullptr);
+      if(mode_ == "Ewt" || mode_ == "nowt"){
+        double emd = emd_obj_(gen, reco);
+        flows = std::make_shared<std::vector<double>>(emd_obj_.flows());
+      } else if(mode_ == "match"){
+        flows = std::make_shared<std::vector<double>>();
+        flows->resize(NPReco * NPGen, 0.0);
 
-      double emd = emd_obj_(gen, reco);
-      auto flows = std::make_shared<std::vector<double>>(emd_obj_.flows());
+        //vector of matched gen particles for each reco particle
+        std::vector<std::vector<unsigned>> matched;
+        matched.resize(NPReco);
+
+        for(unsigned iPGen=0; iPGen < NPGen; ++iPGen){//for each gen particle
+          const EMDParticle& genPart = gen[iPGen];
+          for(unsigned iPReco=0; iPReco < NPReco; ++iPReco){//for each reco particle
+            const EMDParticle& recoPart = reco[iPReco];
+
+            double dR2 = reco::deltaR2(recoPart[0], recoPart[1], genPart[0], genPart[1]);
+            if(dR2 < partDR2cut_){ //reco particle too far away from gen particle
+              matched[iPReco].emplace_back(iPGen);
+            }
+          }//end for each reco particle
+        }//end for each gen particle
+
+        for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){//for each reco particle
+          const EMDParticle& recoPart = reco[iPReco];
+          if(matched[iPReco].size()==0){//matching failed. No entry in flow matrix
+            continue;
+          } else if(matched[iPReco].size()==1){//matching is obvious. 
+                                               //This should be the most common case?
+            flows->at(matched[iPReco][0]*NPReco + iPReco) = recoPart.weight();
+            printf("1match (%u, %u) = %0.3f\n", matched[iPReco][0], iPReco, recoPart.weight());
+          } else{//have to determine how much to give each gen particle from the reco particle
+                 //for the moment lets do a naive energy weighting
+            double matchedWt=0;
+            std::cout << "Nmatch: " << std::endl;
+            for(const auto idx : matched[iPReco]){//for each matched gen particle
+              matchedWt += gen[idx].weight();
+            }//end for each matched gen particle
+            for(const auto idx : matched[iPReco]){//for each matched gen particle (again)
+              flows->at(idx*NPReco + iPReco) = recoPart.weight()*gen[idx].weight()/matchedWt;
+              printf("\t(%u, %u) = %0.3f\n", idx, iPReco, recoPart.weight()*gen[idx].weight()/matchedWt);
+            }//end for each matched gen particle
+          }//end switch(NMatches)
+        }//end for each reco particle
+      } else {
+        throw cms::Exception("EMDFlowProducer") << "Unsupported mode" << std::endl;
+      }//end switch(mode_)
 
       auto EG = std::make_shared<std::vector<double>>();
       auto ER = std::make_shared<std::vector<double>>();
@@ -88,13 +134,6 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EG->push_back(gen[iPGen].weight());
       }
 
-      //printf("Matched (%0.3f, %0.3f, %0.3f) with (%0.3f, %0.3f, %0.3f)\n", 
-      //    recoJet.pt(), recoJet.eta(), recoJet.phi(), 
-      //    genJet.pt(), genJet.eta(), genJet.phi());
-      //printf("\tEMD = %0.3f\n", emd);
-
-      //flows indexed by (iPReco * nPGen + iPReco)??
-      //printf("TOTAL SIZE = %zu (=%dx%d)\n", flows->size(), NPReco, NPGen);
       for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){
         for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
           if(reco[iPReco].weight() > EPSILON){
@@ -102,20 +141,12 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           } else{
             flows->at(iPGen*NPReco + iPReco) = 0;
           }
-          //printf("FLOW (%u, %u) = %0.3f\n", iPReco, iPGen, flows->at(iPGen*NPReco+iPReco));
-          //printf("%0.3f\t", flows->at(iPReco*NPGen + iPGen));
         }
-        //printf("\n");
       }
-      //printf("\n");
       result->emplace_back(bestGen, iReco, std::move(flows), 
           NPGen, NPReco,
           std::move(EG), std::move(ER));
-    } else{
-      //printf("Matching failed for (%0.3f, %0.3f, %0.3f)\n",
-      //    recoJet.pt(), recoJet.eta(), recoJet.phi()); 
     }
-    //printf("\n");
   }
   evt.put(std::move(result));
 }  // end produce()

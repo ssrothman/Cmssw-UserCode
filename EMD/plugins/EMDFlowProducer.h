@@ -54,6 +54,8 @@ private:
 
   double minPartPt_;
 
+  double partDR2cut_;
+
   std::string mode_;
 
   EMD emd_obj_;
@@ -69,13 +71,12 @@ void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
   std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
   size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
 
-  //printf("PARTS\n");
   double rawpt = 0;
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
     auto part = constituents[iPart];
     if(part->pt() < minPartPt_){
       rawpt += 0.0;
-    } else if(mode_ == "Ewt"){
+    } else if(mode_ == "Ewt" || mode_ == "match"){
       rawpt += part->pt();
     } else if(mode_ == "nowt"){
       rawpt += 1.;
@@ -85,27 +86,22 @@ void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
   }
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
     auto part = constituents[iPart];
-    printf("EMD %0.3f\n", part->pt());
 
     double wt;
     if(part->pt() < minPartPt_){
       wt = 0.0;
-    } else if(mode_ == "Ewt"){
+    } else if(mode_ == "Ewt" || mode_ == "match"){
       wt = part->pt()/rawpt;
     } else if(mode_ == "nowt"){
       wt = 1.0/rawpt;
     }
     out.emplace_back(wt, part->eta(), part->phi());
-    //printf("(%0.3f, %0.3f, %0.3f)\n", part->pt()/rawpt, part->eta(), part->phi());
   }
-  printf("\n");
 
   double sum=0;
   for(size_t i=0; i<out.size(); ++i){
-    printf("EMD WT %0.3f\n", out[i].weight());
     sum+=out[i].weight();
   }
-  printf("EMD totWT %0.3f\n\n", sum);
 }
 
 

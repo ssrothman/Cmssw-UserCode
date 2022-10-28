@@ -43,7 +43,8 @@ def setupCustomizedJetToolbox(process, runOnMC=False, PU="Puppi"):
                Cut='pt > 30.0',
                bTagDiscriminators=ak4btagdiscriminators,
                bTagInfos=ak4btaginfos,
-               verbosity=4
+               verbosity=4,
+               addPUJetID=True,
                )
 
     return process

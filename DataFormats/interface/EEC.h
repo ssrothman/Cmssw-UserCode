@@ -5,10 +5,13 @@
 #include <memory>
 
 #include "SRothman/armadillo/include/armadillo"
+#include "SRothman/EECs/src/vecND.h"
 
 //indexed by power, iPart, iDR
 using coefs_t = std::vector<std::vector<std::vector<double>>>;
 using vecptr_t = std::shared_ptr<std::vector<double>>;
+using tuple_t = std::pair<std::vector<int>, double>;
+using tuples_t = std::vector<std::vector<tuple_t>>;
 
 struct ProjectedEEC{
   int iJet;
@@ -19,17 +22,25 @@ struct ProjectedEEC{
   int order;
 
   std::shared_ptr<coefs_t> coefs;
+  std::shared_ptr<vecND<double>> tuplewts;
+  std::shared_ptr<vecND<int>> tupleiDR;
 
   explicit ProjectedEEC(int jet, 
       vecptr_t&& dR, 
       vecptr_t&& wt, 
       int N,
-      std::shared_ptr<coefs_t>&& coeficients):
+      std::shared_ptr<coefs_t>&& coeficients,
+      std::shared_ptr<vecND<double>>&& tuplewts,
+      std::shared_ptr<vecND<int>>&& tupleiDR):
     iJet(jet), 
     dRvec(std::move(dR)), wtvec(std::move(wt)), 
     order(N), 
-    coefs(std::move(coeficients)) {}
-  ProjectedEEC() : iJet(-1), dRvec(nullptr), wtvec(nullptr), order(-1), coefs(nullptr) {}
+    coefs(std::move(coeficients)), tuplewts(std::move(tuplewts)), tupleiDR(std::move(tupleiDR)) {}
+  ProjectedEEC() : 
+    iJet(-1), 
+    dRvec(nullptr), wtvec(nullptr), 
+    order(-1), 
+    coefs(nullptr), tuplewts(nullptr), tupleiDR(nullptr) {}
 };
 
 struct ResolvedEEC{

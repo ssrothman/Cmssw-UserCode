@@ -22,6 +22,7 @@
 
 #include "SRothman/EECs/src/eec.h"
 #include "SRothman/EECs/src/combinatorics.h"
+#include "SRothman/EECs/src/vecND.h"
 
 #include "SRothman/DataFormats/interface/EEC.h"
 
@@ -43,7 +44,6 @@ public:
 
 private:
   unsigned int order_;
-  double minJetPt_;
   double minPartPt_;
 
   unsigned int verbose_;
@@ -51,9 +51,6 @@ private:
 
   edm::InputTag src_;
   edm::EDGetTokenT<edm::View<T>> srcToken_;
-
-  edm::InputTag muonSrc_;
-  edm::EDGetTokenT<edm::View<reco::Muon>> muonSrcToken_;
 
   double pt_[MAX_CONSTITUENTS], eta_[MAX_CONSTITUENTS], phi_[MAX_CONSTITUENTS];
 
@@ -82,9 +79,7 @@ size_t EECProducerT<T, K>::fill(const std::vector<reco::Jet::Constituent>& const
       eta_[j] = (double)part->eta();
       phi_[j++] = (double)part->phi();
     }
-    printf("EEC %0.3f\n", part->pt());
   } //end for each constituent
-  printf("EEC %lu\n\n", j);
 
   return j;
 }
@@ -92,15 +87,12 @@ size_t EECProducerT<T, K>::fill(const std::vector<reco::Jet::Constituent>& const
 template <typename T, typename K>
 EECProducerT<T, K>::EECProducerT(const edm::ParameterSet& conf)
     : order_(conf.getParameter<unsigned int>("order")),
-      minJetPt_(conf.getParameter<double>("minJetPt")),
       minPartPt_(conf.getParameter<double>("minPartPt")),
       verbose_(conf.getParameter<unsigned int>("verbose")),
       p1_(conf.getParameter<unsigned int>("p1")),
       p2_(conf.getParameter<unsigned int>("p2")),
       src_(conf.getParameter<edm::InputTag>("jets")),
-      srcToken_(consumes<edm::View<T>>(src_)),
-      muonSrc_(conf.getParameter<edm::InputTag>("muons")),
-      muonSrcToken_(consumes<edm::View<reco::Muon>>(muonSrc_)){
+      srcToken_(consumes<edm::View<T>>(src_)){
   produces<K>();
 
   if( (p1_!=1 || p2_!=1) && order_!=2)
@@ -111,10 +103,8 @@ template <typename T, typename K>
 void EECProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<unsigned int>("order");
-  desc.add<double>("minJetPt");
   desc.add<double>("minPartPt");
   desc.add<edm::InputTag>("jets");
-  desc.add<edm::InputTag>("muons");
   desc.add<unsigned int>("verbose");
   desc.add<unsigned int>("p1");
   desc.add<unsigned int>("p2");
@@ -126,9 +116,6 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
   edm::Handle<edm::View<T>> jets;
   evt.getByToken(srcToken_, jets);
 
-  edm::Handle<edm::View<reco::Muon>> muons;
-  evt.getByToken(muonSrcToken_, muons);
-
   unsigned nJets = jets->size();
 
   if(verbose_)
@@ -136,14 +123,14 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
 
   auto result = std::make_unique<K>();
 
-  for (size_t iJet = 0; (iJet < nJets) && muons->size()>=2; ++iJet) {
+  for (size_t iJet = 0; iJet < nJets; ++iJet) {
 
     T jet = jets->at(iJet);
 
     std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
     size_t nConstituents = fill(constituents);
 
-    if (jet.pt() < minJetPt_ || nConstituents<2){ //skip jet
+    if (nConstituents<2){ //skip jet
       continue;
     } 
 
@@ -156,13 +143,23 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
     if constexpr (std::is_same<K, ProjectedEECCollection>::value){ //projected EEC
       auto dRs = std::make_shared<std::vector<double>>();
       auto coefs = std::make_shared<std::vector<std::vector<std::vector<double>>>>();
+      auto tuplewts = std::make_shared<vecND<double>>(nConstituents, order_, 0);
+      auto tupleiDR = std::make_shared<vecND<int>>(nConstituents, order_, -1);
+
       if(p1_==1 && p2_==1){
-        projectedEEC(pt_, eta_, phi_, nConstituents, 2, *dRs, *wts, order_, coefs.get());
+        projectedEEC(pt_, eta_, phi_, 
+                     nConstituents, 2, 
+                     *dRs, *wts, 
+                     order_, 
+                     coefs.get(), tuplewts.get(), tupleiDR.get());
       } else{
         EECnonIRC(pt_, eta_, phi_, nConstituents, p1_, p2_, *dRs, *wts);
       }
       if(std::accumulate(wts->begin(), wts->end(), 0.0) > 0){
-        result->emplace_back(iJet, std::move(dRs), std::move(wts), order_, std::move(coefs));
+        result->emplace_back(iJet, 
+                             std::move(dRs), std::move(wts), 
+                             order_, 
+                             std::move(coefs), std::move(tuplewts), std::move(tupleiDR));
       }
     } else { //resolved EEC
       auto dRs = std::make_shared<std::vector<std::vector<double>>>();

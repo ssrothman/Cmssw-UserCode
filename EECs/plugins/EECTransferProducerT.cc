@@ -23,6 +23,8 @@
 #include "SRothman/DataFormats/interface/EEC.h"
 #include "SRothman/DataFormats/interface/EMDFlow.h"
 
+#include "SRothman/EECs/src/iterating.h"
+
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -166,20 +168,18 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       E_R(iPart) = flow.ER->at(iPart);
     }
-    std::cout << "made E_R" << std::endl;
 
     arma::vec E_G(NPart_G, arma::fill::zeros);
     for(size_t iPart=0; iPart<NPart_G; ++iPart){
       E_G(iPart) = flow.EG->at(iPart);
     }
-    std::cout << "made E_G" << std::endl;
 
     //build Wreco
     arma::mat W_R(NDR_R, NPart_R, arma::fill::zeros); 
     arma::mat W_R_PP(NDR_R, NPart_R, arma::fill::zeros); 
     for(size_t iPart=0; iPart<NPart_R; ++iPart){
       for(size_t iDR=0; iDR<NDR_R; ++iDR){
-        if(E_R[iPart] > 0){
+        if(E_R[iPart] > EPSILON){
           W_R_PP(iDR, iPart) = recoEEC.coefs->at(0)[iPart][iDR];
           W_R(iDR, iPart) = W_R_PP(iDR, iPart) / E_R[iPart];
         } else {
@@ -188,13 +188,12 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         }
       }
     }
-    std::cout << "made W_R" << std::endl;
 
     arma::mat W_G(NDR_G, NPart_G, arma::fill::zeros); 
     arma::mat W_G_PP(NDR_G, NPart_G, arma::fill::zeros); 
     for(size_t iPart=0; iPart<NPart_G; ++iPart){
       for(size_t iDR=0; iDR<NDR_G; ++iDR){
-        if(E_G[iPart] > 0){
+        if(E_G[iPart] > EPSILON){
           W_G_PP(iDR, iPart) = genEEC.coefs->at(0)[iPart][iDR];// / E_G[iPart];
           W_G(iDR, iPart) = W_G_PP(iDR, iPart) / E_G[iPart];
         } else {
@@ -204,7 +203,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       }
     }
     arma::vec WGsum = arma::sum(W_G_PP, 1);
-    std::cout << "made W_G" << std::endl;
 
     arma::mat F(NPart_G, NPart_R, arma::fill::zeros);
     for(size_t iG=0; iG<NPart_G; ++iG){
@@ -212,19 +210,23 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         F(iG, iR) = flow.at(iG, iR);
       }
     }
-    std::cout << "made F" << std::endl;
 
     arma::vec EEC_G(NDR_G, arma::fill::zeros);
     for(size_t iDR=0; iDR<NDR_G; ++iDR){
       EEC_G(iDR) = genEEC.wtvec->at(iDR);
     }
-    std::cout << "made EEC_G" << std::endl;
 
     arma::vec EEC_R(NDR_R, arma::fill::zeros);
     for(size_t iDR=0; iDR<NDR_R; ++iDR){
       EEC_R(iDR) = recoEEC.wtvec->at(iDR);
     }
-    std::cout << "made EEC_R" << std::endl;
+
+    std::cout << "Flow matrix" << std::endl << F << std::endl;
+    std::cout << "EEC_G" << std::endl << arma::trans(EEC_G) << std::endl;
+    std::cout << "EEC_R" << std::endl << arma::trans(EEC_R) << std::endl;
+    std::cout << "E_G" << std::endl << arma::trans(E_G) << std::endl;
+    std::cout << "E_R" << std::endl << arma::trans(E_R) << std::endl;
+    std::cout << "F*E_G" << std::endl << arma::trans(arma::trans(F) * E_G) << std::endl;
     
         //actually fill transfer matrix
     auto transfer = std::make_shared<arma::mat>();
@@ -243,10 +245,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       Aproj = arma::reshape(Aproj, NPart_R, NDR_R);
 
       *Tmat = W_G * F * Aproj;
-      std::cout << "made Tproj" << std::endl;
 
-      printf("Tproj * RECO\n");
-      std::cout << arma::trans(*Tmat * EEC_R) << std::endl;
     } else if(mode_ == "MP"){
       //build inverse with Moore-Penrse
       arma::mat Winv = arma::pinv(W_R);
@@ -260,11 +259,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       }
 
       *Tmat = W_G*F*AMP;
-      std::cout << "made TMP" << std::endl;
-
-      printf("TMP * RECO\n");
-      std::cout << arma::trans(*Tmat * EEC_R) << std::endl;
-
     } else if(mode_ == "AF" || mode_ == "FF"){
       //Invert with absolute flow
       arma::mat W_R_PP_G = W_R*arma::trans(F);
@@ -273,11 +267,9 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
           W_R_PP_G(iDR, iPart) *= E_G[iPart];
         }
       }
-      std::cout << "made W_R_PP_G" << std::endl;
       arma::vec WRGsum = arma::sum(W_R_PP_G, 1);
 
       arma::mat W_G_PP_G = arma::trans(W_G_PP);
-      std::cout << "made W_G_PP_G" << std::endl;
       arma::rowvec WGsum = arma::sum(W_G_PP_G, 0);
 
       auto TAF = std::make_shared<arma::mat>(NDR_R, NDR_G, arma::fill::zeros);
@@ -287,18 +279,14 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
         arma::rowvec G2 = arma::square(G);
         double den = arma::dot(G, G);
-        if (den>0){
+        if (den>EPSILON){
           arma::mat next = R * G2 / den;
 
           arma::vec RG = next * arma::ones<arma::vec>(NDR_G);
 
-          std::cout << "R    " << arma::trans(R) << std::endl;
-          std::cout << "RG   " << arma::trans(RG) << std::endl;
-
           *TAF += R * G2 / den;
         }
       }
-      std::cout << "made TAF" << std::endl;
 
       //invert with fractional flow
       auto TFF = std::make_shared<arma::mat>(NDR_R, NDR_G, arma::fill::zeros);
@@ -311,54 +299,111 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
           }
         }
       }
-      std::cout << "made TFF" << std::endl;
-
-      std::cout << "genDR0 " << genEEC.dRvec->at(0) << std::endl;
-      std::cout << "recDR0 " << recoEEC.dRvec->at(0) << std::endl;
-
-      std::cout << "E_G" << std::endl << arma::trans(E_G) << std::endl;
-      std::cout << "E_R" << std::endl << arma::trans(E_R) << std::endl;
-      std::cout << "F * E_G" << std::endl 
-        << arma::trans(arma::trans(F) * E_G) << std::endl;
-
-      std::cout << "EEC_G" << std::endl
-        << arma::trans(EEC_G) << std::endl;
-      std::cout << "WGsum" << std::endl
-        << WGsum << std::endl;
-      std::cout << "EEC_R" << std::endl
-        << arma::trans(EEC_R) << std::endl;
-      std::cout << "WRGsum" << std::endl
-        << arma::trans(WRGsum) << std::endl;
-      std::cout << "TAF * 1s" << std::endl 
-        << arma::trans(*TAF * arma::ones<arma::vec>(NDR_G)) << std::endl;
-      std::cout << "TFF * EEC_G" << std::endl 
-        << arma::trans(*TFF * EEC_G) << std::endl << std::endl;
-
 
       if (mode_ == "AF"){
         Tmat = TAF;
       } else {
         Tmat = TFF;
       }
-    } else{
+    } else if (mode_ == "tuples") { 
+      std::cout << "Entering tuples clause" << std::endl;
+      auto Ttuple = std::make_shared<arma::mat>(NDR_R, NDR_G, arma::fill::zeros);
+      
+      //recoEEC.order must equal genEEC.order
+      std::vector<int> ord_R(recoEEC.order, 0);
+      std::vector<int> ord_G(genEEC.order, 0);
+      for(int i=0; i<recoEEC.order; ++i){
+        ord_R[i] = 0;
+      }
+
+      //size_t maxIter_R = choose(NPart_R + recoEEC.order - 1, recoEEC.order);
+      size_t maxIter_R = intPow(NPart_R, recoEEC.order);
+      size_t maxIter_G = choose(NPart_G + genEEC.order - 1, genEEC.order);
+      //size_t maxIter_G = intPow(NPart_G, genEEC.order);
+
+      printf("RECO\n");
+      for(size_t iter_R=0; iter_R<maxIter_R; ++iter_R){//for each reco configuration
+        if(recoEEC.tuplewts->at(ord_R) > EPSILON){
+          printOrd(ord_R);
+          printf(" %0.5g\n", recoEEC.tuplewts->at(ord_R));
+        }
+        iterate_all<int>(recoEEC.order, ord_R, NPart_R);
+      }
+      printf("\nGEN\n");
+      for(size_t iter_G=0; iter_G<maxIter_G; ++iter_G){//for each reco configuration
+        if(genEEC.tuplewts->at(ord_G) > EPSILON){
+          printOrd(ord_G);
+          printf(" %0.5g\n", genEEC.tuplewts->at(ord_G));
+        }
+        iterate_wdiag<int>(genEEC.order, ord_G, NPart_G);
+      }
+
+      vecND<double> testwts(NPart_R, recoEEC.order, 0);
+
+      for(int i=0; i<genEEC.order; ++i){
+        ord_R[i] = 0;
+        ord_G[i] = 0;
+      }
+
+      std::cout << "About to enter big loop" << std::endl;
+      for(size_t iter_R=0; iter_R<maxIter_R; ++iter_R){//for each reco configuration
+        for(size_t iter_G=0; iter_G<maxIter_G; ++iter_G){//for each gen configuration
+          int iDR_R = recoEEC.tupleiDR->at(ord_R);
+          int iDR_G = genEEC.tupleiDR->at(ord_G);
+          double wt = genEEC.tuplewts->at(ord_G);
+
+          if(wt>EPSILON && recoEEC.tuplewts->at(ord_R) > EPSILON){
+            //printf("RECO");
+            //printOrd(ord_R);
+            //printf("\nGEN");
+            //printOrd(ord_G);
+
+            for(int iOrd=0; iOrd<recoEEC.order; ++iOrd){
+              wt*= F(ord_G[iOrd], ord_R[iOrd]);
+            }
+
+            //printf("wt %0.3f\n\n", wt);
+            //fflush(stdout);
+            if(wt>EPSILON){
+              printf("term like (%d, %d)G x (%d, %d)R -> %0.5g\n", 
+                  ord_G[0], ord_G[1], ord_R[0], ord_R[1], wt);
+              printf("\t(%0.5g)G -> (%0.5g)R\n", genEEC.dRvec->at(iDR_G), recoEEC.dRvec->at(iDR_R));
+              (*Ttuple)(iDR_R, iDR_G) += wt;
+              testwts.at(ord_R) += wt;
+            }
+          }
+
+          iterate_wdiag<int>(genEEC.order, ord_G, NPart_G);
+        }
+        for(int i=0; i<genEEC.order; ++i){
+          ord_G[i] = 0;
+        }
+        iterate_all<int>(recoEEC.order, ord_R, NPart_R);
+      }
+
+      printf("\nTESTWTS\n");
+      for(int i=0; i<recoEEC.order; ++i){
+        ord_R[i]=0;
+      }
+      for(size_t iter_R=0; iter_R<maxIter_R; ++iter_R){//for each reco configuration
+        if(testwts.at(ord_R) > EPSILON){
+          printOrd(ord_R);
+          printf(" %0.5g\n", testwts.at(ord_R));
+        }
+        iterate_all<int>(recoEEC.order, ord_R, NPart_R);
+      }
+
+
+      std::cout << "Ending tuples clause" << std::endl;
+
+      Tmat = Ttuple;
+    }else{
       throw cms::Exception("EECTransferProducer") << "unsupported mode" << std::endl;
     }
     result2->emplace_back(genEEC.iJet, recoEEC.iJet,
                           genEEC.dRvec, recoEEC.dRvec, 
                           genEEC.wtvec, recoEEC.wtvec, 
                           Tmat);
-  
-    printf("\nRECO\n");
-    std::cout << EEC_R.t() << std::endl;
-    printf("GEN\n");
-    std::cout << EEC_G.t() << std::endl;
-    printf("E_G\n");
-    std::cout << arma::trans(E_G) << std::endl;
-    printf("WGsum\n");
-    std::cout << arma::trans(WGsum) << std::endl;
-    printf("W_G * E_G\n");
-    std::cout << arma::trans(W_G * E_G) << std::endl;
-    printf("\n");
   }
 
   auto flatDRs = std::make_unique<std::vector<float>>();
