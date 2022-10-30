@@ -61,27 +61,31 @@ private:
   EMD emd_obj_;
 
   template <typename T>
-  void getConstituents_(T& jet, jetConstituents& out);
+  double getConstituents_(T& jet, jetConstituents& out);
 };
 
 template <typename T>
-void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
+double EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
   out.clear();
 
   std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
   size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
 
   double rawpt = 0;
+  double rawpt2 = 0;
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
     auto part = constituents[iPart];
-    if(part->pt() < minPartPt_){
-      rawpt += 0.0;
-    } else if(mode_ == "Ewt" || mode_ == "match"){
-      rawpt += part->pt();
+    double nextpt = 0;
+    if(mode_ == "Ewt" || mode_ == "match"){
+      nextpt = part->pt();
     } else if(mode_ == "nowt"){
-      rawpt += 1.;
+      nextpt += 1.;
     } else {
       throw cms::Exception("EMDFlowProducer") << "Invalid mode" << std::endl;
+    }
+    rawpt += nextpt;
+    if(part->pt() > minPartPt_){
+      rawpt2 += nextpt;
     }
   }
   for(size_t iPart=0; iPart < nConstituents; ++iPart){
@@ -98,10 +102,7 @@ void EMDFlowProducer::getConstituents_(T& jet, jetConstituents& out) {
     out.emplace_back(wt, part->eta(), part->phi());
   }
 
-  double sum=0;
-  for(size_t i=0; i<out.size(); ++i){
-    sum+=out[i].weight();
-  }
+  return rawpt2/rawpt;
 }
 
 

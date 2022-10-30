@@ -87,7 +87,6 @@ EECTransferProducerT<T, K>::EECTransferProducerT(const edm::ParameterSet& conf)
       flowToken_(consumes<EMDFlowCollection>(flowTag_)),
       nDR_(conf.getParameter<unsigned>("nDR")),
       mode_(conf.getParameter<std::string>("mode")){
-  produces<nanoaod::FlatTable>();
   produces<EECTransferCollection>();
 }
 
@@ -121,7 +120,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
   edm::Handle<EMDFlowCollection> flows;
   evt.getByToken(flowToken_, flows);
 
-  auto result2 = std::make_unique<EECTransferCollection>();
+  auto result = std::make_unique<EECTransferCollection>();
 
   size_t iEEC;
   for(size_t iFlow=0; iFlow < flows->size(); ++iFlow){
@@ -400,22 +399,13 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     }else{
       throw cms::Exception("EECTransferProducer") << "unsupported mode" << std::endl;
     }
-    result2->emplace_back(genEEC.iJet, recoEEC.iJet,
+    result->emplace_back(genEEC.iJet, recoEEC.iJet,
                           genEEC.dRvec, recoEEC.dRvec, 
                           genEEC.wtvec, recoEEC.wtvec, 
                           Tmat);
   }
 
-  auto flatDRs = std::make_unique<std::vector<float>>();
-  auto flatWTs = std::make_unique<std::vector<float>>();
-  auto jetIdx = std::make_unique<std::vector<int>>();
-
-  auto table = std::make_unique<nanoaod::FlatTable>(flatWTs->size(), "transfer", false);
-  table->addColumn<float>("wts", *flatWTs, "Weight", nanoaod::FlatTable::FloatColumn);
-  table->addColumn<int>("jetIdx", *jetIdx, "jet index", nanoaod::FlatTable::IntColumn);
-  table->addColumn<float>("dR", *flatDRs, "largest delta R", nanoaod::FlatTable::FloatColumn);
-  evt.put(std::move(table));
-  evt.put(std::move(result2));
+  evt.put(std::move(result));
 }  // end produce()
 
 typedef EECTransferProducerT<reco::PFJet, ProjectedEECCollection> ProjectedEECTransferProducer;

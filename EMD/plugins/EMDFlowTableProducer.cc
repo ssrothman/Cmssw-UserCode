@@ -54,11 +54,11 @@ void EMDFlowTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup
   std::vector<double> flowvec;
 
   for(auto flow : *flows){
-    for(auto f: *(flow.flowvec)){
+    /*for(auto f: *(flow.flowmat)){
       flowvec.emplace_back(f);
       iGen.emplace_back(flow.iGen);
       iReco.emplace_back(flow.iReco);
-    }
+    }*/
   }
 
   auto table = std::make_unique<nanoaod::FlatTable>(flowvec.size(), "EMDFlow", false);

@@ -2,6 +2,8 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "SRothman/DataFormats/interface/EMDFlow.h"
 
+#include "SRothman/armadillo/include/armadillo"
+
 #define EPSILON 1e-15
 
 EMDFlowProducer::EMDFlowProducer(const edm::ParameterSet& conf)
@@ -68,22 +70,31 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       auto genJet = genJets->at(bestGen);
 
       jetConstituents reco;
-      getConstituents_<pat::Jet>(recoJet, reco);
+      double recoFactor = getConstituents_<pat::Jet>(recoJet, reco);
 
       jetConstituents gen;
-      getConstituents_<reco::GenJet>(genJet, gen);
+      double genFactor = getConstituents_<reco::GenJet>(genJet, gen);
 
       unsigned NPReco = reco.size();
       unsigned NPGen = gen.size();
 
-      std::shared_ptr<std::vector<double>> flows(nullptr);
+      auto flowmat = std::make_shared<arma::mat>(reco.size(), gen.size(), arma::fill::zeros);
+
       if(mode_ == "Ewt" || mode_ == "nowt"){
         double emd = emd_obj_(gen, reco);
-        flows = std::make_shared<std::vector<double>>(emd_obj_.flows());
-      } else if(mode_ == "match"){
-        flows = std::make_shared<std::vector<double>>();
-        flows->resize(NPReco * NPGen, 0.0);
+        std::vector<double> flows = emd_obj_.flows();
 
+        for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){
+            for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
+              if(gen[iPGen].weight() > EPSILON){
+                (*flowmat)(iPReco, iPGen) = flows.at(iPGen*NPReco + iPReco)
+                                            * recoFactor / gen[iPGen].weight();
+              } else{
+                (*flowmat)(iPReco, iPGen) = 0;
+              }
+            }
+          }
+      } else if(mode_ == "match"){
         //vector of matched gen particles for each reco particle
         std::vector<std::vector<unsigned>> matched;
         matched.resize(NPReco);
@@ -106,18 +117,23 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             continue;
           } else if(matched[iPReco].size()==1){//matching is obvious. 
                                                //This should be the most common case?
-            flows->at(matched[iPReco][0]*NPReco + iPReco) = recoPart.weight();
-            printf("1match (%u, %u) = %0.3f\n", matched[iPReco][0], iPReco, recoPart.weight());
+            if(gen[matched[iPReco][0]].weight() > EPSILON){
+              (*flowmat)(iPReco, matched[iPReco][0]) 
+                = reco[iPReco].weight()/gen[matched[iPReco][0]].weight();
+            }
           } else{//have to determine how much to give each gen particle from the reco particle
                  //for the moment lets do a naive energy weighting
             double matchedWt=0;
-            std::cout << "Nmatch: " << std::endl;
+            //std::cout << "Nmatch: " << std::endl;
             for(const auto idx : matched[iPReco]){//for each matched gen particle
               matchedWt += gen[idx].weight();
             }//end for each matched gen particle
             for(const auto idx : matched[iPReco]){//for each matched gen particle (again)
-              flows->at(idx*NPReco + iPReco) = recoPart.weight()*gen[idx].weight()/matchedWt;
-              printf("\t(%u, %u) = %0.3f\n", idx, iPReco, recoPart.weight()*gen[idx].weight()/matchedWt);
+              if(gen[idx].weight()>EPSILON){
+                (*flowmat)(iPReco, idx) = (gen[idx].weight()/matchedWt) 
+                                          * reco[iPReco].weight()/gen[idx].weight(); 
+              }
+              //printf("\t(%u, %u) = %0.3f\n", idx, iPReco, recoPart.weight()*gen[idx].weight()/matchedWt);
             }//end for each matched gen particle
           }//end switch(NMatches)
         }//end for each reco particle
@@ -134,16 +150,27 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EG->push_back(gen[iPGen].weight());
       }
 
-      for(unsigned iPReco=0; iPReco<NPReco; ++iPReco){
-        for(unsigned iPGen=0; iPGen<NPGen; ++iPGen){
-          if(reco[iPReco].weight() > EPSILON){
-            flows->at(iPGen*NPReco + iPReco) /= gen[iPGen].weight();
-          } else{
-            flows->at(iPGen*NPReco + iPReco) = 0;
-          }
-        }
+      arma::vec genvec(gen.size(), arma::fill::zeros);
+      for(unsigned i=0; i<gen.size(); ++i){
+        genvec(i) = gen[i].weight();
       }
-      result->emplace_back(bestGen, iReco, std::move(flows), 
+      arma::vec recovec(reco.size(), arma::fill::zeros);
+      for(unsigned i=0; i<reco.size(); ++i){
+        recovec(i) = reco[i].weight();
+      }
+      std::cout << "Flow matrix" << std::endl << *flowmat << std::endl;
+      std::cout << "Reco vec" << std::endl << recovec << std::endl;
+      std::cout << "Gen vec" << std::endl << genvec << std::endl;
+      std::cout << "F * G" << std::endl 
+        << *flowmat * genvec << std::endl;
+      std::cout << "F * 1s" << std::endl 
+        << *flowmat * arma::ones<arma::vec>(gen.size()) << std::endl;
+      std::cout << "Reco factor " << recoFactor << std::endl;
+      std::cout << "Gen factor " << genFactor << std::endl;
+      std::cout << std::endl << std::endl;
+      fflush(stdout);
+
+      result->emplace_back(bestGen, iReco, std::move(flowmat), 
           NPGen, NPReco,
           std::move(EG), std::move(ER));
     }

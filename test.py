@@ -131,7 +131,7 @@ process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
     recoEEC = cms.InputTag("EEC2"),
     recoJets = cms.InputTag("MyGoodJets"),
     genJets = cms.InputTag("MyGenJets"),
-    minpt = cms.double(50.0),
+    minpt = cms.double(10.0),
     nBins = cms.uint32(20),
 )
 

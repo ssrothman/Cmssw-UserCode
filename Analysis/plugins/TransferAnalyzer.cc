@@ -52,6 +52,8 @@
 
 
 
+
+
 class TransferAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
    public:
       explicit TransferAnalyzer(const edm::ParameterSet&);
@@ -176,13 +178,13 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   }
 
   std::vector<double> matmul;
-  matmul.resize(nBins_, 0.);
+  matmul.resize(nBins_+2, 0.);
   std::vector<double> matmul2;
-  matmul2.resize(nBins_, 0.);
+  matmul2.resize(nBins_+2, 0.);
 
   std::cout << std::endl << "TRANSFER" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
-    for(unsigned i=0; i<nBins_; ++i){
+  for(unsigned j=0; j<nBins_+2; ++j){
+    for(unsigned i=0; i<nBins_+2; ++i){
       matmul2[j] += hist->GetBinContent(i,j);
       if(matchedgen->GetBinContent(i) > 0.){
         printf("%0.5g, ", hist->GetBinContent(i,j));
@@ -200,43 +202,43 @@ void TransferAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   std::cout << std::endl;
 
   std::cout << "GEN" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_+2; ++j){
     printf("%0.5g, ", gen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "RECO" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_+2; ++j){
     printf("%0.5g, ", reco->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_+2; ++j){
     printf("%0.5g, ", matmul.at(j));
   }
   printf("\n");
 
   std::cout << "MATCHED GEN" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_+2; ++j){
     printf("%0.5g, ", matchedgen->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATMUL2" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_+2; ++j){
     printf("%0.5g, ", matmul2.at(j));
   }
   printf("\n");
 
   std::cout << "MATCHED RECO" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_+2; ++j){
     printf("%0.5g, ", matchedreco->GetBinContent(j));
   }
   printf("\n");
 
   std::cout << "MATCHED RECO 2" << std::endl;
-  for(unsigned j=0; j<nBins_; ++j){
+  for(unsigned j=0; j<nBins_+2; ++j){
     printf("%0.5g, ", matchedreco2->GetBinContent(j));
   }
   printf("\n");
