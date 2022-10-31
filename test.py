@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 # Input source
@@ -125,6 +125,27 @@ process.EEC2Transfer = cms.EDProducer("PatProjectedEECTransferProducer",
 
 process.EECseq = cms.Sequence(process.EEC2 + process.genEEC2 + process.EEC2Transfer)
 
+process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
+    name = cms.string("EEC2"),
+    jets = cms.InputTag("MyGoodJets"),
+    EECs = cms.InputTag("EEC2"),
+    nDR = cms.uint32(1),
+)
+
+process.genEEC2Table = cms.EDProducer("GenProjectedEECTableProducer",
+    name = cms.string("genEEC2"),
+    jets = cms.InputTag("MyGenJets"),
+    EECs = cms.InputTag("genEEC2"),
+    nDR = cms.uint32(1),
+)
+
+process.transfer2Table = cms.EDProducer("EECTransferTableProducer",
+    name = cms.string("transfer2"),
+    transfer = cms.InputTag("EEC2Transfer"),
+)
+
+process.EECTableTask = cms.Task(process.EEC2Table, process.genEEC2Table, process.transfer2Table)
+
 process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
     src = cms.InputTag("EEC2Transfer"),
     genEEC = cms.InputTag("genEEC2"),
@@ -140,7 +161,7 @@ process.aseq = cms.Sequence(process.analyzer)
 process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag('slimmedMuons'),
     cut = cms.string("pt > 20 && abs(eta) < 2.5 && CutBasedIdTight && PFIsoTight"),
-    filter = cms.bool(True),
+    filter = cms.bool(False),
 )
 
 process.MyZs = cms.EDProducer("CandViewShallowCloneCombiner",
@@ -154,12 +175,13 @@ process.ZFilter = cms.EDFilter("CandViewCountFilter",
     minNumber = cms.uint32(1)
 )
 
-process.Zseq = cms.Sequence(process.MyGoodMuons + process.MyZs + process.ZFilter)
+#process.Zseq = cms.Sequence(process.MyGoodMuons + process.MyZs + process.ZFilter)
+process.Zseq = cms.Sequence(process.MyGoodMuons + process.MyZs)
 
 process.MyGoodJets = cms.EDFilter("PATJetSelector",
     src = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     cut = cms.string("pt>30 && abs(eta) < 2.1 && userInt('tightId')==1 && numberOfDaughters>1 && muonMultiplicity==0"),
-    filter = cms.bool(True),
+    filter = cms.bool(False),
 )
 
 process.MyGenJets = cms.EDFilter("GenJetSelector",
@@ -171,6 +193,7 @@ process.MyGenJets = cms.EDFilter("GenJetSelector",
 process.Jetseq = cms.Sequence(process.MyGoodJets + process.MyGenJets)
 
 process.EEC_PATH = cms.Path(process.Jetseq + process.Zseq + process.EMDseq + process.EECseq + process.aseq)
+process.schedule.associate(process.EECTableTask)
 
 # Automatic addition of the customisation function from PhysicsTools.NanoAOD.nano_cff
 from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC 
@@ -195,4 +218,4 @@ process = customiseEarlyDelete(process)
 # End adding early deletion
 
 #process.schedule = cms.Schedule(*[process.EEC_PATH, process.nanoAOD_step,], tasks=[process.customizedPFCandsTask, process.patAlgosToolsTask])
-process.schedule = cms.Schedule(*[process.EEC_PATH, process.nanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step ], tasks=[process.customizedPFCandsTask, process.patAlgosToolsTask])
+#process.schedule = cms.Schedule(*[process.EEC_PATH, process.nanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step ], tasks=[process.customizedPFCandsTask, process.patAlgosToolsTask])
