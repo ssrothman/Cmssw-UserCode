@@ -4,3 +4,6 @@
 [submodule "EECs/src"]
   path = EECs/src
   url = git@github.com:ssrothman/EECs_ccp.git
+[submodule "JetToolbox"]
+	path = JetToolbox
+	url = git@github.com:cms-jet/JetToolbox.git
