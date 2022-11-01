@@ -62,9 +62,8 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '106X_mc2017_realistic_v8', '')
 
-# Path and EndPath definitions
-process.nanoSequenceMC = cms.Sequence(process.genParticleSequence+process.genVertexTables+process.particleLevelSequence+process.nanoSequenceCommon+process.nanoSequenceOnlyFullSim+process.muonMC+process.electronMC+process.lowPtElectronMC+process.photonMC+process.tauMC+process.metMC+process.globalTablesMC+process.btagWeightTable+process.genWeightsTable+process.genVertexTable+process.genParticleTables+process.particleLevelTables+process.lheInfoTable)
 
+# Path and EndPath definitions
 process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
@@ -75,20 +74,23 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(1)
-process.options.numberOfStreams=cms.untracked.uint32(1)
+process.options.numberOfThreads=cms.untracked.uint32(4)
+process.options.numberOfStreams=cms.untracked.uint32(4)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 # customisation of the process.
 from SRothman.MyJets.myjets_cff import setupCustomizedJetToolbox, addPFCands
-process = setupCustomizedJetToolbox(process, runOnMC=True, PU="Puppi")
+process = setupCustomizedJetToolbox(process, runOnMC=True, PU="Puppi",
+    cut = "pt>30 && abs(eta) < 2.4",
+    genJetCut = "pt>20 && abs(eta) < 2.7 && numberOfDaughters>1"
+)
 process = addPFCands(process, runOnMC=True, jetsName="selectedPatJetsAK4PFPuppi")
 
 minPartPt = 0.0
 
 process.EMDFlow = cms.EDProducer("EMDFlowProducer",
-    jets = cms.InputTag("MyGoodJets"),
-    genJets = cms.InputTag("MyGenJets"),
+    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+    genJets = cms.InputTag("selectedak4GenJetsNoNu"),
     dR2cut = cms.double(0.2*0.2),
     minPartPt = cms.double(minPartPt),
     mode = cms.string("match"),
@@ -98,7 +100,7 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
 process.EMDTask = cms.Task(process.EMDFlow)
 
 process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
-    jets = cms.InputTag("MyGoodJets"),
+    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     order = cms.uint32(2),
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
@@ -107,7 +109,7 @@ process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
 )
 
 process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
-    jets = cms.InputTag("MyGenJets"),
+    jets = cms.InputTag("selectedak4GenJetsNoNu"),
     order = cms.uint32(2),
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
@@ -116,8 +118,8 @@ process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
 )
 
 process.EEC2Transfer = cms.EDProducer("PatProjectedEECTransferProducer",
-    jets = cms.InputTag("MyGoodJets"),
-    genJets = cms.InputTag("MyGenJets"),
+    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+    genJets = cms.InputTag("selectedak4GenJetsNoNu"),
     nDR = cms.uint32(1),
     EECs = cms.InputTag("EEC2"),
     genEECs = cms.InputTag("genEEC2"),
@@ -129,14 +131,14 @@ process.EECTask = cms.Task(process.EEC2, process.genEEC2, process.EEC2Transfer)
 
 process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
     name = cms.string("EEC2"),
-    jets = cms.InputTag("MyGoodJets"),
+    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
     EECs = cms.InputTag("EEC2"),
     nDR = cms.uint32(1),
 )
 
 process.genEEC2Table = cms.EDProducer("GenProjectedEECTableProducer",
     name = cms.string("genEEC2"),
-    jets = cms.InputTag("MyGenJets"),
+    jets = cms.InputTag("selectedak4GenJetsNoNu"),
     EECs = cms.InputTag("genEEC2"),
     nDR = cms.uint32(1),
 )
@@ -152,8 +154,8 @@ process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
     src = cms.InputTag("EEC2Transfer"),
     genEEC = cms.InputTag("genEEC2"),
     recoEEC = cms.InputTag("EEC2"),
-    recoJets = cms.InputTag("MyGoodJets"),
-    genJets = cms.InputTag("MyGenJets"),
+    recoJets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+    genJets = cms.InputTag("selectedak4GenJetsNoNu"),
     minpt = cms.double(10.0),
     nBins = cms.uint32(20),
 )
@@ -180,22 +182,22 @@ process.ZFilter = cms.EDFilter("CandViewCountFilter",
 #process.Zseq = cms.Sequence(process.MyGoodMuons + process.MyZs + process.ZFilter)
 process.ZTask = cms.Task(process.MyGoodMuons, process.MyZs)
 
-process.MyGoodJets = cms.EDFilter("PATJetSelector",
-    src = cms.InputTag("selectedPatJetsAK4PFPuppi"),
-    cut = cms.string("pt>30 && abs(eta) < 2.1 && userInt('tightIdLepVeto')==1 && numberOfDaughters>1"),
-    filter = cms.bool(False),
-)
+#process.MyGoodJets = cms.EDFilter("PATJetSelector",
+#    src = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+#    cut = cms.string("pt>30 && abs(eta) < 2.1 && userInt('tightIdLepVeto')==1 && numberOfDaughters>1"),
+#    filter = cms.bool(False),
+#)
 
-process.MyGenJets = cms.EDFilter("GenJetSelector",
-    src = cms.InputTag("ak4GenJetsNoNu"),
-    cut = cms.string("pt>20 && abs(eta) < 2.4 && numberOfDaughters>1"),
-    filter = cms.bool(False)
-)
+#process.MyGenJets = cms.EDFilter("GenJetSelector",
+#    src = cms.InputTag("ak4GenJetsNoNu"),
+#    cut = cms.string("pt>20 && abs(eta) < 2.4 && numberOfDaughters>1"),
+#    filter = cms.bool(False)
+#)
 
-process.JetTask = cms.Task(process.MyGoodJets, process.MyGenJets)
+#process.JetTask = cms.Task(process.MyGoodJets, process.MyGenJets)
 
 #process.EEC_PATH = cms.Path(process.Jetseq + process.Zseq + process.EMDseq + process.EECseq + process.aseq)
-process.schedule.associate(process.JetTask, process.ZTask, process.EMDTask, process.EECTask, process.EECTableTask)
+process.schedule.associate(process.ZTask, process.EMDTask, process.EECTask, process.EECTableTask)
 
 # Automatic addition of the customisation function from PhysicsTools.NanoAOD.nano_cff
 from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC 
@@ -215,6 +217,7 @@ process.NANOAODSIMoutput.fakeNameForCrab = cms.untracked.bool(True)  # needed fo
 
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 # Add early deletion of temporary data products to reduce peak memory need
+
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
 # End adding early deletion

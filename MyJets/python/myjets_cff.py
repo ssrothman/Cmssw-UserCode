@@ -1,18 +1,21 @@
 import FWCore.ParameterSet.Config as cms
 from  PhysicsTools.NanoAOD.common_cff import *
-### NanoAOD v5 (for 2016,2017,2018), for different recipe please modify accordingly
-from Configuration.Eras.Modifier_run2_nanoAOD_94X2016_cff import run2_nanoAOD_94X2016
-from Configuration.Eras.Modifier_run2_nanoAOD_94XMiniAODv2_cff import run2_nanoAOD_94XMiniAODv2
-from Configuration.Eras.Modifier_run2_nanoAOD_102Xv1_cff import run2_nanoAOD_102Xv1
-from PhysicsTools.PFNano.ak15.jetToolbox_cff import jetToolbox
+from SRothman.JetToolbox.jetToolbox_cff import jetToolbox
 
 # ---------------------------------------------------------
 # Cusomtization function for custom jets via jet toolbox
-def setupCustomizedJetToolbox(process, runOnMC=False, PU="Puppi"):
 
-    #### AK4 PUPPI jets
+def setupCustomizedJetToolbox(process, runOnMC=False, PU="Puppi", cut="", genJetCut=""):
+    JECPayload = 'AK4PF'
+    if PU=='Puppi' or PU=='CHS':
+      JECPayload += PU
+    elif PU=="CS":
+      JEC+="CHS"
+    else:
+      print("Unspported PU method")
+      return
 
-    ak4btagdiscriminators = [
+    btags = [
         'pfDeepCSVJetTags:probb',
         'pfDeepCSVJetTags:probbb',
         'pfDeepCSVJetTags:probc',
@@ -23,29 +26,20 @@ def setupCustomizedJetToolbox(process, runOnMC=False, PU="Puppi"):
         'pfDeepFlavourJetTags:problepb',
         'pfDeepFlavourJetTags:probc',
         'pfDeepFlavourJetTags:probuds',
-        'pfDeepFlavourJetTags:probg',
-    ]
-    ak4btaginfos = [ 'pfDeepCSVTagInfos', 'pfDeepFlavourTagInfos' ] #'pfDeepFlavourTagInfos'
+        'pfDeepFlavourJetTags:probg']
 
-    JEC = "AK4PF"
-    if PU=="Puppi" or PU=="CHS":
-      JEC+=PU
-    elif PU=="CS":
-      JEC+="CHS"
-    else:
-      print("ERROR: unsupported PU method")
-      return
+    btaginfos = [ 'pfDeepCSVTagInfos', 'pfDeepFlavourTagInfos' ] 
+
     jetToolbox(process, 'ak4', 'dummyseq', 'noOutput',
-               dataTier='nanoAOD',
-               PUMethod=PU, #JETCorrPayload=JEC,
-               #addQGTagger=True,
-               runOnMC=runOnMC,
-               Cut='pt > 30.0',
-               bTagDiscriminators=ak4btagdiscriminators,
-               bTagInfos=ak4btaginfos,
-               verbosity=4,
-               addPUJetID=True,
-               )
+               PUMethod = PU, dataTier='miniAOD',
+               runOnMC = runOnMC, 
+               JETCorrPayload = JECPayload, JETCorrLevels=['None'], #?
+               GetJetMCFlavour=True,
+               Cut = cut, genJetCut = genJetCut,
+               postFix='',
+               bTagDiscriminators = btags, bTagInfos=btaginfos,
+               addQGTagger=False, 
+               verbosity=4)
 
     return process
 
