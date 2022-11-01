@@ -152,6 +152,8 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
                      *dRs, *wts, 
                      order_, 
                      coefs.get(), tuplewts.get(), tupleiDR.get());
+        std::cout << "dR size " << dRs->size() << std::endl;
+        std::cout << "wt size " << wts->size() << std::endl;
       } else{
         EECnonIRC(pt_, eta_, phi_, nConstituents, p1_, p2_, *dRs, *wts);
       }

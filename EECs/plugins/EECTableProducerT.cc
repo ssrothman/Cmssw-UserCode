@@ -122,6 +122,8 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
       jetIdx->emplace_back(iJet++);
     } //end for all skipped jets
 
+    std::cout << "In table, EEC wt size is " << EEC.wtvec->size() << std::endl;
+    std::cout << "In table, EEC dR size is " << EEC.dRvec->size() << std::endl;
     for(size_t i=0; i<EEC.wtvec->size(); ++i){//for each dR in the EEC
       flatWTs->emplace_back(EEC.wtvec->at(i));
       jetIdx->emplace_back(EEC.iJet);

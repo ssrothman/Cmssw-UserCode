@@ -1,0 +1,2464 @@
+|---- jetToolbox: Initializing collection... (with postfix )
+|---- jetToolBox: Adding these btag discriminators: ['pfDeepCSVJetTags:probb', 'pfDeepCSVJetTags:probbb', 'pfDeepCSVJetTags:probc', 'pfDeepCSVJetTags:probudsg', 'pfDeepFlavourJetTags:probb', 'pfDeepFlavourJetTags:probbb', 'pfDeepFlavourJetTags:problepb', 'pfDeepFlavourJetTags:probc', 'pfDeepFlavourJetTags:probuds', 'pfDeepFlavourJetTags:probg'] in the jet collection.
+|---- jetToolBox: DeepCSV and DeepFlavour btag discriminators were trained for AK4 CHS jets. You are trying to use it in other configuration. Use it at your own risk.
+|---- jetToolBox: JETTOOLBOX RUNNING ON MiniAOD FOR AK4 JETS USING Puppi
+|---- jetToolBox: Applying these corrections: ('AK4PFPuppi', ['L2Relative', 'L3Absolute'], 'None')
+|---- jetToolBox: Creating selectedPatJetsAK4PFPuppi collection.
+[1m|---- jetToolBox: RUNNING FROM MINIAOD BUT STORING VARIABLES IN NANOAOD FORMAT.[0m
+|---- jetToolBox: List of modules created (and other internal names):
+      PATJetsLabel = AK4PFPuppi
+      PATJetsLabelPost = AK4PFPuppi
+      SubstructureLabel = AK4Puppi
+      GenJetsNoNu = ak4GenJetsNoNu
+      GenParticlesNoNu = packedGenParticlesForJetsNoNu
+      selectedGenJetsNoNu = selectedak4GenJetsNoNu
+      PFJets = ak4PFJetsPuppi
+      PFJetsConstituents = ak4PFJetsPuppiConstituents
+      PFJetsConstituentsColon = ak4PFJetsPuppiConstituents:constituents
+      PFJetsConstituentsColonOrUpdate = ak4PFJetsPuppiConstituents:constituents
+      PATJets = patJetsAK4PFPuppi
+      selPATJets = selectedPatJetsAK4PFPuppi
+      PFJetsOrUpdate = ak4PFJetsPuppi
+      looseJetId = patJetsAK4PFPuppilooseJetId
+      tightJetId = patJetsAK4PFPuppitightJetId
+      tightJetIdLepVeto = patJetsAK4PFPuppitightJetIdLepVeto
+      PATJetswithUserData = patJetsAK4PFPuppiPATJetswithUserData
+      jetToolboxGenJetTable = selectedak4GenJetsNoNuJTBTable
+      jetToolboxJetTable = selectedPatJetsAK4PFPuppiJTBTable
+Updating process to run ParticleNet before it's included in MiniAOD
+Updating process to run DeepDoubleXv2 on datasets before 11X
+Will recalculate the following discriminators on AK8 jets: pfParticleNetJetTags:probTbcq, pfParticleNetJetTags:probTbqq, pfParticleNetJetTags:probTbc, pfParticleNetJetTags:probTbq, pfParticleNetJetTags:probTbel, pfParticleNetJetTags:probTbmu, pfParticleNetJetTags:probTbta, pfParticleNetJetTags:probWcq, pfParticleNetJetTags:probWqq, pfParticleNetJetTags:probZbb, pfParticleNetJetTags:probZcc, pfParticleNetJetTags:probZqq, pfParticleNetJetTags:probHbb, pfParticleNetJetTags:probHcc, pfParticleNetJetTags:probHqqqq, pfParticleNetJetTags:probQCDbb, pfParticleNetJetTags:probQCDcc, pfParticleNetJetTags:probQCDb, pfParticleNetJetTags:probQCDc, pfParticleNetJetTags:probQCDothers, pfParticleNetDiscriminatorsJetTags:TvsQCD, pfParticleNetDiscriminatorsJetTags:WvsQCD, pfParticleNetDiscriminatorsJetTags:ZvsQCD, pfParticleNetDiscriminatorsJetTags:ZbbvsQCD, pfParticleNetDiscriminatorsJetTags:HbbvsQCD, pfParticleNetDiscriminatorsJetTags:HccvsQCD, pfParticleNetDiscriminatorsJetTags:H4qvsQCD, pfMassDecorrelatedParticleNetJetTags:probXbb, pfMassDecorrelatedParticleNetJetTags:probXcc, pfMassDecorrelatedParticleNetJetTags:probXqq, pfMassDecorrelatedParticleNetJetTags:probQCDbb, pfMassDecorrelatedParticleNetJetTags:probQCDcc, pfMassDecorrelatedParticleNetJetTags:probQCDb, pfMassDecorrelatedParticleNetJetTags:probQCDc, pfMassDecorrelatedParticleNetJetTags:probQCDothers, pfMassDecorrelatedParticleNetDiscriminatorsJetTags:XbbvsQCD, pfMassDecorrelatedParticleNetDiscriminatorsJetTags:XccvsQCD, pfMassDecorrelatedParticleNetDiscriminatorsJetTags:XqqvsQCD, pfMassIndependentDeepDoubleBvLV2JetTags:probHbb, pfMassIndependentDeepDoubleCvLV2JetTags:probHcc, pfMassIndependentDeepDoubleCvBV2JetTags:probHcc
+add DeepMET Producers
+01-Nov-2022 17:41:30 CDT  Initiating request to open file file:DYJetsToLL_miniAOD.root
+01-Nov-2022 17:41:36 CDT  Successfully opened file file:DYJetsToLL_miniAOD.root
+2022-11-01 17:41:41.721368: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+                         : Booking "muonMVATTH" of type "BDT" from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/external/slc7_amd64_gcc820/data/PhysicsTools/NanoAOD/data/mu_BDTG_2017.weights.xml.
+                         : Reading weight file: /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/external/slc7_amd64_gcc820/data/PhysicsTools/NanoAOD/data/mu_BDTG_2017.weights.xml
+<HEADER> DataSetInfo              : [Default] : Added class "Signal"
+<HEADER> DataSetInfo              : [Default] : Added class "Background"
+                         : Booked classifier "BDTG" of type: "BDT"
+                         : Booking "muonMVALowPt" of type "BDT" from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/external/slc7_amd64_gcc820/data/PhysicsTools/NanoAOD/data/mu_BDTG_lowpt.weights.xml.
+                         : Reading weight file: /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/external/slc7_amd64_gcc820/data/PhysicsTools/NanoAOD/data/mu_BDTG_lowpt.weights.xml
+<HEADER> DataSetInfo              : [Default] : Added class "Signal"
+<HEADER> DataSetInfo              : [Default] : Added class "Background"
+                         : Booked classifier "BDTG" of type: "BDT"
+                         : Booking "electronMVATTH" of type "BDT" from /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/external/slc7_amd64_gcc820/data/PhysicsTools/NanoAOD/data/el_BDTG_2017.weights.xml.
+                         : Reading weight file: /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_26/external/slc7_amd64_gcc820/data/PhysicsTools/NanoAOD/data/el_BDTG_2017.weights.xml
+<HEADER> DataSetInfo              : [Default] : Added class "Signal"
+<HEADER> DataSetInfo              : [Default] : Added class "Background"
+                         : Booked classifier "BDTG" of type: "BDT"
+%MSG-w BTagSFProducer:  BTagSFProducer:btagWeightTable@ctor  01-Nov-2022 17:42:30 CDT pre-events
+Skipped loading BTagCalibration for CMVA as it was marked as unavailable in the configuration file. Event weights will not be stored.
+
+%MSG
+EMD
+  EuclideanParticleEvent<EuclideanParticle2D<8-byte float>>
+    norm - true
+    external_dists - false
+
+  YPhiParticleDistance
+    R - 1
+    beta - 2
+
+  NetworkSimplex
+    n_iter_max - 100000
+    epsilon_large - 2.22045e-13
+    epsilon_small - 2.22045e-16
+
+%MSG-w LogicError:  GenWeightsTableProducer:genWeightsTable@beginRun  01-Nov-2022 17:43:23 CDT Run: 1
+::getByLabel: An attempt was made to read a Run product before endRun() was called.
+The product is of type 'LHERunInfoProduct'.
+The specified ModuleLabel was 'externalLHEProducer'.
+The specified productInstanceName was ''.
+
+%MSG
+%MSG-w LogicError:  HTXSRivetProducer:rivetProducerHTXS@beginRun  01-Nov-2022 17:43:23 CDT Run: 1
+::getByLabel: An attempt was made to read a Run product before endRun() was called.
+The product is of type 'LHERunInfoProduct'.
+The specified ModuleLabel was 'externalLHEProducer'.
+The specified productInstanceName was ''.
+
+%MSG
+Begin processing the 1st record. Run 1, Event 192535763, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:23.415 CDT
+Rivet.Analysis.Handler: WARN  Analysis 'HiggsTemplateCrossSections' is unvalidated: be careful, it may be broken!
+==============================================================
+========     HiggsTemplateCrossSections Initialization     =========
+==============================================================
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  No HIGGSPRODMODE shell variable found. Needed when running Rivet stand-alone.
+==============================================================
+========             Higgs prod mode 0              =========
+========          Sucessful Initialization           =========
+==============================================================
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+Begin processing the 2nd record. Run 1, Event 192535785, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:41.494 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+dR size 67
+wt size 67
+In table, EEC wt size is 67
+In table, EEC dR size is 67
+Begin processing the 3rd record. Run 1, Event 192535752, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:43.972 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+dR size 92
+wt size 92
+In table, EEC wt size is 92
+In table, EEC dR size is 92
+Begin processing the 4th record. Run 1, Event 192535753, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:44.133 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+dR size 4
+wt size 4
+In table, EEC wt size is 4
+In table, EEC dR size is 4
+Begin processing the 5th record. Run 1, Event 192535765, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:44.886 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+dR size 11
+wt size 11
+dR size 2
+wt size 2
+In table, EEC wt size is 11
+In table, EEC dR size is 11
+In table, EEC wt size is 2
+In table, EEC dR size is 2
+dR size 7
+wt size 7
+dR size 22
+wt size 22
+In table, EEC wt size is 7
+In table, EEC dR size is 7
+In table, EEC wt size is 22
+In table, EEC dR size is 22
+Flow matrix
+   0.9092        0   1.0000   1.0000        0
+   0.0575   1.0000        0        0        0
+   0.0192        0        0        0        0
+   0.0140        0        0        0   1.0000
+
+Reco vec
+   0.9056
+   0.0608
+   0.0191
+   0.0145
+
+Gen vec
+   0.9920
+   0.0037
+   0.0027
+   0.0010
+   0.0006
+
+F * G
+   0.9056
+   0.0608
+   0.0191
+   0.0145
+
+F * 1s
+   2.9092
+   1.0575
+   0.0192
+   1.0140
+
+Reco factor 1
+Gen factor 1
+
+
+Flow matrix
+   0.8713        0
+   0.0412   1.0000
+   0.0244        0
+   0.0213        0
+   0.0148        0
+   0.0136        0
+   0.0135        0
+
+Reco vec
+   0.8685
+   0.0442
+   0.0243
+   0.0213
+   0.0147
+   0.0135
+   0.0134
+
+Gen vec
+   0.9968
+   0.0032
+
+F * G
+   0.8685
+   0.0442
+   0.0243
+   0.0213
+   0.0147
+   0.0135
+   0.0134
+
+F * 1s
+   0.8713
+   1.0412
+   0.0244
+   0.0213
+   0.0148
+   0.0136
+   0.0135
+
+Reco factor 1
+Gen factor 1
+
+
+Flow matrix
+   0.9092   0.0575   0.0192   0.0140
+        0   1.0000        0        0
+   1.0000        0        0        0
+   1.0000        0        0        0
+        0        0        0   1.0000
+
+EEC_G
+   7.4135e-03   5.3825e-03   1.9513e-03   1.1701e-03   2.0275e-05   7.3504e-06   4.4076e-06   5.3367e-06   3.2001e-06   1.1601e-06   9.8404e-01
+
+EEC_R
+   0.1101   0.0346   0.0263   0.0023   0.0018   0.0006   0.8244
+
+E_G
+   0.9920   0.0037   0.0027   0.0010   0.0006
+
+E_R
+   0.9056   0.0608   0.0191   0.0145
+
+F*E_G
+   0.9056   0.0608   0.0191   0.0145
+
+Entering tuples clause
+RECO
+(0, 0) 0.8201
+(0, 1) 0.11014
+(0, 2) 0.034565
+(0, 3) 0.026282
+(1, 0) 0.11014
+(1, 1) 0.0036981
+(1, 2) 0.0023211
+(1, 3) 0.0017649
+(2, 0) 0.034565
+(2, 1) 0.0023211
+(2, 2) 0.00036421
+(2, 3) 0.00055385
+(3, 0) 0.026282
+(3, 1) 0.0017649
+(3, 2) 0.00055385
+(3, 3) 0.00021056
+
+GEN
+(0, 0) 0.98402
+(0, 1) 0.0074135
+(0, 2) 0.0053825
+(0, 3) 0.0019513
+(0, 4) 0.0011701
+(1, 1) 1.3963e-05
+(1, 2) 2.0275e-05
+(1, 3) 7.3504e-06
+(1, 4) 4.4076e-06
+(2, 2) 7.3604e-06
+(2, 3) 5.3367e-06
+(2, 4) 3.2001e-06
+(3, 3) 9.6734e-07
+(3, 4) 1.1601e-06
+(4, 4) 3.4783e-07
+About to enter big loop
+term like (0, 0)G x (0, 0)R -> 0.81342
+	(0)G -> (0)R
+term like (0, 2)G x (0, 0)R -> 0.0048937
+	(0.25533)G -> (0)R
+term like (0, 3)G x (0, 0)R -> 0.0017741
+	(0.86158)G -> (0)R
+term like (2, 2)G x (0, 0)R -> 7.3604e-06
+	(0)G -> (0)R
+term like (2, 3)G x (0, 0)R -> 5.3367e-06
+	(0.64772)G -> (0)R
+term like (3, 3)G x (0, 0)R -> 9.6734e-07
+	(0)G -> (0)R
+term like (0, 0)G x (0, 1)R -> 0.051476
+	(0)G -> (0.30795)R
+term like (0, 1)G x (0, 1)R -> 0.0067403
+	(0.32625)G -> (0.30795)R
+term like (0, 0)G x (0, 2)R -> 0.017212
+	(0)G -> (0.32934)R
+term like (0, 0)G x (0, 3)R -> 0.012555
+	(0)G -> (0.033095)R
+term like (0, 4)G x (0, 3)R -> 0.0010638
+	(0.31588)G -> (0.033095)R
+term like (2, 4)G x (0, 3)R -> 3.2001e-06
+	(0.27891)G -> (0.033095)R
+term like (3, 4)G x (0, 3)R -> 1.1601e-06
+	(0.60556)G -> (0.033095)R
+term like (0, 0)G x (1, 0)R -> 0.051476
+	(0)G -> (0.30795)R
+term like (0, 2)G x (1, 0)R -> 0.00030969
+	(0.25533)G -> (0.30795)R
+term like (0, 3)G x (1, 0)R -> 0.00011227
+	(0.86158)G -> (0.30795)R
+term like (1, 2)G x (1, 0)R -> 2.0275e-05
+	(0.50927)G -> (0.30795)R
+term like (1, 3)G x (1, 0)R -> 7.3504e-06
+	(0.9404)G -> (0.30795)R
+term like (0, 0)G x (1, 1)R -> 0.0032576
+	(0)G -> (0)R
+term like (0, 1)G x (1, 1)R -> 0.00042655
+	(0.32625)G -> (0)R
+term like (1, 1)G x (1, 1)R -> 1.3963e-05
+	(0)G -> (0)R
+term like (0, 0)G x (1, 2)R -> 0.0010892
+	(0)G -> (0.26349)R
+term like (0, 0)G x (1, 3)R -> 0.00079455
+	(0)G -> (0.29052)R
+term like (0, 4)G x (1, 3)R -> 6.7323e-05
+	(0.31588)G -> (0.29052)R
+term like (1, 4)G x (1, 3)R -> 4.4076e-06
+	(0.34269)G -> (0.29052)R
+term like (0, 0)G x (2, 0)R -> 0.017212
+	(0)G -> (0.32934)R
+term like (0, 2)G x (2, 0)R -> 0.00010355
+	(0.25533)G -> (0.32934)R
+term like (0, 3)G x (2, 0)R -> 3.754e-05
+	(0.86158)G -> (0.32934)R
+term like (0, 0)G x (2, 1)R -> 0.0010892
+	(0)G -> (0.26349)R
+term like (0, 1)G x (2, 1)R -> 0.00014263
+	(0.32625)G -> (0.26349)R
+term like (0, 0)G x (2, 2)R -> 0.00036421
+	(0)G -> (0)R
+term like (0, 0)G x (2, 3)R -> 0.00026567
+	(0)G -> (0.33902)R
+term like (0, 4)G x (2, 3)R -> 2.2511e-05
+	(0.31588)G -> (0.33902)R
+term like (0, 0)G x (3, 0)R -> 0.012555
+	(0)G -> (0.033095)R
+term like (0, 2)G x (3, 0)R -> 7.5535e-05
+	(0.25533)G -> (0.033095)R
+term like (0, 3)G x (3, 0)R -> 2.7383e-05
+	(0.86158)G -> (0.033095)R
+term like (0, 0)G x (3, 1)R -> 0.00079455
+	(0)G -> (0.29052)R
+term like (0, 1)G x (3, 1)R -> 0.00010404
+	(0.32625)G -> (0.29052)R
+term like (0, 0)G x (3, 2)R -> 0.00026567
+	(0)G -> (0.33902)R
+term like (0, 0)G x (3, 3)R -> 0.00019379
+	(0)G -> (0)R
+term like (0, 4)G x (3, 3)R -> 1.642e-05
+	(0.31588)G -> (0)R
+term like (4, 4)G x (3, 3)R -> 3.4783e-07
+	(0)G -> (0)R
+
+TESTWTS
+(0, 0) 0.8201
+(0, 1) 0.11014
+(0, 2) 0.034565
+(0, 3) 0.026282
+(1, 0) 0.11014
+(1, 1) 0.0036981
+(1, 2) 0.0023211
+(1, 3) 0.0017649
+(2, 0) 0.034565
+(2, 1) 0.0023211
+(2, 2) 0.00036421
+(2, 3) 0.00055385
+(3, 0) 0.026282
+(3, 1) 0.0017649
+(3, 2) 0.00055385
+(3, 3) 0.00021056
+Ending tuples clause
+Flow matrix
+   0.8713   0.0412   0.0244   0.0213   0.0148   0.0136   0.0135
+        0   1.0000        0        0        0        0        0
+
+EEC_G
+   0.0064   0.9936
+
+EEC_R
+   0.0768   0.0422   0.0370   0.0256   0.0235   0.0233   0.0022   0.0019   0.0013   0.0012   0.0012   0.0010   0.0007   0.0007   0.0007   0.0006   0.0006   0.0006   0.0004   0.0004   0.0004   0.7579
+
+E_G
+   0.9968   0.0032
+
+E_R
+   0.8685   0.0442   0.0243   0.0213   0.0147   0.0135   0.0134
+
+F*E_G
+   0.8685   0.0442   0.0243   0.0213   0.0147   0.0135   0.0134
+
+Entering tuples clause
+RECO
+(0, 0) 0.75431
+(0, 1) 0.076802
+(0, 2) 0.042241
+(0, 3) 0.036961
+(0, 4) 0.025595
+(0, 5) 0.023486
+(0, 6) 0.023315
+(1, 0) 0.076802
+(1, 1) 0.001955
+(1, 2) 0.0021505
+(1, 3) 0.0018817
+(1, 4) 0.001303
+(1, 5) 0.0011957
+(1, 6) 0.0011869
+(2, 0) 0.042241
+(2, 1) 0.0021505
+(2, 2) 0.00059138
+(2, 3) 0.0010349
+(2, 4) 0.00071666
+(2, 5) 0.00065762
+(2, 6) 0.00065282
+(3, 0) 0.036961
+(3, 1) 0.0018817
+(3, 2) 0.0010349
+(3, 3) 0.00045277
+(3, 4) 0.00062708
+(3, 5) 0.00057542
+(3, 6) 0.00057122
+(4, 0) 0.025595
+(4, 1) 0.001303
+(4, 2) 0.00071666
+(4, 3) 0.00062708
+(4, 4) 0.00021712
+(4, 5) 0.00039847
+(4, 6) 0.00039556
+(5, 0) 0.023486
+(5, 1) 0.0011957
+(5, 2) 0.00065762
+(5, 3) 0.00057542
+(5, 4) 0.00039847
+(5, 5) 0.00018282
+(5, 6) 0.00036297
+(6, 0) 0.023315
+(6, 1) 0.0011869
+(6, 2) 0.00065282
+(6, 3) 0.00057122
+(6, 4) 0.00039556
+(6, 5) 0.00036297
+(6, 6) 0.00018016
+
+GEN
+(0, 0) 0.99364
+(0, 1) 0.0063529
+(1, 1) 1.0155e-05
+About to enter big loop
+term like (0, 0)G x (0, 0)R -> 0.75431
+	(0)G -> (0)R
+term like (0, 0)G x (0, 1)R -> 0.035634
+	(0)G -> (0.25782)R
+term like (0, 1)G x (0, 1)R -> 0.0055352
+	(0.68361)G -> (0.25782)R
+term like (0, 0)G x (0, 2)R -> 0.021121
+	(0)G -> (0.30468)R
+term like (0, 0)G x (0, 3)R -> 0.018481
+	(0)G -> (0.28958)R
+term like (0, 0)G x (0, 4)R -> 0.012798
+	(0)G -> (0.12623)R
+term like (0, 0)G x (0, 5)R -> 0.011743
+	(0)G -> (0.36713)R
+term like (0, 0)G x (0, 6)R -> 0.011658
+	(0)G -> (0.31694)R
+term like (0, 0)G x (1, 0)R -> 0.035634
+	(0)G -> (0.25782)R
+term like (0, 0)G x (1, 1)R -> 0.0016833
+	(0)G -> (0)R
+term like (0, 1)G x (1, 1)R -> 0.00026148
+	(0.68361)G -> (0)R
+term like (1, 1)G x (1, 1)R -> 1.0155e-05
+	(0)G -> (0)R
+term like (0, 0)G x (1, 2)R -> 0.00099774
+	(0)G -> (0.40616)R
+term like (0, 0)G x (1, 3)R -> 0.00087302
+	(0)G -> (0.39292)R
+term like (0, 0)G x (1, 4)R -> 0.00060456
+	(0)G -> (0.33333)R
+term like (0, 0)G x (1, 5)R -> 0.00055475
+	(0)G -> (0.44513)R
+term like (0, 0)G x (1, 6)R -> 0.0005507
+	(0)G -> (0.55615)R
+term like (0, 0)G x (2, 0)R -> 0.021121
+	(0)G -> (0.30468)R
+term like (0, 0)G x (2, 1)R -> 0.00099774
+	(0)G -> (0.40616)R
+term like (0, 1)G x (2, 1)R -> 0.00015499
+	(0.68361)G -> (0.40616)R
+term like (0, 0)G x (2, 2)R -> 0.00059138
+	(0)G -> (0)R
+term like (0, 0)G x (2, 3)R -> 0.00051746
+	(0)G -> (0.59396)R
+term like (0, 0)G x (2, 4)R -> 0.00035833
+	(0)G -> (0.19634)R
+term like (0, 0)G x (2, 5)R -> 0.00032881
+	(0)G -> (0.064876)R
+term like (0, 0)G x (2, 6)R -> 0.00032641
+	(0)G -> (0.3041)R
+term like (0, 0)G x (3, 0)R -> 0.018481
+	(0)G -> (0.28958)R
+term like (0, 0)G x (3, 1)R -> 0.00087302
+	(0)G -> (0.39292)R
+term like (0, 1)G x (3, 1)R -> 0.00013561
+	(0.68361)G -> (0.39292)R
+term like (0, 0)G x (3, 2)R -> 0.00051746
+	(0)G -> (0.59396)R
+term like (0, 0)G x (3, 3)R -> 0.00045277
+	(0)G -> (0)R
+term like (0, 0)G x (3, 4)R -> 0.00031354
+	(0)G -> (0.40559)R
+term like (0, 0)G x (3, 5)R -> 0.00028771
+	(0)G -> (0.6567)R
+term like (0, 0)G x (3, 6)R -> 0.00028561
+	(0)G -> (0.51963)R
+term like (0, 0)G x (4, 0)R -> 0.012798
+	(0)G -> (0.12623)R
+term like (0, 0)G x (4, 1)R -> 0.00060456
+	(0)G -> (0.33333)R
+term like (0, 1)G x (4, 1)R -> 9.391e-05
+	(0.68361)G -> (0.33333)R
+term like (0, 0)G x (4, 2)R -> 0.00035833
+	(0)G -> (0.19634)R
+term like (0, 0)G x (4, 3)R -> 0.00031354
+	(0)G -> (0.40559)R
+term like (0, 0)G x (4, 4)R -> 0.00021712
+	(0)G -> (0)R
+term like (0, 0)G x (4, 5)R -> 0.00019923
+	(0)G -> (0.26118)R
+term like (0, 0)G x (4, 6)R -> 0.00019778
+	(0)G -> (0.22448)R
+term like (0, 0)G x (5, 0)R -> 0.011743
+	(0)G -> (0.36713)R
+term like (0, 0)G x (5, 1)R -> 0.00055475
+	(0)G -> (0.44513)R
+term like (0, 1)G x (5, 1)R -> 8.6173e-05
+	(0.68361)G -> (0.44513)R
+term like (0, 0)G x (5, 2)R -> 0.00032881
+	(0)G -> (0.064876)R
+term like (0, 0)G x (5, 3)R -> 0.00028771
+	(0)G -> (0.6567)R
+term like (0, 0)G x (5, 4)R -> 0.00019923
+	(0)G -> (0.26118)R
+term like (0, 0)G x (5, 5)R -> 0.00018282
+	(0)G -> (0)R
+term like (0, 0)G x (5, 6)R -> 0.00018149
+	(0)G -> (0.35265)R
+term like (0, 0)G x (6, 0)R -> 0.011658
+	(0)G -> (0.31694)R
+term like (0, 0)G x (6, 1)R -> 0.0005507
+	(0)G -> (0.55615)R
+term like (0, 1)G x (6, 1)R -> 8.5544e-05
+	(0.68361)G -> (0.55615)R
+term like (0, 0)G x (6, 2)R -> 0.00032641
+	(0)G -> (0.3041)R
+term like (0, 0)G x (6, 3)R -> 0.00028561
+	(0)G -> (0.51963)R
+term like (0, 0)G x (6, 4)R -> 0.00019778
+	(0)G -> (0.22448)R
+term like (0, 0)G x (6, 5)R -> 0.00018149
+	(0)G -> (0.35265)R
+term like (0, 0)G x (6, 6)R -> 0.00018016
+	(0)G -> (0)R
+
+TESTWTS
+(0, 0) 0.75431
+(0, 1) 0.076802
+(0, 2) 0.042241
+(0, 3) 0.036961
+(0, 4) 0.025595
+(0, 5) 0.023486
+(0, 6) 0.023315
+(1, 0) 0.076802
+(1, 1) 0.001955
+(1, 2) 0.0021505
+(1, 3) 0.0018817
+(1, 4) 0.001303
+(1, 5) 0.0011957
+(1, 6) 0.0011869
+(2, 0) 0.042241
+(2, 1) 0.0021505
+(2, 2) 0.00059138
+(2, 3) 0.0010349
+(2, 4) 0.00071666
+(2, 5) 0.00065762
+(2, 6) 0.00065282
+(3, 0) 0.036961
+(3, 1) 0.0018817
+(3, 2) 0.0010349
+(3, 3) 0.00045277
+(3, 4) 0.00062708
+(3, 5) 0.00057542
+(3, 6) 0.00057122
+(4, 0) 0.025595
+(4, 1) 0.001303
+(4, 2) 0.00071666
+(4, 3) 0.00062708
+(4, 4) 0.00021712
+(4, 5) 0.00039847
+(4, 6) 0.00039556
+(5, 0) 0.023486
+(5, 1) 0.0011957
+(5, 2) 0.00065762
+(5, 3) 0.00057542
+(5, 4) 0.00039847
+(5, 5) 0.00018282
+(5, 6) 0.00036297
+(6, 0) 0.023315
+(6, 1) 0.0011869
+(6, 2) 0.00065282
+(6, 3) 0.00057122
+(6, 4) 0.00039556
+(6, 5) 0.00036297
+(6, 6) 0.00018016
+Ending tuples clause
+Begin processing the 6th record. Run 1, Event 192535770, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:45.230 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+Begin processing the 7th record. Run 1, Event 192535788, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:45.494 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+dR size 7
+wt size 7
+dR size 67
+wt size 67
+dR size 4
+wt size 4
+In table, EEC wt size is 7
+In table, EEC dR size is 7
+In table, EEC wt size is 67
+In table, EEC dR size is 67
+In table, EEC wt size is 4
+In table, EEC dR size is 4
+dR size 22
+wt size 22
+dR size 92
+wt size 92
+dR size 7
+wt size 7
+In table, EEC wt size is 22
+In table, EEC dR size is 22
+In table, EEC wt size is 92
+In table, EEC dR size is 92
+In table, EEC wt size is 7
+In table, EEC dR size is 7
+Flow matrix
+   1.0000   0.7636   0.0035        0
+        0        0   0.7472        0
+        0   0.1197        0        0
+        0   0.0645        0        0
+        0        0   0.2493        0
+        0   0.0507        0        0
+        0   0.0015        0   1.0000
+
+Reco vec
+   0.9274
+   0.0239
+   0.0181
+   0.0097
+   0.0080
+   0.0077
+   0.0052
+
+Gen vec
+   0.8119
+   0.1511
+   0.0320
+   0.0050
+
+F * G
+   0.9274
+   0.0239
+   0.0181
+   0.0097
+   0.0080
+   0.0077
+   0.0052
+
+F * 1s
+   1.7671
+   0.7472
+   0.1197
+   0.0645
+   0.2493
+   0.0507
+   1.0015
+
+Reco factor 1
+Gen factor 1
+
+
+Flow matrix
+        0   0.8887        0        0        0   0.5838        0        0        0        0        0        0
+   0.4999        0        0        0        0        0        0        0        0        0        0        0
+   0.1531   0.1113        0   0.6340        0        0        0        0        0        0        0        0
+   0.0352        0   1.0000        0        0        0        0        0        0        0   1.0000        0
+        0        0        0   0.3296   0.4066        0        0        0        0        0        0        0
+        0        0        0        0   0.0756        0   1.0000        0        0   1.0000        0        0
+        0        0        0        0   0.4625        0        0        0        0        0        0        0
+        0        0        0        0        0   0.4162        0        0   0.0296        0        0        0
+   0.1376        0        0        0        0        0        0        0        0        0        0        0
+   0.1157        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0   0.0364        0        0        0   1.0000        0        0        0        0
+   0.0586        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0   0.9704        0        0        0
+        0        0        0        0   0.0553        0        0        0        0        0        0   1.0000
+
+Reco vec
+   0.2378
+   0.1463
+   0.1351
+   0.1316
+   0.0766
+   0.0564
+   0.0471
+   0.0415
+   0.0403
+   0.0338
+   0.0183
+   0.0171
+   0.0096
+   0.0085
+
+Gen vec
+   0.2926
+   0.2024
+   0.1155
+   0.1069
+   0.1017
+   0.0991
+   0.0393
+   0.0144
+   0.0099
+   0.0093
+   0.0058
+   0.0029
+
+F * G
+   0.2378
+   0.1463
+   0.1351
+   0.1316
+   0.0766
+   0.0564
+   0.0471
+   0.0415
+   0.0403
+   0.0338
+   0.0183
+   0.0171
+   0.0096
+   0.0085
+
+F * 1s
+   1.4726
+   0.4999
+   0.8984
+   2.0352
+   0.7361
+   2.0756
+   0.4625
+   0.4457
+   0.1376
+   0.1157
+   1.0364
+   0.0586
+   0.9704
+   1.0553
+
+Reco factor 1
+Gen factor 1
+
+
+Flow matrix
+   0.9889        0        0
+   0.0111   0.9646        0
+        0   0.0354   0.9353
+        0        0   0.0647
+
+Reco vec
+   0.5007
+   0.2723
+   0.2130
+   0.0140
+
+Gen vec
+   0.5063
+   0.2765
+   0.2172
+
+F * G
+   0.5007
+   0.2723
+   0.2130
+   0.0140
+
+F * 1s
+   0.9889
+   0.9757
+   0.9707
+   0.0647
+
+Reco factor 1
+Gen factor 1
+
+
+Flow matrix
+   1.0000        0        0        0        0        0        0
+   0.7636        0   0.1197   0.0645        0   0.0507   0.0015
+   0.0035   0.7472        0        0   0.2493        0        0
+        0        0        0        0        0        0   1.0000
+
+EEC_G
+   0.2454   0.0519   0.0081   0.0097   0.0015   0.0003   0.6831
+
+EEC_R
+   4.4317e-02   3.3549e-02   1.8080e-02   1.4786e-02   1.4223e-02   9.6329e-03   8.6428e-04   4.6578e-04   3.8090e-04   3.6641e-04   2.4816e-04   3.5261e-04   2.8835e-04   2.7738e-04   1.8786e-04   1.5540e-04   1.4949e-04   1.0124e-04   1.2225e-04   8.2794e-05   7.9644e-05   8.6129e-01
+
+E_G
+   0.8119   0.1511   0.0320   0.0050
+
+E_R
+   0.9274   0.0239   0.0181   0.0097   0.0080   0.0077   0.0052
+
+F*E_G
+   0.9274   0.0239   0.0181   0.0097   0.0080   0.0077   0.0052
+
+Entering tuples clause
+RECO
+(0, 0) 0.86015
+(0, 1) 0.044317
+(0, 2) 0.033549
+(0, 3) 0.01808
+(0, 4) 0.014786
+(0, 5) 0.014223
+(0, 6) 0.0096329
+(1, 0) 0.044317
+(1, 1) 0.00057084
+(1, 2) 0.00086428
+(1, 3) 0.00046578
+(1, 4) 0.0003809
+(1, 5) 0.00036641
+(1, 6) 0.00024816
+(2, 0) 0.033549
+(2, 1) 0.00086428
+(2, 2) 0.00032714
+(2, 3) 0.00035261
+(2, 4) 0.00028835
+(2, 5) 0.00027738
+(2, 6) 0.00018786
+(3, 0) 0.01808
+(3, 1) 0.00046578
+(3, 2) 0.00035261
+(3, 3) 9.5013e-05
+(3, 4) 0.0001554
+(3, 5) 0.00014949
+(3, 6) 0.00010124
+(4, 0) 0.014786
+(4, 1) 0.0003809
+(4, 2) 0.00028835
+(4, 3) 0.0001554
+(4, 4) 6.3541e-05
+(4, 5) 0.00012225
+(4, 6) 8.2794e-05
+(5, 0) 0.014223
+(5, 1) 0.00036641
+(5, 2) 0.00027738
+(5, 3) 0.00014949
+(5, 4) 0.00012225
+(5, 5) 5.8799e-05
+(5, 6) 7.9644e-05
+(6, 0) 0.0096329
+(6, 1) 0.00024816
+(6, 2) 0.00018786
+(6, 3) 0.00010124
+(6, 4) 8.2794e-05
+(6, 5) 7.9644e-05
+(6, 6) 2.697e-05
+
+GEN
+(0, 0) 0.65922
+(0, 1) 0.24541
+(0, 2) 0.051925
+(0, 3) 0.0080717
+(1, 1) 0.022841
+(1, 2) 0.0096653
+(1, 3) 0.0015025
+(2, 2) 0.0010225
+(2, 3) 0.00031789
+(3, 3) 2.4708e-05
+About to enter big loop
+term like (0, 0)G x (0, 0)R -> 0.65922
+	(0)G -> (0)R
+term like (0, 1)G x (0, 0)R -> 0.1874
+	(0.029619)G -> (0)R
+term like (0, 2)G x (0, 0)R -> 0.00018336
+	(0.008714)G -> (0)R
+term like (1, 1)G x (0, 0)R -> 0.013319
+	(0)G -> (0)R
+term like (1, 2)G x (0, 0)R -> 2.6063e-05
+	(0.038035)G -> (0)R
+term like (2, 2)G x (0, 0)R -> 1.275e-08
+	(0)G -> (0)R
+term like (0, 2)G x (0, 1)R -> 0.038797
+	(0.008714)G -> (0.26393)R
+term like (1, 2)G x (0, 1)R -> 0.0055146
+	(0.038035)G -> (0.26393)R
+term like (2, 2)G x (0, 1)R -> 2.6978e-06
+	(0)G -> (0.26393)R
+term like (0, 1)G x (0, 2)R -> 0.02937
+	(0.029619)G -> (0.097726)R
+term like (1, 1)G x (0, 2)R -> 0.0020874
+	(0)G -> (0.097726)R
+term like (0, 1)G x (0, 3)R -> 0.015828
+	(0.029619)G -> (0.18015)R
+term like (1, 1)G x (0, 3)R -> 0.0011249
+	(0)G -> (0.18015)R
+term like (0, 2)G x (0, 4)R -> 0.012944
+	(0.008714)G -> (0.10971)R
+term like (1, 2)G x (0, 4)R -> 0.0018399
+	(0.038035)G -> (0.10971)R
+term like (2, 2)G x (0, 4)R -> 9.0009e-07
+	(0)G -> (0.10971)R
+term like (0, 1)G x (0, 5)R -> 0.012452
+	(0.029619)G -> (0.27078)R
+term like (1, 1)G x (0, 5)R -> 0.00088494
+	(0)G -> (0.27078)R
+term like (0, 1)G x (0, 6)R -> 0.00036129
+	(0.029619)G -> (0.36769)R
+term like (0, 3)G x (0, 6)R -> 0.0080717
+	(0.37021)G -> (0.36769)R
+term like (1, 1)G x (0, 6)R -> 2.5677e-05
+	(0)G -> (0.36769)R
+term like (1, 3)G x (0, 6)R -> 0.0011473
+	(0.36732)G -> (0.36769)R
+term like (2, 3)G x (0, 6)R -> 1.1226e-06
+	(0.37398)G -> (0.36769)R
+term like (2, 2)G x (1, 0)R -> 2.6978e-06
+	(0)G -> (0.26393)R
+term like (2, 2)G x (1, 1)R -> 0.00057084
+	(0)G -> (0)R
+term like (2, 2)G x (1, 4)R -> 0.00019045
+	(0)G -> (0.21545)R
+term like (2, 3)G x (1, 6)R -> 0.00023752
+	(0.37398)G -> (0.32868)R
+term like (1, 1)G x (2, 0)R -> 0.0020874
+	(0)G -> (0.097726)R
+term like (1, 2)G x (2, 0)R -> 4.0847e-06
+	(0.038035)G -> (0.097726)R
+term like (1, 2)G x (2, 1)R -> 0.00086428
+	(0.038035)G -> (0.33569)R
+term like (1, 1)G x (2, 2)R -> 0.00032714
+	(0)G -> (0)R
+term like (1, 1)G x (2, 3)R -> 0.0001763
+	(0)G -> (0.18036)R
+term like (1, 2)G x (2, 4)R -> 0.00028835
+	(0.038035)G -> (0.13087)R
+term like (1, 1)G x (2, 5)R -> 0.00013869
+	(0)G -> (0.34526)R
+term like (1, 1)G x (2, 6)R -> 4.0242e-06
+	(0)G -> (0.46411)R
+term like (1, 3)G x (2, 6)R -> 0.00017981
+	(0.36732)G -> (0.46411)R
+term like (1, 1)G x (3, 0)R -> 0.0011249
+	(0)G -> (0.18015)R
+term like (1, 2)G x (3, 0)R -> 2.2013e-06
+	(0.038035)G -> (0.18015)R
+term like (1, 2)G x (3, 1)R -> 0.00046578
+	(0.038035)G -> (0.43404)R
+term like (1, 1)G x (3, 2)R -> 0.0001763
+	(0)G -> (0.18036)R
+term like (1, 1)G x (3, 3)R -> 9.5013e-05
+	(0)G -> (0)R
+term like (1, 2)G x (3, 4)R -> 0.0001554
+	(0.038035)G -> (0.28199)R
+term like (1, 1)G x (3, 5)R -> 7.4744e-05
+	(0)G -> (0.23553)R
+term like (1, 1)G x (3, 6)R -> 2.1688e-06
+	(0)G -> (0.4235)R
+term like (1, 3)G x (3, 6)R -> 9.6905e-05
+	(0.36732)G -> (0.4235)R
+term like (2, 2)G x (4, 0)R -> 9.0009e-07
+	(0)G -> (0.10971)R
+term like (2, 2)G x (4, 1)R -> 0.00019045
+	(0)G -> (0.21545)R
+term like (2, 2)G x (4, 4)R -> 6.3541e-05
+	(0)G -> (0)R
+term like (2, 3)G x (4, 6)R -> 7.9246e-05
+	(0.37398)G -> (0.4221)R
+term like (1, 1)G x (5, 0)R -> 0.00088494
+	(0)G -> (0.27078)R
+term like (1, 2)G x (5, 0)R -> 1.7317e-06
+	(0.038035)G -> (0.27078)R
+term like (1, 2)G x (5, 1)R -> 0.00036641
+	(0.038035)G -> (0.39795)R
+term like (1, 1)G x (5, 2)R -> 0.00013869
+	(0)G -> (0.34526)R
+term like (1, 1)G x (5, 3)R -> 7.4744e-05
+	(0)G -> (0.23553)R
+term like (1, 2)G x (5, 4)R -> 0.00012225
+	(0.038035)G -> (0.36892)R
+term like (1, 1)G x (5, 5)R -> 5.8799e-05
+	(0)G -> (0)R
+term like (1, 1)G x (5, 6)R -> 1.7061e-06
+	(0)G -> (0.21825)R
+term like (1, 3)G x (5, 6)R -> 7.6232e-05
+	(0.36732)G -> (0.21825)R
+term like (1, 1)G x (6, 0)R -> 2.5677e-05
+	(0)G -> (0.36769)R
+term like (1, 2)G x (6, 0)R -> 5.0246e-08
+	(0.038035)G -> (0.36769)R
+term like (1, 2)G x (6, 1)R -> 1.0632e-05
+	(0.038035)G -> (0.32868)R
+term like (1, 1)G x (6, 2)R -> 4.0242e-06
+	(0)G -> (0.46411)R
+term like (1, 1)G x (6, 3)R -> 2.1688e-06
+	(0)G -> (0.4235)R
+term like (1, 2)G x (6, 4)R -> 3.5471e-06
+	(0.038035)G -> (0.4221)R
+term like (1, 1)G x (6, 5)R -> 1.7061e-06
+	(0)G -> (0.21825)R
+term like (1, 1)G x (6, 6)R -> 4.9503e-08
+	(0)G -> (0)R
+term like (1, 3)G x (6, 6)R -> 2.2119e-06
+	(0.36732)G -> (0)R
+term like (3, 3)G x (6, 6)R -> 2.4708e-05
+	(0)G -> (0)R
+
+TESTWTS
+(0, 0) 0.86015
+(0, 1) 0.044317
+(0, 2) 0.033549
+(0, 3) 0.01808
+(0, 4) 0.014786
+(0, 5) 0.014223
+(0, 6) 0.0096329
+(1, 0) 0.044317
+(1, 1) 0.00057084
+(1, 2) 0.00086428
+(1, 3) 0.00046578
+(1, 4) 0.0003809
+(1, 5) 0.00036641
+(1, 6) 0.00024816
+(2, 0) 0.033549
+(2, 1) 0.00086428
+(2, 2) 0.00032714
+(2, 3) 0.00035261
+(2, 4) 0.00028835
+(2, 5) 0.00027738
+(2, 6) 0.00018786
+(3, 0) 0.01808
+(3, 1) 0.00046578
+(3, 2) 0.00035261
+(3, 3) 9.5013e-05
+(3, 4) 0.0001554
+(3, 5) 0.00014949
+(3, 6) 0.00010124
+(4, 0) 0.014786
+(4, 1) 0.0003809
+(4, 2) 0.00028835
+(4, 3) 0.0001554
+(4, 4) 6.3541e-05
+(4, 5) 0.00012225
+(4, 6) 8.2794e-05
+(5, 0) 0.014223
+(5, 1) 0.00036641
+(5, 2) 0.00027738
+(5, 3) 0.00014949
+(5, 4) 0.00012225
+(5, 5) 5.8799e-05
+(5, 6) 7.9644e-05
+(6, 0) 0.0096329
+(6, 1) 0.00024816
+(6, 2) 0.00018786
+(6, 3) 0.00010124
+(6, 4) 8.2794e-05
+(6, 5) 7.9644e-05
+(6, 6) 2.697e-05
+Ending tuples clause
+Flow matrix
+        0   0.4999   0.1531   0.0352        0        0        0        0   0.1376   0.1157        0   0.0586        0        0
+   0.8887        0   0.1113        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0   1.0000        0        0        0        0        0        0        0        0        0        0
+        0        0   0.6340        0   0.3296        0        0        0        0        0   0.0364        0        0        0
+        0        0        0        0   0.4066   0.0756   0.4625        0        0        0        0        0        0   0.0553
+   0.5838        0        0        0        0        0        0   0.4162        0        0        0        0        0        0
+        0        0        0        0        0   1.0000        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0   1.0000        0        0        0
+        0        0        0        0        0        0        0   0.0296        0        0        0        0   0.9704        0
+        0        0        0        0        0   1.0000        0        0        0        0        0        0        0        0
+        0        0        0   1.0000        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0   1.0000
+
+EEC_G
+   1.1847e-01   6.7615e-02   6.2580e-02   5.9546e-02   5.8014e-02   2.3018e-02   8.4206e-03   5.7701e-03   5.4691e-03   3.4089e-03   1.6810e-03   4.6773e-02   4.3290e-02   4.1191e-02   4.0131e-02   1.5923e-02   5.8249e-03   3.9915e-03   3.7832e-03   2.3581e-03   1.1628e-03   2.4707e-02   2.3510e-02   2.2905e-02   9.0878e-03   3.3246e-03   2.2781e-03   2.1593e-03   1.3459e-03   6.6368e-04   2.1759e-02   2.1199e-02   8.4111e-03   3.0770e-03   2.1085e-03   1.9985e-03   1.2457e-03   6.1426e-04   2.0171e-02   8.0033e-03   2.9278e-03   2.0063e-03   1.9016e-03   1.1853e-03   5.8448e-04   7.7974e-03   2.8525e-03   1.9546e-03   1.8527e-03   1.1548e-03   5.6944e-04   1.1318e-03   7.7553e-04   7.3507e-04   4.5817e-04   2.2593e-04   2.8371e-04   2.6891e-04   1.6761e-04   8.2653e-05   1.8427e-04   1.1485e-04   5.6637e-05   1.0886e-04   5.3682e-05   3.3460e-05   1.7354e-01
+
+EEC_R
+   0.0696   0.0643   0.0626   0.0364   0.0268   0.0224   0.0198   0.0192   0.0161   0.0087   0.0082   0.0045   0.0040   0.0395   0.0385   0.0224   0.0165   0.0138   0.0122   0.0118   0.0099   0.0053   0.0050   0.0028   0.0025   0.0356   0.0207   0.0152   0.0127   0.0112   0.0109   0.0091   0.0049   0.0046   0.0026   0.0023   0.0202   0.0148   0.0124   0.0109   0.0106   0.0089   0.0048   0.0045   0.0025   0.0022   0.0086   0.0072   0.0064   0.0062   0.0052   0.0028   0.0026   0.0015   0.0013   0.0053   0.0047   0.0045   0.0038   0.0021   0.0019   0.0011   0.0010   0.0039   0.0038   0.0032   0.0017   0.0016   0.0009   0.0008   0.0033   0.0028   0.0015   0.0014   0.0008   0.0007   0.0027   0.0015   0.0014   0.0008   0.0007   0.0012   0.0012   0.0006   0.0006   0.0006   0.0003   0.0003   0.0003   0.0003   0.0002   0.1301
+
+E_G
+   0.2926   0.2024   0.1155   0.1069   0.1017   0.0991   0.0393   0.0144   0.0099   0.0093   0.0058   0.0029
+
+E_R
+   0.2378   0.1463   0.1351   0.1316   0.0766   0.0564   0.0471   0.0415   0.0403   0.0338   0.0183   0.0171   0.0096   0.0085
+
+F*E_G
+   0.2378   0.1463   0.1351   0.1316   0.0766   0.0564   0.0471   0.0415   0.0403   0.0338   0.0183   0.0171   0.0096   0.0085
+
+Entering tuples clause
+RECO
+(0, 0) 0.056536
+(0, 1) 0.069558
+(0, 2) 0.064254
+(0, 3) 0.062602
+(0, 4) 0.036431
+(0, 5) 0.026807
+(0, 6) 0.022376
+(0, 7) 0.019756
+(0, 8) 0.019152
+(0, 9) 0.016095
+(0, 10) 0.0086947
+(0, 11) 0.0081548
+(0, 12) 0.0045498
+(0, 13) 0.0040436
+(1, 0) 0.069558
+(1, 1) 0.021395
+(1, 2) 0.039527
+(1, 3) 0.038511
+(1, 4) 0.022411
+(1, 5) 0.016491
+(1, 6) 0.013765
+(1, 7) 0.012153
+(1, 8) 0.011782
+(1, 9) 0.0099013
+(1, 10) 0.0053487
+(1, 11) 0.0050166
+(1, 12) 0.0027989
+(1, 13) 0.0024875
+(2, 0) 0.064254
+(2, 1) 0.039527
+(2, 2) 0.018256
+(2, 3) 0.035574
+(2, 4) 0.020702
+(2, 5) 0.015233
+(2, 6) 0.012715
+(2, 7) 0.011226
+(2, 8) 0.010883
+(2, 9) 0.0091462
+(2, 10) 0.0049409
+(2, 11) 0.004634
+(2, 12) 0.0025855
+(2, 13) 0.0022978
+(3, 0) 0.062602
+(3, 1) 0.038511
+(3, 2) 0.035574
+(3, 3) 0.01733
+(3, 4) 0.02017
+(3, 5) 0.014842
+(3, 6) 0.012389
+(3, 7) 0.010938
+(3, 8) 0.010604
+(3, 9) 0.0089111
+(3, 10) 0.0048139
+(3, 11) 0.0045149
+(3, 12) 0.002519
+(3, 13) 0.0022388
+(4, 0) 0.036431
+(4, 1) 0.022411
+(4, 2) 0.020702
+(4, 3) 0.02017
+(4, 4) 0.0058688
+(4, 5) 0.0086369
+(4, 6) 0.0072094
+(4, 7) 0.0063651
+(4, 8) 0.0061707
+(4, 9) 0.0051857
+(4, 10) 0.0028014
+(4, 11) 0.0026274
+(4, 12) 0.0014659
+(4, 13) 0.0013028
+(5, 0) 0.026807
+(5, 1) 0.016491
+(5, 2) 0.015233
+(5, 3) 0.014842
+(5, 4) 0.0086369
+(5, 5) 0.0031777
+(5, 6) 0.0053049
+(5, 7) 0.0046837
+(5, 8) 0.0045406
+(5, 9) 0.0038158
+(5, 10) 0.0020613
+(5, 11) 0.0019333
+(5, 12) 0.0010787
+(5, 13) 0.00095866
+(6, 0) 0.022376
+(6, 1) 0.013765
+(6, 2) 0.012715
+(6, 3) 0.012389
+(6, 4) 0.0072094
+(6, 5) 0.0053049
+(6, 6) 0.002214
+(6, 7) 0.0039095
+(6, 8) 0.0037901
+(6, 9) 0.0031851
+(6, 10) 0.0017206
+(6, 11) 0.0016138
+(6, 12) 0.00090038
+(6, 13) 0.00080021
+(7, 0) 0.019756
+(7, 1) 0.012153
+(7, 2) 0.011226
+(7, 3) 0.010938
+(7, 4) 0.0063651
+(7, 5) 0.0046837
+(7, 6) 0.0039095
+(7, 7) 0.0017258
+(7, 8) 0.0033463
+(7, 9) 0.0028121
+(7, 10) 0.0015191
+(7, 11) 0.0014248
+(7, 12) 0.00079495
+(7, 13) 0.0007065
+(8, 0) 0.019152
+(8, 1) 0.011782
+(8, 2) 0.010883
+(8, 3) 0.010604
+(8, 4) 0.0061707
+(8, 5) 0.0045406
+(8, 6) 0.0037901
+(8, 7) 0.0033463
+(8, 8) 0.001622
+(8, 9) 0.0027262
+(8, 10) 0.0014727
+(8, 11) 0.0013813
+(8, 12) 0.00077066
+(8, 13) 0.00068492
+(9, 0) 0.016095
+(9, 1) 0.0099013
+(9, 2) 0.0091462
+(9, 3) 0.0089111
+(9, 4) 0.0051857
+(9, 5) 0.0038158
+(9, 6) 0.0031851
+(9, 7) 0.0028121
+(9, 8) 0.0027262
+(9, 9) 0.0011455
+(9, 10) 0.0012377
+(9, 11) 0.0011608
+(9, 12) 0.00064765
+(9, 13) 0.0005756
+(10, 0) 0.0086947
+(10, 1) 0.0053487
+(10, 2) 0.0049409
+(10, 3) 0.0048139
+(10, 4) 0.0028014
+(10, 5) 0.0020613
+(10, 6) 0.0017206
+(10, 7) 0.0015191
+(10, 8) 0.0014727
+(10, 9) 0.0012377
+(10, 10) 0.0003343
+(10, 11) 0.00062707
+(10, 12) 0.00034987
+(10, 13) 0.00031094
+(11, 0) 0.0081548
+(11, 1) 0.0050166
+(11, 2) 0.004634
+(11, 3) 0.0045149
+(11, 4) 0.0026274
+(11, 5) 0.0019333
+(11, 6) 0.0016138
+(11, 7) 0.0014248
+(11, 8) 0.0013813
+(11, 9) 0.0011608
+(11, 10) 0.00062707
+(11, 11) 0.00029406
+(11, 12) 0.00032814
+(11, 13) 0.00029163
+(12, 0) 0.0045498
+(12, 1) 0.0027989
+(12, 2) 0.0025855
+(12, 3) 0.002519
+(12, 4) 0.0014659
+(12, 5) 0.0010787
+(12, 6) 0.00090038
+(12, 7) 0.00079495
+(12, 8) 0.00077066
+(12, 9) 0.00064765
+(12, 10) 0.00034987
+(12, 11) 0.00032814
+(12, 12) 9.154e-05
+(12, 13) 0.00016271
+(13, 0) 0.0040436
+(13, 1) 0.0024875
+(13, 2) 0.0022978
+(13, 3) 0.0022388
+(13, 4) 0.0013028
+(13, 5) 0.00095866
+(13, 6) 0.00080021
+(13, 7) 0.0007065
+(13, 8) 0.00068492
+(13, 9) 0.0005756
+(13, 10) 0.00031094
+(13, 11) 0.00029163
+(13, 12) 0.00016271
+(13, 13) 7.2304e-05
+
+GEN
+(0, 0) 0.085629
+(0, 1) 0.11847
+(0, 2) 0.067615
+(0, 3) 0.06258
+(0, 4) 0.059546
+(0, 5) 0.058014
+(0, 6) 0.023018
+(0, 7) 0.0084206
+(0, 8) 0.0057701
+(0, 9) 0.0054691
+(0, 10) 0.0034089
+(0, 11) 0.001681
+(1, 1) 0.040975
+(1, 2) 0.046773
+(1, 3) 0.04329
+(1, 4) 0.041191
+(1, 5) 0.040131
+(1, 6) 0.015923
+(1, 7) 0.0058249
+(1, 8) 0.0039915
+(1, 9) 0.0037832
+(1, 10) 0.0023581
+(1, 11) 0.0011628
+(2, 2) 0.013348
+(2, 3) 0.024707
+(2, 4) 0.02351
+(2, 5) 0.022905
+(2, 6) 0.0090878
+(2, 7) 0.0033246
+(2, 8) 0.0022781
+(2, 9) 0.0021593
+(2, 10) 0.0013459
+(2, 11) 0.00066368
+(3, 3) 0.011434
+(3, 4) 0.021759
+(3, 5) 0.021199
+(3, 6) 0.0084111
+(3, 7) 0.003077
+(3, 8) 0.0021085
+(3, 9) 0.0019985
+(3, 10) 0.0012457
+(3, 11) 0.00061426
+(4, 4) 0.010352
+(4, 5) 0.020171
+(4, 6) 0.0080033
+(4, 7) 0.0029278
+(4, 8) 0.0020063
+(4, 9) 0.0019016
+(4, 10) 0.0011853
+(4, 11) 0.00058448
+(5, 5) 0.0098262
+(5, 6) 0.0077974
+(5, 7) 0.0028525
+(5, 8) 0.0019546
+(5, 9) 0.0018527
+(5, 10) 0.0011548
+(5, 11) 0.00056944
+(6, 6) 0.0015469
+(6, 7) 0.0011318
+(6, 8) 0.00077553
+(6, 9) 0.00073507
+(6, 10) 0.00045817
+(6, 11) 0.00022593
+(7, 7) 0.00020702
+(7, 8) 0.00028371
+(7, 9) 0.00026891
+(7, 10) 0.00016761
+(7, 11) 8.2653e-05
+(8, 8) 9.7205e-05
+(8, 9) 0.00018427
+(8, 10) 0.00011485
+(8, 11) 5.6637e-05
+(9, 9) 8.7328e-05
+(9, 10) 0.00010886
+(9, 11) 5.3682e-05
+(10, 10) 3.3927e-05
+(10, 11) 3.346e-05
+(11, 11) 8.25e-06
+About to enter big loop
+term like (1, 1)G x (0, 0)R -> 0.032363
+	(0)G -> (0)R
+term like (1, 5)G x (0, 0)R -> 0.020823
+	(0.072188)G -> (0)R
+term like (5, 5)G x (0, 0)R -> 0.0033495
+	(0)G -> (0)R
+term like (1, 1)G x (0, 2)R -> 0.0040522
+	(0)G -> (0.03905)R
+term like (1, 3)G x (0, 2)R -> 0.024391
+	(0.038575)G -> (0.03905)R
+term like (1, 2)G x (0, 3)R -> 0.041568
+	(0.050865)G -> (0.052128)R
+term like (1, 10)G x (0, 3)R -> 0.0020957
+	(0.053888)G -> (0.052128)R
+term like (5, 10)G x (0, 3)R -> 0.00067421
+	(0.070888)G -> (0.052128)R
+term like (1, 3)G x (0, 4)R -> 0.01268
+	(0.038575)G -> (0.13671)R
+term like (1, 4)G x (0, 4)R -> 0.014883
+	(0.14936)G -> (0.13671)R
+term like (1, 4)G x (0, 5)R -> 0.0027688
+	(0.14936)G -> (0.19375)R
+term like (1, 6)G x (0, 5)R -> 0.014151
+	(0.19421)G -> (0.19375)R
+term like (1, 9)G x (0, 5)R -> 0.0033622
+	(0.20863)G -> (0.19375)R
+term like (5, 6)G x (0, 5)R -> 0.0045525
+	(0.21879)G -> (0.19375)R
+term like (5, 9)G x (0, 5)R -> 0.0010817
+	(0.20066)G -> (0.19375)R
+term like (1, 4)G x (0, 6)R -> 0.01693
+	(0.14936)G -> (0.14662)R
+term like (1, 5)G x (0, 7)R -> 0.014842
+	(0.072188)G -> (0.10556)R
+term like (1, 8)G x (0, 7)R -> 0.00010492
+	(0.20552)G -> (0.10556)R
+term like (5, 5)G x (0, 7)R -> 0.0023875
+	(0)G -> (0.10556)R
+term like (5, 8)G x (0, 7)R -> 3.3753e-05
+	(0.14101)G -> (0.10556)R
+term like (1, 3)G x (0, 10)R -> 0.0014016
+	(0.038575)G -> (0.40018)R
+term like (1, 7)G x (0, 10)R -> 0.0051768
+	(0.046868)G -> (0.40018)R
+term like (5, 7)G x (0, 10)R -> 0.0016654
+	(0.10089)G -> (0.40018)R
+term like (1, 8)G x (0, 12)R -> 0.0034424
+	(0.20552)G -> (0.20612)R
+term like (5, 8)G x (0, 12)R -> 0.0011075
+	(0.14101)G -> (0.20612)R
+term like (1, 4)G x (0, 13)R -> 0.002026
+	(0.14936)G -> (0.15499)R
+term like (1, 11)G x (0, 13)R -> 0.0010334
+	(0.25412)G -> (0.15499)R
+term like (5, 11)G x (0, 13)R -> 0.00033247
+	(0.1871)G -> (0.15499)R
+term like (0, 1)G x (1, 0)R -> 0.052627
+	(0.016462)G -> (0.026978)R
+term like (0, 5)G x (1, 0)R -> 0.016931
+	(0.084707)G -> (0.026978)R
+term like (0, 0)G x (1, 1)R -> 0.021395
+	(0)G -> (0)R
+term like (0, 0)G x (1, 2)R -> 0.006553
+	(0)G -> (0.027655)R
+term like (0, 1)G x (1, 2)R -> 0.0065895
+	(0.016462)G -> (0.027655)R
+term like (0, 3)G x (1, 2)R -> 0.019831
+	(0.0392)G -> (0.027655)R
+term like (0, 0)G x (1, 3)R -> 0.0015045
+	(0)G -> (0.049629)R
+term like (0, 2)G x (1, 3)R -> 0.033798
+	(0.038662)G -> (0.049629)R
+term like (0, 10)G x (1, 3)R -> 0.001704
+	(0.05034)G -> (0.049629)R
+term like (0, 3)G x (1, 4)R -> 0.01031
+	(0.0392)G -> (0.13718)R
+term like (0, 4)G x (1, 4)R -> 0.012101
+	(0.16579)G -> (0.13718)R
+term like (0, 4)G x (1, 5)R -> 0.0022513
+	(0.16579)G -> (0.19554)R
+term like (0, 6)G x (1, 5)R -> 0.011506
+	(0.20396)G -> (0.19554)R
+term like (0, 9)G x (1, 5)R -> 0.0027338
+	(0.22316)G -> (0.19554)R
+term like (0, 4)G x (1, 6)R -> 0.013765
+	(0.16579)G -> (0.15269)R
+term like (0, 5)G x (1, 7)R -> 0.012068
+	(0.084707)G -> (0.13234)R
+term like (0, 8)G x (1, 7)R -> 8.5304e-05
+	(0.21268)G -> (0.13234)R
+term like (0, 0)G x (1, 8)R -> 0.0058909
+	(0)G -> (0.031151)R
+term like (0, 0)G x (1, 9)R -> 0.0049506
+	(0)G -> (0.012185)R
+term like (0, 3)G x (1, 10)R -> 0.0011396
+	(0.0392)G -> (0.3732)R
+term like (0, 7)G x (1, 10)R -> 0.0042091
+	(0.032085)G -> (0.3732)R
+term like (0, 0)G x (1, 11)R -> 0.0025083
+	(0)G -> (0.042086)R
+term like (0, 8)G x (1, 12)R -> 0.0027989
+	(0.21268)G -> (0.2287)R
+term like (0, 4)G x (1, 13)R -> 0.0016473
+	(0.16579)G -> (0.18109)R
+term like (0, 11)G x (1, 13)R -> 0.00084026
+	(0.26901)G -> (0.18109)R
+term like (0, 1)G x (2, 0)R -> 0.016119
+	(0.016462)G -> (0.03905)R
+term like (0, 5)G x (2, 0)R -> 0.0051857
+	(0.084707)G -> (0.03905)R
+term like (1, 1)G x (2, 0)R -> 0.0040522
+	(0)G -> (0.03905)R
+term like (1, 5)G x (2, 0)R -> 0.0026073
+	(0.072188)G -> (0.03905)R
+term like (3, 5)G x (2, 0)R -> 0.0078468
+	(0.10603)G -> (0.03905)R
+term like (0, 0)G x (2, 1)R -> 0.006553
+	(0)G -> (0.027655)R
+term like (0, 0)G x (2, 2)R -> 0.0020071
+	(0)G -> (0)R
+term like (0, 1)G x (2, 2)R -> 0.0020183
+	(0.016462)G -> (0)R
+term like (0, 3)G x (2, 2)R -> 0.0060741
+	(0.0392)G -> (0)R
+term like (1, 1)G x (2, 2)R -> 0.00050738
+	(0)G -> (0)R
+term like (1, 3)G x (2, 2)R -> 0.003054
+	(0.038575)G -> (0)R
+term like (3, 3)G x (2, 2)R -> 0.0045955
+	(0)G -> (0)R
+term like (0, 0)G x (2, 3)R -> 0.00046082
+	(0)G -> (0.077068)R
+term like (0, 2)G x (2, 3)R -> 0.010352
+	(0.038662)G -> (0.077068)R
+term like (0, 10)G x (2, 3)R -> 0.0005219
+	(0.05034)G -> (0.077068)R
+term like (1, 2)G x (2, 3)R -> 0.0052047
+	(0.050865)G -> (0.077068)R
+term like (1, 10)G x (2, 3)R -> 0.0002624
+	(0.053888)G -> (0.077068)R
+term like (3, 10)G x (2, 3)R -> 0.00078972
+	(0.089141)G -> (0.077068)R
+term like (0, 3)G x (2, 4)R -> 0.0031578
+	(0.0392)G -> (0.10985)R
+term like (0, 4)G x (2, 4)R -> 0.0037064
+	(0.16579)G -> (0.10985)R
+term like (1, 3)G x (2, 4)R -> 0.0015877
+	(0.038575)G -> (0.10985)R
+term like (1, 4)G x (2, 4)R -> 0.0018635
+	(0.14936)G -> (0.10985)R
+term like (3, 3)G x (2, 4)R -> 0.0023891
+	(0)G -> (0.10985)R
+term like (3, 4)G x (2, 4)R -> 0.0056084
+	(0.16325)G -> (0.10985)R
+term like (0, 4)G x (2, 5)R -> 0.00068954
+	(0.16579)G -> (0.16827)R
+term like (0, 6)G x (2, 5)R -> 0.003524
+	(0.20396)G -> (0.16827)R
+term like (0, 9)G x (2, 5)R -> 0.00083731
+	(0.22316)G -> (0.16827)R
+term like (1, 4)G x (2, 5)R -> 0.00034669
+	(0.14936)G -> (0.16827)R
+term like (1, 6)G x (2, 5)R -> 0.0017718
+	(0.19421)G -> (0.16827)R
+term like (1, 9)G x (2, 5)R -> 0.00042099
+	(0.20863)G -> (0.16827)R
+term like (3, 4)G x (2, 5)R -> 0.0010434
+	(0.16325)G -> (0.16827)R
+term like (3, 6)G x (2, 5)R -> 0.0053324
+	(0.16887)G -> (0.16827)R
+term like (3, 9)G x (2, 5)R -> 0.001267
+	(0.19943)G -> (0.16827)R
+term like (0, 4)G x (2, 6)R -> 0.004216
+	(0.16579)G -> (0.1269)R
+term like (1, 4)G x (2, 6)R -> 0.0021198
+	(0.14936)G -> (0.1269)R
+term like (3, 4)G x (2, 6)R -> 0.0063796
+	(0.16325)G -> (0.1269)R
+term like (0, 5)G x (2, 7)R -> 0.0036962
+	(0.084707)G -> (0.13868)R
+term like (0, 8)G x (2, 7)R -> 2.6128e-05
+	(0.21268)G -> (0.13868)R
+term like (1, 5)G x (2, 7)R -> 0.0018584
+	(0.072188)G -> (0.13868)R
+term like (1, 8)G x (2, 7)R -> 1.3137e-05
+	(0.20552)G -> (0.13868)R
+term like (3, 5)G x (2, 7)R -> 0.005593
+	(0.10603)G -> (0.13868)R
+term like (3, 8)G x (2, 7)R -> 3.9535e-05
+	(0.24318)G -> (0.13868)R
+term like (0, 0)G x (2, 8)R -> 0.0018043
+	(0)G -> (0.058632)R
+term like (0, 0)G x (2, 9)R -> 0.0015163
+	(0)G -> (0.039587)R
+term like (0, 3)G x (2, 10)R -> 0.00034905
+	(0.0392)G -> (0.37365)R
+term like (0, 7)G x (2, 10)R -> 0.0012892
+	(0.032085)G -> (0.37365)R
+term like (1, 3)G x (2, 10)R -> 0.0001755
+	(0.038575)G -> (0.37365)R
+term like (1, 7)G x (2, 10)R -> 0.00064819
+	(0.046868)G -> (0.37365)R
+term like (3, 3)G x (2, 10)R -> 0.00026409
+	(0)G -> (0.37365)R
+term like (3, 7)G x (2, 10)R -> 0.0019508
+	(0.066218)G -> (0.37365)R
+term like (0, 0)G x (2, 11)R -> 0.00076825
+	(0)G -> (0.065984)R
+term like (0, 8)G x (2, 12)R -> 0.00085727
+	(0.21268)G -> (0.24468)R
+term like (1, 8)G x (2, 12)R -> 0.00043102
+	(0.20552)G -> (0.24468)R
+term like (3, 8)G x (2, 12)R -> 0.0012972
+	(0.24318)G -> (0.24468)R
+term like (0, 4)G x (2, 13)R -> 0.00050454
+	(0.16579)G -> (0.1773)R
+term like (0, 11)G x (2, 13)R -> 0.00025736
+	(0.26901)G -> (0.1773)R
+term like (1, 4)G x (2, 13)R -> 0.00025367
+	(0.14936)G -> (0.1773)R
+term like (1, 11)G x (2, 13)R -> 0.0001294
+	(0.25412)G -> (0.1773)R
+term like (3, 4)G x (2, 13)R -> 0.00076345
+	(0.16325)G -> (0.1773)R
+term like (3, 11)G x (2, 13)R -> 0.00038943
+	(0.27859)G -> (0.1773)R
+term like (0, 1)G x (3, 0)R -> 0.0037008
+	(0.016462)G -> (0.052128)R
+term like (0, 5)G x (3, 0)R -> 0.0011906
+	(0.084707)G -> (0.052128)R
+term like (2, 5)G x (3, 0)R -> 0.013373
+	(0.095214)G -> (0.052128)R
+term like (0, 0)G x (3, 1)R -> 0.0015045
+	(0)G -> (0.049629)R
+term like (0, 0)G x (3, 2)R -> 0.00046082
+	(0)G -> (0.077068)R
+term like (0, 1)G x (3, 2)R -> 0.00046338
+	(0.016462)G -> (0.077068)R
+term like (0, 3)G x (3, 2)R -> 0.0013946
+	(0.0392)G -> (0.077068)R
+term like (2, 3)G x (3, 2)R -> 0.015664
+	(0.075889)G -> (0.077068)R
+term like (0, 0)G x (3, 3)R -> 0.0001058
+	(0)G -> (0)R
+term like (0, 2)G x (3, 3)R -> 0.0023767
+	(0.038662)G -> (0)R
+term like (0, 10)G x (3, 3)R -> 0.00011983
+	(0.05034)G -> (0)R
+term like (2, 2)G x (3, 3)R -> 0.013348
+	(0)G -> (0)R
+term like (2, 10)G x (3, 3)R -> 0.0013459
+	(0.030186)G -> (0)R
+term like (10, 10)G x (3, 3)R -> 3.3927e-05
+	(0)G -> (0)R
+term like (0, 3)G x (3, 4)R -> 0.00072501
+	(0.0392)G -> (0.18524)R
+term like (0, 4)G x (3, 4)R -> 0.00085096
+	(0.16579)G -> (0.18524)R
+term like (2, 3)G x (3, 4)R -> 0.0081434
+	(0.075889)G -> (0.18524)R
+term like (2, 4)G x (3, 4)R -> 0.0095581
+	(0.19126)G -> (0.18524)R
+term like (0, 4)G x (3, 5)R -> 0.00015831
+	(0.16579)G -> (0.24324)R
+term like (0, 6)G x (3, 5)R -> 0.0008091
+	(0.20396)G -> (0.24324)R
+term like (0, 9)G x (3, 5)R -> 0.00019224
+	(0.22316)G -> (0.24324)R
+term like (2, 4)G x (3, 5)R -> 0.0017782
+	(0.19126)G -> (0.24324)R
+term like (2, 6)G x (3, 5)R -> 0.0090878
+	(0.24261)G -> (0.24324)R
+term like (2, 9)G x (3, 5)R -> 0.0021593
+	(0.25924)G -> (0.24324)R
+term like (0, 4)G x (3, 6)R -> 0.00096798
+	(0.16579)G -> (0.19783)R
+term like (2, 4)G x (3, 6)R -> 0.010872
+	(0.19126)G -> (0.19783)R
+term like (0, 5)G x (3, 7)R -> 0.00084863
+	(0.084707)G -> (0.12752)R
+term like (0, 8)G x (3, 7)R -> 5.9987e-06
+	(0.21268)G -> (0.12752)R
+term like (2, 5)G x (3, 7)R -> 0.0095318
+	(0.095214)G -> (0.12752)R
+term like (2, 8)G x (3, 7)R -> 6.7378e-05
+	(0.20139)G -> (0.12752)R
+term like (0, 0)G x (3, 8)R -> 0.00041426
+	(0)G -> (0.022119)R
+term like (0, 0)G x (3, 9)R -> 0.00034814
+	(0)G -> (0.038705)R
+term like (0, 3)G x (3, 10)R -> 8.0141e-05
+	(0.0392)G -> (0.38506)R
+term like (0, 7)G x (3, 10)R -> 0.00029599
+	(0.032085)G -> (0.38506)R
+term like (2, 3)G x (3, 10)R -> 0.00090015
+	(0.075889)G -> (0.38506)R
+term like (2, 7)G x (3, 10)R -> 0.0033246
+	(0.01275)G -> (0.38506)R
+term like (0, 0)G x (3, 11)R -> 0.00017639
+	(0)G -> (0.037647)R
+term like (0, 8)G x (3, 12)R -> 0.00019682
+	(0.21268)G -> (0.19935)R
+term like (2, 8)G x (3, 12)R -> 0.0022107
+	(0.20139)G -> (0.19935)R
+term like (0, 4)G x (3, 13)R -> 0.00011584
+	(0.16579)G -> (0.19051)R
+term like (0, 11)G x (3, 13)R -> 5.9088e-05
+	(0.26901)G -> (0.19051)R
+term like (2, 4)G x (3, 13)R -> 0.0013011
+	(0.19126)G -> (0.19051)R
+term like (2, 11)G x (3, 13)R -> 0.00066368
+	(0.28195)G -> (0.19051)R
+term like (10, 11)G x (3, 13)R -> 3.346e-05
+	(0.25528)G -> (0.19051)R
+term like (3, 5)G x (4, 0)R -> 0.0040794
+	(0.10603)G -> (0.13671)R
+term like (4, 5)G x (4, 0)R -> 0.0047881
+	(0.10525)G -> (0.13671)R
+term like (3, 3)G x (4, 2)R -> 0.0023891
+	(0)G -> (0.10985)R
+term like (3, 10)G x (4, 3)R -> 0.00041056
+	(0.089141)G -> (0.18524)R
+term like (4, 10)G x (4, 3)R -> 0.00048188
+	(0.17291)G -> (0.18524)R
+term like (3, 3)G x (4, 4)R -> 0.0012421
+	(0)G -> (0)R
+term like (3, 4)G x (4, 4)R -> 0.0029157
+	(0.16325)G -> (0)R
+term like (4, 4)G x (4, 4)R -> 0.0017111
+	(0)G -> (0)R
+term like (3, 4)G x (4, 5)R -> 0.00054243
+	(0.16325)G -> (0.058442)R
+term like (3, 6)G x (4, 5)R -> 0.0027722
+	(0.16887)G -> (0.058442)R
+term like (3, 9)G x (4, 5)R -> 0.00065868
+	(0.19943)G -> (0.058442)R
+term like (4, 4)G x (4, 5)R -> 0.00031833
+	(0)G -> (0.058442)R
+term like (4, 6)G x (4, 5)R -> 0.0032538
+	(0.17572)G -> (0.058442)R
+term like (4, 9)G x (4, 5)R -> 0.00077311
+	(0.11736)G -> (0.058442)R
+term like (3, 4)G x (4, 6)R -> 0.0033166
+	(0.16325)G -> (0.032535)R
+term like (4, 4)G x (4, 6)R -> 0.0019464
+	(0)G -> (0.032535)R
+term like (3, 5)G x (4, 7)R -> 0.0029076
+	(0.10603)G -> (0.18996)R
+term like (3, 8)G x (4, 7)R -> 2.0553e-05
+	(0.24318)G -> (0.18996)R
+term like (4, 5)G x (4, 7)R -> 0.0034128
+	(0.10525)G -> (0.18996)R
+term like (4, 8)G x (4, 7)R -> 2.4124e-05
+	(0.18909)G -> (0.18996)R
+term like (3, 3)G x (4, 10)R -> 0.00013729
+	(0)G -> (0.4123)R
+term like (3, 7)G x (4, 10)R -> 0.0010142
+	(0.066218)G -> (0.4123)R
+term like (4, 7)G x (4, 10)R -> 0.0011903
+	(0.19272)G -> (0.4123)R
+term like (3, 8)G x (4, 12)R -> 0.00067438
+	(0.24318)G -> (0.3119)R
+term like (4, 8)G x (4, 12)R -> 0.00079154
+	(0.18909)G -> (0.3119)R
+term like (3, 4)G x (4, 13)R -> 0.0003969
+	(0.16325)G -> (0.1858)R
+term like (3, 11)G x (4, 13)R -> 0.00020245
+	(0.27859)G -> (0.1858)R
+term like (4, 4)G x (4, 13)R -> 0.00023292
+	(0)G -> (0.1858)R
+term like (4, 11)G x (4, 13)R -> 0.00023763
+	(0.12799)G -> (0.1858)R
+term like (4, 5)G x (5, 0)R -> 0.00089077
+	(0.10525)G -> (0.19375)R
+term like (4, 10)G x (5, 3)R -> 8.965e-05
+	(0.17291)G -> (0.24324)R
+term like (6, 10)G x (5, 3)R -> 0.00045817
+	(0.24697)G -> (0.24324)R
+term like (9, 10)G x (5, 3)R -> 0.00010886
+	(0.25243)G -> (0.24324)R
+term like (4, 4)G x (5, 4)R -> 0.00031833
+	(0)G -> (0.058442)R
+term like (4, 4)G x (5, 5)R -> 5.9223e-05
+	(0)G -> (0)R
+term like (4, 6)G x (5, 5)R -> 0.00060534
+	(0.17572)G -> (0)R
+term like (4, 9)G x (5, 5)R -> 0.00014383
+	(0.11736)G -> (0)R
+term like (6, 6)G x (5, 5)R -> 0.0015469
+	(0)G -> (0)R
+term like (6, 9)G x (5, 5)R -> 0.00073507
+	(0.093363)G -> (0)R
+term like (9, 9)G x (5, 5)R -> 8.7328e-05
+	(0)G -> (0)R
+term like (4, 4)G x (5, 6)R -> 0.00036211
+	(0)G -> (0.052785)R
+term like (4, 5)G x (5, 7)R -> 0.00063492
+	(0.10525)G -> (0.23323)R
+term like (4, 8)G x (5, 7)R -> 4.4881e-06
+	(0.18909)G -> (0.23323)R
+term like (6, 8)G x (5, 7)R -> 2.2937e-05
+	(0.34943)G -> (0.23323)R
+term like (4, 7)G x (5, 10)R -> 0.00022145
+	(0.19272)G -> (0.44415)R
+term like (6, 7)G x (5, 10)R -> 0.0011318
+	(0.2344)G -> (0.44415)R
+term like (4, 8)G x (5, 12)R -> 0.00014726
+	(0.18909)G -> (0.35531)R
+term like (6, 8)G x (5, 12)R -> 0.0007526
+	(0.34943)G -> (0.35531)R
+term like (4, 4)G x (5, 13)R -> 4.3334e-05
+	(0)G -> (0.21304)R
+term like (4, 11)G x (5, 13)R -> 4.4208e-05
+	(0.12799)G -> (0.21304)R
+term like (6, 11)G x (5, 13)R -> 0.00022593
+	(0.29642)G -> (0.21304)R
+term like (9, 11)G x (5, 13)R -> 5.3682e-05
+	(0.21781)G -> (0.21304)R
+term like (4, 5)G x (6, 0)R -> 0.0054465
+	(0.10525)G -> (0.14662)R
+term like (4, 10)G x (6, 3)R -> 0.00054815
+	(0.17291)G -> (0.19783)R
+term like (4, 4)G x (6, 4)R -> 0.0019464
+	(0)G -> (0.032535)R
+term like (4, 4)G x (6, 5)R -> 0.00036211
+	(0)G -> (0.052785)R
+term like (4, 6)G x (6, 5)R -> 0.0037012
+	(0.17572)G -> (0.052785)R
+term like (4, 9)G x (6, 5)R -> 0.00087942
+	(0.11736)G -> (0.052785)R
+term like (4, 4)G x (6, 6)R -> 0.002214
+	(0)G -> (0)R
+term like (4, 5)G x (6, 7)R -> 0.0038821
+	(0.10525)G -> (0.18058)R
+term like (4, 8)G x (6, 7)R -> 2.7441e-05
+	(0.18909)G -> (0.18058)R
+term like (4, 7)G x (6, 10)R -> 0.001354
+	(0.19272)G -> (0.44479)R
+term like (4, 8)G x (6, 12)R -> 0.00090038
+	(0.18909)G -> (0.30279)R
+term like (4, 4)G x (6, 13)R -> 0.00026495
+	(0)G -> (0.16505)R
+term like (4, 11)G x (6, 13)R -> 0.0002703
+	(0.12799)G -> (0.16505)R
+term like (5, 5)G x (7, 0)R -> 0.0023875
+	(0)G -> (0.10556)R
+term like (5, 10)G x (7, 3)R -> 0.00048056
+	(0.070888)G -> (0.12752)R
+term like (8, 10)G x (7, 3)R -> 3.3969e-06
+	(0.17161)G -> (0.12752)R
+term like (5, 6)G x (7, 5)R -> 0.0032449
+	(0.21879)G -> (0.23323)R
+term like (5, 9)G x (7, 5)R -> 0.00077099
+	(0.20066)G -> (0.23323)R
+term like (8, 9)G x (7, 5)R -> 5.4499e-06
+	(0.30627)G -> (0.23323)R
+term like (5, 5)G x (7, 7)R -> 0.0017017
+	(0)G -> (0)R
+term like (5, 8)G x (7, 7)R -> 2.4058e-05
+	(0.14101)G -> (0)R
+term like (8, 8)G x (7, 7)R -> 8.5029e-08
+	(0)G -> (0)R
+term like (5, 7)G x (7, 10)R -> 0.0011871
+	(0.10089)G -> (0.50495)R
+term like (5, 8)G x (7, 12)R -> 0.00078937
+	(0.14101)G -> (0.12235)R
+term like (8, 8)G x (7, 12)R -> 2.7899e-06
+	(0)G -> (0.12235)R
+term like (5, 11)G x (7, 13)R -> 0.00023697
+	(0.1871)G -> (0.072054)R
+term like (8, 11)G x (7, 13)R -> 1.6751e-06
+	(0.16468)G -> (0.072054)R
+term like (0, 1)G x (8, 0)R -> 0.01449
+	(0.016462)G -> (0.043824)R
+term like (0, 5)G x (8, 0)R -> 0.0046618
+	(0.084707)G -> (0.043824)R
+term like (0, 0)G x (8, 1)R -> 0.0058909
+	(0)G -> (0.031151)R
+term like (0, 0)G x (8, 2)R -> 0.0018043
+	(0)G -> (0.058632)R
+term like (0, 1)G x (8, 2)R -> 0.0018144
+	(0.016462)G -> (0.058632)R
+term like (0, 3)G x (8, 2)R -> 0.0054604
+	(0.0392)G -> (0.058632)R
+term like (0, 0)G x (8, 3)R -> 0.00041426
+	(0)G -> (0.022119)R
+term like (0, 2)G x (8, 3)R -> 0.009306
+	(0.038662)G -> (0.022119)R
+term like (0, 10)G x (8, 3)R -> 0.00046917
+	(0.05034)G -> (0.022119)R
+term like (0, 3)G x (8, 4)R -> 0.0028388
+	(0.0392)G -> (0.16833)R
+term like (0, 4)G x (8, 4)R -> 0.0033319
+	(0.16579)G -> (0.16833)R
+term like (0, 4)G x (8, 5)R -> 0.00061987
+	(0.16579)G -> (0.22669)R
+term like (0, 6)G x (8, 5)R -> 0.003168
+	(0.20396)G -> (0.22669)R
+term like (0, 9)G x (8, 5)R -> 0.00075272
+	(0.22316)G -> (0.22669)R
+term like (0, 4)G x (8, 6)R -> 0.0037901
+	(0.16579)G -> (0.18341)R
+term like (0, 5)G x (8, 7)R -> 0.0033228
+	(0.084707)G -> (0.13667)R
+term like (0, 8)G x (8, 7)R -> 2.3488e-05
+	(0.21268)G -> (0.13667)R
+term like (0, 0)G x (8, 8)R -> 0.001622
+	(0)G -> (0)R
+term like (0, 0)G x (8, 9)R -> 0.0013631
+	(0)G -> (0.019048)R
+term like (0, 3)G x (8, 10)R -> 0.00031379
+	(0.0392)G -> (0.37035)R
+term like (0, 7)G x (8, 10)R -> 0.0011589
+	(0.032085)G -> (0.37035)R
+term like (0, 0)G x (8, 11)R -> 0.00069064
+	(0)G -> (0.021599)R
+term like (0, 8)G x (8, 12)R -> 0.00077066
+	(0.21268)G -> (0.21807)R
+term like (0, 4)G x (8, 13)R -> 0.00045356
+	(0.16579)G -> (0.19449)R
+term like (0, 11)G x (8, 13)R -> 0.00023136
+	(0.26901)G -> (0.19449)R
+term like (0, 1)G x (9, 0)R -> 0.012178
+	(0.016462)G -> (0.031969)R
+term like (0, 5)G x (9, 0)R -> 0.0039177
+	(0.084707)G -> (0.031969)R
+term like (0, 0)G x (9, 1)R -> 0.0049506
+	(0)G -> (0.012185)R
+term like (0, 0)G x (9, 2)R -> 0.0015163
+	(0)G -> (0.039587)R
+term like (0, 1)G x (9, 2)R -> 0.0015248
+	(0.016462)G -> (0.039587)R
+term like (0, 3)G x (9, 2)R -> 0.0045888
+	(0.0392)G -> (0.039587)R
+term like (0, 0)G x (9, 3)R -> 0.00034814
+	(0)G -> (0.038705)R
+term like (0, 2)G x (9, 3)R -> 0.0078206
+	(0.038662)G -> (0.038705)R
+term like (0, 10)G x (9, 3)R -> 0.00039428
+	(0.05034)G -> (0.038705)R
+term like (0, 3)G x (9, 4)R -> 0.0023856
+	(0.0392)G -> (0.1493)R
+term like (0, 4)G x (9, 4)R -> 0.0028001
+	(0.16579)G -> (0.1493)R
+term like (0, 4)G x (9, 5)R -> 0.00052093
+	(0.16579)G -> (0.20768)R
+term like (0, 6)G x (9, 5)R -> 0.0026623
+	(0.20396)G -> (0.20768)R
+term like (0, 9)G x (9, 5)R -> 0.00063257
+	(0.22316)G -> (0.20768)R
+term like (0, 4)G x (9, 6)R -> 0.0031851
+	(0.16579)G -> (0.16482)R
+term like (0, 5)G x (9, 7)R -> 0.0027924
+	(0.084707)G -> (0.13427)R
+term like (0, 8)G x (9, 7)R -> 1.9739e-05
+	(0.21268)G -> (0.13427)R
+term like (0, 0)G x (9, 8)R -> 0.0013631
+	(0)G -> (0.019048)R
+term like (0, 0)G x (9, 9)R -> 0.0011455
+	(0)G -> (0)R
+term like (0, 3)G x (9, 10)R -> 0.0002637
+	(0.0392)G -> (0.37069)R
+term like (0, 7)G x (9, 10)R -> 0.00097395
+	(0.032085)G -> (0.37069)R
+term like (0, 0)G x (9, 11)R -> 0.0005804
+	(0)G -> (0.03142)R
+term like (0, 8)G x (9, 12)R -> 0.00064765
+	(0.21268)G -> (0.22514)R
+term like (0, 4)G x (9, 13)R -> 0.00038117
+	(0.16579)G -> (0.18681)R
+term like (0, 11)G x (9, 13)R -> 0.00019443
+	(0.26901)G -> (0.18681)R
+term like (3, 5)G x (10, 0)R -> 0.00045092
+	(0.10603)G -> (0.40018)R
+term like (3, 3)G x (10, 2)R -> 0.00026409
+	(0)G -> (0.37365)R
+term like (3, 10)G x (10, 3)R -> 4.5382e-05
+	(0.089141)G -> (0.38506)R
+term like (7, 10)G x (10, 3)R -> 0.00016761
+	(0.041149)G -> (0.38506)R
+term like (3, 3)G x (10, 4)R -> 0.00013729
+	(0)G -> (0.4123)R
+term like (3, 4)G x (10, 4)R -> 0.00032229
+	(0.16325)G -> (0.4123)R
+term like (3, 4)G x (10, 5)R -> 5.9959e-05
+	(0.16325)G -> (0.44415)R
+term like (3, 6)G x (10, 5)R -> 0.00030643
+	(0.16887)G -> (0.44415)R
+term like (3, 9)G x (10, 5)R -> 7.2809e-05
+	(0.19943)G -> (0.44415)R
+term like (7, 9)G x (10, 5)R -> 0.00026891
+	(0.25514)G -> (0.44415)R
+term like (3, 4)G x (10, 6)R -> 0.00036661
+	(0.16325)G -> (0.44479)R
+term like (3, 5)G x (10, 7)R -> 0.0003214
+	(0.10603)G -> (0.50495)R
+term like (3, 8)G x (10, 7)R -> 2.2719e-06
+	(0.24318)G -> (0.50495)R
+term like (7, 8)G x (10, 7)R -> 8.3911e-06
+	(0.21276)G -> (0.50495)R
+term like (3, 3)G x (10, 10)R -> 1.5176e-05
+	(0)G -> (0)R
+term like (3, 7)G x (10, 10)R -> 0.0001121
+	(0.066218)G -> (0)R
+term like (7, 7)G x (10, 10)R -> 0.00020702
+	(0)G -> (0)R
+term like (3, 8)G x (10, 12)R -> 7.4544e-05
+	(0.24318)G -> (0.58089)R
+term like (7, 8)G x (10, 12)R -> 0.00027532
+	(0.21276)G -> (0.58089)R
+term like (3, 4)G x (10, 13)R -> 4.3872e-05
+	(0.16325)G -> (0.55094)R
+term like (3, 11)G x (10, 13)R -> 2.2379e-05
+	(0.27859)G -> (0.55094)R
+term like (7, 11)G x (10, 13)R -> 8.2653e-05
+	(0.28799)G -> (0.55094)R
+term like (0, 1)G x (11, 0)R -> 0.0061699
+	(0.016462)G -> (0.062279)R
+term like (0, 5)G x (11, 0)R -> 0.0019849
+	(0.084707)G -> (0.062279)R
+term like (0, 0)G x (11, 1)R -> 0.0025083
+	(0)G -> (0.042086)R
+term like (0, 0)G x (11, 2)R -> 0.00076825
+	(0)G -> (0.065984)R
+term like (0, 1)G x (11, 2)R -> 0.00077253
+	(0.016462)G -> (0.065984)R
+term like (0, 3)G x (11, 2)R -> 0.002325
+	(0.0392)G -> (0.065984)R
+term like (0, 0)G x (11, 3)R -> 0.00017639
+	(0)G -> (0.037647)R
+term like (0, 2)G x (11, 3)R -> 0.0039624
+	(0.038662)G -> (0.037647)R
+term like (0, 10)G x (11, 3)R -> 0.00019977
+	(0.05034)G -> (0.037647)R
+term like (0, 3)G x (11, 4)R -> 0.0012087
+	(0.0392)G -> (0.17467)R
+term like (0, 4)G x (11, 4)R -> 0.0014187
+	(0.16579)G -> (0.17467)R
+term like (0, 4)G x (11, 5)R -> 0.00026393
+	(0.16579)G -> (0.23304)R
+term like (0, 6)G x (11, 5)R -> 0.0013489
+	(0.20396)G -> (0.23304)R
+term like (0, 9)G x (11, 5)R -> 0.0003205
+	(0.22316)G -> (0.23304)R
+term like (0, 4)G x (11, 6)R -> 0.0016138
+	(0.16579)G -> (0.19288)R
+term like (0, 5)G x (11, 7)R -> 0.0014148
+	(0.084707)G -> (0.15827)R
+term like (0, 8)G x (11, 7)R -> 1.0001e-05
+	(0.21268)G -> (0.15827)R
+term like (0, 0)G x (11, 8)R -> 0.00069064
+	(0)G -> (0.021599)R
+term like (0, 0)G x (11, 9)R -> 0.0005804
+	(0)G -> (0.03142)R
+term like (0, 3)G x (11, 10)R -> 0.00013361
+	(0.0392)G -> (0.34921)R
+term like (0, 7)G x (11, 10)R -> 0.00049346
+	(0.032085)G -> (0.34921)R
+term like (0, 0)G x (11, 11)R -> 0.00029406
+	(0)G -> (0)R
+term like (0, 8)G x (11, 12)R -> 0.00032814
+	(0.21268)G -> (0.23693)R
+term like (0, 4)G x (11, 13)R -> 0.00019312
+	(0.16579)G -> (0.2154)R
+term like (0, 11)G x (11, 13)R -> 9.8509e-05
+	(0.26901)G -> (0.2154)R
+term like (8, 10)G x (12, 3)R -> 0.00011146
+	(0.17161)G -> (0.19935)R
+term like (8, 9)G x (12, 5)R -> 0.00017882
+	(0.30627)G -> (0.35531)R
+term like (8, 8)G x (12, 7)R -> 2.7899e-06
+	(0)G -> (0.12235)R
+term like (8, 8)G x (12, 12)R -> 9.154e-05
+	(0)G -> (0)R
+term like (8, 11)G x (12, 13)R -> 5.4962e-05
+	(0.16468)G -> (0.16212)R
+term like (4, 5)G x (13, 0)R -> 0.00065178
+	(0.10525)G -> (0.15499)R
+term like (4, 10)G x (13, 3)R -> 6.5597e-05
+	(0.17291)G -> (0.19051)R
+term like (4, 4)G x (13, 4)R -> 0.00023292
+	(0)G -> (0.1858)R
+term like (4, 4)G x (13, 5)R -> 4.3334e-05
+	(0)G -> (0.21304)R
+term like (4, 6)G x (13, 5)R -> 0.00044293
+	(0.17572)G -> (0.21304)R
+term like (4, 9)G x (13, 5)R -> 0.00010524
+	(0.11736)G -> (0.21304)R
+term like (4, 4)G x (13, 6)R -> 0.00026495
+	(0)G -> (0.16505)R
+term like (4, 5)G x (13, 7)R -> 0.00046457
+	(0.10525)G -> (0.072054)R
+term like (4, 8)G x (13, 7)R -> 3.2839e-06
+	(0.18909)G -> (0.072054)R
+term like (4, 7)G x (13, 10)R -> 0.00016204
+	(0.19272)G -> (0.55094)R
+term like (4, 8)G x (13, 12)R -> 0.00010775
+	(0.18909)G -> (0.16212)R
+term like (4, 4)G x (13, 13)R -> 3.1707e-05
+	(0)G -> (0)R
+term like (4, 11)G x (13, 13)R -> 3.2347e-05
+	(0.12799)G -> (0)R
+term like (11, 11)G x (13, 13)R -> 8.25e-06
+	(0)G -> (0)R
+
+TESTWTS
+(0, 0) 0.056536
+(0, 1) 0.069558
+(0, 2) 0.064254
+(0, 3) 0.062602
+(0, 4) 0.036431
+(0, 5) 0.026807
+(0, 6) 0.022376
+(0, 7) 0.019756
+(0, 8) 0.019152
+(0, 9) 0.016095
+(0, 10) 0.0086947
+(0, 11) 0.0081548
+(0, 12) 0.0045498
+(0, 13) 0.0040436
+(1, 0) 0.069558
+(1, 1) 0.021395
+(1, 2) 0.039527
+(1, 3) 0.038511
+(1, 4) 0.022411
+(1, 5) 0.016491
+(1, 6) 0.013765
+(1, 7) 0.012153
+(1, 8) 0.011782
+(1, 9) 0.0099013
+(1, 10) 0.0053487
+(1, 11) 0.0050166
+(1, 12) 0.0027989
+(1, 13) 0.0024875
+(2, 0) 0.064254
+(2, 1) 0.039527
+(2, 2) 0.018256
+(2, 3) 0.035574
+(2, 4) 0.020702
+(2, 5) 0.015233
+(2, 6) 0.012715
+(2, 7) 0.011226
+(2, 8) 0.010883
+(2, 9) 0.0091462
+(2, 10) 0.0049409
+(2, 11) 0.004634
+(2, 12) 0.0025855
+(2, 13) 0.0022978
+(3, 0) 0.062602
+(3, 1) 0.038511
+(3, 2) 0.035574
+(3, 3) 0.01733
+(3, 4) 0.02017
+(3, 5) 0.014842
+(3, 6) 0.012389
+(3, 7) 0.010938
+(3, 8) 0.010604
+(3, 9) 0.0089111
+(3, 10) 0.0048139
+(3, 11) 0.0045149
+(3, 12) 0.002519
+(3, 13) 0.0022388
+(4, 0) 0.036431
+(4, 1) 0.022411
+(4, 2) 0.020702
+(4, 3) 0.02017
+(4, 4) 0.0058688
+(4, 5) 0.0086369
+(4, 6) 0.0072094
+(4, 7) 0.0063651
+(4, 8) 0.0061707
+(4, 9) 0.0051857
+(4, 10) 0.0028014
+(4, 11) 0.0026274
+(4, 12) 0.0014659
+(4, 13) 0.0013028
+(5, 0) 0.026807
+(5, 1) 0.016491
+(5, 2) 0.015233
+(5, 3) 0.014842
+(5, 4) 0.0086369
+(5, 5) 0.0031777
+(5, 6) 0.0053049
+(5, 7) 0.0046837
+(5, 8) 0.0045406
+(5, 9) 0.0038158
+(5, 10) 0.0020613
+(5, 11) 0.0019333
+(5, 12) 0.0010787
+(5, 13) 0.00095866
+(6, 0) 0.022376
+(6, 1) 0.013765
+(6, 2) 0.012715
+(6, 3) 0.012389
+(6, 4) 0.0072094
+(6, 5) 0.0053049
+(6, 6) 0.002214
+(6, 7) 0.0039095
+(6, 8) 0.0037901
+(6, 9) 0.0031851
+(6, 10) 0.0017206
+(6, 11) 0.0016138
+(6, 12) 0.00090038
+(6, 13) 0.00080021
+(7, 0) 0.019756
+(7, 1) 0.012153
+(7, 2) 0.011226
+(7, 3) 0.010938
+(7, 4) 0.0063651
+(7, 5) 0.0046837
+(7, 6) 0.0039095
+(7, 7) 0.0017258
+(7, 8) 0.0033463
+(7, 9) 0.0028121
+(7, 10) 0.0015191
+(7, 11) 0.0014248
+(7, 12) 0.00079495
+(7, 13) 0.0007065
+(8, 0) 0.019152
+(8, 1) 0.011782
+(8, 2) 0.010883
+(8, 3) 0.010604
+(8, 4) 0.0061707
+(8, 5) 0.0045406
+(8, 6) 0.0037901
+(8, 7) 0.0033463
+(8, 8) 0.001622
+(8, 9) 0.0027262
+(8, 10) 0.0014727
+(8, 11) 0.0013813
+(8, 12) 0.00077066
+(8, 13) 0.00068492
+(9, 0) 0.016095
+(9, 1) 0.0099013
+(9, 2) 0.0091462
+(9, 3) 0.0089111
+(9, 4) 0.0051857
+(9, 5) 0.0038158
+(9, 6) 0.0031851
+(9, 7) 0.0028121
+(9, 8) 0.0027262
+(9, 9) 0.0011455
+(9, 10) 0.0012377
+(9, 11) 0.0011608
+(9, 12) 0.00064765
+(9, 13) 0.0005756
+(10, 0) 0.0086947
+(10, 1) 0.0053487
+(10, 2) 0.0049409
+(10, 3) 0.0048139
+(10, 4) 0.0028014
+(10, 5) 0.0020613
+(10, 6) 0.0017206
+(10, 7) 0.0015191
+(10, 8) 0.0014727
+(10, 9) 0.0012377
+(10, 10) 0.0003343
+(10, 11) 0.00062707
+(10, 12) 0.00034987
+(10, 13) 0.00031094
+(11, 0) 0.0081548
+(11, 1) 0.0050166
+(11, 2) 0.004634
+(11, 3) 0.0045149
+(11, 4) 0.0026274
+(11, 5) 0.0019333
+(11, 6) 0.0016138
+(11, 7) 0.0014248
+(11, 8) 0.0013813
+(11, 9) 0.0011608
+(11, 10) 0.00062707
+(11, 11) 0.00029406
+(11, 12) 0.00032814
+(11, 13) 0.00029163
+(12, 0) 0.0045498
+(12, 1) 0.0027989
+(12, 2) 0.0025855
+(12, 3) 0.002519
+(12, 4) 0.0014659
+(12, 5) 0.0010787
+(12, 6) 0.00090038
+(12, 7) 0.00079495
+(12, 8) 0.00077066
+(12, 9) 0.00064765
+(12, 10) 0.00034987
+(12, 11) 0.00032814
+(12, 12) 9.154e-05
+(12, 13) 0.00016271
+(13, 0) 0.0040436
+(13, 1) 0.0024875
+(13, 2) 0.0022978
+(13, 3) 0.0022388
+(13, 4) 0.0013028
+(13, 5) 0.00095866
+(13, 6) 0.00080021
+(13, 7) 0.0007065
+(13, 8) 0.00068492
+(13, 9) 0.0005756
+(13, 10) 0.00031094
+(13, 11) 0.00029163
+(13, 12) 0.00016271
+(13, 13) 7.2304e-05
+Ending tuples clause
+Flow matrix
+   0.9889   0.0111        0        0
+        0   0.9646   0.0354        0
+        0        0   0.9353   0.0647
+
+EEC_G
+   0.2799   0.2200   0.1201   0.3800
+
+EEC_R
+   0.2727   0.2133   0.0141   0.1160   0.0077   0.0060   0.3704
+
+E_G
+   0.5063   0.2765   0.2172
+
+E_R
+   0.5007   0.2723   0.2130   0.0140
+
+F*E_G
+   0.5007   0.2723   0.2130   0.0140
+
+Entering tuples clause
+RECO
+(0, 0) 0.25067
+(0, 1) 0.27268
+(0, 2) 0.21325
+(0, 3) 0.014067
+(1, 0) 0.27268
+(1, 1) 0.074155
+(1, 2) 0.11599
+(1, 3) 0.007651
+(2, 0) 0.21325
+(2, 1) 0.11599
+(2, 2) 0.045356
+(2, 3) 0.0059836
+(3, 0) 0.014067
+(3, 1) 0.007651
+(3, 2) 0.0059836
+(3, 3) 0.00019735
+
+GEN
+(0, 0) 0.25634
+(0, 1) 0.27995
+(0, 2) 0.21997
+(1, 1) 0.076432
+(1, 2) 0.12012
+(2, 2) 0.047192
+About to enter big loop
+term like (0, 0)G x (0, 0)R -> 0.25067
+	(0)G -> (0)R
+term like (0, 0)G x (0, 1)R -> 0.002819
+	(0)G -> (0.050133)R
+term like (0, 1)G x (0, 1)R -> 0.26704
+	(0.049184)G -> (0.050133)R
+term like (0, 1)G x (0, 2)R -> 0.0097927
+	(0.049184)G -> (0.072378)R
+term like (0, 2)G x (0, 2)R -> 0.20346
+	(0.071972)G -> (0.072378)R
+term like (0, 2)G x (0, 3)R -> 0.014067
+	(0.071972)G -> (0.31851)R
+term like (0, 0)G x (1, 0)R -> 0.002819
+	(0)G -> (0.050133)R
+term like (0, 0)G x (1, 1)R -> 3.1703e-05
+	(0)G -> (0)R
+term like (0, 1)G x (1, 1)R -> 0.0030031
+	(0.049184)G -> (0)R
+term like (1, 1)G x (1, 1)R -> 0.07112
+	(0)G -> (0)R
+term like (0, 1)G x (1, 2)R -> 0.00011013
+	(0.049184)G -> (0.039417)R
+term like (0, 2)G x (1, 2)R -> 0.0022881
+	(0.071972)G -> (0.039417)R
+term like (1, 1)G x (1, 2)R -> 0.0026081
+	(0)G -> (0.039417)R
+term like (1, 2)G x (1, 2)R -> 0.10837
+	(0.039514)G -> (0.039417)R
+term like (0, 2)G x (1, 3)R -> 0.0001582
+	(0.071972)G -> (0.31674)R
+term like (1, 2)G x (1, 3)R -> 0.0074928
+	(0.039514)G -> (0.31674)R
+term like (1, 1)G x (2, 1)R -> 0.0026081
+	(0)G -> (0.039417)R
+term like (1, 1)G x (2, 2)R -> 9.5642e-05
+	(0)G -> (0)R
+term like (1, 2)G x (2, 2)R -> 0.0039742
+	(0.039514)G -> (0)R
+term like (2, 2)G x (2, 2)R -> 0.041286
+	(0)G -> (0)R
+term like (1, 2)G x (2, 3)R -> 0.00027477
+	(0.039514)G -> (0.27996)R
+term like (2, 2)G x (2, 3)R -> 0.0028544
+	(0)G -> (0.27996)R
+term like (2, 2)G x (3, 2)R -> 0.0028544
+	(0)G -> (0.27996)R
+term like (2, 2)G x (3, 3)R -> 0.00019735
+	(0)G -> (0)R
+
+TESTWTS
+(0, 0) 0.25067
+(0, 1) 0.27268
+(0, 2) 0.21325
+(0, 3) 0.014067
+(1, 0) 0.27268
+(1, 1) 0.074155
+(1, 2) 0.11599
+(1, 3) 0.007651
+(2, 0) 0.21325
+(2, 1) 0.11599
+(2, 2) 0.045356
+(2, 3) 0.0059836
+(3, 0) 0.014067
+(3, 1) 0.007651
+(3, 2) 0.0059836
+(3, 3) 0.00019735
+Ending tuples clause
+Begin processing the 8th record. Run 1, Event 192535769, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:45.758 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+Begin processing the 9th record. Run 1, Event 192535780, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:45.943 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+dR size 11
+wt size 11
+dR size 16
+wt size 16
+In table, EEC wt size is 11
+In table, EEC dR size is 11
+In table, EEC wt size is 16
+In table, EEC dR size is 16
+Begin processing the 10th record. Run 1, Event 192535771, LumiSection 770144 on stream 0 at 01-Nov-2022 17:43:46.097 CDT
+Rivet.Analysis.HiggsTemplateCrossSections: WARN  Unkown Higgs production mechanism. Cannot classify event. Classification for all events will most likely fail.
+%MSG-e MissingJetConstituent:  JetFlavourClustering:genJetAK8FlavourAssociation  01-Nov-2022 17:43:46 CDT Run: 1 Event: 192535771
+Jet constituent required for jet reclustering is missing. Reclustered jets are not guaranteed to reproduce the original jets!
+%MSG
+%MSG-e JetPtMismatch:  JetFlavourClustering:genJetAK8FlavourAssociation  01-Nov-2022 17:43:46 CDT Run: 1 Event: 192535771
+The reclustered and original jet 2 have different Pt's (1.02621e-17 vs 10.2621 GeV, respectively).
+Please check that the jet algorithm and jet size match those used for the original jet collection and also make sure the original jets are uncorrected. In addition, make sure you are not using CaloJets which are presently not supported.
+
+In extremely rare instances the mismatch could be caused by a difference in the machine precision in which case make sure the original jet collection is produced and reclustering is performed in the same job.
+%MSG
+dR size 46
+wt size 46
+In table, EEC wt size is 46
+In table, EEC dR size is 46
+Rivet.Analysis.HiggsTemplateCrossSections: INFO   ====================================================== 
+Rivet.Analysis.HiggsTemplateCrossSections: INFO        Higgs Template X-Sec Categorization Tool          
+Rivet.Analysis.HiggsTemplateCrossSections: INFO                  Status Code Summary                     
+Rivet.Analysis.HiggsTemplateCrossSections: INFO   ====================================================== 
+Rivet.Analysis.HiggsTemplateCrossSections: INFO       >>>> All 0 events successfully categorized!
+Rivet.Analysis.HiggsTemplateCrossSections: INFO   ====================================================== 
+Rivet.Analysis.HiggsTemplateCrossSections: INFO   ====================================================== 
+01-Nov-2022 17:43:46 CDT  Closed file file:DYJetsToLL_miniAOD.root
+
+=============================================
+
+MessageLogger Summary
+
+ type     category        sev    module        subroutine        count    total
+ ---- -------------------- -- ---------------- ----------------  -----    -----
+    1 BTagSFProducer       -w BTagSFProducer:b                       1        1
+    2 LogicError           -w GenWeightsTableP                       1        1
+    3 LogicError           -w HTXSRivetProduce                       1        1
+    4 JetPtMismatch        -e JetFlavourCluste                       1        1
+    5 MissingJetConstituen -e JetFlavourCluste                       1        1
+    6 fileAction           -s file_close                             1        1
+    7 fileAction           -s file_open                              2        2
+
+ type    category    Examples: run/evt        run/evt          run/evt
+ ---- -------------------- ---------------- ---------------- ----------------
+    1 BTagSFProducer       pre-events                        
+    2 LogicError           Run: 1                            
+    3 LogicError           Run: 1                            
+    4 JetPtMismatch        1/192535771                       
+    5 MissingJetConstituent 1/192535771                       
+    6 fileAction           PostGlobalEndRun                  
+    7 fileAction           pre-events       pre-events       
+
+Severity    # Occurrences   Total Occurrences
+--------    -------------   -----------------
+Warning                 3                   3
+Error                   2                   2
+System                  3                   3
+
+dropped waiting message count 0

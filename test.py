@@ -36,7 +36,7 @@ process.options = cms.untracked.PSet(
 
 )
 
-# Production Info
+ Info
 process.configurationMetadata = cms.untracked.PSet(
     annotation = cms.untracked.string('nano_mc_2017_UL nevts:100'),
     name = cms.untracked.string('Applications'),
@@ -93,7 +93,7 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
     genJets = cms.InputTag("selectedak4GenJetsNoNu"),
     dR2cut = cms.double(0.2*0.2),
     minPartPt = cms.double(minPartPt),
-    mode = cms.string("match"),
+    mode = cms.string("Ewt"),
     partDR2cut = cms.double(0.05*0.05)
 )
 

@@ -31,7 +31,7 @@ def setupCustomizedJetToolbox(process, runOnMC=False, PU="Puppi", cut="", genJet
     btaginfos = [ 'pfDeepCSVTagInfos', 'pfDeepFlavourTagInfos' ] 
 
     jetToolbox(process, 'ak4', 'dummyseq', 'noOutput',
-               PUMethod = PU, dataTier='miniAOD',
+               PUMethod = PU, dataTier='nanoAOD',
                runOnMC = runOnMC, 
                JETCorrPayload = JECPayload, JETCorrLevels=['None'], #?
                GetJetMCFlavour=True,
