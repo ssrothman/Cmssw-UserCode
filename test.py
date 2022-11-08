@@ -101,6 +101,7 @@ jets = 'selectedPatJetsAK4PFPuppi'
 genJets = 'selectedak4GenJetsNoNu'
 muons = "MyGoodMuons"
 
+#produces particle-level transfer 
 process.EMDFlow = cms.EDProducer("EMDFlowProducer",
     jets = cms.InputTag(jets),
     genJets = cms.InputTag(genJets),
@@ -112,6 +113,7 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
 
 process.EMDTask = cms.Task(process.EMDFlow)
 
+#compute EEC
 process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
     jets = cms.InputTag(jets),
     order = cms.uint32(2),
@@ -123,6 +125,7 @@ process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
     requireZ = cms.bool(True)
 )
 
+#compute gen EEC
 process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
     jets = cms.InputTag(genJets),
     order = cms.uint32(2),
@@ -134,6 +137,7 @@ process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
     requireZ = cms.bool(True)
 )
 
+#compute transfer matrix
 process.EEC2Transfer = cms.EDProducer("PatProjectedEECTransferProducer",
     jets = cms.InputTag(jets),
     genJets = cms.InputTag(genJets),
@@ -146,6 +150,7 @@ process.EEC2Transfer = cms.EDProducer("PatProjectedEECTransferProducer",
 
 process.EECTask = cms.Task(process.EEC2, process.genEEC2, process.EEC2Transfer)
 
+#save EEC to nanoAOD
 process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
     name = cms.string("EEC2"),
     jets = cms.InputTag(jets),
@@ -153,6 +158,7 @@ process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
     nDR = cms.uint32(1),
 )
 
+#save gen EEC to nano
 process.genEEC2Table = cms.EDProducer("GenProjectedEECTableProducer",
     name = cms.string("genEEC2"),
     jets = cms.InputTag(genJets),
@@ -160,6 +166,7 @@ process.genEEC2Table = cms.EDProducer("GenProjectedEECTableProducer",
     nDR = cms.uint32(1),
 )
 
+#save transfer matrix to nano
 process.transfer2Table = cms.EDProducer("EECTransferTableProducer",
     name = cms.string("transfer2"),
     transfer = cms.InputTag("EEC2Transfer"),
@@ -167,47 +174,15 @@ process.transfer2Table = cms.EDProducer("EECTransferTableProducer",
 
 process.EECTableTask = cms.Task(process.EEC2Table, process.genEEC2Table, process.transfer2Table)
 
-process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
-    src = cms.InputTag("EEC2Transfer"),
-    genEEC = cms.InputTag("genEEC2"),
-    recoEEC = cms.InputTag("EEC2"),
-    recoJets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
-    genJets = cms.InputTag("selectedak4GenJetsNoNu"),
-    minpt = cms.double(10.0),
-    nBins = cms.uint32(20),
-)
-
-#process.aseq = cms.Task(process.analyzer)
-
+#muon selection
 process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag('slimmedMuons'),
     cut = cms.string("pt > 20 && abs(eta) < 2.7 && CutBasedIdTight && PFIsoTight"),
     filter = cms.bool(False),
 )
 
-process.ZFilter = cms.EDFilter("CandViewCountFilter",
-    src = cms.InputTag("MyZs"),
-    minNumber = cms.uint32(1)
-)
-
-#process.Zseq = cms.Sequence(process.MyGoodMuons + process.MyZs + process.ZFilter)
 process.ZTask = cms.Task(process.MyGoodMuons)
 
-#process.MyGoodJets = cms.EDFilter("PATJetSelector",
-#    src = cms.InputTag("selectedPatJetsAK4PFPuppi"),
-#    cut = cms.string("pt>30 && abs(eta) < 2.1 && userInt('tightIdLepVeto')==1 && numberOfDaughters>1"),
-#    filter = cms.bool(False),
-#)
-
-#process.MyGenJets = cms.EDFilter("GenJetSelector",
-#    src = cms.InputTag("ak4GenJetsNoNu"),
-#    cut = cms.string("pt>20 && abs(eta) < 2.4 && numberOfDaughters>1"),
-#    filter = cms.bool(False)
-#)
-
-#process.JetTask = cms.Task(process.MyGoodJets, process.MyGenJets)
-
-#process.EEC_PATH = cms.Path(process.Jetseq + process.Zseq + process.EMDseq + process.EECseq + process.aseq)
 process.schedule.associate(process.ZTask, process.EMDTask, process.EECTask, process.EECTableTask)
 
 # Automatic addition of the customisation function from PhysicsTools.NanoAOD.nano_cff
