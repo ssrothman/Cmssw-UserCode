@@ -85,6 +85,8 @@ EECTableProducerT<T, K>::EECTableProducerT(const edm::ParameterSet& conf)
       EECTag_(conf.getParameter<edm::InputTag>("EECs")),
       EECToken_(consumes<K>(EECTag_)),
       nDR_(conf.getParameter<unsigned>("nDR")){
+  produces<nanoaod::FlatTable>(name_ + "COV");
+  produces<nanoaod::FlatTable>(name_ + "BK");
   produces<nanoaod::FlatTable>(name_);
 }
 
@@ -106,10 +108,19 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
   edm::Handle<K> EECs;
   evt.getByToken(EECToken_, EECs);
 
+  //EEC table
   auto flatDRs = std::make_unique<std::vector<std::vector<float>>>();
   flatDRs->resize(nDR_);
   auto flatWTs = std::make_unique<std::vector<float>>();
+
+  //table for covariance computation
+  auto flatCOV = std::make_unique<std::vector<float>>();
+
+  //book-keeping table
   auto jetIdx = std::make_unique<std::vector<int>>();
+  auto nDR = std::make_unique<std::vector<int>>();
+  auto nCOV = std::make_unique<std::vector<int>>();
+
 
   int iJet=0;
   for (size_t iEEC = 0; iEEC < EECs->size(); ++iEEC){
@@ -119,14 +130,17 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
         flatDRs->at(i).emplace_back(0);
       }
       flatWTs->emplace_back(0);
+      flatCOV->emplace_back(0);
+
       jetIdx->emplace_back(iJet++);
+      nDR->emplace_back(1);
+      nCOV->emplace_back(1);
     } //end for all skipped jets
 
-    std::cout << "In table, EEC wt size is " << EEC.wtvec->size() << std::endl;
-    std::cout << "In table, EEC dR size is " << EEC.dRvec->size() << std::endl;
+    jetIdx->emplace_back(EEC.iJet);
+
     for(size_t i=0; i<EEC.wtvec->size(); ++i){//for each dR in the EEC
       flatWTs->emplace_back(EEC.wtvec->at(i));
-      jetIdx->emplace_back(EEC.iJet);
       if constexpr (!std::is_same<K, ProjectedEECCollection>::value){
         for(size_t j=0; j<nDR_; ++j) { //for each dR axis
           flatDRs->at(j).emplace_back(EEC.dRvec->at(j)[i]);
@@ -135,29 +149,50 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
         flatDRs->at(0).emplace_back(EEC.dRvec->at(i));
       }
     }// end for each dR in the EEC
+    nDR->emplace_back(EEC.wtvec->size());
+
+    size_t N=0;
+    for(size_t iPart=0; iPart<EEC.coefs->at(0).size(); ++iPart){
+      for(size_t iDR=0; iDR<EEC.coefs->at(0).at(iPart).size(); ++iDR){
+        flatCOV->emplace_back(EEC.coefs->at(0).at(iPart).at(iDR));
+        ++N;
+      }
+    }
+    nCOV->emplace_back(N);
+
     ++iJet; //next jet
   }
   auto table = std::make_unique<nanoaod::FlatTable>(flatWTs->size(), name_, false);
   table->addColumn<float>("wts", *flatWTs, "Weight", nanoaod::FlatTable::FloatColumn);
-  table->addColumn<int>("jetIdx", *jetIdx, "jet index", nanoaod::FlatTable::IntColumn);
   for(unsigned i=0; i<nDR_; ++i){
     table->addColumn<float>(vformat("dR%d", i+1), flatDRs->at(i), vformat("%dth-largest delta R", i+1), nanoaod::FlatTable::FloatColumn);
   }
   evt.put(std::move(table), name_);
+
+  auto tableCOV = std::make_unique<nanoaod::FlatTable>(flatCOV->size(), name_+"COV", false);
+  tableCOV->addColumn<float>("COV", *flatCOV, "Elements of particle, dR matrix needed for covariance computation", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(tableCOV), name_+"COV");
+
+  auto tableBK = std::make_unique<nanoaod::FlatTable>(jetIdx->size(), name_+"BK", false);
+  tableBK->addColumn<int>("jetIdx", *jetIdx, "Jet index", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nDR", *nDR, "# of dR vals", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nCOV", *nCOV, "#of cov vals", nanoaod::FlatTable::IntColumn);
+  evt.put(std::move(tableBK), name_+"BK");
+
 }  // end produce()
 
 typedef EECTableProducerT<reco::PFJet, ProjectedEECCollection> ProjectedEECTableProducer;
 typedef EECTableProducerT<reco::GenJet, ProjectedEECCollection> GenProjectedEECTableProducer;
 typedef EECTableProducerT<pat::Jet, ProjectedEECCollection> PatProjectedEECTableProducer;
 
-typedef EECTableProducerT<reco::PFJet, ResolvedEECCollection> ResolvedEECTableProducer;
-typedef EECTableProducerT<reco::GenJet, ResolvedEECCollection> GenResolvedEECTableProducer;
-typedef EECTableProducerT<pat::Jet, ResolvedEECCollection> PatResolvedEECTableProducer;
+//typedef EECTableProducerT<reco::PFJet, ResolvedEECCollection> ResolvedEECTableProducer;
+//typedef EECTableProducerT<reco::GenJet, ResolvedEECCollection> GenResolvedEECTableProducer;
+//typedef EECTableProducerT<pat::Jet, ResolvedEECCollection> PatResolvedEECTableProducer;
 
 DEFINE_FWK_MODULE(ProjectedEECTableProducer);
 DEFINE_FWK_MODULE(GenProjectedEECTableProducer);
 DEFINE_FWK_MODULE(PatProjectedEECTableProducer);
 
-DEFINE_FWK_MODULE(ResolvedEECTableProducer);
-DEFINE_FWK_MODULE(GenResolvedEECTableProducer);
-DEFINE_FWK_MODULE(PatResolvedEECTableProducer);
+//DEFINE_FWK_MODULE(ResolvedEECTableProducer);
+//DEFINE_FWK_MODULE(GenResolvedEECTableProducer);
+//DEFINE_FWK_MODULE(PatResolvedEECTableProducer);

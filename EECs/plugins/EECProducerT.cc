@@ -17,8 +17,8 @@
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include "SRothman/EECs/src/eec.h"
 #include "SRothman/EECs/src/combinatorics.h"
@@ -51,6 +51,11 @@ private:
 
   edm::InputTag src_;
   edm::EDGetTokenT<edm::View<T>> srcToken_;
+
+  edm::InputTag muonSrc_;
+  edm::EDGetTokenT<edm::View<pat::Muon>> muonToken_;
+
+  bool requireZ_;
 
   double pt_[MAX_CONSTITUENTS], eta_[MAX_CONSTITUENTS], phi_[MAX_CONSTITUENTS];
 
@@ -92,7 +97,10 @@ EECProducerT<T, K>::EECProducerT(const edm::ParameterSet& conf)
       p1_(conf.getParameter<unsigned int>("p1")),
       p2_(conf.getParameter<unsigned int>("p2")),
       src_(conf.getParameter<edm::InputTag>("jets")),
-      srcToken_(consumes<edm::View<T>>(src_)){
+      srcToken_(consumes<edm::View<T>>(src_)),
+      muonSrc_(conf.getParameter<edm::InputTag>("muons")),
+      muonToken_(consumes<edm::View<pat::Muon>>(muonSrc_)),
+      requireZ_(conf.getParameter<bool>("requireZ")){
   produces<K>();
 
   if( (p1_!=1 || p2_!=1) && order_!=2)
@@ -108,6 +116,8 @@ void EECProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions& descri
   desc.add<unsigned int>("verbose");
   desc.add<unsigned int>("p1");
   desc.add<unsigned int>("p2");
+  desc.add<edm::InputTag>("muons");
+  desc.add<bool>("requireZ");
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -116,14 +126,37 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
   edm::Handle<edm::View<T>> jets;
   evt.getByToken(srcToken_, jets);
 
-  unsigned nJets = jets->size();
+  edm::Handle<edm::View<pat::Muon>> muons;
+  evt.getByToken(muonToken_, muons);
 
+  bool doEvent = true;
+
+  unsigned nJets = jets->size();
   if(verbose_)
     std::cout << " Event has " << nJets << " jets" << std::endl;
 
+  if(requireZ_){
+    doEvent=false;
+    if(muons->size() >= 2){
+      const auto& mu1 = (*muons)[0].pfP4();
+      const auto& mu2 = (*muons)[1].pfP4();
+
+      const auto& Z = mu1 + mu2;
+      //if(Z.mass() > 50 && Z.mass() < 130){
+      doEvent=true;
+      //} else if(verbose_){
+      //  std::cout << "skipping event because Z boson outside of mass range (" << Z.mass() << ")" << std::endl;
+      //}
+    } else if(verbose_){
+      std::cout << "skipping event because of too few muons" << std::endl;
+    }
+  }
+
+
+
   auto result = std::make_unique<K>();
 
-  for (size_t iJet = 0; iJet < nJets; ++iJet) {
+  for (size_t iJet = 0; iJet < nJets && doEvent; ++iJet) {
 
     T jet = jets->at(iJet);
 
@@ -133,6 +166,21 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
     if (nConstituents<2){ //skip jet
       continue;
     } 
+
+    if(requireZ_){
+      double dR2 = reco::deltaR2(muons->at(0).eta(), muons->at(0).phi(), jet.eta(), jet.phi());
+      if(dR2 < 0.2 * 0.2){
+        if(verbose_)
+          std::cout << "skipping jet too close to first muon" << std::endl;
+        continue;
+      }
+      dR2 = reco::deltaR2(muons->at(1).eta(), muons->at(1).phi(), jet.eta(), jet.phi());
+      if(dR2 < 0.2 * 0.2){
+        if(verbose_)
+          std::cout << "skipping jet too close to second muon" << std::endl;
+        continue;
+      }
+    }
 
     if (verbose_){
       std::cout << "\tjet: (" << jet.pt() << ", " << jet.eta() << ", " << jet.phi() << ")" << std::endl;
@@ -152,8 +200,6 @@ void EECProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) 
                      *dRs, *wts, 
                      order_, 
                      coefs.get(), tuplewts.get(), tupleiDR.get());
-        std::cout << "dR size " << dRs->size() << std::endl;
-        std::cout << "wt size " << wts->size() << std::endl;
       } else{
         EECnonIRC(pt_, eta_, phi_, nConstituents, p1_, p2_, *dRs, *wts);
       }

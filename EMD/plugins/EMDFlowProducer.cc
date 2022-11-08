@@ -158,17 +158,6 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       for(unsigned i=0; i<reco.size(); ++i){
         recovec(i) = reco[i].weight();
       }
-      std::cout << "Flow matrix" << std::endl << *flowmat << std::endl;
-      std::cout << "Reco vec" << std::endl << recovec << std::endl;
-      std::cout << "Gen vec" << std::endl << genvec << std::endl;
-      std::cout << "F * G" << std::endl 
-        << *flowmat * genvec << std::endl;
-      std::cout << "F * 1s" << std::endl 
-        << *flowmat * arma::ones<arma::vec>(gen.size()) << std::endl;
-      std::cout << "Reco factor " << recoFactor << std::endl;
-      std::cout << "Gen factor " << genFactor << std::endl;
-      std::cout << std::endl << std::endl;
-      fflush(stdout);
 
       result->emplace_back(bestGen, iReco, std::move(flowmat), 
           NPGen, NPReco,

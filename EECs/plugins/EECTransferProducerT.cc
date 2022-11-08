@@ -220,14 +220,7 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       EEC_R(iDR) = recoEEC.wtvec->at(iDR);
     }
 
-    std::cout << "Flow matrix" << std::endl << F << std::endl;
-    std::cout << "EEC_G" << std::endl << arma::trans(EEC_G) << std::endl;
-    std::cout << "EEC_R" << std::endl << arma::trans(EEC_R) << std::endl;
-    std::cout << "E_G" << std::endl << arma::trans(E_G) << std::endl;
-    std::cout << "E_R" << std::endl << arma::trans(E_R) << std::endl;
-    std::cout << "F*E_G" << std::endl << arma::trans(arma::trans(F) * E_G) << std::endl;
-    
-        //actually fill transfer matrix
+    //actually fill transfer matrix
     auto transfer = std::make_shared<arma::mat>();
     std::shared_ptr<arma::mat> Tmat;
     if(mode_ == "proj"){
@@ -305,7 +298,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         Tmat = TFF;
       }
     } else if (mode_ == "tuples") { 
-      std::cout << "Entering tuples clause" << std::endl;
       auto Ttuple = std::make_shared<arma::mat>(NDR_R, NDR_G, arma::fill::zeros);
       
       //recoEEC.order must equal genEEC.order
@@ -320,19 +312,13 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       size_t maxIter_G = choose(NPart_G + genEEC.order - 1, genEEC.order);
       //size_t maxIter_G = intPow(NPart_G, genEEC.order);
 
-      printf("RECO\n");
       for(size_t iter_R=0; iter_R<maxIter_R; ++iter_R){//for each reco configuration
         if(recoEEC.tuplewts->at(ord_R) > EPSILON){
-          printOrd(ord_R);
-          printf(" %0.5g\n", recoEEC.tuplewts->at(ord_R));
         }
         iterate_all<int>(recoEEC.order, ord_R, NPart_R);
       }
-      printf("\nGEN\n");
       for(size_t iter_G=0; iter_G<maxIter_G; ++iter_G){//for each reco configuration
         if(genEEC.tuplewts->at(ord_G) > EPSILON){
-          printOrd(ord_G);
-          printf(" %0.5g\n", genEEC.tuplewts->at(ord_G));
         }
         iterate_wdiag<int>(genEEC.order, ord_G, NPart_G);
       }
@@ -344,7 +330,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         ord_G[i] = 0;
       }
 
-      std::cout << "About to enter big loop" << std::endl;
       for(size_t iter_R=0; iter_R<maxIter_R; ++iter_R){//for each reco configuration
         for(size_t iter_G=0; iter_G<maxIter_G; ++iter_G){//for each gen configuration
           int iDR_R = recoEEC.tupleiDR->at(ord_R);
@@ -352,21 +337,12 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
           double wt = genEEC.tuplewts->at(ord_G);
 
           if(wt>EPSILON && recoEEC.tuplewts->at(ord_R) > EPSILON){
-            //printf("RECO");
-            //printOrd(ord_R);
-            //printf("\nGEN");
-            //printOrd(ord_G);
 
             for(int iOrd=0; iOrd<recoEEC.order; ++iOrd){
               wt*= F(ord_G[iOrd], ord_R[iOrd]);
             }
 
-            //printf("wt %0.3f\n\n", wt);
-            //fflush(stdout);
             if(wt>EPSILON){
-              printf("term like (%d, %d)G x (%d, %d)R -> %0.5g\n", 
-                  ord_G[0], ord_G[1], ord_R[0], ord_R[1], wt);
-              printf("\t(%0.5g)G -> (%0.5g)R\n", genEEC.dRvec->at(iDR_G), recoEEC.dRvec->at(iDR_R));
               (*Ttuple)(iDR_R, iDR_G) += wt;
               testwts.at(ord_R) += wt;
             }
@@ -380,20 +356,9 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
         iterate_all<int>(recoEEC.order, ord_R, NPart_R);
       }
 
-      printf("\nTESTWTS\n");
       for(int i=0; i<recoEEC.order; ++i){
         ord_R[i]=0;
       }
-      for(size_t iter_R=0; iter_R<maxIter_R; ++iter_R){//for each reco configuration
-        if(testwts.at(ord_R) > EPSILON){
-          printOrd(ord_R);
-          printf(" %0.5g\n", testwts.at(ord_R));
-        }
-        iterate_all<int>(recoEEC.order, ord_R, NPart_R);
-      }
-
-
-      std::cout << "Ending tuples clause" << std::endl;
 
       Tmat = Ttuple;
     }else{

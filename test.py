@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 # Input source
@@ -36,7 +36,6 @@ process.options = cms.untracked.PSet(
 
 )
 
- Info
 process.configurationMetadata = cms.untracked.PSet(
     annotation = cms.untracked.string('nano_mc_2017_UL nevts:100'),
     name = cms.untracked.string('Applications'),
@@ -53,7 +52,17 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         filterName = cms.untracked.string('')
     ),
     fileName = cms.untracked.string('file:nano_mc2017.root'),
-    outputCommands = process.NANOAODSIMEventContent.outputCommands
+    outputCommands = cms.untracked.vstring(
+      'drop *',
+      'keep nanoaodFlatTable_*_Muon_*',
+      'keep nanoaodFlatTable_*transfer*_*_*',
+      'keep nanoaodFlatTable_*EEC*_*_*',
+      'keep nanoaodFlatTable_muonTable_*_*',
+      'keep nanoaodFlatTable_*JTBTable_*_*',
+      'keep nanoaodFlatTable_genJetsParticleTable_*_*',
+      'keep *_TriggerResults_*_HLT',
+      'keep *_genWeightsTable_*_*'
+    )
 )
 
 # Additional output definition
@@ -64,6 +73,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '106X_mc2017_realistic_v8', '')
 
 
 # Path and EndPath definitions
+
 process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
@@ -74,8 +84,8 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(4)
-process.options.numberOfStreams=cms.untracked.uint32(4)
+process.options.numberOfThreads=cms.untracked.uint32(1)
+process.options.numberOfStreams=cms.untracked.uint32(1)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 # customisation of the process.
@@ -87,10 +97,13 @@ process = setupCustomizedJetToolbox(process, runOnMC=True, PU="Puppi",
 process = addPFCands(process, runOnMC=True, jetsName="selectedPatJetsAK4PFPuppi")
 
 minPartPt = 0.0
+jets = 'selectedPatJetsAK4PFPuppi'
+genJets = 'selectedak4GenJetsNoNu'
+muons = "MyGoodMuons"
 
 process.EMDFlow = cms.EDProducer("EMDFlowProducer",
-    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
-    genJets = cms.InputTag("selectedak4GenJetsNoNu"),
+    jets = cms.InputTag(jets),
+    genJets = cms.InputTag(genJets),
     dR2cut = cms.double(0.2*0.2),
     minPartPt = cms.double(minPartPt),
     mode = cms.string("Ewt"),
@@ -100,26 +113,30 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
 process.EMDTask = cms.Task(process.EMDFlow)
 
 process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
-    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+    jets = cms.InputTag(jets),
     order = cms.uint32(2),
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
-    verbose = cms.uint32(0),
+    verbose = cms.uint32(1),
     minPartPt = cms.double(minPartPt),
+    muons = cms.InputTag(muons),
+    requireZ = cms.bool(True)
 )
 
 process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
-    jets = cms.InputTag("selectedak4GenJetsNoNu"),
+    jets = cms.InputTag(genJets),
     order = cms.uint32(2),
     p1 = cms.uint32(1),
     p2 = cms.uint32(1),
     verbose = cms.uint32(0),
     minPartPt = cms.double(minPartPt),
+    muons = cms.InputTag(muons),
+    requireZ = cms.bool(True)
 )
 
 process.EEC2Transfer = cms.EDProducer("PatProjectedEECTransferProducer",
-    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
-    genJets = cms.InputTag("selectedak4GenJetsNoNu"),
+    jets = cms.InputTag(jets),
+    genJets = cms.InputTag(genJets),
     nDR = cms.uint32(1),
     EECs = cms.InputTag("EEC2"),
     genEECs = cms.InputTag("genEEC2"),
@@ -131,14 +148,14 @@ process.EECTask = cms.Task(process.EEC2, process.genEEC2, process.EEC2Transfer)
 
 process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
     name = cms.string("EEC2"),
-    jets = cms.InputTag("selectedPatJetsAK4PFPuppi"),
+    jets = cms.InputTag(jets),
     EECs = cms.InputTag("EEC2"),
     nDR = cms.uint32(1),
 )
 
 process.genEEC2Table = cms.EDProducer("GenProjectedEECTableProducer",
     name = cms.string("genEEC2"),
-    jets = cms.InputTag("selectedak4GenJetsNoNu"),
+    jets = cms.InputTag(genJets),
     EECs = cms.InputTag("genEEC2"),
     nDR = cms.uint32(1),
 )
@@ -164,14 +181,8 @@ process.analyzer = cms.EDAnalyzer("TransferAnalyzer",
 
 process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag('slimmedMuons'),
-    cut = cms.string("pt > 20 && abs(eta) < 2.5 && CutBasedIdTight && PFIsoTight"),
+    cut = cms.string("pt > 20 && abs(eta) < 2.7 && CutBasedIdTight && PFIsoTight"),
     filter = cms.bool(False),
-)
-
-process.MyZs = cms.EDProducer("CandViewShallowCloneCombiner",
-    checkCharge = cms.bool(True),
-    cut = cms.string("charge == 0 & mass > 50 & mass < 120"),
-    decay = cms.string("MyGoodMuons@+ MyGoodMuons@-")
 )
 
 process.ZFilter = cms.EDFilter("CandViewCountFilter",
@@ -180,7 +191,7 @@ process.ZFilter = cms.EDFilter("CandViewCountFilter",
 )
 
 #process.Zseq = cms.Sequence(process.MyGoodMuons + process.MyZs + process.ZFilter)
-process.ZTask = cms.Task(process.MyGoodMuons, process.MyZs)
+process.ZTask = cms.Task(process.MyGoodMuons)
 
 #process.MyGoodJets = cms.EDFilter("PATJetSelector",
 #    src = cms.InputTag("selectedPatJetsAK4PFPuppi"),
