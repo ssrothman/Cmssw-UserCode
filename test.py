@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 # Input source
@@ -112,67 +112,11 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
 )
 
 process.EMDTask = cms.Task(process.EMDFlow)
+process.schedule.associate(process.EMDTask)
 
-#compute EEC
-process.EEC2 = cms.EDProducer("PatProjectedEECProducer",
-    jets = cms.InputTag(jets),
-    order = cms.uint32(2),
-    p1 = cms.uint32(1),
-    p2 = cms.uint32(1),
-    verbose = cms.uint32(1),
-    minPartPt = cms.double(minPartPt),
-    muons = cms.InputTag(muons),
-    requireZ = cms.bool(True)
-)
-
-#compute gen EEC
-process.genEEC2 = cms.EDProducer("GenProjectedEECProducer",
-    jets = cms.InputTag(genJets),
-    order = cms.uint32(2),
-    p1 = cms.uint32(1),
-    p2 = cms.uint32(1),
-    verbose = cms.uint32(0),
-    minPartPt = cms.double(minPartPt),
-    muons = cms.InputTag(muons),
-    requireZ = cms.bool(True)
-)
-
-#compute transfer matrix
-process.EEC2Transfer = cms.EDProducer("PatProjectedEECTransferProducer",
-    jets = cms.InputTag(jets),
-    genJets = cms.InputTag(genJets),
-    nDR = cms.uint32(1),
-    EECs = cms.InputTag("EEC2"),
-    genEECs = cms.InputTag("genEEC2"),
-    flows = cms.InputTag("EMDFlow"),
-    mode = cms.string("tuples"),
-)
-
-process.EECTask = cms.Task(process.EEC2, process.genEEC2, process.EEC2Transfer)
-
-#save EEC to nanoAOD
-process.EEC2Table = cms.EDProducer("PatProjectedEECTableProducer",
-    name = cms.string("EEC2"),
-    jets = cms.InputTag(jets),
-    EECs = cms.InputTag("EEC2"),
-    nDR = cms.uint32(1),
-)
-
-#save gen EEC to nano
-process.genEEC2Table = cms.EDProducer("GenProjectedEECTableProducer",
-    name = cms.string("genEEC2"),
-    jets = cms.InputTag(genJets),
-    EECs = cms.InputTag("genEEC2"),
-    nDR = cms.uint32(1),
-)
-
-#save transfer matrix to nano
-process.transfer2Table = cms.EDProducer("EECTransferTableProducer",
-    name = cms.string("transfer2"),
-    transfer = cms.InputTag("EEC2Transfer"),
-)
-
-process.EECTableTask = cms.Task(process.EEC2Table, process.genEEC2Table, process.transfer2Table)
+from SRothman.EECs.EECs_cff import addEECs
+process = addEECs(process, "EEC2", 2, True, jets, genJets, muons, minPartPt=minPartPt)
+process = addEECs(process, "EEC3", 3, True, jets, genJets, muons, minPartPt=minPartPt)
 
 #muon selection
 process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
@@ -183,7 +127,7 @@ process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
 
 process.ZTask = cms.Task(process.MyGoodMuons)
 
-process.schedule.associate(process.ZTask, process.EMDTask, process.EECTask, process.EECTableTask)
+process.schedule.associate(process.ZTask, process.EMDTask)
 
 # Automatic addition of the customisation function from PhysicsTools.NanoAOD.nano_cff
 from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC 

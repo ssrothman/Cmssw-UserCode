@@ -1,181 +1,71 @@
 import FWCore.ParameterSet.Config as cms
 
-def addEECs(process, runOnMC=False, jetName="ak4PFJetsPuppi", genJetName="ak4GenJetsNoNu", maxOrder=2, doFull3Pt=True, doFull4Pt=True, minJetPt=10, doNonIRC=True, prefix='Puppi'):
-    process.EECTask = cms.Task()
-    process.schedule.associate(process.EECTask)
+def addEECs(process, name, order, isMC,
+            jets, genJets=None, muons=None, requireZ=True, 
+            p1=1, p2=1, 
+            verbose=0, 
+            minPartPt=0.0):
 
-    for order in range(2, maxOrder+1):
-        setattr(process, "%sEEC%dTable"%(prefix,order), 
-            cms.EDProducer("PatProjectedEECTableProducer",
-                jets = cms.InputTag(jetName),
-                order=cms.uint32(order),
-                name=cms.string("%sEEC%d"%(prefix,order)),
-                minJetPt=cms.double(minJetPt),
-                muons = cms.InputTag('finalMuons'),
-                p1 = cms.uint32(1),
-                p2 = cms.uint32(1),
-                verbose = cms.uint32(0),
-            )
-        )
-        process.EECTask.add(getattr(process, "%sEEC%dTable"%(prefix,order)))
-    
-    setattr(getattr(process, '%sEEC2Table'%prefix), 'verbose', cms.uint32(1))
+    producers = []
+    setattr(process, name, cms.EDProducer("PatProjectedEECProducer",
+        jets = cms.InputTag(jets),
+        order = cms.uint32(order),
+        p1 = cms.uint32(p1),
+        p2 = cms.uint32(p2),
+        verbose = cms.uint32(verbose),
+        minPartPt = cms.double(minPartPt),
+        muons = cms.InputTag(muons),
+        requireZ = cms.bool(requireZ)
+    ))
+    producers.append(getattr(process, name))
 
-    if doFull3Pt:
-        setattr(process,"%sFull3PtEECTable"%prefix,
-            cms.EDProducer("PatFull3PtEECTableProducer",
-              verbose = cms.uint32(0),
-              p1 = cms.uint32(1),
-              p2 = cms.uint32(1),
-              jets = cms.InputTag(jetName),
-              order = cms.uint32(3),
-              name = cms.string("%sFull3PtEEC"%prefix),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-        )
-        process.EECTask.add(getattr(process, "%sFull3PtEECTable"%prefix))
-    
-    if doFull4Pt:
-        setattr(process, "%sFull4PtEECTable"%prefix,
-            cms.EDProducer("PatFull4PtEECTableProducer",
-              verbose = cms.uint32(0),
-              p1 = cms.uint32(1),
-              p2 = cms.uint32(1),
-              jets = cms.InputTag(jetName),
-              order = cms.uint32(4),
-              name = cms.string("%sFull4PtEEC"%prefix),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-        )
-        process.EECTask.add(getattr(process, "%sFull4PtEECTable"%prefix))
+    setattr(process, name+"Table", cms.EDProducer("PatProjectedEECTableProducer",
+        name = cms.string(name),
+        jets = cms.InputTag(jets),
+        EECs = cms.InputTag(name),
+        nDR = cms.uint32(1)
+    ))
+    producers.append(getattr(process, name+"Table"))
 
-    if doNonIRC:
-        setattr(process, "%sEECnonIRC12Table"%prefix,
-            cms.EDProducer("PatProjectedEECTableProducer",
-              verbose = cms.uint32(0),
-              p1 = cms.uint32(1),
-              p2 = cms.uint32(2),
-              jets = cms.InputTag(jetName),
-              order = cms.uint32(2),
-              name = cms.string("%sEECnonIRC12"%prefix),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-        )
-        process.EECTask.add(getattr(process, "%sEECnonIRC12Table"%prefix))
+    if isMC:
+        setattr(process, "gen"+name, cms.EDProducer("GenProjectedEECProducer",
+            jets = cms.InputTag(genJets),
+            order = cms.uint32(order),
+            p1 = cms.uint32(p1),
+            p2 = cms.uint32(p2),
+            verbose = cms.uint32(0),
+            minPartPt = cms.double(minPartPt),
+            muons = cms.InputTag(muons),
+            requireZ = cms.bool(requireZ)
+        ))
+        producers.append(getattr(process, "gen"+name))
 
-        setattr(process, "%sEECnonIRC13Table"%prefix,
-            cms.EDProducer("PatProjectedEECTableProducer",
-              p1 = cms.uint32(1),
-              verbose = cms.uint32(0),
-              p2 = cms.uint32(3),
-              jets = cms.InputTag(jetName),
-              order = cms.uint32(2),
-              name = cms.string("%sEECnonIRC13"%prefix),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-        )
-        process.EECTask.add(getattr(process, "%sEECnonIRC13Table"%prefix))
+        setattr(process, "gen"+name+"Table", cms.EDProducer("GenProjectedEECTableProducer",
+            name = cms.string("gen"+name),
+            jets = cms.InputTag(genJets),
+            EECs = cms.InputTag("gen"+name),
+            nDR = cms.uint32(1)
+        ))
+        producers.append(getattr(process, "gen"+name+"Table"))
 
-        setattr(process, "%sEECnonIRC22Table"%prefix,
-            cms.EDProducer("PatProjectedEECTableProducer",
-              verbose = cms.uint32(0),
-              p1 = cms.uint32(2),
-              p2 = cms.uint32(2),
-              jets = cms.InputTag(jetName),
-              order = cms.uint32(2),
-              name = cms.string("%sEECnonIRC22"%prefix),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-        )
-        process.EECTask.add(getattr(process, "%sEECnonIRC22Table"%prefix))
+        setattr(process, name+"Transfer", cms.EDProducer("PatProjectedEECTransferProducer",
+            jets = cms.InputTag(jets),
+            genJets = cms.InputTag(genJets),
+            nDR = cms.uint32(1),
+            EECs = cms.InputTag(name),
+            genEECs = cms.InputTag("gen"+name),
+            flows = cms.InputTag("EMDFlow"),
+            mode = cms.string("tuples")
+        ))
+        producers.append(getattr(process, name+"Transfer"))
 
-    if runOnMC:
-        process.genEECTask = cms.Task()
-        process.schedule.associate(process.genEECTask)
+        setattr(process, name+"TransferTable", cms.EDProducer("EECTransferTableProducer",
+            name = cms.string(name+"Transfer"),
+            transfer = cms.InputTag(name+"Transfer")
+        ))
+        producers.append(getattr(process, name+"TransferTable"))
 
-        for order in range(2, maxOrder+1):
-            setattr(process, "GenEEC%dTable"%order, 
-                cms.EDProducer("GenProjectedEECTableProducer",
-                    p1 = cms.uint32(1),
-                    verbose = cms.uint32(0),
-                    p2 = cms.uint32(1),
-                    jets = cms.InputTag(genJetName),
-                    order=cms.uint32(order),
-                    name=cms.string("genEEC%d"%order),
-                    minJetPt=cms.double(minJetPt),
-                    muons=cms.InputTag('finalMuons')
-                )
-            )
-            process.genEECTask.add(getattr(process, "GenEEC%dTable"%order))
-
-        setattr(getattr(process, 'GenEEC2Table'), 'verbose', cms.uint32(1))
-
-        if doFull3Pt:
-            process.GenFull3PtEECTable = cms.EDProducer("GenFull3PtEECTableProducer",
-                verbose = cms.uint32(0),
-                p1 = cms.uint32(1),
-                p2 = cms.uint32(1),
-                jets = cms.InputTag(genJetName),
-                order = cms.uint32(3),
-                name = cms.string("genFull3PtEEC"),
-                minJetPt=cms.double(minJetPt),
-                muons = cms.InputTag('finalMuons')
-            )
-            process.genEECTask.add(process.GenFull3PtEECTable)
-        
-        if doFull4Pt:
-            process.GenFull4PtEECTable = cms.EDProducer("GenFull4PtEECTableProducer",
-                p1 = cms.uint32(1),
-                verbose = cms.uint32(0),
-                p2 = cms.uint32(1),
-                jets = cms.InputTag(genJetName),
-                order = cms.uint32(4),
-                name = cms.string("genFull4PtEEC"),
-                minJetPt=cms.double(minJetPt),
-                muons = cms.InputTag('finalMuons')
-            )
-            process.genEECTask.add(process.GenFull4PtEECTable)
-
-        if doNonIRC:
-          process.genEECnonIRC12Table = cms.EDProducer("GenProjectedEECTableProducer",
-              p1 = cms.uint32(1),
-              p2 = cms.uint32(2),
-              verbose = cms.uint32(0),
-              jets = cms.InputTag(genJetName),
-              order = cms.uint32(2),
-              name = cms.string("genEECnonIRC12"),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-          process.genEECTask.add(process.genEECnonIRC12Table)
-
-          process.genEECnonIRC13Table = cms.EDProducer("GenProjectedEECTableProducer",
-              p1 = cms.uint32(1),
-              verbose = cms.uint32(0),
-              p2 = cms.uint32(3),
-              jets = cms.InputTag(genJetName),
-              order = cms.uint32(2),
-              name = cms.string("genEECnonIRC13"),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-          process.genEECTask.add(process.genEECnonIRC13Table)
-
-          process.genEECnonIRC22Table = cms.EDProducer("GenProjectedEECTableProducer",
-              p1 = cms.uint32(2),
-              verbose = cms.uint32(0),
-              p2 = cms.uint32(2),
-              jets = cms.InputTag(genJetName),
-              order = cms.uint32(2),
-              name = cms.string("genEECnonIRC22"),
-              minJetPt=cms.double(minJetPt),
-              muons = cms.InputTag('finalMuons')
-          )
-          process.genEECTask.add(process.genEECnonIRC22Table)
+    setattr(process, name+"Task", cms.Task(*producers))
+    process.schedule.associate(getattr(process, name+"Task"))
 
     return process
