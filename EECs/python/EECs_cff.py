@@ -4,7 +4,8 @@ def addEECs(process, name, order, isMC,
             jets, genJets=None, muons=None, requireZ=True, 
             p1=1, p2=1, 
             verbose=0, 
-            minPartPt=0.0):
+            minPartPt=0.0,
+            flow="EMDFlow"):
 
     producers = []
     setattr(process, name, cms.EDProducer("PatProjectedEECProducer",
@@ -54,7 +55,7 @@ def addEECs(process, name, order, isMC,
             nDR = cms.uint32(1),
             EECs = cms.InputTag(name),
             genEECs = cms.InputTag("gen"+name),
-            flows = cms.InputTag("EMDFlow"),
+            flows = cms.InputTag(flow),
             mode = cms.string("tuples")
         ))
         producers.append(getattr(process, name+"Transfer"))

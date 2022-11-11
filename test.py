@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(7)
 )
 
 # Input source
@@ -61,7 +61,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
       'keep nanoaodFlatTable_*JTBTable_*_*',
       'keep nanoaodFlatTable_genJetsParticleTable_*_*',
       'keep *_TriggerResults_*_HLT',
-      'keep *_genWeightsTable_*_*'
+      'keep *_genWeightsTable_*_*',
     )
 )
 
@@ -111,12 +111,27 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
     partDR2cut = cms.double(0.05*0.05)
 )
 
+process.GMF = cms.EDProducer("GenMatchFitProducer",
+    jets = cms.InputTag(jets),
+    genJets = cms.InputTag(genJets),
+    dR2cut = cms.double(0.2 * 0.2),
+    minPartPt = cms.double(minPartPt),
+    partDR2cut = cms.double(0.1*0.1),
+    maxIter = cms.uint32(20),
+    feasCondition = cms.double(0.5),
+    startMu = cms.double(10.0),
+    startLambda = cms.double(1.0),
+    clipVal = cms.double(0.05)
+)
+
+process.GMFTask = cms.Task(process.GMF)
+process.schedule.associate(process.GMFTask)
 process.EMDTask = cms.Task(process.EMDFlow)
 process.schedule.associate(process.EMDTask)
 
 from SRothman.EECs.EECs_cff import addEECs
-process = addEECs(process, "EEC2", 2, True, jets, genJets, muons, minPartPt=minPartPt)
-process = addEECs(process, "EEC3", 3, True, jets, genJets, muons, minPartPt=minPartPt)
+process = addEECs(process, "EEC2", 2, True, jets, genJets, muons, minPartPt=minPartPt, flow="GMF")
+process = addEECs(process, "EEC3", 3, True, jets, genJets, muons, minPartPt=minPartPt, flow="GMF")
 
 #muon selection
 process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
