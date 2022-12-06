@@ -9,15 +9,42 @@
 
 //indexed by power, iPart, iDR
 using coefs_t = std::vector<std::vector<std::vector<double>>>;
-using vecptr_t = std::shared_ptr<std::vector<double>>;
-using tuple_t = std::pair<std::vector<int>, double>;
-using tuples_t = std::vector<std::vector<tuple_t>>;
+
+//pointers to vectors
+using vecptr_d_t = std::shared_ptr<std::vector<double>>;
+using vecptr_i_t = std::shared_ptr<std::vector<int>>;
+using vecptr_b_t = std::shared_ptr<std::vector<bool>>;
+
+struct EECParts{
+  int iJet;
+
+  double rawPt;      //sum of all jet consituent pt (including those with pt<minPartPt)
+  double minPartPt;  //pt threshold
+
+  vecptr_d_t partPt;
+  vecptr_d_t partEta;
+  vecptr_d_t partPhi;
+  vecptr_i_t partPdgId;
+
+  explicit EECParts(int iJet, double rawPt, double minPartPt,
+                    vecptr_d_t&& partPt, vecptr_d_t&& partEta, vecptr_d_t&& partPhi,
+                    vecptr_i_t&& partPdgId):
+    iJet(iJet), rawPt(rawPt), minPartPt(minPartPt),
+    partPt(std::move(partPt)), partEta(std::move(partEta)), partPhi(std::move(partPhi)),
+    partPdgId(std::move(partPdgId)) {}
+    
+  EECParts():
+    iJet(-1), rawPt(-1), minPartPt(-1),
+    partPt(nullptr), partEta(nullptr), partPhi(nullptr),
+    partPdgId(nullptr) {}
+};
+    
 
 struct ProjectedEEC{
   int iJet;
 
-  vecptr_t dRvec;
-  vecptr_t wtvec;
+  vecptr_d_t dRvec;
+  vecptr_d_t wtvec;
 
   int order;
 
@@ -26,8 +53,8 @@ struct ProjectedEEC{
   std::shared_ptr<vecND<int>> tupleiDR;
 
   explicit ProjectedEEC(int jet, 
-      vecptr_t&& dR, 
-      vecptr_t&& wt, 
+      vecptr_d_t&& dR, 
+      vecptr_d_t&& wt, 
       int N,
       std::shared_ptr<coefs_t>&& coeficients,
       std::shared_ptr<vecND<double>>&& tuplewts,
@@ -35,7 +62,10 @@ struct ProjectedEEC{
     iJet(jet), 
     dRvec(std::move(dR)), wtvec(std::move(wt)), 
     order(N), 
-    coefs(std::move(coeficients)), tuplewts(std::move(tuplewts)), tupleiDR(std::move(tupleiDR)) {}
+    coefs(std::move(coeficients)), 
+    tuplewts(std::move(tuplewts)), 
+    tupleiDR(std::move(tupleiDR))
+  {}
   ProjectedEEC() : 
     iJet(-1), 
     dRvec(nullptr), wtvec(nullptr), 
@@ -47,13 +77,13 @@ struct ResolvedEEC{
   int iJet;
 
   std::shared_ptr<std::vector<std::vector<double>>> dRvec;
-  vecptr_t wtvec;
+  vecptr_d_t wtvec;
 
   int order;
 
   explicit ResolvedEEC(int jet, 
       std::shared_ptr<std::vector<std::vector<double>>>&& dR, 
-      vecptr_t&& wt, 
+      vecptr_d_t&& wt, 
       int N):
     iJet(jet), 
     dRvec(std::move(dR)), wtvec(std::move(wt)), 
@@ -63,12 +93,12 @@ struct ResolvedEEC{
 
 struct EECTransfer{
   int iJetGen, iJetReco;
-  vecptr_t dRgen, dRreco, wtgen, wtreco;
+  vecptr_d_t dRgen, dRreco, wtgen, wtreco;
   std::shared_ptr<arma::mat> matrix;
 
   explicit EECTransfer(int iGen, int iReco,
-                       vecptr_t& genDR, vecptr_t& recoDR, 
-                       vecptr_t& genWT, vecptr_t& recoWT,
+                       vecptr_d_t& genDR, vecptr_d_t& recoDR, 
+                       vecptr_d_t& genWT, vecptr_d_t& recoWT,
                        std::shared_ptr<arma::mat> mat) :
     iJetGen(iGen), iJetReco(iReco),
     dRgen(genDR), dRreco(recoDR), 
@@ -83,5 +113,6 @@ struct EECTransfer{
 typedef std::vector<ProjectedEEC> ProjectedEECCollection;
 typedef std::vector<ResolvedEEC> ResolvedEECCollection;
 typedef std::vector<EECTransfer> EECTransferCollection;
+typedef std::vector<EECParts> EECPartsCollection;
 
 #endif

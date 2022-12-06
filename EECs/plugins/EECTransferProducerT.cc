@@ -312,19 +312,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       size_t maxIter_G = choose(NPart_G + genEEC.order - 1, genEEC.order);
       //size_t maxIter_G = intPow(NPart_G, genEEC.order);
 
-      for(size_t iter_R=0; iter_R<maxIter_R; ++iter_R){//for each reco configuration
-        if(recoEEC.tuplewts->at(ord_R) > EPSILON){
-        }
-        iterate_all<int>(recoEEC.order, ord_R, NPart_R);
-      }
-      for(size_t iter_G=0; iter_G<maxIter_G; ++iter_G){//for each reco configuration
-        if(genEEC.tuplewts->at(ord_G) > EPSILON){
-        }
-        iterate_wdiag<int>(genEEC.order, ord_G, NPart_G);
-      }
-
-      vecND<double> testwts(NPart_R, recoEEC.order, 0);
-
       for(int i=0; i<genEEC.order; ++i){
         ord_R[i] = 0;
         ord_G[i] = 0;
@@ -344,7 +331,6 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
 
             if(wt>EPSILON){
               (*Ttuple)(iDR_R, iDR_G) += wt;
-              testwts.at(ord_R) += wt;
             }
           }
 
@@ -364,6 +350,17 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
     }else{
       throw cms::Exception("EECTransferProducer") << "unsupported mode" << std::endl;
     }
+
+    arma::rowvec sumG = arma::sum(*Tmat, 0);
+    arma::colvec sumR = arma::sum(*Tmat, 1);
+
+    for(size_t iPGen=0; iPGen<NPart_G; ++iPGen){
+      //genEEC.partMatched->at(iPGen) = sumG(iPGen)!=0;
+    }
+    for(size_t iPReco=0; iPReco<NPart_R; ++iPReco){
+      //recoEEC.partMatched->at(iPReco) = sumR(iPReco)!=0;
+    }
+
     result->emplace_back(genEEC.iJet, recoEEC.iJet,
                           genEEC.dRvec, recoEEC.dRvec, 
                           genEEC.wtvec, recoEEC.wtvec, 

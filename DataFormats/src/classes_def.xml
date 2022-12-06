@@ -11,4 +11,7 @@
  <class name="EECTransfer"/>
  <class name="std::vector<EECTransfer>"/>
  <class name="edm::Wrapper<std::vector<EECTransfer> >"/>
+ <class name="EECParts"/>
+ <class name="std::vector<EECParts>"/>
+ <class name="edm::Wrapper<std::vector<EECParts> >"/>
 </lcgdict>

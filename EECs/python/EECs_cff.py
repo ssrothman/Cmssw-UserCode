@@ -24,7 +24,8 @@ def addEECs(process, name, order, isMC,
         name = cms.string(name),
         jets = cms.InputTag(jets),
         EECs = cms.InputTag(name),
-        nDR = cms.uint32(1)
+        nDR = cms.uint32(1),
+        doParts = cms.bool(True)
     ))
     producers.append(getattr(process, name+"Table"))
 
@@ -45,7 +46,8 @@ def addEECs(process, name, order, isMC,
             name = cms.string("gen"+name),
             jets = cms.InputTag(genJets),
             EECs = cms.InputTag("gen"+name),
-            nDR = cms.uint32(1)
+            nDR = cms.uint32(1),
+            doParts = cms.bool(True)
         ))
         producers.append(getattr(process, "gen"+name+"Table"))
 

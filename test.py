@@ -23,13 +23,14 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(7)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('file:DYJetsToLL_miniAOD.root'),
-    secondaryFileNames = cms.untracked.vstring()
+    secondaryFileNames = cms.untracked.vstring(),
+    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1,170809822,1,170809826))
 )
 
 process.options = cms.untracked.PSet(
@@ -91,15 +92,15 @@ process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 # customisation of the process.
 from SRothman.MyJets.myjets_cff import setupCustomizedJetToolbox, addPFCands
 process = setupCustomizedJetToolbox(process, runOnMC=True, PU="Puppi",
-    cut = "pt>30 && abs(eta) < 2.4",
+    cut = "pt>30 && abs(eta) < 2.4 && numberOfDaughters>1",
     genJetCut = "pt>20 && abs(eta) < 2.7 && numberOfDaughters>1"
 )
 process = addPFCands(process, runOnMC=True, jetsName="selectedPatJetsAK4PFPuppi")
 
-minPartPt = 0.0
+minPartPt = 1.0
 jets = 'selectedPatJetsAK4PFPuppi'
 genJets = 'selectedak4GenJetsNoNu'
-muons = "MyGoodMuons"
+muons = "slimmedMuons"
 
 #produces particle-level transfer 
 process.EMDFlow = cms.EDProducer("EMDFlowProducer",
@@ -108,7 +109,7 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
     dR2cut = cms.double(0.2*0.2),
     minPartPt = cms.double(minPartPt),
     mode = cms.string("Ewt"),
-    partDR2cut = cms.double(0.05*0.05)
+    partDR2cut = cms.double(0.05*0.05),
 )
 
 process.GMF = cms.EDProducer("GenMatchFitProducer",
@@ -121,16 +122,17 @@ process.GMF = cms.EDProducer("GenMatchFitProducer",
     feasCondition = cms.double(0.5),
     startMu = cms.double(10.0),
     startLambda = cms.double(1.0),
-    clipVal = cms.double(0.05)
+    clipVal = cms.double(0.05),
+    requireZ = cms.bool(True)
 )
 
 process.GMFTask = cms.Task(process.GMF)
 process.schedule.associate(process.GMFTask)
-process.EMDTask = cms.Task(process.EMDFlow)
-process.schedule.associate(process.EMDTask)
+#process.EMDTask = cms.Task(process.EMDFlow)
+#process.schedule.associate(process.EMDTask)
 
 from SRothman.EECs.EECs_cff import addEECs
-process = addEECs(process, "EEC2", 2, True, jets, genJets, muons, minPartPt=minPartPt, flow="GMF")
+process = addEECs(process, "EEC2", 2, True, jets, genJets, muons, minPartPt=minPartPt, flow="GMF", verbose=0)
 process = addEECs(process, "EEC3", 3, True, jets, genJets, muons, minPartPt=minPartPt, flow="GMF")
 
 #muon selection
@@ -142,7 +144,7 @@ process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
 
 process.ZTask = cms.Task(process.MyGoodMuons)
 
-process.schedule.associate(process.ZTask, process.EMDTask)
+process.schedule.associate(process.ZTask)
 
 # Automatic addition of the customisation function from PhysicsTools.NanoAOD.nano_cff
 from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC 
