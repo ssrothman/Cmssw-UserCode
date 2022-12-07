@@ -20,9 +20,6 @@ class GenMatchFCN: public ROOT::Minuit2::FCNBase {
 
     //constants for augmented lagrangian method
     //will be used to enforce sum_i Aij = 1
-    std::vector<double> lambdas;
-    double mu;
-
   public:
     explicit GenMatchFCN(cvecptr recoPT, cvecptr recoETA, cvecptr recoPHI,
                          cvecptr genPT, cvecptr genETA, cvecptr genPHI,
@@ -33,39 +30,28 @@ class GenMatchFCN: public ROOT::Minuit2::FCNBase {
       genPT(genPT), genETA(genETA), genPHI(genPHI),
       errPT(errPT), errETA(errETA), errPHI(errPHI),
       NPReco(recoPT->size()), NPGen(genPT->size()),
-      PUexp(PUexp), PUpenalty(PUpenalty), 
-      lambdas(NPGen, startLambda), mu(startMu) { }
+      PUexp(PUexp), PUpenalty(PUpenalty) {}
 
     inline const size_t idx(const size_t iReco, const size_t iGen) const{
-      return iReco*NPGen + iGen;
+      return iReco*NPGen + iGen + NPGen + 1;
     }
 
-    //NB updateLambdas() must be called before updateMu()
-    double updateLambdas(const std::vector<double>& data){
+    double getFeas(const std::vector<double>& data){
       double feas=0;
-      size_t N=0;
+      std::vector<double> C(NPGen,0);
 
-      std::vector<double> C(NPGen, 0);
       for(size_t iGen=0; iGen<NPGen; ++iGen){
         for(size_t iReco=0; iReco<NPReco; ++iReco){
           C.at(iGen) += data.at(idx(iReco, iGen));
         }
-        if(C.at(iGen)==0){
-          continue;
-        }
-        ++N;
-        C.at(iGen)-=1;
-        feas += C.at(iGen)*C.at(iGen);
-        lambdas.at(iGen) += mu * C.at(iGen);
-        printf("%lu: lambda = %0.3f\t C = %0.3f\n", iGen, lambdas.at(iGen), C.at(iGen));
       }
 
-      return feas/N;
-    }
-
-    inline void updateMu(const double factor){
-      mu *= factor;
-      printf("mu = %0.2f\n", mu);
+      for(size_t iGen=0; iGen<NPGen; ++iGen){
+        if(C[iGen]!=0){
+          feas += (C[iGen]-1)*(C[iGen]-1);
+        }
+      }
+      return feas;
     }
 
     double operator()(const std::vector<double>& data) const override;

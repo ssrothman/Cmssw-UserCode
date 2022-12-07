@@ -21,6 +21,7 @@
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 
 #include "SRothman/DataFormats/interface/EEC.h"
+#include "SRothman/DataFormats/interface/EMDFlow.h"
 #include "SRothman/EECs/src/iterating.h"
 
 #include <iostream>
@@ -57,7 +58,7 @@ static const std::string vformat(const char * const zcFormat, ...) {
   return std::string(zc.data(), iLen); 
 }
 
-template <typename T, typename K>
+template <typename K>
 class EECTableProducerT : public edm::stream::EDProducer<> {
 public:
   explicit EECTableProducerT(const edm::ParameterSet&);
@@ -69,26 +70,33 @@ private:
   std::string name_;
 
   edm::InputTag jetsTag_;
-  edm::EDGetTokenT<edm::View<T>> jetsToken_;
+  edm::EDGetTokenT<EECPartsCollection> jetsToken_;
 
   edm::InputTag EECTag_;
   edm::EDGetTokenT<K> EECToken_;
 
+  edm::InputTag flowTag_;
+  edm::EDGetTokenT<EMDFlowCollection> flowToken_;
+
   unsigned nDR_;
 
   bool doParts_;
+  bool isGen_;
 };
 
-template <typename T, typename K>
-EECTableProducerT<T, K>::EECTableProducerT(const edm::ParameterSet& conf)
+template <typename K>
+EECTableProducerT<K>::EECTableProducerT(const edm::ParameterSet& conf)
     : 
       name_(conf.getParameter<std::string>("name")),
       jetsTag_(conf.getParameter<edm::InputTag>("jets")),
-      jetsToken_(consumes<edm::View<T>>(jetsTag_)),
+      jetsToken_(consumes<EECPartsCollection>(jetsTag_)),
       EECTag_(conf.getParameter<edm::InputTag>("EECs")),
       EECToken_(consumes<K>(EECTag_)),
+      flowTag_(conf.getParameter<edm::InputTag>("flow")),
+      flowToken_(consumes<EMDFlowCollection>(flowTag_)),
       nDR_(conf.getParameter<unsigned>("nDR")),
-      doParts_(conf.getParameter<bool>("doParts")){
+      doParts_(conf.getParameter<bool>("doParts")),
+      isGen_(conf.getParameter<bool>("isGen")){
   produces<nanoaod::FlatTable>(name_ + "COV");
   produces<nanoaod::FlatTable>(name_ + "BK");
   produces<nanoaod::FlatTable>(name_);
@@ -97,24 +105,29 @@ EECTableProducerT<T, K>::EECTableProducerT(const edm::ParameterSet& conf)
   }
 }
 
-template <typename T, typename K>
-void EECTableProducerT<T, K>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+template <typename K>
+void EECTableProducerT<K>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<std::string>("name");
   desc.add<edm::InputTag>("jets");
   desc.add<edm::InputTag>("EECs");
+  desc.add<edm::InputTag>("flow");
   desc.add<unsigned>("nDR");
   desc.add<bool>("doParts");
+  desc.add<bool>("isGen");
   descriptions.addWithDefaultLabel(desc);
 }
 
-template <typename T, typename K>
-void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& setup) {
-  edm::Handle<edm::View<T>> jets;
+template <typename K>
+void EECTableProducerT<K>::produce(edm::Event& evt, const edm::EventSetup& setup) {
+  edm::Handle<EECPartsCollection> jets;
   evt.getByToken(jetsToken_, jets);
 
   edm::Handle<K> EECs;
   evt.getByToken(EECToken_, EECs);
+
+  edm::Handle<EMDFlowCollection> flows;
+  evt.getByToken(flowToken_, flows);
 
   //EEC table
   auto flatDRs = std::make_unique<std::vector<std::vector<float>>>();
@@ -140,6 +153,10 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
   int iJet=0;
   for (size_t iEEC = 0; iEEC < EECs->size(); ++iEEC){
     auto EEC = EECs->at(iEEC);
+    auto parts = jets->at(iEEC);
+
+    assert(parts.iJet == EEC.iJet);
+
     while(iJet < EEC.iJet){ //for all skipped jets
       for(size_t i=0; i<nDR_; ++i){
         flatDRs->at(i).emplace_back(0);
@@ -164,14 +181,32 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
     jetIdx->emplace_back(EEC.iJet);
 
     if(doParts_){
-    //  for(size_t i=0; i<EEC.partPt->size(); ++i){
-    //    partPt->emplace_back(EEC.partPt->at(i));
-    //    partEta->emplace_back(EEC.partEta->at(i));
-    //    partPhi->emplace_back(EEC.partPhi->at(i));
-    //    partPdgId->emplace_back(EEC.partPdgId->at(i));
-    //    partMatched->emplace_back(EEC.partMatched->at(i));
-    //  }
-    //  nPart->emplace_back(EEC.partPt->size());
+
+      size_t matched_flow = -1;
+      for(size_t i=0; i<flows->size(); ++i){
+        if( (isGen_ && flows->at(i).iGen == parts.iJet) ||
+            (!isGen_ && flows->at(i).iReco == parts.iJet) ){
+          matched_flow=i;
+          break;
+        }
+      }
+
+      for(size_t i=0; i<parts.partPt->size(); ++i){
+        partPt->emplace_back(parts.partPt->at(i));
+        partEta->emplace_back(parts.partEta->at(i));
+        partPhi->emplace_back(parts.partPhi->at(i));
+        partPdgId->emplace_back(parts.partPdgId->at(i));
+        if(matched_flow<0){
+          partMatched->emplace_back(false);
+        } else {
+          if(isGen_){
+            partMatched->emplace_back(flows->at(matched_flow).matchedG->at(i));
+          } else {
+            partMatched->emplace_back(flows->at(matched_flow).matchedR->at(i));
+          }
+        }
+      }
+      nPart->emplace_back(parts.partPt->size());
     }
 
     for(size_t i=0; i<EEC.wtvec->size(); ++i){//for each dR in the EEC
@@ -262,17 +297,13 @@ void EECTableProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup& se
 
 }  // end produce()
 
-typedef EECTableProducerT<reco::PFJet, ProjectedEECCollection> ProjectedEECTableProducer;
-typedef EECTableProducerT<reco::GenJet, ProjectedEECCollection> GenProjectedEECTableProducer;
-typedef EECTableProducerT<pat::Jet, ProjectedEECCollection> PatProjectedEECTableProducer;
+typedef EECTableProducerT<ProjectedEECCollection> ProjectedEECTableProducer;
 
 //typedef EECTableProducerT<reco::PFJet, ResolvedEECCollection> ResolvedEECTableProducer;
 //typedef EECTableProducerT<reco::GenJet, ResolvedEECCollection> GenResolvedEECTableProducer;
 //typedef EECTableProducerT<pat::Jet, ResolvedEECCollection> PatResolvedEECTableProducer;
 
 DEFINE_FWK_MODULE(ProjectedEECTableProducer);
-DEFINE_FWK_MODULE(GenProjectedEECTableProducer);
-DEFINE_FWK_MODULE(PatProjectedEECTableProducer);
 
 //DEFINE_FWK_MODULE(ResolvedEECTableProducer);
 //DEFINE_FWK_MODULE(GenResolvedEECTableProducer);

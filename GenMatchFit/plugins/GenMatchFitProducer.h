@@ -21,13 +21,13 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
+#include "SRothman/DataFormats/interface/EEC.h"
+
 #include <iostream>
 #include <memory>
 #include <vector>
 
-#define MAX_CONSTITUENTS 10
-
-using vecptr = std::shared_ptr<std::vector<double>>;
+using vecptr_d_t = std::shared_ptr<std::vector<double>>;
 
 class GenMatchFitProducer : public edm::stream::EDProducer<> {
 public:
@@ -38,73 +38,22 @@ public:
 
 private:
   edm::InputTag jetsTag_;
-  edm::EDGetTokenT<edm::View<pat::Jet>> jetsToken_;
+  edm::EDGetTokenT<EECPartsCollection> jetsToken_;
 
   edm::InputTag genJetsTag_;
-  edm::EDGetTokenT<edm::View<reco::GenJet>> genJetsToken_;
+  edm::EDGetTokenT<EECPartsCollection> genJetsToken_;
 
   double dR2cut_;
   double minPartPt_;
   double partDR2cut_;
 
-  vecptr recoPT_, recoETA_, recoPHI_, 
-         genPT_, genETA_, genPHI_,
-         errPT_, errETA_, errPHI_;
+  vecptr_d_t recoCorrPT_, errPT_, errETA_, errPHI_;
 
   unsigned maxIter_;
   double feasCondition_;
   double startMu_;
   double startLambda_;
   double clipVal_;
-
-  template <typename T>
-  double getConstituents_(const T& jet, 
-                          vecptr ptOut,
-                          vecptr etaOut,
-                          vecptr phiOut);
 };
-
-template <typename T>
-double GenMatchFitProducer::getConstituents_(const T& jet, 
-                                             vecptr ptOut,
-                                             vecptr etaOut,
-                                             vecptr phiOut){
-  ptOut->clear();
-  etaOut->clear();
-  phiOut->clear();
-
-  const std::vector<reco::Jet::Constituent> constituents = jet.getJetConstituents();
-  size_t nConstituents = std::min<size_t>(constituents.size(), MAX_CONSTITUENTS);
-
-  double rawpt = 0;
-  double rawpt2 = 0;
-  for(size_t iPart=0; iPart < nConstituents; ++iPart){
-    auto part = constituents[iPart];
-
-    double nextpt = part->pt();
-
-    rawpt += nextpt;
-    if(part->pt() > minPartPt_){
-      rawpt2 += nextpt;
-    }
-  }
-
-  double JECfactor = jet.pt()/rawpt;
-
-  for(size_t iPart=0; iPart < nConstituents; ++iPart){
-    auto part = constituents[iPart];
-
-
-    if(part->pt() < minPartPt_){
-      continue;
-    } else {
-      ptOut->emplace_back(part->pt() * JECfactor);
-      etaOut->emplace_back(part->eta());
-      phiOut->emplace_back(part->phi());
-    }
-  }
-
-  return rawpt2/rawpt;
-}
 
 #endif

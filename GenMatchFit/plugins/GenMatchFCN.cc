@@ -11,11 +11,19 @@ double GenMatchFCN::operator()(const std::vector<double>& data) const{
   std::vector<double> A(NPReco*NPGen, 0);
   
   //predicted pT, eta, phi
-  std::vector<double> EP(NPReco, 0), etaP(NPReco, 0), phiP(NPReco, 0);
+  std::vector<double> EP(NPReco, 0);
   
   //constraint functions
   std::vector<double> C(NPGen, 0);
   
+  double mu;
+  std::vector<double> lambdas(NPGen, 0);
+
+  for(size_t iGen=0; iGen<NPGen; ++iGen){
+    lambdas[iGen] = data.at(iGen);
+  }
+  mu = data.at(NPGen+1);
+
   //compute column sums
   for(size_t iReco=0; iReco<NPReco; ++iReco){
     for(size_t iGen=0; iGen<NPGen; ++iGen){
@@ -27,9 +35,9 @@ double GenMatchFCN::operator()(const std::vector<double>& data) const{
   for(size_t iReco=0; iReco<NPReco; ++iReco){
     for(size_t iGen=0; iGen<NPGen; ++iGen){
       if(C.at(iGen)>0){
-        A.at(idx(iReco, iGen)) = data.at(idx(iReco, iGen))/C.at(iGen);
+        A.at(idx(iReco, iGen)-NPGen-1) = data.at(idx(iReco, iGen))/C.at(iGen);
       } else {
-        A.at(idx(iReco, iGen)) = 0;
+        A.at(idx(iReco, iGen)-NPGen-1) = 0;
       }
     }
   }
@@ -41,26 +49,22 @@ double GenMatchFCN::operator()(const std::vector<double>& data) const{
     }
   }
 
-  //calculate predicted eta, phi
-  for(size_t iReco=0; iReco<NPReco; ++iReco){
-    if(EP.at(iReco) == 0){//skip unmatched particles
-      continue;
-    }
-    for(size_t iGen=0; iGen<NPGen; ++iGen){
-      double Z = data.at(idx(iReco, iGen)) * genPT->at(iGen) / EP.at(iReco);
-      etaP[iReco] += Z * genETA->at(iGen);
-      phiP[iReco] += Z * genPHI->at(iGen);
-    }
-  }
-
   //calculate chi squared
   double chisq = 0;
   for(size_t iReco=0; iReco<NPReco; ++iReco){
     if (EP[iReco]>0){ //reco particle got matched
-      //add gaussian likelihood terms to chi squared
+      //gaussian energy likelihood
       chisq += square( (EP.at(iReco) - recoPT->at(iReco))/errPT->at(iReco));
-      chisq += square( (etaP.at(iReco) - recoETA->at(iReco))/errETA->at(iReco));
-      chisq += square( (phiP.at(iReco) - recoPHI->at(iReco))/errPHI->at(iReco));
+      for(size_t iGen=0; iGen<NPGen; ++iGen){
+        //gaussian likelihoods for merging gen particle into reco particle
+        double A = data.at(idx(iReco, iGen));
+        if(A==0){
+          continue;
+        } else {
+          chisq += A * square((genETA->at(iGen) - recoETA->at(iReco))/errETA->at(iReco));
+          chisq += A * square((genPHI->at(iGen) - recoPHI->at(iReco))/errPHI->at(iReco));
+        }
+      }
     } else { //reco particle didn't get matched
       //power law likelihood
       //clips to zero so that low-energy particles aren't favorably marked as PU
@@ -69,15 +73,10 @@ double GenMatchFCN::operator()(const std::vector<double>& data) const{
     }
   }
 
-  //lagrange multiplier-style constraint functions for column sums
-  for(size_t iGen=0; iGen<NPGen; ++iGen){
-    C.at(iGen) -= 1;
-  }
-
   //augmented lagrangian constraint enforcement terms
   //L = f(x) + mu/2 sum_i c^2 + lambda_i c_i
   for(size_t iGen=0; iGen<NPGen; ++iGen){
-    chisq += 0.5 * mu * square(C.at(iGen)) + lambdas.at(iGen)*C.at(iGen);
+    chisq += 0.5 * mu * square(C.at(iGen) - 1.0); //+ lambdas.at(iGen)*C.at(iGen);
   }
 
   return chisq;

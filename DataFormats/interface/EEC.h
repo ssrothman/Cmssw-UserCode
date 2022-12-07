@@ -18,6 +18,10 @@ using vecptr_b_t = std::shared_ptr<std::vector<bool>>;
 struct EECParts{
   int iJet;
 
+  double jetPt;
+  double jetEta;
+  double jetPhi;
+
   double rawPt;      //sum of all jet consituent pt (including those with pt<minPartPt)
   double minPartPt;  //pt threshold
 
@@ -25,18 +29,22 @@ struct EECParts{
   vecptr_d_t partEta;
   vecptr_d_t partPhi;
   vecptr_i_t partPdgId;
+  vecptr_i_t partCharge;
 
-  explicit EECParts(int iJet, double rawPt, double minPartPt,
+  explicit EECParts(int iJet, double jetPt, double jetEta, double jetPhi,
+                    double rawPt, double minPartPt,
                     vecptr_d_t&& partPt, vecptr_d_t&& partEta, vecptr_d_t&& partPhi,
-                    vecptr_i_t&& partPdgId):
-    iJet(iJet), rawPt(rawPt), minPartPt(minPartPt),
+                    vecptr_i_t&& partPdgId, vecptr_i_t&& partCharge):
+    iJet(iJet), jetPt(jetPt), jetEta(jetEta), jetPhi(jetPhi),
+    rawPt(rawPt), minPartPt(minPartPt),
     partPt(std::move(partPt)), partEta(std::move(partEta)), partPhi(std::move(partPhi)),
-    partPdgId(std::move(partPdgId)) {}
+    partPdgId(std::move(partPdgId)), partCharge(partCharge) {}
     
   EECParts():
-    iJet(-1), rawPt(-1), minPartPt(-1),
+    iJet(-1), jetPt(-1), jetEta(-1), jetPhi(-1),
+    rawPt(-1), minPartPt(-1),
     partPt(nullptr), partEta(nullptr), partPhi(nullptr),
-    partPdgId(nullptr) {}
+    partPdgId(nullptr), partCharge(nullptr) {}
 };
     
 

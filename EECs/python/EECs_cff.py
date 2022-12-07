@@ -1,53 +1,51 @@
 import FWCore.ParameterSet.Config as cms
 
 def addEECs(process, name, order, isMC,
-            jets, genJets=None, muons=None, requireZ=True, 
+            jets, EECParts, genJets=None, genEECParts=None, muons=None, requireZ=True, 
             p1=1, p2=1, 
             verbose=0, 
             minPartPt=0.0,
             flow="EMDFlow"):
 
     producers = []
-    setattr(process, name, cms.EDProducer("PatProjectedEECProducer",
-        jets = cms.InputTag(jets),
+    setattr(process, name, cms.EDProducer("ProjectedEECProducer",
+        EECParts = cms.InputTag(EECParts),
         order = cms.uint32(order),
         p1 = cms.uint32(p1),
         p2 = cms.uint32(p2),
-        verbose = cms.uint32(verbose),
         minPartPt = cms.double(minPartPt),
-        muons = cms.InputTag(muons),
-        requireZ = cms.bool(requireZ)
     ))
     producers.append(getattr(process, name))
 
-    setattr(process, name+"Table", cms.EDProducer("PatProjectedEECTableProducer",
+    setattr(process, name+"Table", cms.EDProducer("ProjectedEECTableProducer",
         name = cms.string(name),
-        jets = cms.InputTag(jets),
+        jets = cms.InputTag(EECParts),
         EECs = cms.InputTag(name),
         nDR = cms.uint32(1),
-        doParts = cms.bool(True)
+        flow = cms.InputTag(flow),
+        isGen = cms.bool(False),
+        doParts = cms.bool(False)
     ))
     producers.append(getattr(process, name+"Table"))
 
     if isMC:
-        setattr(process, "gen"+name, cms.EDProducer("GenProjectedEECProducer",
-            jets = cms.InputTag(genJets),
+        setattr(process, "gen"+name, cms.EDProducer("ProjectedEECProducer",
+            EECParts = cms.InputTag(genEECParts),
             order = cms.uint32(order),
             p1 = cms.uint32(p1),
             p2 = cms.uint32(p2),
-            verbose = cms.uint32(0),
             minPartPt = cms.double(minPartPt),
-            muons = cms.InputTag(muons),
-            requireZ = cms.bool(requireZ)
         ))
         producers.append(getattr(process, "gen"+name))
 
-        setattr(process, "gen"+name+"Table", cms.EDProducer("GenProjectedEECTableProducer",
+        setattr(process, "gen"+name+"Table", cms.EDProducer("ProjectedEECTableProducer",
             name = cms.string("gen"+name),
-            jets = cms.InputTag(genJets),
+            jets = cms.InputTag(genEECParts),
             EECs = cms.InputTag("gen"+name),
             nDR = cms.uint32(1),
-            doParts = cms.bool(True)
+            doParts = cms.bool(False),
+            flow = cms.InputTag(flow),
+            isGen = cms.bool(True)
         ))
         producers.append(getattr(process, "gen"+name+"Table"))
 

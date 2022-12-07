@@ -330,6 +330,16 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
             }
 
             if(wt>EPSILON){
+              printOrd(ord_G);
+              printf(" -> ");
+              printOrd(ord_R);
+              printf("\n\tE1G = %0.4f\tF = %0.4f\tF*E1G = %0.4f", 
+                  E_G(ord_G[0]), F(ord_G[0], ord_R[0]), 
+                  F(ord_G[0], ord_R[0]) * E_G(ord_G[0]));
+              printf("\n\tE2G = %0.4f\tF = %0.4f\tF*E2G = %0.4f", 
+                  E_G(ord_G[1]), F(ord_G[1], ord_R[1]), 
+                  F(ord_G[1], ord_R[1]) * E_G(ord_G[1]));
+              printf("\n\twt_G = %0.4f\tF*F*wt = %0.4f\n", genEEC.tuplewts->at(ord_G), wt);
               (*Ttuple)(iDR_R, iDR_G) += wt;
             }
           }
@@ -347,18 +357,13 @@ void EECTransferProducerT<T, K>::produce(edm::Event& evt, const edm::EventSetup&
       }
 
       Tmat = Ttuple;
+
+      //std::cout << "Ttuple" << std::endl << *Ttuple << std::endl;
+      std::cout << "EEC_R" << std::endl << EEC_R << std::endl;
+      std::cout << "sum(Ttuple, 1)" << std::endl << arma::sum(*Ttuple, 1) << std::endl;
+
     }else{
       throw cms::Exception("EECTransferProducer") << "unsupported mode" << std::endl;
-    }
-
-    arma::rowvec sumG = arma::sum(*Tmat, 0);
-    arma::colvec sumR = arma::sum(*Tmat, 1);
-
-    for(size_t iPGen=0; iPGen<NPart_G; ++iPGen){
-      //genEEC.partMatched->at(iPGen) = sumG(iPGen)!=0;
-    }
-    for(size_t iPReco=0; iPReco<NPart_R; ++iPReco){
-      //recoEEC.partMatched->at(iPReco) = sumR(iPReco)!=0;
     }
 
     result->emplace_back(genEEC.iJet, recoEEC.iJet,

@@ -109,12 +109,10 @@ void EECProducerT<K>::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EECnonIRC(normPt.data(), parts.partEta->data(), parts.partPhi->data(),
             nConstituents, p1_, p2_, *dRs, *wts);
       }
-      if(std::accumulate(wts->begin(), wts->end(), 0.0) > 0){
-        result->emplace_back(parts.iJet, 
-                             std::move(dRs), std::move(wts), 
-                             order_, 
-                             std::move(coefs), std::move(tuplewts), std::move(tupleiDR));
-      }
+      result->emplace_back(parts.iJet, 
+                           std::move(dRs), std::move(wts), 
+                           order_, 
+                           std::move(coefs), std::move(tuplewts), std::move(tupleiDR));
     } else { //resolved EEC
       auto dRs = std::make_shared<std::vector<std::vector<double>>>();
       dRs->resize(choose(order_, 2));
@@ -129,9 +127,7 @@ void EECProducerT<K>::produce(edm::Event& evt, const edm::EventSetup& setup) {
             dRs->at(3), dRs->at(4), dRs->at(5),
             *wts);
       }
-      if(std::accumulate(wts->begin(), wts->end(), 0.0) > 0){
-        result->emplace_back(parts.iJet, std::move(dRs), std::move(wts), order_);
-      }
+      result->emplace_back(parts.iJet, std::move(dRs), std::move(wts), order_);
     } //end switch (EEC kind)
   }  // end for jet
   evt.put(std::move(result));

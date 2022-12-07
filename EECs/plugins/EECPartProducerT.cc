@@ -150,10 +150,11 @@ void EECPartProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup)
 
     //jet passed conditions, actually do the work now
 
-    auto partPt = std::make_shared<std::vector<double>>(nConstituents);
-    auto partEta = std::make_shared<std::vector<double>>(nConstituents);
-    auto partPhi = std::make_shared<std::vector<double>>(nConstituents);
-    auto partPdgId = std::make_shared<std::vector<int>>(nConstituents);
+    auto partPt = std::make_shared<std::vector<double>>();
+    auto partEta = std::make_shared<std::vector<double>>();
+    auto partPhi = std::make_shared<std::vector<double>>();
+    auto partPdgId = std::make_shared<std::vector<int>>();
+    auto partCharge = std::make_shared<std::vector<int>>();
 
     double rawPt;
 
@@ -173,11 +174,13 @@ void EECPartProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup)
       partEta->push_back(part->eta());
       partPhi->push_back(part->phi());
       partPdgId->push_back(part->pdgId());
+      partCharge->push_back(part->charge());
     } 
 
-    result->emplace_back(iJet, rawPt, minPartPt_, 
+    result->emplace_back(iJet, jet.pt(), jet.eta(), jet.phi(),
+        rawPt, minPartPt_, 
         std::move(partPt), std::move(partEta), std::move(partPhi), 
-        std::move(partPdgId));
+        std::move(partPdgId), std::move(partCharge));
 
   }  // end for jet
   evt.put(std::move(result));

@@ -161,7 +161,8 @@ void EMDFlowProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
       result->emplace_back(bestGen, iReco, std::move(flowmat), 
           NPGen, NPReco,
-          std::move(EG), std::move(ER));
+          std::move(EG), std::move(ER),
+          nullptr, nullptr);
     }
   }
   evt.put(std::move(result));

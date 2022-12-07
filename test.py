@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(100)
 )
 
 # Input source
@@ -102,6 +102,25 @@ jets = 'selectedPatJetsAK4PFPuppi'
 genJets = 'selectedak4GenJetsNoNu'
 muons = "slimmedMuons"
 
+process.EECParts = cms.EDProducer("PatEECPartsProducer",
+    minPartPt = cms.double(minPartPt),
+    jets = cms.InputTag(jets),
+    verbose = cms.uint32(1),
+    muons = cms.InputTag(muons),
+    requireZ = cms.bool(True)
+)
+
+process.genEECParts = cms.EDProducer("GenEECPartsProducer",
+    minPartPt = cms.double(minPartPt),
+    jets = cms.InputTag(genJets),
+    verbose = cms.uint32(1),
+    muons = cms.InputTag(muons),
+    requireZ = cms.bool(True)
+)
+
+process.EECPartsTask = cms.Task(process.genEECParts, process.EECParts)
+process.schedule.associate(process.EECPartsTask)
+
 #produces particle-level transfer 
 process.EMDFlow = cms.EDProducer("EMDFlowProducer",
     jets = cms.InputTag(jets),
@@ -113,8 +132,8 @@ process.EMDFlow = cms.EDProducer("EMDFlowProducer",
 )
 
 process.GMF = cms.EDProducer("GenMatchFitProducer",
-    jets = cms.InputTag(jets),
-    genJets = cms.InputTag(genJets),
+    jets = cms.InputTag("EECParts"),
+    genJets = cms.InputTag("genEECParts"),
     dR2cut = cms.double(0.2 * 0.2),
     minPartPt = cms.double(minPartPt),
     partDR2cut = cms.double(0.1*0.1),
@@ -123,7 +142,6 @@ process.GMF = cms.EDProducer("GenMatchFitProducer",
     startMu = cms.double(10.0),
     startLambda = cms.double(1.0),
     clipVal = cms.double(0.05),
-    requireZ = cms.bool(True)
 )
 
 process.GMFTask = cms.Task(process.GMF)
@@ -132,8 +150,8 @@ process.schedule.associate(process.GMFTask)
 #process.schedule.associate(process.EMDTask)
 
 from SRothman.EECs.EECs_cff import addEECs
-process = addEECs(process, "EEC2", 2, True, jets, genJets, muons, minPartPt=minPartPt, flow="GMF", verbose=0)
-process = addEECs(process, "EEC3", 3, True, jets, genJets, muons, minPartPt=minPartPt, flow="GMF")
+process = addEECs(process, "EEC2", 2, True, jets, "EECParts", genJets, "genEECParts", muons, minPartPt=minPartPt, flow="GMF", verbose=0)
+#process = addEECs(process, "EEC3", 3, True, jets, "EECParts", genJets, "genEECParts",  muons, minPartPt=minPartPt, flow="GMF")
 
 #muon selection
 process.MyGoodMuons = cms.EDFilter("PATMuonSelector",
