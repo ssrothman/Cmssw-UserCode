@@ -1,0 +1,6 @@
+[submodule "EECs/src"]
+	path = EECs/src
+	url = git@github.com:ssrothman/EECs.git
+[submodule "Matching/src"]
+	path = Matching/src
+	url = git@github.com:ssrothman/particle_match_fit.git
