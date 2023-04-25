@@ -4,3 +4,6 @@
 [submodule "Matching/src"]
 	path = Matching/src
 	url = git@github.com:ssrothman/particle_match_fit.git
+[submodule "JetToolbox"]
+	path = JetToolbox
+	url = git@github.com:cms-jet/JetToolbox.git
