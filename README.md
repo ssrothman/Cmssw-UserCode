@@ -1,2 +1,5 @@
 # Cmssw-UserCode
-Analysis user code :) 
+
+EEC analysis user code
+
+git submodule update --recursive --init

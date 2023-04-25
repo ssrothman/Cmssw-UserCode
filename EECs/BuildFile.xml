@@ -1,0 +1,7 @@
+<Flags ADD_SUBDIR="1"/>
+<Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
+<use name="boost"/>
+<use name="openblas"/>
+<export>
+    <lib name="1"/>
+</export>
