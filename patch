@@ -1,0 +1,16 @@
+diff --git a/RecoBTag/FeatureTools/plugins/DeepFlavourTagInfoProducer.cc b/RecoBTag/FeatureTools/plugins/DeepFlavourTagInfoProducer.cc
+index a32052b..7328921 100644
+--- a/RecoBTag/FeatureTools/plugins/DeepFlavourTagInfoProducer.cc
++++ b/RecoBTag/FeatureTools/plugins/DeepFlavourTagInfoProducer.cc
+@@ -357,9 +357,9 @@ void DeepFlavourTagInfoProducer::produce(edm::Event& iEvent, const edm::EventSet
+     auto reco_cand = dynamic_cast<const reco::PFCandidate *>(cand);
+ 
+     // need some edm::Ptr or edm::Ref if reco candidates
+-    reco::PFCandidatePtr reco_ptr;
++    reco::Jet::Constituent reco_ptr;
+     if (pf_jet) {
+-      reco_ptr = pf_jet->getPFConstituent(i);
++      reco_ptr = pf_jet->getJetConstituents()[i];
+     } else if (pat_jet && reco_cand) {
+       reco_ptr = pat_jet->getPFConstituent(i);
+     }
