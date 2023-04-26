@@ -1,0 +1,16 @@
+<lcgdict>
+    <class name="particle"/>
+    <class name="edm::Wrapper<particle>"/>
+    <class name="std::vector<particle>"/>
+    <class name="edm::Wrapper<std::vector<particle>>"/>
+    <class name="jet"/>
+    <class name="edm::Wrapper<jet>"/>
+    <class name="std::vector<jet>"/>
+    <class name="edm::Wrapper<std::vector<jet>>"/>
+    <class name="arma::mat"/>
+    <class name="edm::Wrapper<arma::mat>"/>
+    <class name="jetmatch"/>
+    <class name="edm::Wrapper<jetmatch>"/>
+    <class name="std::vector<jetmatch>"/>
+    <class name="edm::Wrapper<std::vector<jetmatch>>"/>
+</lcgdict>

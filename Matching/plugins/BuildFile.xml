@@ -1,4 +1,4 @@
-<library file="*.cc" name="SRothmanCustomJetsPlugins">
+<library file="*.cc" name="SRothmanMatcherPlugins">
   <Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
   <flags EDM_PLUGIN="1"/>
   <use name="RecoJets/JetProducers"/>
@@ -19,6 +19,9 @@
   <use name="CondFormats/DataRecord"/>
   <use name="JetMETCorrections/Objects"/>
   <use name="fastjet"/>
+  <use name="root"/>
   <use name="fastjet-contrib"/>
   <use name="DataFormats/NanoAOD"/>
+  <use name="SRothman/DataFormats"/>
+  <use name="rootminuit2"/>
 </library>

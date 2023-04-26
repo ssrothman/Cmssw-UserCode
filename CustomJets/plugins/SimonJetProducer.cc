@@ -48,8 +48,7 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           verbose_(conf.getParameter<int>("verbose")),
           src_(conf.getParameter<edm::InputTag>("src")),
           srcToken_(consumes<edm::View<T>>(src_)){
-    //produces<std::vector<jet>>();
-    produces<teststruct>();
+    produces<std::vector<jet>>();
 }
 
 template <typename T>
@@ -88,6 +87,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
       std::cout << "\tjet: (" << pt << ", " << eta << ", " << phi << ")" << std::endl;
     }
 
+    printf("(pt, eta, phi, pdgid, charge)\n");
     for(const auto& part : j){
         double partpt = part.pt();
         ans.sumpt += partpt;
@@ -95,6 +95,10 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
             ans.particles.emplace_back(part.pt(), part.eta(), part.phi(), 
                                        0.0, 0.0, 0.0,
                                        std::abs(part.pdgId()), part.charge());
+            const particle& p = ans.particles.at(ans.particles.size()-1);
+            printf("\t(%0.3f, %0.3f. %0.3f, %u, %d)\n", p.pt, p.eta,
+                                                        p.phi, p.pdgid,
+                                                        p.charge);
             ++ans.nPart;
         }
     }

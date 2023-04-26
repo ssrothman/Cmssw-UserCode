@@ -80,11 +80,14 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeMC(process)
 
+from SRothman.CustomJets.CustomJets_cff import *
+process = addCustomJets(process)
 # End of customisation functions
 
 # Customisation from command line
 
-process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)));process.MessageLogger.cerr.FwkReport.reportEvery=1000
+process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)));
+process.MessageLogger.cerr.FwkReport.reportEvery=1
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)

@@ -59,21 +59,22 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   edm::Handle<edm::View<jet>> jets;
   evt.getByToken(srcToken_, jets);
 
-  std::vector<double>  partPt;
-  std::vector<double> partEta;
-  std::vector<double> partPhi;
+  std::vector<float>  partPt;
+  std::vector<float> partEta;
+  std::vector<float> partPhi;
   std::vector<int> pdgid;
   std::vector<int> charge;
 
-  std::vector<double> pt;
-  std::vector<double> eta;
-  std::vector<double> phi;
+  std::vector<float> pt;
+  std::vector<float> eta;
+  std::vector<float> phi;
   std::vector<int> iJet;
   std::vector<int> nPart;
 
   for(const auto& j : *jets){
       pt.push_back(j.pt);
       eta.push_back(j.eta);
+      phi.push_back(j.phi);
       iJet.push_back(j.iJet);
       nPart.push_back(j.nPart);
 
@@ -87,19 +88,19 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   }
 
   auto table = std::make_unique<nanoaod::FlatTable>(partPt.size(), name_, false);
-  table->addColumn<double>("pt", partPt, "particle pt");
-  table->addColumn<double>("eta", partEta, "particle eta");
-  table->addColumn<double>("phi", partPhi, "particle phi");
-  table->addColumn<int>("pdgid", pdgid, "particle pdgid");
-  table->addColumn<int>("charge", charge, "particle charge");
+  table->addColumn<float>("pt", partPt, "particle pt", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<float>("eta", partEta, "particle eta", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<float>("phi", partPhi, "particle phi", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<int>("pdgid", pdgid, "particle pdgid", nanoaod::FlatTable::IntColumn);
+  table->addColumn<int>("charge", charge, "particle charge", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(table), name_);
 
   auto tableBK = std::make_unique<nanoaod::FlatTable>(pt.size(), name_+"BK", false);
-  tableBK->addColumn<double>("jetPt", pt, "jet pt");
-  tableBK->addColumn<double>("jetEta", eta, "jet eta");
-  tableBK->addColumn<double>("jetPhi", phi, "jet phi");
-  tableBK->addColumn<int>("iJet", iJet, "index in primary jet array");
-  tableBK->addColumn<int>("nPart", nPart, "number of particles in jet");
+  tableBK->addColumn<float>("jetPt", pt, "jet pt", nanoaod::FlatTable::FloatColumn);
+  tableBK->addColumn<float>("jetEta", eta, "jet eta", nanoaod::FlatTable::FloatColumn);
+  tableBK->addColumn<float>("jetPhi", phi, "jet phi", nanoaod::FlatTable::FloatColumn);
+  tableBK->addColumn<int>("iJet", iJet, "index in primary jet array", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nPart", nPart, "number of particles in jet", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
 }
 

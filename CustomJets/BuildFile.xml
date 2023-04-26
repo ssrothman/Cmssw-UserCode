@@ -1,3 +1,4 @@
+<Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
 <use name="CommonTools/Statistics"/>
 <use name="CommonTools/Utils"/>
 <use name="FWCore/Framework"/>
