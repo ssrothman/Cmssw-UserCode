@@ -22,6 +22,8 @@
 
 #include "SRothman/Matching/src/toyjets/common.h"
 
+#include "SRothman/CustomJets/plugins/ParticleUncertainty.h"
+
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -35,8 +37,15 @@ public:
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     double minPartPt_;
+    bool doUncertainty_;
 
     int verbose_;
+
+    double minPt_;
+    double maxEta_;
+
+    double maxMuFrac_;
+    double maxChEmFrac_;
 
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<T>> srcToken_;
@@ -45,7 +54,12 @@ private:
 template <typename T>
 SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
         : minPartPt_(conf.getParameter<double>("minPartPt")),
+          doUncertainty_(conf.getParameter<bool>("doUncertainty")),
           verbose_(conf.getParameter<int>("verbose")),
+          minPt_(conf.getParameter<double>("minPt")),
+          maxEta_(conf.getParameter<double>("maxEta")),
+          maxMuFrac_(conf.getParameter<double>("maxMuFrac")),
+          maxChEmFrac_(conf.getParameter<double>("maxChEmFrac")),
           src_(conf.getParameter<edm::InputTag>("src")),
           srcToken_(consumes<edm::View<T>>(src_)){
     produces<std::vector<jet>>();
@@ -55,6 +69,11 @@ template <typename T>
 void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<double>("minPartPt");
+  desc.add<double>("minPt");
+  desc.add<double>("maxEta");
+  desc.add<double>("maxMuFrac");
+  desc.add<double>("maxChEmFrac");
+  desc.add<bool>("doUncertainty");
   desc.add<edm::InputTag>("src");
   desc.add<int>("verbose");
   descriptions.addWithDefaultLabel(desc);
@@ -69,8 +88,35 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
 
   unsigned iJet=0;
   for (const T& j : *jets){
+    if(j.pt() < minPt_ || std::fabs(j.eta()) > maxEta_){
+        continue;
+    } 
+
+    double chEmFrac=0;
+    double muFrac=0;
+    if constexpr(std::is_same<T, pat::Jet>::value){
+        chEmFrac = j.chargedEmEnergyFraction();
+        muFrac = j.muonEnergyFraction();
+    } else if constexpr(std::is_same<T, reco::Jet>::value){
+        if(maxChEmFrac_>0 || maxMuFrac_>0){
+            throw std::logic_error("cutting on lepton energy fractions not supported for reco jets");
+        }
+        chEmFrac = 0;
+        muFrac = 0;
+    } else if constexpr(std::is_same<T, reco::GenJet>::value){
+        chEmFrac = j.chargedEmEnergy() / j.energy();
+        muFrac = j.muonEnergy() / j.energy();
+    }
+
+    if(chEmFrac > maxChEmFrac_ || muFrac > maxMuFrac_){
+        continue;
+    }
 
     const std::vector<reco::Jet::Constituent>& constituents = j.getJetConstituents();
+
+    if(constituents.size() < 2){
+        continue;
+    }
 
     double pt = j.pt();
     double eta = j.eta();
@@ -87,18 +133,17 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
       std::cout << "\tjet: (" << pt << ", " << eta << ", " << phi << ")" << std::endl;
     }
 
-    printf("(pt, eta, phi, pdgid, charge)\n");
     for(const auto& part : j){
         double partpt = part.pt();
         ans.sumpt += partpt;
         if(partpt >= minPartPt_){
-            ans.particles.emplace_back(part.pt(), part.eta(), part.phi(), 
-                                       0.0, 0.0, 0.0,
-                                       std::abs(part.pdgId()), part.charge());
-            const particle& p = ans.particles.at(ans.particles.size()-1);
-            printf("\t(%0.3f, %0.3f. %0.3f, %u, %d)\n", p.pt, p.eta,
-                                                        p.phi, p.pdgid,
-                                                        p.charge);
+            particle next(part.pt(), part.eta(), part.phi(), 
+                          0.0, 0.0, 0.0,
+                          std::abs(part.pdgId()), part.charge());
+            if(doUncertainty_){
+                addUncertainty(next);
+            }
+            ans.particles.push_back(std::move(next));
             ++ans.nPart;
         }
     }

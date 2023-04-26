@@ -82,6 +82,12 @@ process = nanoAOD_customizeMC(process)
 
 from SRothman.CustomJets.CustomJets_cff import *
 process = addCustomJets(process)
+
+from SRothman.Matching.Matching_cff import *
+process = addGenMatching(process)
+
+from SRothman.EECs.EECs_cff import *
+process = addEECs(process)
 # End of customisation functions
 
 # Customisation from command line

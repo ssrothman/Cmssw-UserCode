@@ -22,102 +22,103 @@
 
 #include "SRothman/DataFormats/interface/jets.h"
 #include "SRothman/DataFormats/interface/matching.h"
+#include "SRothman/DataFormats/interface/EEC.h"
 
 #include "SRothman/Matching/src/simon_util_cpp/deltaR.h"
 #include "SRothman/Matching/src/simon_util_cpp/util.h"
 
-#include "SRothman/Matching/src/matcher.h"
+#include "SRothman/EECs/src/eec_oo.h"
 
 #include <iostream>
 #include <memory>
 #include <vector>
 
-
-class GenMatchProducer : public edm::stream::EDProducer<> {
+class EECProducer : public edm::stream::EDProducer<> {
 public:
-    explicit GenMatchProducer(const edm::ParameterSet&);
-    ~GenMatchProducer() override {}
+    explicit EECProducer(const edm::ParameterSet&);
+    ~EECProducer() override {}
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     int verbose_;
-    double dR2thresh_;
-    
-    double clipval_, cutoff_;
-    bool matchCharge_;
-    unsigned maxReFit_;
+
+    unsigned maxOrder_;
 
     edm::InputTag recoTag_;
     edm::EDGetTokenT<edm::View<jet>> recoToken_;
     edm::InputTag genTag_;
     edm::EDGetTokenT<edm::View<jet>> genToken_;
+    edm::InputTag matchTag_;
+    edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
 };
 
-GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
+EECProducer::EECProducer(const edm::ParameterSet& conf)
         : verbose_(conf.getParameter<int>("verbose")),
-          dR2thresh_(square(conf.getParameter<double>("dRthresh"))),
-          clipval_(conf.getParameter<double>("clipval")),
-          cutoff_(conf.getParameter<double>("cutoff")),
-          matchCharge_(conf.getParameter<bool>("matchCharge")),
-          maxReFit_(conf.getParameter<unsigned>("maxReFit")),
+          maxOrder_(conf.getParameter<unsigned>("maxOrder")),
           recoTag_(conf.getParameter<edm::InputTag>("reco")),
           recoToken_(consumes<edm::View<jet>>(recoTag_)),
           genTag_(conf.getParameter<edm::InputTag>("gen")),
-          genToken_(consumes<edm::View<jet>>(genTag_)){
-    produces<std::vector<jetmatch>>();
+          genToken_(consumes<edm::View<jet>>(genTag_)),
+          matchTag_(conf.getParameter<edm::InputTag>("match")),
+          matchToken_(consumes<edm::View<jetmatch>>(matchTag_)){
+    produces<std::vector<EECresult>>();
 }
 
-void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
-  desc.add<double>("dRthresh");
-  desc.add<double>("clipval");
-  desc.add<double>("cutoff");
-  desc.add<bool>("matchCharge");
-  desc.add<unsigned>("maxReFit");
   desc.add<edm::InputTag>("reco");
   desc.add<edm::InputTag>("gen");
+  desc.add<edm::InputTag>("match");
   desc.add<int>("verbose");
+  desc.add<unsigned>("maxOrder");
   descriptions.addWithDefaultLabel(desc);
 }
 
-void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
+void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   edm::Handle<edm::View<jet>> reco;
   evt.getByToken(recoToken_, reco);
 
   edm::Handle<edm::View<jet>> gen;
   evt.getByToken(genToken_, gen);
 
-  auto result = std::make_unique<std::vector<jetmatch>>();
+  edm::Handle<edm::View<jetmatch>> matches;
+  evt.getByToken(matchToken_, matches);
 
-  std::vector<bool> taken(gen->size(), false);
+  auto result = std::make_unique<std::vector<EECresult>>();
+
   for(unsigned iReco=0; iReco<reco->size(); ++iReco){
-      const jet& jreco = reco->at(iReco);
-      for(unsigned iGen=0; iGen<gen->size(); ++iGen){
-          if(taken[iGen]){
-              continue;
-          }
-          const jet& jgen = gen->at(iGen);
-    
-          double dist = dR2(jreco.eta, jreco.phi, 
-                            jgen.eta, jgen.phi);
-          if(dist > dR2thresh_){
-              continue;
-          }
+      ProjectedEECCalculator projcalc(reco->at(iReco), maxOrder_);
+      projcalc.run();
 
-          jetmatch next;
-          next.iReco = iReco;
-          next.iGen = iGen;
 
-          matcher match (jreco.particles, jgen.particles,
-                         clipval_, cutoff_, matchCharge_, 
-                         maxReFit_);
-          match.minimize();
-          next.ptrans = match.ptrans();
+      EECresult next;
+      next.maxOrder = maxOrder_;
+      next.iJet = iReco;
 
-          result->push_back(std::move(next));
+      for(unsigned order=2; order<=maxOrder_; ++order){
+        next.offsets.push_back(next.wts.size());
+        const std::vector<double>& wts = projcalc.getwts(order);
+        next.wts.insert(next.wts.end(), wts.begin(), wts.end());
+        const std::vector<double>& dRs = projcalc.getdRs();
+        next.dRs.insert(next.dRs.end(), dRs.begin(), dRs.end());
       }
+
+      arma::mat covp(next.wts.size(), reco->at(iReco).nPart, arma::fill::none);
+      for(unsigned order=2; order<=maxOrder_; ++order){
+          const arma::mat& cov = projcalc.getCov(order);
+          for(unsigned i=0; i<cov.n_rows; ++i){
+              for(unsigned j=0; j<cov.n_cols; ++j){
+                  covp(i + next.offsets[order-2], j) = cov(i, j);
+              }
+          }
+      }
+      next.cov = covp * arma::trans(covp);
+
+      result->push_back(std::move(next));
   }
+
+
   evt.put(std::move(result));
 }  // end produce()
 
-DEFINE_FWK_MODULE(GenMatchProducer);
+DEFINE_FWK_MODULE(EECProducer);

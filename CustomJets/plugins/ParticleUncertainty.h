@@ -1,0 +1,6 @@
+#ifndef SROTHMAN_CUSTOMJETS_PARTICLEUNCERTAINTY_H
+#define SROTHMAN_CUSTOMJETS_PARTICLEUNCERTAINTY_H
+
+void addUncertainty(particle& part);
+
+#endif

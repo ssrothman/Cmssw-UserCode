@@ -13,4 +13,8 @@
     <class name="edm::Wrapper<jetmatch>"/>
     <class name="std::vector<jetmatch>"/>
     <class name="edm::Wrapper<std::vector<jetmatch>>"/>
+    <class name="EECresult"/>
+    <class name="edm::Wrapper<EECresult>"/>
+    <class name="std::vector<EECresult>"/>
+    <class name="edm::Wrapper<std::vector<EECresult>>"/>
 </lcgdict>

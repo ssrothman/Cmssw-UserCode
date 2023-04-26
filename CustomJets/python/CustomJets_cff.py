@@ -49,9 +49,10 @@ def addCustomJets(process):
         name = "GenSimonJets"
     )
     process.JetsTask = cms.Task(process.SimonJets,
-                                #process.GenSimonJets,
-                                process.SimonJetTable)
-                                #process.GenSimonJetTable)
+                                process.GenSimonJets)
+    process.JetsTableTask = cms.Task(process.SimonJetTable,
+                                     process.GenSimonJetTable)
     process.schedule.associate(process.JetsTask)
+    process.schedule.associate(process.JetsTableTask)
 
     return process
