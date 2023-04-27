@@ -3,6 +3,7 @@
 
 struct EECresult{
     unsigned iJet; 
+
     unsigned maxOrder;
     std::vector<size_t> offsets;
     std::vector<int> order;
@@ -31,6 +32,14 @@ struct EECresult{
     arma::mat covRes4Res3;
     arma::mat covRes4Proj;
 
+};
+
+struct EECtransfer{
+    unsigned iReco, iGen;
+    std::vector<arma::mat> proj;
+    std::vector<unsigned> order;
+    arma::mat res3;
+    arma::mat res4;
 };
 
 #endif

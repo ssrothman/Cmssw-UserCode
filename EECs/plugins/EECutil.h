@@ -16,7 +16,12 @@ void addProjectedWTs(EECresult& result,
                      const EECCalculator<PROJECTED, nonIRC, doPU>& calc,
                      const unsigned& order){
     result.offsets.emplace_back(result.wts.size());
-    result.order.push_back(order);
+
+    if constexpr (nonIRC){
+        result.order.push_back(-(10*calc.getP1() + calc.getP2()));
+    } else {
+        result.order.push_back(order);
+    }
 
     const std::vector<double>& wts = calc.getwts(order);
     result.wts.insert(result.wts.end(), wts.begin(), wts.end());
@@ -63,5 +68,56 @@ void addResolved4(EECresult& result,
     result.res4dR6 = calc.getResolvedDRs(4, 5);
     result.res4wts = calc.getwts(4);
 }
+
+template <bool doPU>
+void addEverything(EECresult& result,
+    const EECCalculator<PROJECTED, false, false>& projcalc,
+    const std::vector<EECCalculator<PROJECTED, true, doPU>>& nirccalcs,
+    const EECCalculator<RESOLVED, false, false>& rescalc,
+    unsigned iJet, unsigned nPart){
+
+    result.maxOrder = projcalc.getMaxOrder();
+    result.iJet = iJet;
+
+    addProjectedDRs(result, projcalc);
+
+    for(unsigned order=2; order<=projcalc.getMaxOrder(); ++order){
+        addProjectedWTs(result, projcalc, order);
+    }
+
+    for(const auto& calc : nirccalcs){
+        addProjectedWTs(result, calc, 2u);
+    }
+
+
+    arma::mat covp(result.wts.size(), nPart, arma::fill::none);
+    for(unsigned order=2; order<=projcalc.getMaxOrder(); ++order){
+        addCovP(covp, projcalc, order, result.offsets[order-2]);
+    }
+
+    unsigned ioff = projcalc.getMaxOrder()+1;
+    for(const auto& calc : nirccalcs){
+        addCovP(covp, calc, 2, result.offsets[ioff-2]);
+        ++ioff;
+    }
+    result.cov = covp * arma::trans(covp);
+
+    if(rescalc.hasRun()){
+        addResolved3(result, rescalc);
+        arma::mat covp3 = rescalc.getCov(3);
+        result.covRes3Res3 = covp3 * arma::trans(covp3);
+        result.covRes3Proj = covp3 * arma::trans(covp);
+        if(rescalc.getMaxOrder() > 3){
+            addResolved4(result, rescalc);
+            arma::mat covp4 = rescalc.getCov(4);
+
+            result.covRes4Res4 = covp4 * arma::trans(covp4);
+            result.covRes4Res3 = covp4 * arma::trans(covp3);
+            result.covRes4Proj = covp4 * arma::trans(covp);
+        }
+    }
+
+}
+
 
 #endif

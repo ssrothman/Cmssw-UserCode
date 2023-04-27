@@ -17,4 +17,8 @@
     <class name="edm::Wrapper<EECresult>"/>
     <class name="std::vector<EECresult>"/>
     <class name="edm::Wrapper<std::vector<EECresult>>"/>
+    <class name="EECtransfer"/>
+    <class name="edm::Wrapper<EECtransfer>"/>
+    <class name="std::vector<EECtransfer>"/>
+    <class name="edm::Wrapper<std::vector<EECtransfer>>"/>
 </lcgdict>
