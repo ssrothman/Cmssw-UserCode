@@ -1,3 +1,6 @@
+#ifndef SROTHMAN_DATAFORMATS_JETS_H
+#define SROTHMAN_DATAFORMATS_JETS_H
+
 #include "SRothman/Matching/src/toyjets/common.h"
 #include "SRothman/armadillo-12.2.0/include/armadillo"
 
@@ -8,3 +11,5 @@ inline arma::vec ptvec(const jet& j){
     }
     return ans;
 }
+
+#endif

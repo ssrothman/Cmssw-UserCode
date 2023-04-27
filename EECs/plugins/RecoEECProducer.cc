@@ -29,6 +29,8 @@
 
 #include "SRothman/EECs/src/eec_oo.h"
 
+#include "SRothman/EECs/plugins/EECutil.h"
+
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -65,18 +67,13 @@ void RecoEECProducer::fillDescriptions(edm::ConfigurationDescriptions& descripti
 }
 
 void RecoEECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
-    printf("top of produce\n");
   edm::Handle<edm::View<jet>> reco;
   evt.getByToken(recoToken_, reco);
-  printf("got from event\n");
 
   auto result = std::make_unique<std::vector<EECresult>>();
 
   for(unsigned iReco=0; iReco<reco->size(); ++iReco){
-      printf("top of loop\n");
       ProjectedEECCalculator projcalc(reco->at(iReco), maxOrder_);
-      projcalc.run();
-      printf("ran projected\n");
 
       std::vector<NonIRCEECCalculator<false>> nonirccalcs;
       nonirccalcs.emplace_back(reco->at(iReco), 2u, 
@@ -86,63 +83,55 @@ void RecoEECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       nonirccalcs.emplace_back(reco->at(iReco), 2u, 
                                getCustomComps(3, 1));
       std::vector<int> nonircorders = {-21, -22, -31};
-      printf("made nonIRC\n");
+
+      ResolvedEECCalculator rescalc(reco->at(iReco), 4u);
 
       EECresult next;
       next.maxOrder = maxOrder_;
       next.iJet = iReco;
 
-       const std::vector<double>& dRs = projcalc.getdRs();
-       next.dRs.insert(next.dRs.end(), dRs.begin(), dRs.end());
-       printf("got dRs\n");
+      projcalc.run();
+      addProjectedDRs(next, projcalc);
 
       for(unsigned order=2; order<=maxOrder_; ++order){
-        next.offsets.push_back(next.wts.size());
-        const std::vector<double>& wts = projcalc.getwts(order);
-        next.order.push_back(order);
-        next.wts.insert(next.wts.end(), wts.begin(), wts.end());
-        printf("got projected %u\n",order);
+          addProjectedWTs(next, projcalc, order);
       }
-
       
       for(unsigned i=0; i<nonirccalcs.size(); ++i){
           auto& calc = nonirccalcs.at(i);
-          printf("calculated nonIRC %d\n", nonircorders[i]);
           calc.run();
-          next.offsets.push_back(next.wts.size());
-          const std::vector<double>& wts = calc.getwts(2);
-          next.wts.insert(next.wts.end(), wts.begin(), wts.end());
-          next.order.push_back(nonircorders[i]);
-          printf("got nonIRC %d\n", nonircorders[i]);
+          addProjectedWTs(next, calc, 2u);
       }
 
       arma::mat covp(next.wts.size(), reco->at(iReco).nPart, arma::fill::none);
       for(unsigned order=2; order<=maxOrder_; ++order){
-          const arma::mat& cov = projcalc.getCov(order);
-          for(unsigned i=0; i<cov.n_rows; ++i){
-              for(unsigned j=0; j<cov.n_cols; ++j){
-                  covp(i + next.offsets[order-2], j) = cov(i, j);
-              }
-          }
-          printf("got cov %u\n", order);
+          addCovP(covp, projcalc, order, next.offsets[order-2]);
       }
 
       unsigned ioff = maxOrder_+1;
       for(const auto& calc : nonirccalcs){
-          printf("ioff = %u\n", ioff);
-          const arma::mat& cov = calc.getCov(2);
-          for(unsigned i=0; i<cov.n_rows; ++i){
-              for(unsigned j=0; j<cov.n_cols; ++j){
-                  covp(i + next.offsets[ioff-2], j) = cov(i, j);
-              }
-          }
-          printf("got cov '%u\n' ;)", ioff);
+          addCovP(covp, calc, 2, next.offsets[ioff-2]);
           ++ioff;
       }
       next.cov = covp * arma::trans(covp);
-      printf("did cov multiply\n");
+      
+      rescalc.run();
+      addResolved3(next, rescalc);
+      addResolved4(next, rescalc);
+      
+     
+      arma::mat covp3 = rescalc.getCov(3);
+      arma::mat covp4 = rescalc.getCov(4);
+
+      next.covRes3Res3 = covp3 * arma::trans(covp3);
+      next.covRes3Proj = covp3 * arma::trans(covp);
+
+      next.covRes4Res4 = covp4 * arma::trans(covp4);
+      next.covRes4Res3 = covp4 * arma::trans(covp3);
+      next.covRes4Proj = covp4 * arma::trans(covp);
 
       result->push_back(std::move(next));
+
   }
 
 
