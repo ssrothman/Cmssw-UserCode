@@ -202,7 +202,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EECtransfer nextTransfer;
         nextTransfer.iReco = iReco;
         nextTransfer.iGen = iGen;
-        for(unsigned order=2; order<maxOrder_; ++order){
+        for(unsigned order=2; order<=maxOrder_; ++order){
             nextTransfer.proj.push_back(projTcalc.getTransfer(order));
             nextTransfer.order.push_back(order);
         }
