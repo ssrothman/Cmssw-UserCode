@@ -98,6 +98,7 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
 }
 
 void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
+    printf("top of produce\n");
   edm::Handle<edm::View<jet>> reco;
   evt.getByToken(recoToken_, reco);
 
@@ -107,6 +108,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       evt.getByToken(genToken_, gen);
       evt.getByToken(matchToken_, matches);
   }
+  printf("got from event\n");
 
   auto result = std::make_unique<std::vector<EECresult>>();
 
@@ -114,6 +116,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   auto resulttrans = std::make_unique<std::vector<EECtransfer>>();
 
   for(unsigned iReco=0; iReco<reco->size(); ++iReco){
+      printf("iReco %u\n", iReco);
       int iGen=-1;
       arma::mat ptrans;
       std::vector<bool> PU;
@@ -134,44 +137,70 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
               for(unsigned i=0; i<reco->at(iReco).nPart; ++i){
                   PU.emplace_back(puvec(i) == 0);
               }
-          } else {
-              PU.resize(reco->at(iReco).nPart, true);
           }
       }
+      if(iGen<0){
+          PU.resize(reco->at(iReco).nPart, true);
+      }
 
+      printf("iGen %d\n", iGen);
       ProjectedEECCalculator projcalc;
       projcalc.setup(reco->at(iReco), maxOrder_);
+      printf("setup projcalc\n");
 
       std::vector<NonIRCEECCalculator<true>> nirccalcs(p1s_.size());
       for(unsigned i=0; i<p1s_.size(); ++i){
           nirccalcs.at(i).setup(reco->at(iReco), 2u, PU, p1s_.at(i), p2s_.at(i));
       }
+      printf("setup nirccalcs\n");
 
       ResolvedEECCalculator rescalc;
       if(doRes4_ || doRes3_){
           unsigned resorder = doRes4_ ? 4 : 3;
           rescalc.setup(reco->at(iReco), resorder);
       }
+      printf("setup rescalc\n");
 
       projcalc.run();
+      printf("ran projcalc\n");
 
       for(auto& calc : nirccalcs){
           calc.run();
       }
+      printf("ran nirccalcs\n");
             
       if(doRes3_ || doRes4_){
           rescalc.run();
       }
+      printf("ran rescalc\n");
 
       EECresult next;
       addEverything(next, projcalc, nirccalcs, rescalc, iReco, reco->at(iReco).nPart);
+      printf("next.maxOrder %u\n", next.maxOrder);
+      printf("nPart = %u\n", reco->at(iReco).nPart);
+      printf("next.wts.size() = %lu\n", next.wts.size());
+      printf("next.dRs.size() = %lu\n", next.dRs.size());
+      printf("next.cov.size() = %llu\n", next.cov.size());
+      printf("next.res3wts.size() = %lu\n", next.res3wts.size());
+      printf("next.res3dR1.size() = %lu\n", next.res3dR1.size());
+      printf("next.res3dR2.size() = %lu\n", next.res3dR2.size());
+      printf("next.res3dR3.size() = %lu\n", next.res3dR3.size());
+      printf("next.covRes3Res3.size() = %llu\n", next.covRes3Res3.size());
+      printf("next.covRes3Proj.size() = %llu\n", next.covRes3Proj.size());
+      printf("next.res4wts.size() = %lu\n", next.res4wts.size());
+      printf("next.covRes4Res4.size() = %llu\n", next.covRes4Res4.size());
+      printf("\n\n");
+
+      printf("added everything\n");
 
       result->push_back(std::move(next));
+      printf("pushed back result\n");
 
       if(iGen >=0 ){
         ProjectedEECCalculator projTcalc;
         projTcalc.setup(gen->at(iGen), maxOrder_, 
                         ptrans, reco->at(iReco));
+        printf("setup gen projcalc\n");
 
         std::vector<NonIRCEECCalculator<false>> nircTcalcs(p1s_.size());
         for(unsigned i=0; i<p1s_.size(); ++i){
@@ -179,6 +208,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                                    ptrans, reco->at(iReco),
                                    p1s_.at(i), p2s_.at(i));
         }
+        printf("setup gen nirccalcs\n");
 
         ResolvedEECCalculator resTcalc;
         if(doRes4_ || doRes3_){
@@ -186,18 +216,24 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             resTcalc.setup(gen->at(iGen), resorder,
                            ptrans, reco->at(iReco));
         }
+        printf("setup gen rescalc\n");
 
         projTcalc.run();
+        printf("ran gen projcalc\n");
         for(auto& calc : nircTcalcs){
             calc.run();
         }
+        printf("ran gen nirccalcs\n");
         if(doRes3_ || doRes4_){
             resTcalc.run();
         }
+        printf("ran gen rescalc\n");
 
         EECresult nextGen;
         addEverything(nextGen, projTcalc, nircTcalcs, resTcalc, iGen, gen->at(iGen).nPart);
+        printf("added everything gen\n");
         resultgen->push_back(std::move(nextGen));
+        printf("pushed back result gen\n");
 
         EECtransfer nextTransfer;
         nextTransfer.iReco = iReco;
@@ -206,6 +242,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             nextTransfer.proj.push_back(projTcalc.getTransfer(order));
             nextTransfer.order.push_back(order);
         }
+        printf("added proj transfers\n");
         for(unsigned i=0; i<p1s_.size(); ++i){
             const auto& gencalc = nircTcalcs.at(i);
             const auto& recocalc = nirccalcs.at(i);
@@ -213,6 +250,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             nextTransfer.order.push_back(-10*gencalc.getP1()
                                             -gencalc.getP2());
         }
+        printf("added nirccalcs transfers\n");
 
         if(doRes3_ || doRes4_){
             nextTransfer.res3 = resTcalc.getTransfer(3);
@@ -220,6 +258,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 nextTransfer.res4 = resTcalc.getTransfer(4);
             }
         }
+        printf("added res transfers\n");
           resulttrans->push_back(std::move(nextTransfer));
       }
   }
@@ -230,6 +269,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       evt.put(std::move(resultgen), "gen");
       evt.put(std::move(resulttrans), "transfer");
   }
+  printf("put into event\n");
 }  // end produce()
 
 DEFINE_FWK_MODULE(EECProducer);

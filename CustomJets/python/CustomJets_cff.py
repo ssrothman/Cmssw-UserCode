@@ -35,10 +35,14 @@ def addCustomJets(process):
     process.schedule.associate(process.patJetPartonsTask)
 
     process.SimonJets = PatSimonJetProducer.clone(
-        src = "selectedPatJetsAK4PFPuppi"
+        src = "selectedPatJetsAK4PFPuppi",
+        eventSelection = "ZMuMu",
+        doEventSelection = True
     )
     process.GenSimonJets = GenSimonJetProducer.clone(
-        src = "ak4GenJetsNoNu"
+        src = "ak4GenJetsNoNu",
+        eventSelection = "ZMuMu",
+        doEventSelection = True
     )
     process.SimonJetTable = SimonJetTableProducer.clone(
         src = "SimonJets",

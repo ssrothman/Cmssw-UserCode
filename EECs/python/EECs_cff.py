@@ -8,6 +8,7 @@ def addEECs(process):
         reco = "SimonJets",
         gen = "GenSimonJets",
         match = "GenMatch",
+        doRes4 = False,
     )
     process.RecoEECTable = EECTableProducer.clone(
         src = "EEC:reco",

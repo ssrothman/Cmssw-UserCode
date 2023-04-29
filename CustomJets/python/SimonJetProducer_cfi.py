@@ -8,7 +8,9 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
     minPt = cms.double(30),
     maxEta = cms.double(2.5),
     maxMuFrac = cms.double(0.8),
-    maxChEmFrac = cms.double(0.8)
+    maxChEmFrac = cms.double(0.8),
+    eventSelection = cms.InputTag(""),
+    doEventSelection = cms.bool(False),
 )
 
 GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
@@ -19,5 +21,7 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     minPt = cms.double(20),
     maxEta = cms.double(3.0),
     maxMuFrac = cms.double(0.8),
-    maxChEmFrac = cms.double(0.8)
+    maxChEmFrac = cms.double(0.8),
+    eventSelection = cms.InputTag(""),
+    doEventSelection = cms.bool(False),
 )

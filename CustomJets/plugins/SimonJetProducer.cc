@@ -49,6 +49,10 @@ private:
 
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<T>> srcToken_;
+
+    edm::InputTag evtSelSrc_;
+    edm::EDGetTokenT<bool> evtSelToken_;
+    bool doEvtSel_;
 };
 
 template <typename T>
@@ -61,7 +65,10 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           maxMuFrac_(conf.getParameter<double>("maxMuFrac")),
           maxChEmFrac_(conf.getParameter<double>("maxChEmFrac")),
           src_(conf.getParameter<edm::InputTag>("src")),
-          srcToken_(consumes<edm::View<T>>(src_)){
+          srcToken_(consumes<edm::View<T>>(src_)),
+          evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
+          evtSelToken_(consumes<bool>(evtSelSrc_)),
+          doEvtSel_(conf.getParameter<bool>("doEventSelection")) {
     produces<std::vector<jet>>();
 }
 
@@ -76,6 +83,8 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<bool>("doUncertainty");
   desc.add<edm::InputTag>("src");
   desc.add<int>("verbose");
+  desc.add<edm::InputTag>("eventSelection");
+  desc.add<bool>("doEventSelection");
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -85,6 +94,15 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
   evt.getByToken(srcToken_, jets);
 
   auto result = std::make_unique<std::vector<jet>>();
+
+  if(doEvtSel_){
+    edm::Handle<bool> evtSel;
+    evt.getByToken(evtSelToken_, evtSel);
+    if(!*evtSel){
+        evt.put(std::move(result));
+        return;
+    }
+  }
 
   unsigned iJet=0;
   for (const T& j : *jets){
