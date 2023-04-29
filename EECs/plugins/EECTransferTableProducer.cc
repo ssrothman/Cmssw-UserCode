@@ -51,8 +51,6 @@ EECTransferTableProducer::EECTransferTableProducer(const edm::ParameterSet& conf
     produces<nanoaod::FlatTable>(name_+"RES4");
     produces<nanoaod::FlatTable>(name_+"BK");
     produces<nanoaod::FlatTable>(name_+"PROJBK");
-    produces<nanoaod::FlatTable>(name_+"RES3BK");
-    produces<nanoaod::FlatTable>(name_+"RES4BK");
 }
 
 void EECTransferTableProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -78,34 +76,39 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
   //BK
   std::vector<int> iReco;
   std::vector<int> iGen;
-
-  //projbk
+  std::vector<int> nOrder;
   std::vector<int> nTransP;
+  std::vector<int> nTrans3;
+  std::vector<int> nTrans4;
   std::vector<int> nRecoP;
   std::vector<int> nGenP;
-  std::vector<int> order;
-
-  //res3bk
-  std::vector<int> nTrans3;
   std::vector<int> nReco3;
   std::vector<int> nGen3;
-
-  //res4bk
-  std::vector<int> nTrans4;
   std::vector<int> nReco4;
   std::vector<int> nGen4;
+
+  //projbk
+  std::vector<int> order;
 
   for(const auto& T : *Ts){
       iReco.push_back(T.iReco);
       iGen.push_back(T.iGen);
+      nOrder.push_back(T.proj.size());
+
+      size_t nTP = 0;
+      size_t nGP = 0;
+      size_t nRP = 0;
       for(unsigned i=0; i<T.proj.size(); ++i){
           const auto& m = T.proj.at(i);
           transP.insert(transP.end(), m.begin(), m.end());
           order.push_back(T.order.at(i));
-          nTransP.push_back(m.size());
-          nRecoP.push_back(m.n_rows);
-          nGenP.push_back(m.n_cols);
+          nRP = m.n_rows;
+          nGP = m.n_cols;
+          nTP = m.size();
       }
+      nTransP.push_back(nTP);
+      nRecoP.push_back(nGP);
+      nGenP.push_back(nRP);
 
       trans3.insert(trans3.end(), T.res3.begin(), T.res3.end());
       nTrans3.push_back(T.res3.size());
@@ -132,26 +135,21 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iReco.size(), name_+"BK", false);
   tableBK->addColumn<int>("iReco", iReco, "Reco index", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("iGen", iGen, "Gen index", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nOrder", nOrder, "Number of orders", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nTransP", nTransP, "Number of elements in projected transfer matrix", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nRecoP", nRecoP, "Number elements in projected transfer matrix reco axis", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nGenP", nGenP, "Number elements in projected transfer matrix gen axis", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nTrans3", nTrans3, "Number of elements in res3 transfer matrix", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nReco3", nReco3, "Number elements in res3 transfer matrix reco axis", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nGen3", nGen3, "Number elements in res3 transfer matrix gen axis", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nTrans4", nTrans4, "Number of elements in transfer matrix", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nReco4", nReco4, "Number elements in transfer matrix reco axis", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nGen4", nGen4, "Number elements in transfer matrix gen axis", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
 
-  auto tablePROJBK = std::make_unique<nanoaod::FlatTable>(nTransP.size(), name_+"PROJBK", false);
-  tablePROJBK->addColumn<int>("nTrans", nTransP, "Number of elements in transfer matrix", nanoaod::FlatTable::IntColumn);
-  tablePROJBK->addColumn<int>("nReco", nRecoP, "Number elements in transfer matrix reco axis", nanoaod::FlatTable::IntColumn);
-  tablePROJBK->addColumn<int>("nGen", nGenP, "Number elements in transfer matrix gen axis", nanoaod::FlatTable::IntColumn);
+  auto tablePROJBK = std::make_unique<nanoaod::FlatTable>(order.size(), name_+"PROJBK", false);
   tablePROJBK->addColumn<int>("order", order, "Order label", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tablePROJBK), name_+"PROJBK");
-
-  auto tableRES3BK = std::make_unique<nanoaod::FlatTable>(nTrans3.size(), name_+"RES3BK", false);
-  tableRES3BK->addColumn<int>("nTrans", nTrans3, "Number of elements in transfer matrix", nanoaod::FlatTable::IntColumn);
-  tableRES3BK->addColumn<int>("nReco", nReco3, "Number elements in transfer matrix reco axis", nanoaod::FlatTable::IntColumn);
-  tableRES3BK->addColumn<int>("nGen", nGen3, "Number elements in transfer matrix gen axis", nanoaod::FlatTable::IntColumn);
-  evt.put(std::move(tableRES3BK), name_+"RES3BK");
-
-  auto tableRES4BK = std::make_unique<nanoaod::FlatTable>(nTrans4.size(), name_+"RES4BK", false);
-  tableRES4BK->addColumn<int>("nTrans", nTrans3, "Number of elements in transfer matrix", nanoaod::FlatTable::IntColumn);
-  tableRES4BK->addColumn<int>("nReco", nReco4, "Number elements in transfer matrix reco axis", nanoaod::FlatTable::IntColumn);
-  tableRES4BK->addColumn<int>("nGen", nGen4, "Number elements in transfer matrix gen axis", nanoaod::FlatTable::IntColumn);
-  evt.put(std::move(tableRES4BK), name_+"RES4BK");
 }
 
 DEFINE_FWK_MODULE(EECTransferTableProducer);
