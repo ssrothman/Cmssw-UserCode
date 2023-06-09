@@ -5,5 +5,8 @@ SimonJetTableProducer = cms.EDProducer("SimonJetTableProducer",
     name = cms.string("SimonJets"),
     addMatch = cms.bool(False),
     isGen = cms.bool(False),
-    matchSrc = cms.InputTag("")
+    matchSrc = cms.InputTag(""),
+    otherMatchSrc = cms.InputTag(""),
+    doOtherMatch = cms.bool(False),
+    verbose = cms.int32(1)
 )
