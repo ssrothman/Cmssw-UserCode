@@ -40,12 +40,16 @@ void addCovP(arma::mat& covp,
              const unsigned& order,
              const size_t offset){
 
+    double accu=0;
     const arma::mat& cov = calc.getCov(order);
     for(unsigned i=0; i<cov.n_rows; ++i){
         for(unsigned j=0; j<cov.n_cols; ++j){
             covp(i + offset, j) = cov(i, j);
+            accu += cov(i,j);
         }
     }
+    printf("accumulated %0.3f in addCovP\n", accu);
+
 }
 
 template <bool nonIRC, bool doPU>
@@ -93,16 +97,21 @@ void addEverything(EECresult& result,
     arma::mat covp(result.wts.size(), nPart, arma::fill::none);
     for(unsigned order=2; order<=projcalc.getMaxOrder(); ++order){
         addCovP(covp, projcalc, order, result.offsets[order-2]);
+        printf("after covp, sum is %0.3f\n", arma::accu(covp));
     }
 
     unsigned ioff = projcalc.getMaxOrder()+1;
     for(const auto& calc : nirccalcs){
         addCovP(covp, calc, 2, result.offsets[ioff-2]);
+        printf("after covp, sum is %0.3f\n", arma::accu(covp));
         ++ioff;
     }
     result.cov = covp * arma::trans(covp);
+    printf("-------SUM COVPxP in EEC Producer is %0.3f------\n", arma::accu(result.cov));
 
+    printf("about to call rescalc\n");
     if(rescalc.hasRun()){
+        printf("inside if\n");
         addResolved3(result, rescalc);
         arma::mat covp3 = rescalc.getCov(3);
         result.covRes3Res3 = covp3 * arma::trans(covp3);
@@ -116,6 +125,7 @@ void addEverything(EECresult& result,
             result.covRes4Proj = covp4 * arma::trans(covp);
         }
     }
+    printf("after if\n");
 
 }
 

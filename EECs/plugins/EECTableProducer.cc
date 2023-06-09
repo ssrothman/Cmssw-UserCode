@@ -40,12 +40,15 @@ private:
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<EECresult>> srcToken_;
 
+    int verbose_;
+
 };
 
 EECTableProducer::EECTableProducer(const edm::ParameterSet& conf)
         : name_(conf.getParameter<std::string>("name")),
           src_(conf.getParameter<edm::InputTag>("src")),
-          srcToken_(consumes<edm::View<EECresult>>(src_)){
+          srcToken_(consumes<edm::View<EECresult>>(src_)),
+          verbose_(conf.getParameter<int>("verbose")){
     produces<nanoaod::FlatTable>(name_+"WTS");
     produces<nanoaod::FlatTable>(name_+"DRS");
     produces<nanoaod::FlatTable>(name_+"RES3");
@@ -64,10 +67,14 @@ void EECTableProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
   edm::ParameterSetDescription desc;
   desc.add<std::string>("name");
   desc.add<edm::InputTag>("src");
+  desc.add<int>("verbose");
   descriptions.addWithDefaultLabel(desc);
 }
 
 void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
+  if(verbose_){
+    printf("top of EECTableProducer::produce()\n");
+  }
   edm::Handle<edm::View<EECresult>> EECs;
   evt.getByToken(srcToken_, EECs);
 
@@ -111,6 +118,9 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   std::vector<int> nRes4;
 
   for(const auto& EEC : *EECs){
+      if(verbose_){
+        printf("doing an EEC\n");
+      }
       iJet.push_back(EEC.iJet);
       nOrders.push_back(EEC.offsets.size());
       nWts.push_back(EEC.wts.size());
@@ -168,14 +178,23 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       cov4xP.insert(cov4xP.end(), EEC.covRes4Proj.begin(), 
                                   EEC.covRes4Proj.end());
   }
+  if(verbose_){
+    printf("filled vectors\n");
+  }
 
   auto tableWTS = std::make_unique<nanoaod::FlatTable>(wts.size(), name_+"WTS", false);
   tableWTS->addColumn<float>("value", wts, "EEC weights", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableWTS), name_+"WTS");
+  if(verbose_){
+    printf("made tableWTs with %lu elements\n", wts.size());
+  }
 
   auto tableDRs = std::make_unique<nanoaod::FlatTable>(dRs.size(), name_+"DRS", false);
   tableDRs->addColumn<float>("value", dRs, "EEC dRs", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableDRs), name_+"DRS");
+  if(verbose_){
+    printf("made tableDRs with %lu elements\n", dRs.size());
+  }
 
   auto tableRES3 = std::make_unique<nanoaod::FlatTable>(res3wts.size(), name_+"RES3", false);
   tableRES3->addColumn<float>("wts", res3wts, "fully resolved weights", nanoaod::FlatTable::FloatColumn);
@@ -183,6 +202,9 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   tableRES3->addColumn<float>("dR2", res3dR2, "fully resolved second-largest dR", nanoaod::FlatTable::FloatColumn);
   tableRES3->addColumn<float>("dR3", res3dR3, "fully resolved third-largest dR", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableRES3), name_+"RES3");
+  if(verbose_){
+    printf("made tableRES3 with %lu elements\n", res3wts.size());
+  }
 
   auto tableRES4 = std::make_unique<nanoaod::FlatTable>(res4wts.size(), name_+"RES4", false);
   tableRES4->addColumn<float>("wts", res4wts, "fully resolved weights", nanoaod::FlatTable::FloatColumn);
@@ -193,35 +215,59 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   tableRES4->addColumn<float>("dR5", res4dR5, "fully resolved fifth-largest dR", nanoaod::FlatTable::FloatColumn);
   tableRES4->addColumn<float>("dR6", res4dR6, "fully resolved sixth-largest dR", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableRES4), name_+"RES4");
+  if(verbose_){
+    printf("made tableRES4 with %lu elements\n", res4wts.size());
+  }
 
   auto tableCOVPxP = std::make_unique<nanoaod::FlatTable>(covPxP.size(), name_+"COVPxP", false);
   tableCOVPxP->addColumn<float>("value", covPxP, "EEC covariance matrix", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableCOVPxP), name_+"COVPxP");
+  if(verbose_){
+    printf("made tableCOVPxP with %lu elements\n", covPxP.size());
+    printf("------covPxP sum is %0.3f--------\n", std::accumulate(covPxP.begin(), covPxP.end(), 0.));
+  }
 
   auto tableCOV3x3 = std::make_unique<nanoaod::FlatTable>(cov3x3.size(), name_+"COV3x3", false);
   tableCOV3x3->addColumn<float>("value", cov3x3, "EEC covariance matrix", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableCOV3x3), name_+"COV3x3");
+  if(verbose_){
+    printf("made tableCOV3x3 with %lu elements\n", cov3x3.size());
+  }
 
   auto tableCOV3xP = std::make_unique<nanoaod::FlatTable>(cov3xP.size(), name_+"COV3xP", false);
   tableCOV3xP->addColumn<float>("value", cov3xP, "EEC covariance matrix", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableCOV3xP), name_+"COV3xP");
+  if(verbose_){
+    printf("made tableCOV3xP with %lu elements\n", cov3xP.size());
+  }
 
   auto tableCOV4x4 = std::make_unique<nanoaod::FlatTable>(cov4x4.size(), name_+"COV4x4", false);
   tableCOV4x4->addColumn<float>("value", cov4x4, "EEC covariance matrix", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableCOV4x4), name_+"COV4x4");
+  if(verbose_){
+    printf("made tableCOV4x4 with %lu elements\n", cov4x4.size());
+  }
 
   auto tableCOV4x3 = std::make_unique<nanoaod::FlatTable>(cov4x3.size(), name_+"COV4x3", false);
   tableCOV4x3->addColumn<float>("value", cov4x3, "EEC covariance matrix", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableCOV4x3), name_+"COV4x3");
+  if(verbose_){
+    printf("made tableCOV4x3 with %lu elements\n", cov4x3.size());
+  }
 
   auto tableCOV4xP = std::make_unique<nanoaod::FlatTable>(cov4xP.size(), name_+"COV4xP", false);
   tableCOV4xP->addColumn<float>("value", cov4xP, "EEC covariance matrix", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableCOV4xP), name_+"COV4xP");
+  if(verbose_){
+    printf("made tableCOV4xP with %lu elements\n", cov4xP.size());
+  }
 
-  auto tableWTSBK = std::make_unique<nanoaod::FlatTable>(offsets.size(), name_+"WTSBK", false);
-  tableWTSBK->addColumn<int>("offset", offsets, "offset into wts", nanoaod::FlatTable::IntColumn);
+  auto tableWTSBK = std::make_unique<nanoaod::FlatTable>(order.size(), name_+"WTSBK", false);
   tableWTSBK->addColumn<int>("order", order, "correlator order", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableWTSBK), name_+"WTSBK");
+  if(verbose_){
+    printf("made tableWTSBK with %lu elements\n", order.size());
+  }
 
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iJet.size(), name_+"BK", false);
   tableBK->addColumn<int>("iJet", iJet, "index in jet array", nanoaod::FlatTable::IntColumn);
@@ -237,6 +283,9 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   tableBK->addColumn<int>("nRes3", nRes3, "number of fully resolved 3pt weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nRes4", nRes4, "number of fully resolved 4pt weights", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
+  if(verbose_){
+    printf("made tableBK with %lu elements\n", iJet.size());
+  }
 }
 
 DEFINE_FWK_MODULE(EECTableProducer);

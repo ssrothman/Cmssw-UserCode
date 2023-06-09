@@ -40,12 +40,15 @@ private:
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<EECtransfer>> srcToken_;
 
+    int verbose_;
+
 };
 
 EECTransferTableProducer::EECTransferTableProducer(const edm::ParameterSet& conf)
         : name_(conf.getParameter<std::string>("name")),
           src_(conf.getParameter<edm::InputTag>("src")),
-          srcToken_(consumes<edm::View<EECtransfer>>(src_)){
+          srcToken_(consumes<edm::View<EECtransfer>>(src_)),
+          verbose_(conf.getParameter<int>("verbose")){
     produces<nanoaod::FlatTable>(name_+"PROJ");
     produces<nanoaod::FlatTable>(name_+"RES3");
     produces<nanoaod::FlatTable>(name_+"RES4");
@@ -57,6 +60,7 @@ void EECTransferTableProducer::fillDescriptions(edm::ConfigurationDescriptions& 
   edm::ParameterSetDescription desc;
   desc.add<std::string>("name");
   desc.add<edm::InputTag>("src");
+  desc.add<int>("verbose");
   descriptions.addWithDefaultLabel(desc);
 }
 
