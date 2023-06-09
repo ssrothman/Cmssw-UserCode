@@ -23,14 +23,14 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL17MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120000/005B6A7C-B0B1-A745-879B-017FE7933B77.root'),
     secondaryFileNames = cms.untracked.vstring(),
-    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1,31045501,1,31045503))
+    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1,36554300,1,36554400))
 )
 
 process.options = cms.untracked.PSet(
@@ -53,8 +53,10 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         dataTier = cms.untracked.string('NANOAODSIM'),
         filterName = cms.untracked.string('')
     ),
-    fileName = cms.untracked.string('NANO_NANO.root'),
-    outputCommands = process.NANOAODSIMEventContent.outputCommands
+    #fileName = cms.untracked.string('/data/submit/cms/store/user/srothman/NANO_NANO_10k_3.root'),
+    fileName = cms.untracked.string('~/cmsdata/NANO_NANO.root'),
+    outputCommands = process.NANOAODSIMEventContent.outputCommands,
+    #autoFlush = cms.untracked.int32(1)
 )
 
 # Additional output definition
@@ -74,8 +76,8 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(16)
-process.options.numberOfStreams=cms.untracked.uint32(16)
+process.options.numberOfThreads=cms.untracked.uint32(1)
+process.options.numberOfStreams=cms.untracked.uint32(1)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 # customisation of the process.
@@ -89,6 +91,9 @@ process = nanoAOD_customizeMC(process)
 from SRothman.Analysis.SelectZMuMu_cff import *
 process = addZMuMuEventSelection(process)
 
+from SRothman.Analysis.addRoccoR_cff import *
+process = addRoccoR(process)
+
 from SRothman.CustomJets.CustomJets_cff import *
 process = addCustomJets(process)
 
@@ -97,6 +102,7 @@ process = addGenMatching(process)
 
 from SRothman.EECs.EECs_cff import *
 process = addEECs(process)
+
 # End of customisation functions
 
 # Customisation from command line
