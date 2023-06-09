@@ -6,6 +6,12 @@ def addGenMatching(process):
     process.GenMatch = GenMatchProducer.clone(
         reco = "SimonJets",
         gen = "GenSimonJets",
+        recoParts = cms.InputTag("puppi"),
+        genParts = cms.InputTag("packedGenParticlesForJetsNoNu"),
+        doLargerCollections = cms.bool(True),
+        jetCoreThreshold = process.SimonJets.jetCoreThreshold,
+        hardPt = process.SimonJets.hardPt,
+        softPt = 1,
     )
     process.GenMatchTable = GenMatchTableProducer.clone(
         src = "GenMatch",
@@ -19,9 +25,13 @@ def addGenMatching(process):
     process.SimonJetTable.addMatch = True
     process.SimonJetTable.isGen = False
     process.SimonJetTable.matchSrc = "GenMatch"
+    process.SimonJetTable.otherMatchSrc = "GenMatch:bigGen"
+    process.SimonJetTable.doOtherMatch = True
 
     process.GenSimonJetTable.addMatch = True
     process.GenSimonJetTable.isGen = True
     process.GenSimonJetTable.matchSrc = "GenMatch"
+    process.GenSimonJetTable.otherMatchSrc = "GenMatch:bigReco"
+    process.GenSimonJetTable.doOtherMatch = True
 
     return process

@@ -39,12 +39,15 @@ private:
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<jetmatch>> srcToken_;
 
+    int verbose_;
+
 };
 
 GenMatchTableProducer::GenMatchTableProducer(const edm::ParameterSet& conf)
         : name_(conf.getParameter<std::string>("name")),
           src_(conf.getParameter<edm::InputTag>("src")),
-          srcToken_(consumes<edm::View<jetmatch>>(src_)){
+          srcToken_(consumes<edm::View<jetmatch>>(src_)),
+          verbose_(conf.getParameter<int>("verbose")){
     produces<nanoaod::FlatTable>(name_);
     produces<nanoaod::FlatTable>(name_+"BK");
 }
@@ -53,10 +56,14 @@ void GenMatchTableProducer::fillDescriptions(edm::ConfigurationDescriptions& des
   edm::ParameterSetDescription desc;
   desc.add<std::string>("name");
   desc.add<edm::InputTag>("src");
+  desc.add<int>("verbose");
   descriptions.addWithDefaultLabel(desc);
 }
 
 void GenMatchTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
+    if(verbose_){
+        printf("top of GenMatchTableProducer::produce()\n");
+    }
   edm::Handle<edm::View<jetmatch>> matches;
   evt.getByToken(srcToken_, matches);
 
@@ -79,10 +86,16 @@ void GenMatchTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
           }
       }
   }
+    if(verbose_){
+        printf("got matrices\n");
+    }
 
   auto table = std::make_unique<nanoaod::FlatTable>(ptrans.size(), name_, false);
   table->addColumn<float>("matrix", ptrans, "patricle transfer", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(table), name_);
+  if(verbose_){
+    printf("made table with %lu elements\n", ptrans.size());
+  }
 
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iReco.size(), name_+"BK", false);
   tableBK->addColumn<int>("iReco", iReco, "index in reco jet array", nanoaod::FlatTable::IntColumn);
@@ -90,6 +103,9 @@ void GenMatchTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   tableBK->addColumn<int>("n_rows", n_rows, "number of rows in transfer matrix", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("n_cols", n_cols, "number of columns in transfer matrix", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
+  if(verbose_){
+    printf("made tableBK with %lu elements\n", iReco.size());
+  }
 }
 
 DEFINE_FWK_MODULE(GenMatchTableProducer);
