@@ -22,8 +22,6 @@
 
 #include "SRothman/Matching/src/toyjets/common.h"
 
-#include "SRothman/CustomJets/plugins/ParticleUncertainty.h"
-
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -53,7 +51,8 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
-    double minMuPt_;
+    double leadMuPt_;
+    double subMuPt_;
     double maxMuEta_;
 
     unsigned long ID_;
@@ -70,7 +69,8 @@ private:
 
 
 ZMuMuEventSelectionProducer::ZMuMuEventSelectionProducer(const edm::ParameterSet& conf)
-        : minMuPt_(conf.getParameter<double>("minMuPt")),
+        : leadMuPt_(conf.getParameter<double>("leadMuPt")),
+          subMuPt_(conf.getParameter<double>("subMuPt")),
           maxMuEta_(conf.getParameter<double>("maxMuEta")),
           ID_(muIDFromStr(conf.getParameter<std::string>("ID"))),
           Iso_(muIsoFromStr(conf.getParameter<std::string>("Iso"))),
@@ -85,7 +85,8 @@ ZMuMuEventSelectionProducer::ZMuMuEventSelectionProducer(const edm::ParameterSet
 
 void ZMuMuEventSelectionProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
-  desc.add<double>("minMuPt");
+  desc.add<double>("leadMuPt");
+  desc.add<double>("subMuPt");
   desc.add<double>("maxMuEta");
   desc.add<double>("minZmass");
   desc.add<double>("maxZmass");
@@ -98,6 +99,9 @@ void ZMuMuEventSelectionProducer::fillDescriptions(edm::ConfigurationDescription
 
 
 void ZMuMuEventSelectionProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
+    if(verbose_){
+        printf("Top of ZMuMUEventSelectionProducer::produce()\n");
+    }
   edm::Handle<edm::View<pat::Muon>> muons;
   evt.getByToken(srcToken_, muons);
 
@@ -106,7 +110,7 @@ void ZMuMuEventSelectionProducer::produce(edm::Event& evt, const edm::EventSetup
   if(muons->size() >= 2) {
     std::vector<unsigned> passedMuons;
     for(unsigned i=0; i<muons->size(); ++i){
-        if(muons->at(i).pt() < minMuPt_ || std::abs(muons->at(i).eta()) > maxMuEta_){
+        if(std::abs(muons->at(i).eta()) > maxMuEta_){
             continue; //failed kinematic cuts
         }
         if(!muons->at(i).passed(ID_) || !muons->at(i).passed(Iso_)){
@@ -117,17 +121,24 @@ void ZMuMuEventSelectionProducer::produce(edm::Event& evt, const edm::EventSetup
     if(passedMuons.size() >= 2){
         const auto& mu1 = muons->at(passedMuons[0]);
         const auto& mu2 = muons->at(passedMuons[1]);
-        if(mu1.charge() * mu2.charge() < 0){//opposite sign
-            const auto& z = mu1.p4() + mu2.p4();
-            printf("Z mass: %f\n", z.mass());
-            if(z.mass() > minZmass_ && z.mass() < maxZmass_){
-                *result = true;
+        if(mu1.pt() > leadMuPt_ && mu2.pt() > subMuPt_){
+            if(mu1.charge() * mu2.charge() < 0){//opposite sign
+                const auto& z = mu1.p4() + mu2.p4();
+                if(verbose_){
+                  printf("Z mass: %f\n", z.mass());
+                }
+                if(z.mass() > minZmass_ && z.mass() < maxZmass_){
+                    *result = true;
+                }
             }
         }
     }
   }
 
   evt.put(std::move(result));
+  if(verbose_){
+      printf("put into event\n");
+  }
 }  // end produce()
 
 DEFINE_FWK_MODULE(ZMuMuEventSelectionProducer);

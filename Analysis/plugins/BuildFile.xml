@@ -1,24 +1,25 @@
-<library file="*.cc" name="SRothmanAnalysisPlugins">
-  <Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
-  <flags EDM_PLUGIN="1"/>
-  <use name="RecoJets/JetProducers"/>
-  <use name="RecoJets/JetAlgorithms"/>
-  <use name="RecoEgamma/EgammaIsolationAlgos"/>
-  <use name="FWCore/Framework"/>
-  <use name="FWCore/ParameterSet"/>
-  <use name="DataFormats/BTauReco"/>
-  <use name="DataFormats/JetReco"/>
-  <use name="DataFormats/VertexReco"/>
-  <use name="DataFormats/HcalRecHit"/>
-  <use name="DataFormats/EcalRecHit"/>
-  <use name="Geometry/CaloGeometry"/>
-  <use name="Geometry/Records"/>
-  <use name="CommonTools/UtilAlgos"/>
-  <use name="CondFormats/JetMETObjects"/>
-  <use name="CondFormats/EcalObjects"/>
-  <use name="CondFormats/DataRecord"/>
-  <use name="JetMETCorrections/Objects"/>
-  <use name="fastjet"/>
-  <use name="fastjet-contrib"/>
-  <use name="DataFormats/NanoAOD"/>
-</library>
+<Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
+<use name="CommonTools/Statistics"/>
+<use name="CommonTools/Utils"/>
+<use name="FWCore/Framework"/>
+<use name="DataFormats/Common"/>
+<use name="DataFormats/HcalRecHit"/>
+<use name="DataFormats/EgammaReco"/>
+<use name="DataFormats/EgammaCandidates"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="DataFormats/TrackReco"/>
+<use name="Geometry/CaloGeometry"/>
+<use name="RecoLocalCalo/HGCalRecAlgos"/>
+<use name="clhep"/>
+<use name="root"/>
+<use name="roottmva"/>
+<use name="CondFormats/DataRecord"/>
+<use name="RecoEcal/EgammaCoreTools"/>
+<use name="DataFormats/ParticleFlowReco"/>
+<use name="PhysicsTools/TensorFlow" />
+<use name="boost"/>
+<use name="SRothman/Analysis"/>
+<Flags ADD_SUBDIR="1"/>
+<export>
+  <lib name="1"/>
+</export>
