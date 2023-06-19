@@ -17,6 +17,8 @@
 <use name="RecoEcal/EgammaCoreTools"/>
 <use name="DataFormats/ParticleFlowReco"/>
 <use name="PhysicsTools/TensorFlow" />
+<use name="rootminuit2"/>
+<Flags ADD_SUBDIR="1"/>
 <export>
   <lib name="1"/>
 </export>

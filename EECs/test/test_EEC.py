@@ -54,7 +54,8 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         filterName = cms.untracked.string('')
     ),
     #fileName = cms.untracked.string('/data/submit/cms/store/user/srothman/NANO_NANO_10k_3.root'),
-    fileName = cms.untracked.string('~/cmsdata/NANO_NANO.root'),
+    #fileName = cms.untracked.string('~/cmsdata/NANO_NANO.root'),
+    fileName = cms.untracked.string('NANO_NANO.root'),
     outputCommands = process.NANOAODSIMEventContent.outputCommands,
     #autoFlush = cms.untracked.int32(1)
 )
@@ -76,8 +77,8 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(1)
-process.options.numberOfStreams=cms.untracked.uint32(1)
+process.options.numberOfThreads=cms.untracked.uint32(4)
+process.options.numberOfStreams=cms.untracked.uint32(4)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 # customisation of the process.
@@ -89,19 +90,19 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 process = nanoAOD_customizeMC(process)
 
 from SRothman.Analysis.SelectZMuMu_cff import *
-process = addZMuMuEventSelection(process)
+process = addZMuMuEventSelection(process, 0)
 
 from SRothman.Analysis.addRoccoR_cff import *
-process = addRoccoR(process)
+process = addRoccoR(process, 0)
 
 from SRothman.CustomJets.CustomJets_cff import *
-process = addCustomJets(process)
+process = addCustomJets(process, 0)
 
 from SRothman.Matching.Matching_cff import *
-process = addGenMatching(process)
+process = addGenMatching(process, 0)
 
 from SRothman.EECs.EECs_cff import *
-process = addEECs(process)
+process = addEECs(process, 0)
 
 # End of customisation functions
 

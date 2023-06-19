@@ -21,5 +21,4 @@
   <use name="fastjet"/>
   <use name="fastjet-contrib"/>
   <use name="DataFormats/NanoAOD"/>
-  <use name="SRothman/CustomJets"/>
 </library>

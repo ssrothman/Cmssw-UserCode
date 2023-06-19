@@ -33,3 +33,5 @@
 
 *.pyc
 *.root
+
+EECs/production/crab/*

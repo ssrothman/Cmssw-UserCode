@@ -38,17 +38,20 @@ template <bool nonIRC, bool doPU>
 void addCovP(arma::mat& covp,
              const EECCalculator<PROJECTED, nonIRC, doPU>& calc,
              const unsigned& order,
-             const size_t offset){
+             const size_t offset,
+             int verbose=0){
 
     double accu=0;
     const arma::mat& cov = calc.getCov(order);
     for(unsigned i=0; i<cov.n_rows; ++i){
         for(unsigned j=0; j<cov.n_cols; ++j){
             covp(i + offset, j) = cov(i, j);
-            accu += cov(i,j);
+            accu += square(cov(i,j));
         }
     }
-    printf("accumulated %0.3f in addCovP\n", accu);
+    if(verbose){
+        printf("accumulated %0.3f in addCovP\n", accu);
+    }
 
 }
 
@@ -78,7 +81,8 @@ void addEverything(EECresult& result,
     const EECCalculator<PROJECTED, false, false>& projcalc,
     const std::vector<EECCalculator<PROJECTED, true, doPU>>& nirccalcs,
     const EECCalculator<RESOLVED, false, false>& rescalc,
-    unsigned iJet, unsigned nPart){
+    unsigned iJet, unsigned nPart,
+    int verbose=0){
 
     result.maxOrder = projcalc.getMaxOrder();
     result.iJet = iJet;
@@ -94,24 +98,36 @@ void addEverything(EECresult& result,
     }
 
 
-    arma::mat covp(result.wts.size(), nPart, arma::fill::none);
+    arma::mat covp(result.wts.size(), nPart, arma::fill::zeros);
     for(unsigned order=2; order<=projcalc.getMaxOrder(); ++order){
-        addCovP(covp, projcalc, order, result.offsets[order-2]);
-        printf("after covp, sum is %0.3f\n", arma::accu(covp));
+        if(verbose){
+            printf("doing order %u\n", order);
+        }
+        addCovP(covp, projcalc, order, result.offsets[order-2], verbose);
+        if(verbose){
+            printf("after covp, sum is %0.3f\n", arma::dot(covp, covp));
+        }
     }
 
     unsigned ioff = projcalc.getMaxOrder()+1;
     for(const auto& calc : nirccalcs){
-        addCovP(covp, calc, 2, result.offsets[ioff-2]);
-        printf("after covp, sum is %0.3f\n", arma::accu(covp));
+        printf("doing nirccalc\n");
+        addCovP(covp, calc, 2, result.offsets[ioff-2], verbose);
+        if(verbose){
+            printf("after covp, sum is %0.3f\n", arma::dot(covp, covp));
+        }
         ++ioff;
     }
     result.cov = covp * arma::trans(covp);
-    printf("-------SUM COVPxP in EEC Producer is %0.3f------\n", arma::accu(result.cov));
+    if(verbose){
+        printf("-------SUM COVPxP in EEC Producer is %0.3f------\n", arma::accu(result.cov));
 
-    printf("about to call rescalc\n");
+        printf("about to call rescalc\n");
+    }
     if(rescalc.hasRun()){
-        printf("inside if\n");
+        if(verbose){
+            printf("inside if\n");
+        }
         addResolved3(result, rescalc);
         arma::mat covp3 = rescalc.getCov(3);
         result.covRes3Res3 = covp3 * arma::trans(covp3);
@@ -125,7 +141,9 @@ void addEverything(EECresult& result,
             result.covRes4Proj = covp4 * arma::trans(covp);
         }
     }
-    printf("after if\n");
+    if(verbose){
+        printf("after if\n");
+    }
 
 }
 

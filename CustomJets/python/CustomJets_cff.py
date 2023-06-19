@@ -3,7 +3,7 @@ from SRothman.JetToolbox.jetToolbox_cff import jetToolbox
 from SRothman.CustomJets.SimonJetProducer_cfi import *
 from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
-def addCustomJets(process):
+def addCustomJets(process, verbose=False):
 
     btags = [
         'pfDeepCSVJetTags:probb',
@@ -37,20 +37,24 @@ def addCustomJets(process):
     process.SimonJets = PatSimonJetProducer.clone(
         src = "selectedPatJetsAK4PFPuppi",
         eventSelection = "ZMuMu",
-        doEventSelection = True
+        doEventSelection = True,
+        verbose = verbose
     )
     process.GenSimonJets = GenSimonJetProducer.clone(
         src = "ak4GenJetsNoNu",
         eventSelection = "ZMuMu",
-        doEventSelection = True
+        doEventSelection = True,
+        verbose = verbose
     )
     process.SimonJetTable = SimonJetTableProducer.clone(
         src = "SimonJets",
-        name = "SimonJets"
+        name = "SimonJets",
+        verbose = verbose
     )
     process.GenSimonJetTable = SimonJetTableProducer.clone(
         src = "GenSimonJets",
-        name = "GenSimonJets"
+        name = "GenSimonJets",
+        verbose = verbose
     )
     process.JetsTask = cms.Task(process.SimonJets,
                                 process.GenSimonJets)

@@ -5,4 +5,5 @@ RoccoRValueMapProducer = cms.EDProducer('RoccoRValueMapProducer',
     genParticles = cms.InputTag('prunedGenParticles'),
     isMC = cms.bool(True),
     dataFile = cms.FileInPath('SRothman/Analysis/data/RoccoR2017UL.txt'),
+    verbose = cms.int32(0)
 )

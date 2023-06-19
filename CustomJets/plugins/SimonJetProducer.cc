@@ -23,8 +23,6 @@
 #include "SRothman/Matching/src/toyjets/common.h"
 #include "SRothman/Matching/src/simon_util_cpp/util.h"
 
-#include "SRothman/CustomJets/src/ParticleUncertainty.h"
-
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -38,9 +36,7 @@ public:
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     double minPartPt_;
-    double jetCoreThreshold_;
-    double hardPt_;
-    bool doUncertainty_;
+    unsigned int maxNumPart_, minNumPart_;
 
     int verbose_;
 
@@ -61,9 +57,8 @@ private:
 template <typename T>
 SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
         : minPartPt_(conf.getParameter<double>("minPartPt")),
-          jetCoreThreshold_(square(conf.getParameter<double>("jetCoreThreshold"))),
-          hardPt_(conf.getParameter<double>("hardPt")),
-          doUncertainty_(conf.getParameter<bool>("doUncertainty")),
+          maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
+          minNumPart_(conf.getParameter<unsigned>("minNumPart")),
           verbose_(conf.getParameter<int>("verbose")),
           minPt_(conf.getParameter<double>("minPt")),
           maxEta_(conf.getParameter<double>("maxEta")),
@@ -80,18 +75,23 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
 template <typename T>
 void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
+
   desc.add<double>("minPartPt");
-  desc.add<double>("jetCoreThreshold");
-  desc.add<double>("hardPt");
+  desc.add<unsigned>("maxNumPart");
+  desc.add<unsigned>("minNumPart");
+
   desc.add<double>("minPt");
   desc.add<double>("maxEta");
   desc.add<double>("maxMuFrac");
   desc.add<double>("maxChEmFrac");
-  desc.add<bool>("doUncertainty");
-  desc.add<edm::InputTag>("src");
-  desc.add<int>("verbose");
+
   desc.add<edm::InputTag>("eventSelection");
   desc.add<bool>("doEventSelection");
+
+  desc.add<edm::InputTag>("src");
+
+  desc.add<int>("verbose");
+
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -145,7 +145,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
 
     const std::vector<reco::Jet::Constituent>& constituents = j.getJetConstituents();
 
-    if(constituents.size() < 2){
+    if(constituents.size() < minNumPart_){
         continue;
     }
 
@@ -168,6 +168,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
       std::cout << "\tjet: (" << pt << ", " << eta << ", " << phi << ")" << std::endl;
     }
 
+    unsigned iPart=0;
     for(const auto& part : j){
         double partpt = part.pt();
         ans.sumpt += partpt;
@@ -175,16 +176,11 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
             particle next(part.pt(), part.eta(), part.phi(), 
                           0.0, 0.0, 0.0,
                           std::abs(part.pdgId()), part.charge());
-            if(doUncertainty_){
-                if(jetCoreThreshold_ > 0){
-                    double jetDR = reco::deltaR2(next.eta, next.phi, 
-                                                 ans.eta, ans.phi);
-                    addUncertainty(next, jetDR < jetCoreThreshold_, hardPt_);
-                }
-                addUncertainty(next);
-            }
             ans.particles.push_back(std::move(next));
             ++ans.nPart;
+        }
+        if(++iPart >= maxNumPart_){
+            break;
         }
     }
     result->push_back(std::move(ans));

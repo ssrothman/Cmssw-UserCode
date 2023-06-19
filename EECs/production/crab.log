@@ -1,0 +1,57 @@
+DEBUG 2023-06-16 13:42:44.834 UTC: 	 CRAB Client version: v3.230417
+DEBUG 2023-06-16 13:42:44.835 UTC: 	 Running on: Linux submit01.mit.edu 3.10.0-1160.45.1.el7.x86_64 #1 SMP Wed Oct 13 17:20:51 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2023-06-16 13:42:44.835 UTC: 	 Executing command: 'submit'
+DEBUG 2023-06-16 13:42:44.837 UTC: 	 Found CRAB cache file /home/submit/srothman/.crab3
+DEBUG 2023-06-16 13:42:44.860 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2023-06-16 13:45:56.867 UTC: 	 CRAB Client version: v3.230417
+DEBUG 2023-06-16 13:45:56.868 UTC: 	 Running on: Linux submit01.mit.edu 3.10.0-1160.45.1.el7.x86_64 #1 SMP Wed Oct 13 17:20:51 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2023-06-16 13:45:56.868 UTC: 	 Executing command: 'status'
+DEBUG 2023-06-16 13:45:56.870 UTC: 	 Found CRAB cache file /home/submit/srothman/.crab3
+ERROR 2023-06-16 13:45:56.880 UTC: 	 Cannot find .requestcache file in CRAB project directory /work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/EECs/production/crab/srothman_EEC_Jun16-2023/crab_srothman_EEC_Jun16-2023_2018_DYJetsToLL
+ERROR 2023-06-16 13:45:56.880 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/bin/crab.py", line 159, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/bin/crab.py", line 144, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/status.py", line 48, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/SubCommand.py", line 275, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/SubCommand.py", line 646, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/SubCommand.py", line 508, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/EECs/production/crab/srothman_EEC_Jun16-2023/crab_srothman_EEC_Jun16-2023_2018_DYJetsToLL
+INFO 2023-06-16 13:45:56.887 UTC: 	 Log file is /work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/EECs/production/crab.log
+DEBUG 2023-06-16 13:50:59.726 UTC: 	 CRAB Client version: v3.230417
+DEBUG 2023-06-16 13:50:59.727 UTC: 	 Running on: Linux submit01.mit.edu 3.10.0-1160.45.1.el7.x86_64 #1 SMP Wed Oct 13 17:20:51 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2023-06-16 13:50:59.728 UTC: 	 Executing command: 'submit'
+DEBUG 2023-06-16 13:50:59.729 UTC: 	 Found CRAB cache file /home/submit/srothman/.crab3
+DEBUG 2023-06-16 13:50:59.737 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2023-06-19 09:12:41.553 UTC: 	 CRAB Client version: v3.230417
+DEBUG 2023-06-19 09:12:41.554 UTC: 	 Running on: Linux submit03.mit.edu 3.10.0-1160.el7.x86_64 #1 SMP Mon Oct 19 16:18:59 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2023-06-19 09:12:41.554 UTC: 	 Executing command: 'submit'
+DEBUG 2023-06-19 09:12:41.556 UTC: 	 Found CRAB cache file /home/submit/srothman/.crab3
+DEBUG 2023-06-19 09:12:41.563 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2023-06-19 09:39:44.901 UTC: 	 CRAB Client version: v3.230417
+DEBUG 2023-06-19 09:39:44.902 UTC: 	 Running on: Linux submit02.mit.edu 3.10.0-1160.el7.x86_64 #1 SMP Mon Oct 19 16:18:59 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2023-06-19 09:39:44.902 UTC: 	 Executing command: 'status'
+DEBUG 2023-06-19 09:39:44.903 UTC: 	 Found CRAB cache file /home/submit/srothman/.crab3
+ERROR 2023-06-19 09:39:44.912 UTC: 	 Cannot find .requestcache file in CRAB project directory /work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/EECs/production/crab/srothman_EEC_Jun19-2023
+ERROR 2023-06-19 09:39:44.912 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/bin/crab.py", line 159, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/bin/crab.py", line 144, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/status.py", line 48, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/SubCommand.py", line 275, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/SubCommand.py", line 646, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.230417.00/lib/CRABClient/Commands/SubCommand.py", line 508, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/EECs/production/crab/srothman_EEC_Jun19-2023
+INFO 2023-06-19 09:39:44.916 UTC: 	 Log file is /work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/EECs/production/crab.log

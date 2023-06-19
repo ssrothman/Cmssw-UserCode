@@ -152,15 +152,16 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       if(verbose_){
         printf("iGen %d\n", iGen);
       }
-      ProjectedEECCalculator projcalc;
+      ProjectedEECCalculator projcalc(verbose_);
       projcalc.setup(reco->at(iReco), maxOrder_);
 
       std::vector<NonIRCEECCalculator<true>> nirccalcs(p1s_.size());
       for(unsigned i=0; i<p1s_.size(); ++i){
+          nirccalcs.at(i).setVerbosity(verbose_);
           nirccalcs.at(i).setup(reco->at(iReco), 2u, PU, p1s_.at(i), p2s_.at(i));
       }
 
-      ResolvedEECCalculator rescalc;
+      ResolvedEECCalculator rescalc(verbose_);
       if(doRes4_ || doRes3_){
           unsigned resorder = doRes4_ ? 4 : 3;
           rescalc.setup(reco->at(iReco), resorder);
@@ -189,7 +190,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           }
       }
       EECresult next;
-      addEverything(next, projcalc, nirccalcs, rescalc, iReco, reco->at(iReco).nPart);
+      addEverything(next, projcalc, nirccalcs, rescalc, iReco, reco->at(iReco).nPart, verbose_);
 
       result->push_back(std::move(next));
       if(verbose_){
@@ -197,35 +198,50 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       }
 
       if(iGen >=0 ){
+        if (verbose_){
           printf("------top of gen block-------\n");
-        ProjectedEECCalculator projTcalc;
+        }
+        ProjectedEECCalculator projTcalc(verbose_);
         projTcalc.setup(gen->at(iGen), maxOrder_, 
                         ptrans, reco->at(iReco));
+        if (verbose_){
           printf("------made proj-------\n");
+        }
 
         std::vector<NonIRCEECCalculator<false>> nircTcalcs(p1s_.size());
         for(unsigned i=0; i<p1s_.size(); ++i){
             nircTcalcs.at(i).setup(gen->at(iGen), 2,
                                    ptrans, reco->at(iReco),
                                    p1s_.at(i), p2s_.at(i));
+            nircTcalcs.at(i).setVerbosity(verbose_);
         }
+        if (verbose_){
           printf("------made nonIRC-------\n");
+        }
 
-        ResolvedEECCalculator resTcalc;
+        ResolvedEECCalculator resTcalc(verbose_);
         if(doRes4_ || doRes3_){
-            printf("passed if\n");
+            if (verbose_){
+                printf("passed if\n");
+            }
             unsigned resorder = doRes4_ ? 4 : 3;
             resTcalc.setup(gen->at(iGen), resorder,
                            ptrans, reco->at(iReco));
-            printf("end if\n");
+            if (verbose_){
+                printf("end if\n");
+            }
         }
+        if (verbose_){
           printf("------made made res-------\n");
+        }
 
         if(verbose_){
             printf("setup gen calculators with %u (gen) x %u (reco) particles\n", gen->at(iGen).nPart, reco->at(iReco).nPart);
         }
 
+        if (verbose_){
           printf("------about to run proj-------\n");
+        }
         projTcalc.run();
         if(verbose_){
             printf("ran gen projcalc\n");
@@ -234,17 +250,17 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             calc.run();
         }
         if(verbose_){
-          printf("ran nirccalcs\n");
+          printf("ran gen nirccalcs\n");
         }
         if(doRes3_ || doRes4_){
             resTcalc.run();
         }
         if(verbose_){
-          printf("ran rescalc\n");
+          printf("ran gen rescalc\n");
         }
 
         EECresult nextGen;
-        addEverything(nextGen, projTcalc, nircTcalcs, resTcalc, iGen, gen->at(iGen).nPart);
+        addEverything(nextGen, projTcalc, nircTcalcs, resTcalc, iGen, gen->at(iGen).nPart, verbose_);
         resultgen->push_back(std::move(nextGen));
         if(verbose_){
           printf("pushed back gen result\n");

@@ -23,6 +23,7 @@
   <use name="fastjet-contrib"/>
   <use name="DataFormats/NanoAOD"/>
   <use name="SRothman/DataFormats"/>
-  <use name="SRothman/CustomJets"/>
   <use name="rootminuit2"/>
+  <use name="SRothman/Matching"/>
+<Flags ADD_SUBDIR="1"/>
 </library>

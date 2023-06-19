@@ -20,8 +20,6 @@
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "SRothman/CustomJets/src/ParticleUncertainty.h"
-
 #include "SRothman/DataFormats/interface/jets.h"
 #include "SRothman/DataFormats/interface/matching.h"
 
@@ -46,8 +44,7 @@ bool hasNearby(const jet& source, const reco::Candidate& cand){
 }
 
 void makeNearbyJet(jet& result, const jet& source, 
-                   const edm::Handle<edm::View<reco::Candidate>>& candidates,
-                   bool doUncertainty){
+                   const edm::Handle<edm::View<reco::Candidate>>& candidates){
     for(const auto& cand : *candidates){
         if(cand.pt() <= 1e-3){
             continue;
@@ -56,9 +53,6 @@ void makeNearbyJet(jet& result, const jet& source,
             particle nextpart(cand.pt(), cand.eta(), cand.phi(),
                               0.0, 0.0, 0.0,
                               std::abs(cand.pdgId()), cand.charge());
-            if(doUncertainty){
-                addUncertainty(nextpart);
-            }
             result.particles.push_back(std::move(nextpart));
             result.nPart++;
             result.sumpt += cand.pt();
@@ -74,11 +68,28 @@ public:
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     int verbose_;
-    double dR2thresh_;
+
+    double jetMatchingDR_;
     
-    double clipval_, cutoff_;
-    bool matchCharge_;
-    double jetCoreDR2_, softPt_, hardPt_;
+    double clipval_;
+
+    enum spatialLoss loss_;
+    enum matchFilterType filter_;
+    enum uncertaintyType uncertainty_;
+
+    double cutoff_;
+
+    double softPt_, hardPt_;
+
+    std::vector<double> EMstochastic_, EMnoise_, EMconstant_;
+    std::vector<double> ECALgranularity_, ECALEtaBoundaries_;
+
+    std::vector<double> HADstochastic_, HADconstant_;
+    std::vector<double> HCALgranularity_, HCALEtaBoundaries_;
+
+    std::vector<double> CHlinear_, CHconstant_;
+    std::vector<double> CHMS_, CHangular_, trkEtaBoundaries_;
+
     unsigned maxReFit_;
 
     edm::InputTag recoTag_;
@@ -95,14 +106,38 @@ private:
 
 GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
         : verbose_(conf.getParameter<int>("verbose")),
-          dR2thresh_(square(conf.getParameter<double>("dRthresh"))),
+          jetMatchingDR_(square(conf.getParameter<double>("jetMatchingDR"))),
+
           clipval_(conf.getParameter<double>("clipval")),
+
+          loss_(static_cast<enum spatialLoss>(conf.getParameter<int>("spatialLoss"))),
+          filter_(static_cast<enum matchFilterType>(conf.getParameter<int>("filter"))),
+          uncertainty_(static_cast<enum uncertaintyType>(conf.getParameter<int>("uncertainty"))),
+
           cutoff_(conf.getParameter<double>("cutoff")),
-          matchCharge_(conf.getParameter<bool>("matchCharge")),
-          jetCoreDR2_(square(conf.getParameter<double>("jetCoreThreshold"))),
+
           softPt_(conf.getParameter<double>("softPt")),
           hardPt_(conf.getParameter<double>("hardPt")),
+
+          EMstochastic_(conf.getParameter<std::vector<double>>("EMstochastic")),
+          EMnoise_(conf.getParameter<std::vector<double>>("EMnoise")),
+          EMconstant_(conf.getParameter<std::vector<double>>("EMconstant")),
+          ECALgranularity_(conf.getParameter<std::vector<double>>("ECALgranularity")),
+          ECALEtaBoundaries_(conf.getParameter<std::vector<double>>("ECALEtaBoundaries")),
+
+          HADstochastic_(conf.getParameter<std::vector<double>>("HADstochastic")),
+          HADconstant_(conf.getParameter<std::vector<double>>("HADconstant")),
+          HCALgranularity_(conf.getParameter<std::vector<double>>("HCALgranularity")),
+          HCALEtaBoundaries_(conf.getParameter<std::vector<double>>("HCALEtaBoundaries")),
+
+          CHlinear_(conf.getParameter<std::vector<double>>("CHlinear")),
+          CHconstant_(conf.getParameter<std::vector<double>>("CHconstant")),
+          CHMS_(conf.getParameter<std::vector<double>>("CHMS")),
+          CHangular_(conf.getParameter<std::vector<double>>("CHangular")),
+          trkEtaBoundaries_(conf.getParameter<std::vector<double>>("trkEtaBoundaries")),
+
           maxReFit_(conf.getParameter<unsigned>("maxReFit")),
+
           recoTag_(conf.getParameter<edm::InputTag>("reco")),
           recoToken_(consumes<edm::View<jet>>(recoTag_)),
           genTag_(conf.getParameter<edm::InputTag>("gen")),
@@ -121,14 +156,30 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
 
 void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
-  desc.add<double>("dRthresh");
+  desc.add<double>("jetMatchingDR");
   desc.add<double>("clipval");
+  desc.add<int>("spatialLoss");
+  desc.add<int>("filter");
+  desc.add<int>("uncertainty");
   desc.add<double>("cutoff");
-  desc.add<bool>("matchCharge");
-  desc.add<double>("jetCoreThreshold");
   desc.add<double>("softPt");
   desc.add<double>("hardPt");
+  desc.add<std::vector<double>>("EMstochastic");
+  desc.add<std::vector<double>>("EMnoise");
+  desc.add<std::vector<double>>("EMconstant");
+  desc.add<std::vector<double>>("ECALgranularity");
+  desc.add<std::vector<double>>("ECALEtaBoundaries");
+  desc.add<std::vector<double>>("HADstochastic");
+  desc.add<std::vector<double>>("HADconstant");
+  desc.add<std::vector<double>>("HCALgranularity");
+  desc.add<std::vector<double>>("HCALEtaBoundaries");
+  desc.add<std::vector<double>>("CHlinear");
+  desc.add<std::vector<double>>("CHconstant");
+  desc.add<std::vector<double>>("CHMS");
+  desc.add<std::vector<double>>("CHangular");
+  desc.add<std::vector<double>>("trkEtaBoundaries");
   desc.add<unsigned>("maxReFit");
+
   desc.add<edm::InputTag>("reco");
   desc.add<edm::InputTag>("gen");
   desc.add<edm::InputTag>("recoParts");
@@ -136,6 +187,16 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
   desc.add<bool>("doLargerCollections");
   desc.add<int>("verbose");
   descriptions.addWithDefaultLabel(desc);
+}
+
+void printParticle(const particle& part){
+    printf("pt: %f, eta: %f, phi: %f, pdgId: %d, charge: %d\n",
+           part.pt, part.eta, part.phi, part.pdgid, part.charge);
+}
+void printJet(const jet& jet){
+    for(const auto& part : jet.particles){
+        printParticle(part);
+    }
 }
 
 void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
@@ -174,7 +235,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
     
           double dist = dR2(jreco.eta, jreco.phi, 
                             jgen.eta, jgen.phi);
-          if(dist > dR2thresh_){
+          if(dist > square(jetMatchingDR_)){
               continue;
           }
 
@@ -196,13 +257,28 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           if(verbose_){
               printf("fit is between %lu and %lu particles\n", 
                       jreco.particles.size(), jgen.particles.size());
+
+              printf("\nRECO JET\n");
+              printJet(jreco);
+              printf("\nGEN JET\n");
+              printJet(jgen);
           }
-          matcher match (jreco.particles, jgen.particles,
-                         clipval_, cutoff_, matchCharge_, 
-                         jetCoreDR2_, softPt_, hardPt_,
-                         maxReFit_, jreco.eta, jreco.phi);
+          matcher match (jreco, jgen, clipval_,
+                         loss_, filter_, uncertainty_,
+                         cutoff_, softPt_, hardPt_,
+                         EMstochastic_, EMnoise_, EMconstant_,
+                         ECALgranularity_, ECALEtaBoundaries_,
+                         HADstochastic_, HADconstant_,
+                         HCALgranularity_, HCALEtaBoundaries_,
+                         CHlinear_, CHconstant_, CHMS_, CHangular_,
+                         trkEtaBoundaries_, maxReFit_, verbose_);
           match.minimize();
           next.ptrans = match.ptrans();
+
+          if(verbose_){
+              printf("\nMatching\n");
+              std::cout << next.ptrans;
+          }
 
           result->push_back(std::move(next));
           if(verbose_){
@@ -215,16 +291,21 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
               printf("matching with full event\n");
           }
           jet biggen;
-          makeNearbyJet(biggen, jreco, genParts, false);
+          makeNearbyJet(biggen, jreco, genParts);
 
           if(verbose_){
               printf("fit is between %lu and %lu particles\n", 
                       jreco.particles.size(), biggen.particles.size());
           }
-          matcher biggenmatch(jreco.particles, biggen.particles, 
-                              clipval_, cutoff_, matchCharge_,
-                              jetCoreDR2_, softPt_, hardPt_,
-                              maxReFit_, jreco.eta, jreco.phi);
+          matcher biggenmatch (jreco, biggen, clipval_,
+                               loss_, filter_, uncertainty_,
+                               cutoff_, softPt_, hardPt_,
+                               EMstochastic_, EMnoise_, EMconstant_,
+                               ECALgranularity_, ECALEtaBoundaries_,
+                               HADstochastic_, HADconstant_,
+                               HCALgranularity_, HCALEtaBoundaries_,
+                               CHlinear_, CHconstant_, CHMS_, CHangular_,
+                               trkEtaBoundaries_, maxReFit_, verbose_);
           biggenmatch.minimize();
 
           jetmatch nextbiggen;
@@ -247,17 +328,21 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         const jet& jgen = gen->at(iGen);
 
         jet bigreco;
-        makeNearbyJet(bigreco, jgen, recoParts, true);
+        makeNearbyJet(bigreco, jgen, recoParts);
 
         if(verbose_){
           printf("fit is between %lu and %lu particles\n", 
                   bigreco.particles.size(), jgen.particles.size());
         }
-        matcher bigrecomatch(bigreco.particles, jgen.particles,
-                             clipval_, cutoff_, matchCharge_,
-                             jetCoreDR2_, softPt_, hardPt_,
-                             maxReFit_, jgen.eta, jgen.phi);
-        bigrecomatch.minimize();
+        matcher bigrecomatch (bigreco, jgen, clipval_,
+                              loss_, filter_, uncertainty_,
+                              cutoff_, softPt_, hardPt_,
+                              EMstochastic_, EMnoise_, EMconstant_,
+                              ECALgranularity_, ECALEtaBoundaries_,
+                              HADstochastic_, HADconstant_,
+                              HCALgranularity_, HCALEtaBoundaries_,
+                              CHlinear_, CHconstant_, CHMS_, CHangular_,
+                              trkEtaBoundaries_, maxReFit_, verbose_);
 
         jetmatch nextbigreco;
         nextbigreco.iReco = 99999999;
