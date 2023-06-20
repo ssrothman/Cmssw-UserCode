@@ -35,3 +35,4 @@
 *.root
 
 EECs/production/crab/*
+EECs/production/crab.log

@@ -20,7 +20,8 @@ from production_tag import production_tag # Get from a text file
 # Get from git tag (tbd)
 #production_tag = "vTEST9" # Specify by hand
 requestname_base = "srothman"
-output_site = "T3_US_FNALLPC"
+#output_site = "T3_US_FNALLPC"
+output_site = "T3_US_MIT"
 output_lfn_base = "/store/user/srothman/{production_tag}".format(
                                                     username=getUsernameFromCRIC(), 
                                                     production_tag=production_tag)
@@ -98,7 +99,7 @@ if __name__ == '__main__':
                 this_config.Data.inputDBS = 'global'
                 this_config.Data.inputDataset = dataset
                 splitting_mode = info.get("splitting", "Automatic")
-                if not splitting_mode in ["Automatic", "FileBased", "LumiBased"]:
+                if not splitting_mode in ["Automatic", "FileBased", "LumiBased", "EventBased"]:
                     raise ValueError("Unrecognized splitting mode: {}".format(splitting_mode))
                 this_config.Data.splitting = splitting_mode
 

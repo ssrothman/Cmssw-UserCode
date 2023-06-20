@@ -1,1 +1,1 @@
-production_tag = "EEC_Jun19-2023"
+production_tag = "EEC_Jun20-2023_FULL_take2"
