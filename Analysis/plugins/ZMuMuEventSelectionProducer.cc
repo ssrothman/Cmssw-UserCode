@@ -20,7 +20,7 @@
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "SRothman/Matching/src/toyjets/common.h"
+#include "SRothman/SimonTools/src/jets.h"
 
 #include <iostream>
 #include <memory>
