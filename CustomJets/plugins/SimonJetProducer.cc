@@ -52,6 +52,8 @@ private:
     edm::InputTag evtSelSrc_;
     edm::EDGetTokenT<bool> evtSelToken_;
     bool doEvtSel_;
+
+    bool applyJEC_;
 };
 
 template <typename T>
@@ -68,7 +70,8 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           srcToken_(consumes<edm::View<T>>(src_)),
           evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
           evtSelToken_(consumes<bool>(evtSelSrc_)),
-          doEvtSel_(conf.getParameter<bool>("doEventSelection")) {
+          doEvtSel_(conf.getParameter<bool>("doEventSelection")),
+          applyJEC_(conf.getParameter<bool>("applyJEC")){
     produces<std::vector<jet>>();
 }
 
@@ -91,6 +94,8 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<edm::InputTag>("src");
 
   desc.add<int>("verbose");
+
+  desc.add<bool>("applyJEC");
 
   descriptions.addWithDefaultLabel(desc);
 }
@@ -181,6 +186,11 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
         }
         if(++iPart >= maxNumPart_){
             break;
+        }
+    }
+    if(applyJEC_){
+        for(auto& part : ans.particles){
+            part.pt *= ans.pt/ans.sumpt;
         }
     }
     result->push_back(std::move(ans));
