@@ -6,8 +6,8 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     clipval = cms.double(0.05),
 
     spatialLoss = cms.int32(0),
-    filter = cms.int32(3),
-    uncertainty = cms.int32(1),
+    filter = cms.vint32([2, 4]),
+    uncertainty = cms.vint32([1, 1]),
 
     cutoff = cms.double(2.0),
 

@@ -74,8 +74,8 @@ private:
     double clipval_;
 
     enum spatialLoss loss_;
-    enum matchFilterType filter_;
-    enum uncertaintyType uncertainty_;
+    std::vector<enum matchFilterType> filter_;
+    std::vector<enum uncertaintyType> uncertainty_;
 
     double cutoff_;
 
@@ -111,8 +111,6 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
           clipval_(conf.getParameter<double>("clipval")),
 
           loss_(static_cast<enum spatialLoss>(conf.getParameter<int>("spatialLoss"))),
-          filter_(static_cast<enum matchFilterType>(conf.getParameter<int>("filter"))),
-          uncertainty_(static_cast<enum uncertaintyType>(conf.getParameter<int>("uncertainty"))),
 
           cutoff_(conf.getParameter<double>("cutoff")),
 
@@ -147,6 +145,21 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
           genPartsTag_(conf.getParameter<edm::InputTag>("genParts")),
           genPartsToken_(consumes<edm::View<reco::Candidate>>(genPartsTag_)),
           doLargerCollections_(conf.getParameter<bool>("doLargerCollections")) {
+
+    for(const auto& fi : conf.getParameter<std::vector<int>>("filter")){
+        filter_.emplace_back(static_cast<enum matchFilterType>(fi));
+    }
+    for(const auto& un : conf.getParameter<std::vector<int>>("uncertainty")){
+        uncertainty_.emplace_back(static_cast<enum uncertaintyType>(un));
+    }
+
+    if(filter_.size() != uncertainty_.size()){
+        throw cms::Exception("Configuration") << "Filter and uncertainty vectors must be the same size";
+    }
+    if(filter_.empty()){
+        throw cms::Exception("Configuration") << "Filter and uncertainty vectors must not be empty";
+    }
+
     produces<std::vector<jetmatch>>();
     if(doLargerCollections_){
         produces<std::vector<jetmatch>>("bigReco");
@@ -159,8 +172,8 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
   desc.add<double>("jetMatchingDR");
   desc.add<double>("clipval");
   desc.add<int>("spatialLoss");
-  desc.add<int>("filter");
-  desc.add<int>("uncertainty");
+  desc.add<std::vector<int>>("filter");
+  desc.add<std::vector<int>>("uncertainty");
   desc.add<double>("cutoff");
   desc.add<double>("softPt");
   desc.add<double>("hardPt");
@@ -263,17 +276,28 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
               printf("\nGEN JET\n");
               printJet(jgen);
           }
-          matcher match (jreco, jgen, clipval_,
-                         loss_, filter_, uncertainty_,
-                         cutoff_, softPt_, hardPt_,
-                         EMstochastic_, EMnoise_, EMconstant_,
-                         ECALgranularity_, ECALEtaBoundaries_,
-                         HADstochastic_, HADconstant_,
-                         HCALgranularity_, HCALEtaBoundaries_,
-                         CHlinear_, CHconstant_, CHMS_, CHangular_,
-                         trkEtaBoundaries_, maxReFit_, verbose_);
-          match.minimize();
-          next.ptrans = match.ptrans();
+          std::unique_ptr<matcher> thismatch;
+          std::unique_ptr<matcher> prevmatch=nullptr;
+          unsigned i = 0;
+          do {
+            if(verbose_)
+                printf("doing %u'th pass\n", i);
+            thismatch = std::make_unique<matcher>(
+                    jreco, jgen, clipval_,
+                    loss_, filter_[i], uncertainty_[i],
+                    cutoff_, softPt_, hardPt_,
+                    EMstochastic_, EMnoise_, EMconstant_,
+                    ECALgranularity_, ECALEtaBoundaries_,
+                    HADstochastic_, HADconstant_,
+                    HCALgranularity_, HCALEtaBoundaries_,
+                    CHlinear_, CHconstant_, CHMS_, CHangular_,
+                    trkEtaBoundaries_, maxReFit_, verbose_,
+                    prevmatch.get());
+            thismatch->minimize();
+            prevmatch = std::move(thismatch);
+          } while( ++i < filter_.size());
+
+          next.ptrans = prevmatch->ptrans();
 
           if(verbose_){
               printf("\nMatching\n");
@@ -298,7 +322,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                       jreco.particles.size(), biggen.particles.size());
           }
           matcher biggenmatch (jreco, biggen, clipval_,
-                               loss_, filter_, uncertainty_,
+                               loss_, filter_[0], uncertainty_[0],
                                cutoff_, softPt_, hardPt_,
                                EMstochastic_, EMnoise_, EMconstant_,
                                ECALgranularity_, ECALEtaBoundaries_,
@@ -335,7 +359,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   bigreco.particles.size(), jgen.particles.size());
         }
         matcher bigrecomatch (bigreco, jgen, clipval_,
-                              loss_, filter_, uncertainty_,
+                              loss_, filter_[0], uncertainty_[0],
                               cutoff_, softPt_, hardPt_,
                               EMstochastic_, EMnoise_, EMconstant_,
                               ECALgranularity_, ECALEtaBoundaries_,
