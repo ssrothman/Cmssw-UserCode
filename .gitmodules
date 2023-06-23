@@ -7,3 +7,6 @@
 [submodule "JetToolbox"]
 	path = JetToolbox
 	url = git@github.com:cms-jet/JetToolbox.git
+[submodule "SimonTools/src"]
+	path = SimonTools/src
+	url = git@github.com:ssrothman/simon_util_cpp.git

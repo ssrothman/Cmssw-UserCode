@@ -23,8 +23,8 @@
 #include "SRothman/DataFormats/interface/jets.h"
 #include "SRothman/DataFormats/interface/matching.h"
 
-#include "SRothman/Matching/src/simon_util_cpp/deltaR.h"
-#include "SRothman/Matching/src/simon_util_cpp/util.h"
+#include "SRothman/SimonTools/src/deltaR.h"
+#include "SRothman/SimonTools/src/util.h"
 
 #include "SRothman/Matching/src/matcher.h"
 

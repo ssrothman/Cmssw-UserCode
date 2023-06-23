@@ -21,7 +21,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include "SRothman/Matching/src/toyjets/common.h"
-#include "SRothman/Matching/src/simon_util_cpp/util.h"
+#include "SRothman/SimonTools/src/util.h"
 
 #include <iostream>
 #include <memory>

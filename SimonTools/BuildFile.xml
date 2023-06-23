@@ -1,0 +1,5 @@
+<Flags ADD_SUBDIR="1"/>
+<use name="boost"/>
+<export>
+  <lib name="1"/>
+</export>
