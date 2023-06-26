@@ -300,7 +300,9 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       evt.put(std::move(resultgen), "gen");
       evt.put(std::move(resulttrans), "transfer");
   }
-  printf("put into event\n");
+  if(verbose_){
+      printf("put into event\n");
+  }
 }  // end produce()
 
 DEFINE_FWK_MODULE(EECProducer);

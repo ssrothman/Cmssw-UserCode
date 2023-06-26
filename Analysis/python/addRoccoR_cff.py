@@ -6,7 +6,7 @@ def addRoccoR(process, verbose=False):
         src = cms.InputTag('linkedObjects', 'muons'),
         genParticles = cms.InputTag('prunedGenParticles'),
         isMC = cms.bool(True),
-        dataFile = cms.FileInPath('SRothman/Analysis/data/RoccoR2017UL.txt'),
+        dataFile = cms.FileInPath('SRothman/Analysis/data/RoccoR2018UL.txt'),
         verbose = verbose
     )
     process.RoccoRTask = cms.Task(process.RoccoR)

@@ -12,6 +12,7 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
     maxChEmFrac = cms.double(0.8),
     eventSelection = cms.InputTag(""),
     doEventSelection = cms.bool(False),
+    applyJEC=cms.bool(True)
 )
 
 GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
@@ -26,4 +27,5 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     maxChEmFrac = cms.double(0.8),
     eventSelection = cms.InputTag(""),
     doEventSelection = cms.bool(False),
+    applyJEC=cms.bool(True)
 )

@@ -111,7 +111,9 @@ void addEverything(EECresult& result,
 
     unsigned ioff = projcalc.getMaxOrder()+1;
     for(const auto& calc : nirccalcs){
-        printf("doing nirccalc\n");
+        if(verbose){
+            printf("doing nirccalc\n");
+        }
         addCovP(covp, calc, 2, result.offsets[ioff-2], verbose);
         if(verbose){
             printf("after covp, sum is %0.3f\n", arma::dot(covp, covp));
