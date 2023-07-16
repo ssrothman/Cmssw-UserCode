@@ -297,10 +297,11 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         thismatch.minimize();
 
           next.ptrans = thismatch.ptrans();
+          next.rawmat = thismatch.rawmat();
 
           if(verbose_){
               printf("\nMatching\n");
-              std::cout << next.ptrans;
+              std::cout << next.rawmat;
           }
 
           result->push_back(std::move(next));
@@ -337,6 +338,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nextbiggen.iReco = iReco;
           nextbiggen.iGen = 999999;
           nextbiggen.ptrans = biggenmatch.ptrans();
+          nextbiggen.rawmat = biggenmatch.rawmat();
 
           resultBigGen->push_back(std::move(nextbiggen));
           if(verbose_){
@@ -375,6 +377,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         nextbigreco.iReco = 99999999;
         nextbigreco.iGen = iGen;
         nextbigreco.ptrans = bigrecomatch.ptrans();
+        nextbigreco.rawmat = bigrecomatch.rawmat();
 
         resultBigReco->push_back(std::move(nextbigreco));
         if(verbose_){

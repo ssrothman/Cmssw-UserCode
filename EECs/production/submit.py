@@ -75,6 +75,7 @@ if __name__ == '__main__':
                 this_config.JobType.allowUndistributedCMSSW = True
                 this_config.JobType.numCores = 4
                 this_config.JobType.maxMemoryMB = 8000
+                this_config.JobType.sendExternalFolder = True
                 #this_config.JobType.outputFiles = ["_".join("nano", "mc" if isMC else "data")]
                 #this_config.JobType.outputFiles = ["nanoskim.root", "hists.root"]
                 #this_config.JobType.outputFiles = ['_'.join(['DijetSkim', 'mc' if isMC else 'data', production_tag])+'.root']

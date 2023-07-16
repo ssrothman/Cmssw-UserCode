@@ -155,9 +155,9 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
           }
           if(matchidx >= 0){//if found match
               const auto& match = otherMatches->at(matchidx);
-              for(unsigned i=0; i<match.ptrans.n_rows; ++i){//for i
-                  for(unsigned j=0; j<match.ptrans.n_cols; ++j){//for j
-                      if(match.ptrans(i, j) > 0){//if matched
+              for(unsigned i=0; i<match.rawmat.n_rows; ++i){//for i
+                  for(unsigned j=0; j<match.rawmat.n_cols; ++j){//for j
+                      if(match.rawmat(i, j) > 0){//if matched
                           if(isGen_){//if gen
                               nextMatches.at(j) += 1;
                           } else {//else if reco
@@ -191,9 +191,9 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
           }
           if(matchidx >=0 ){//if found match
               const auto& match = matches->at(matchidx);
-              for(unsigned i=0; i<match.ptrans.n_rows; ++i){//for i
-                  for(unsigned j=0; j<match.ptrans.n_cols; ++j){// for j
-                      if(match.ptrans(i, j) > 0){//if matched
+              for(unsigned i=0; i<match.rawmat.n_rows; ++i){//for i
+                  for(unsigned j=0; j<match.rawmat.n_cols; ++j){// for j
+                      if(match.rawmat(i, j) > 0){//if matched
                           if(isGen_){//if gen
                               nextMatches.at(j) += 1;
                           } else {//else if reco
@@ -205,17 +205,17 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
 
               if(!isGen_){
                   const auto& genj= genJets->at(match.iGen);
-                  arma::vec genpt = genj.ptvec()/genj.sumpt;
-                  arma::vec predpt = (match.ptrans*genpt);
+                  
+                  arma::vec genpt = genj.ptvec();
+                  arma::vec recopt = j.ptvec();
+
+                  arma::vec predpt = (match.rawmat*genpt);
 
                   arma::vec wgeneta = genpt % genj.etavec();
                   arma::vec wgenphi = genpt % genj.phivec();
 
-                  arma::vec predeta = (match.ptrans*wgeneta)/predpt;
-                  arma::vec predphi = (match.ptrans*wgenphi)/predpt;
-
-                  predpt = predpt * j.sumpt;
-
+                  arma::vec predeta = (match.rawmat*wgeneta)/predpt;
+                  arma::vec predphi = (match.rawmat*wgenphi)/predpt;
 
                   for(unsigned i=0; i<j.nPart; ++i){
                       nextPt.at(i) = predpt(i);

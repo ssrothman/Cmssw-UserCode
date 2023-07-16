@@ -6,6 +6,7 @@
 struct jetmatch { 
     unsigned iReco, iGen;
     arma::mat ptrans;
+    arma::mat rawmat;
 };
 
 #endif

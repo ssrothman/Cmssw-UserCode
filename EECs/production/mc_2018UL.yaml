@@ -7,7 +7,7 @@ defaults:
   pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC.py
   allowInvalid: False
   unitsPerJob: 3
-  totalUnits: 100000
+  totalUnits: 10000
 
 samples:
   DYJetsToLL: 
