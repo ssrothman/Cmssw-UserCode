@@ -1,7 +1,6 @@
-<library file="*.cc" name="SRothmanEECPlugins">
+<library file="*.cc" name="SRothmanResolutionStudyPlugins">
   <Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
   <flags EDM_PLUGIN="1"/>
-  <use name="boost"/>
   <use name="RecoJets/JetProducers"/>
   <use name="RecoJets/JetAlgorithms"/>
   <use name="RecoEgamma/EgammaIsolationAlgos"/>
@@ -24,6 +23,7 @@
   <use name="fastjet-contrib"/>
   <use name="DataFormats/NanoAOD"/>
   <use name="SRothman/DataFormats"/>
-  <use name="SRothman/EECs"/>
   <use name="rootminuit2"/>
+  <use name="SRothman/Matching"/>
+<Flags ADD_SUBDIR="1"/>
 </library>

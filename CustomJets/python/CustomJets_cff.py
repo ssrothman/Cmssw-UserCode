@@ -38,7 +38,7 @@ def addCustomJets(process, verbose=False):
         src = "selectedPatJetsAK4PFPuppi",
         eventSelection = "ZMuMu",
         doEventSelection = True,
-        verbose = verbose
+        verbose = verbose,
     )
     process.GenSimonJets = GenSimonJetProducer.clone(
         src = "ak4GenJetsNoNu",
@@ -49,12 +49,14 @@ def addCustomJets(process, verbose=False):
     process.SimonJetTable = SimonJetTableProducer.clone(
         src = "SimonJets",
         name = "SimonJets",
-        verbose = verbose
+        verbose = verbose,
+        isGen = False
     )
     process.GenSimonJetTable = SimonJetTableProducer.clone(
         src = "GenSimonJets",
         name = "GenSimonJets",
-        verbose = verbose
+        verbose = verbose,
+        isGen = True
     )
     process.JetsTask = cms.Task(process.SimonJets,
                                 process.GenSimonJets)

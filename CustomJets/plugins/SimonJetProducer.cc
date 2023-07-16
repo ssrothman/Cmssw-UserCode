@@ -122,8 +122,10 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
         printf("passed event selection\n");
     }
 
-  unsigned iJet=0;
-  for (const T& j : *jets){
+  for(unsigned iJet=0; iJet < jets->size(); ++iJet){
+
+    const auto& j = jets->at(iJet);
+
     if(j.pt() < minPt_ || std::fabs(j.eta()) > maxEta_){
         continue;
     } 
@@ -155,7 +157,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
     }
 
     if(verbose_){
-        printf("passed jet selection\n");
+        printf("jet %d passed jet selection\n", iJet);
     }
 
     double pt = j.pt();
@@ -167,31 +169,52 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
     ans.eta = eta;
     ans.phi = phi;
     ans.nPart = 0;
-    ans.iJet = iJet++;
+    ans.iJet = iJet;
+    ans.sumpt = 0;
 
     if (verbose_){
       std::cout << "\tjet: (" << pt << ", " << eta << ", " << phi << ")" << std::endl;
     }
 
-    unsigned iPart=0;
-    for(const auto& part : j){
-        double partpt = part.pt();
-        ans.sumpt += partpt;
-        if(partpt >= minPartPt_){
-            particle next(part.pt(), part.eta(), part.phi(), 
+    size_t nPart=std::min<size_t>(maxNumPart_, constituents.size());
+    if(verbose_>1){
+        printf("constituents.size() = %lu\n", constituents.size());
+        printf("maxNumPart_ = %u\n", maxNumPart_);
+        printf("nPart = %lu\n", nPart);
+    }
+    for(unsigned iPart=0; iPart < nPart; ++iPart){
+        const auto& part = constituents[iPart];
+        if(verbose_>1){
+            printf("part %d: (%f, %f, %f)\n", iPart, part->pt(), part->eta(), part->phi());
+        }
+        ans.sumpt += part->pt();
+        if(part->pt() >= minPartPt_){
+            particle next(part->pt(), part->eta(), part->phi(), 
                           0.0, 0.0, 0.0,
-                          std::abs(part.pdgId()), part.charge());
+                          std::abs(part->pdgId()), part->charge());
             ans.particles.push_back(std::move(next));
             ++ans.nPart;
         }
-        if(++iPart >= maxNumPart_){
-            break;
-        }
     }
+
     if(applyJEC_){
-        for(auto& part : ans.particles){
-            part.pt *= ans.pt/ans.sumpt;
+        double rawPt=0;
+        for(const auto& part : constituents){
+            rawPt += part->pt();
         }
+        double jec = pt / rawPt;
+
+        if(verbose_){
+            printf("rawPt = %f\n", rawPt);
+            printf("pt = %f\n", pt);
+            printf("sumpt = %f\n", ans.sumpt);
+            printf("jec = %f\n", jec);
+        }
+
+        for(auto& part : ans.particles){
+            part.pt *= jec;
+        }
+        ans.sumpt *= jec;
     }
     result->push_back(std::move(ans));
     if(verbose_){

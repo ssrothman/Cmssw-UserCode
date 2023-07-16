@@ -22,13 +22,12 @@ def addGenMatching(process, verbose=0):
     process.schedule.associate(process.MatchTableTask)
 
     process.SimonJetTable.addMatch = True
-    process.SimonJetTable.isGen = False
     process.SimonJetTable.matchSrc = "GenMatch"
+    process.SimonJetTable.genJets = "GenSimonJets"
     #process.SimonJetTable.otherMatchSrc = "GenMatch:bigGen"
     #process.SimonJetTable.doOtherMatch = True
 
     process.GenSimonJetTable.addMatch = True
-    process.GenSimonJetTable.isGen = True
     process.GenSimonJetTable.matchSrc = "GenMatch"
     #process.GenSimonJetTable.otherMatchSrc = "GenMatch:bigReco"
     #process.GenSimonJetTable.doOtherMatch = True

@@ -69,13 +69,15 @@ public:
 private:
     int verbose_;
 
-    double jetMatchingDR_;
+    double jetMatchingDR2_;
     
     double clipval_;
 
     enum spatialLoss loss_;
-    std::vector<enum matchFilterType> filter_;
-    std::vector<enum uncertaintyType> uncertainty_;
+    enum matchFilterType filter_;
+    enum uncertaintyType uncertainty_;
+    std::vector<enum prefitterType> prefitters_;
+    bool recoverLostTracks_;
 
     double cutoff_;
 
@@ -106,11 +108,15 @@ private:
 
 GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
         : verbose_(conf.getParameter<int>("verbose")),
-          jetMatchingDR_(square(conf.getParameter<double>("jetMatchingDR"))),
+          jetMatchingDR2_(square(conf.getParameter<double>("jetMatchingDR"))),
 
           clipval_(conf.getParameter<double>("clipval")),
 
           loss_(static_cast<enum spatialLoss>(conf.getParameter<int>("spatialLoss"))),
+          filter_(static_cast<enum matchFilterType>(conf.getParameter<int>("filter"))),
+          uncertainty_(static_cast<enum uncertaintyType>(conf.getParameter<int>("uncertainty"))),
+          prefitters_(),
+          recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
 
           cutoff_(conf.getParameter<double>("cutoff")),
 
@@ -146,18 +152,12 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
           genPartsToken_(consumes<edm::View<reco::Candidate>>(genPartsTag_)),
           doLargerCollections_(conf.getParameter<bool>("doLargerCollections")) {
 
-    for(const auto& fi : conf.getParameter<std::vector<int>>("filter")){
-        filter_.emplace_back(static_cast<enum matchFilterType>(fi));
-    }
-    for(const auto& un : conf.getParameter<std::vector<int>>("uncertainty")){
-        uncertainty_.emplace_back(static_cast<enum uncertaintyType>(un));
+    for(const auto& pft : conf.getParameter<std::vector<int>>("prefitters")){
+        prefitters_.push_back(static_cast<enum prefitterType>(pft));
     }
 
-    if(filter_.size() != uncertainty_.size()){
-        throw cms::Exception("Configuration") << "Filter and uncertainty vectors must be the same size";
-    }
-    if(filter_.empty()){
-        throw cms::Exception("Configuration") << "Filter and uncertainty vectors must not be empty";
+    if(prefitters_.size() != 3){
+        throw cms::Exception("Configuration") << "prefitters must be a vector of length 3";
     }
 
     produces<std::vector<jetmatch>>();
@@ -172,8 +172,10 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
   desc.add<double>("jetMatchingDR");
   desc.add<double>("clipval");
   desc.add<int>("spatialLoss");
-  desc.add<std::vector<int>>("filter");
-  desc.add<std::vector<int>>("uncertainty");
+  desc.add<int>("filter");
+  desc.add<int>("uncertainty");
+  desc.add<std::vector<int>>("prefitters");
+  desc.add<bool>("recoverLostTracks");
   desc.add<double>("cutoff");
   desc.add<double>("softPt");
   desc.add<double>("hardPt");
@@ -248,7 +250,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
     
           double dist = dR2(jreco.eta, jreco.phi, 
                             jgen.eta, jgen.phi);
-          if(dist > square(jetMatchingDR_)){
+          if(dist > jetMatchingDR2_){
               continue;
           }
 
@@ -276,28 +278,25 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
               printf("\nGEN JET\n");
               printJet(jgen);
           }
-          std::unique_ptr<matcher> thismatch;
-          std::unique_ptr<matcher> prevmatch=nullptr;
-          unsigned i = 0;
-          do {
-            if(verbose_)
-                printf("doing %u'th pass\n", i);
-            thismatch = std::make_unique<matcher>(
-                    jreco, jgen, clipval_,
-                    loss_, filter_[i], uncertainty_[i],
-                    cutoff_, softPt_, hardPt_,
-                    EMstochastic_, EMnoise_, EMconstant_,
-                    ECALgranularity_, ECALEtaBoundaries_,
-                    HADstochastic_, HADconstant_,
-                    HCALgranularity_, HCALEtaBoundaries_,
-                    CHlinear_, CHconstant_, CHMS_, CHangular_,
-                    trkEtaBoundaries_, maxReFit_, verbose_,
-                    prevmatch.get());
-            thismatch->minimize();
-            prevmatch = std::move(thismatch);
-          } while( ++i < filter_.size());
 
-          next.ptrans = prevmatch->ptrans();
+        if(verbose_)
+            printf("doing fit\n");
+
+        matcher thismatch(
+                jreco, jgen, clipval_,
+                loss_, filter_, uncertainty_,
+                prefitters_,
+                recoverLostTracks_,
+                cutoff_, softPt_, hardPt_,
+                EMstochastic_, EMnoise_, EMconstant_,
+                ECALgranularity_, ECALEtaBoundaries_,
+                HADstochastic_, HADconstant_,
+                HCALgranularity_, HCALEtaBoundaries_,
+                CHlinear_, CHconstant_, CHMS_, CHangular_,
+                trkEtaBoundaries_, maxReFit_, verbose_);
+        thismatch.minimize();
+
+          next.ptrans = thismatch.ptrans();
 
           if(verbose_){
               printf("\nMatching\n");
@@ -322,7 +321,9 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                       jreco.particles.size(), biggen.particles.size());
           }
           matcher biggenmatch (jreco, biggen, clipval_,
-                               loss_, filter_[0], uncertainty_[0],
+                               loss_, filter_, uncertainty_,
+                               prefitters_,
+                               recoverLostTracks_,
                                cutoff_, softPt_, hardPt_,
                                EMstochastic_, EMnoise_, EMconstant_,
                                ECALgranularity_, ECALEtaBoundaries_,
@@ -359,7 +360,9 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   bigreco.particles.size(), jgen.particles.size());
         }
         matcher bigrecomatch (bigreco, jgen, clipval_,
-                              loss_, filter_[0], uncertainty_[0],
+                              loss_, filter_, uncertainty_,
+                              prefitters_,
+                              recoverLostTracks_,
                               cutoff_, softPt_, hardPt_,
                               EMstochastic_, EMnoise_, EMconstant_,
                               ECALgranularity_, ECALEtaBoundaries_,

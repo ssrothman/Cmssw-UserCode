@@ -1,13 +1,15 @@
 import FWCore.ParameterSet.Config as cms
 
 GenMatchProducer = cms.EDProducer("GenMatchProducer",
-    jetMatchingDR = cms.double(0.4),
+    jetMatchingDR = cms.double(0.2),
 
     clipval = cms.double(0.05),
 
     spatialLoss = cms.int32(0),
-    filter = cms.vint32([2, 4]),
-    uncertainty = cms.vint32([1, 1]),
+    filter = cms.int32(2),
+    uncertainty = cms.int32(1),
+    prefitters = cms.vint32([4, 4, 3]),
+    recoverLostTracks = cms.bool(True),
 
     cutoff = cms.double(2.0),
 

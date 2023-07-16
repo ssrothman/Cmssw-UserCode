@@ -41,6 +41,8 @@ private:
     bool isGen_;
     edm::InputTag matchSrc_;
     edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
+    edm::InputTag genJetSrc_;
+    edm::EDGetTokenT<edm::View<jet>> genJetToken_;
 
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<jet>> srcToken_;
@@ -57,10 +59,10 @@ SimonJetTableProducer::SimonJetTableProducer(const edm::ParameterSet& conf)
           addMatch_(conf.getParameter<bool>("addMatch")),
           isGen_(conf.getParameter<bool>("isGen")),
           matchSrc_(conf.getParameter<edm::InputTag>("matchSrc")),
+          genJetSrc_(conf.getParameter<edm::InputTag>("genJets")),
           src_(conf.getParameter<edm::InputTag>("src")),
           srcToken_(consumes<edm::View<jet>>(src_)),
           otherMatchSrc_(conf.getParameter<edm::InputTag>("otherMatchSrc")),
-          otherMatchToken_(consumes<edm::View<jetmatch>>(otherMatchSrc_)),
           doOtherMatch_(conf.getParameter<bool>("doOtherMatch")),
           verbose_(conf.getParameter<int>("verbose")){
     if(addMatch_){
@@ -68,6 +70,9 @@ SimonJetTableProducer::SimonJetTableProducer(const edm::ParameterSet& conf)
     }
     if(doOtherMatch_){
         otherMatchToken_ = consumes<edm::View<jetmatch>>(otherMatchSrc_);
+    }
+    if(addMatch_ && !isGen_){
+        genJetToken_ = consumes<edm::View<jet>>(genJetSrc_);
     }
     produces<nanoaod::FlatTable>(name_);
     produces<nanoaod::FlatTable>(name_+"BK");
@@ -82,6 +87,7 @@ void SimonJetTableProducer::fillDescriptions(edm::ConfigurationDescriptions& des
   desc.add<edm::InputTag>("src");
   desc.add<edm::InputTag>("matchSrc");
   desc.add<edm::InputTag>("otherMatchSrc");
+  desc.add<edm::InputTag>("genJets");
   desc.add<bool>("doOtherMatch");
   descriptions.addWithDefaultLabel(desc);
 }
@@ -103,6 +109,11 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
       evt.getByToken(otherMatchToken_, otherMatches);
   }
 
+  edm::Handle<edm::View<jet>> genJets;
+  if(addMatch_ && !isGen_){
+      evt.getByToken(genJetToken_, genJets);
+  }
+
   std::vector<float>  partPt;
   std::vector<float> partEta;
   std::vector<float> partPhi;
@@ -110,6 +121,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   std::vector<int> charge;
 
   std::vector<int> nmatch;
+  std::vector<float> matchPt, matchEta, matchPhi;
 
   std::vector<int> othernmatch;
 
@@ -161,7 +173,11 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
 
       if(addMatch_){//if doing matches
           std::vector<int> nextMatches;
+          std::vector<float> nextPt, nextEta, nextPhi;
           nextMatches.resize(j.particles.size(), 0);
+          nextPt.resize(j.particles.size(), 0);
+          nextEta.resize(j.particles.size(), 0);
+          nextPhi.resize(j.particles.size(), 0);
 
           int matchidx = -1;
           for(unsigned iMatch=0; iMatch<matches->size(); ++iMatch){
@@ -186,9 +202,35 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
                       }//end if matched
                   }//end for j
               }//end for i
+
+              if(!isGen_){
+                  const auto& genj= genJets->at(match.iGen);
+                  arma::vec genpt = genj.ptvec()/genj.sumpt;
+                  arma::vec predpt = (match.ptrans*genpt);
+
+                  arma::vec wgeneta = genpt % genj.etavec();
+                  arma::vec wgenphi = genpt % genj.phivec();
+
+                  arma::vec predeta = (match.ptrans*wgeneta)/predpt;
+                  arma::vec predphi = (match.ptrans*wgenphi)/predpt;
+
+                  predpt = predpt * j.sumpt;
+
+
+                  for(unsigned i=0; i<j.nPart; ++i){
+                      nextPt.at(i) = predpt(i);
+                      nextEta.at(i) = predeta(i);
+                      nextPhi.at(i) = predphi(i);
+                  }
+              }
           }// end if found match
+          
           nmatch.insert(nmatch.end(), nextMatches.begin(), 
                                       nextMatches.end());
+          matchPt.insert(matchPt.end(), nextPt.begin(), nextPt.end());
+          matchEta.insert(matchEta.end(), nextEta.begin(), nextEta.end());
+          matchPhi.insert(matchPhi.end(), nextPhi.begin(), nextPhi.end());
+          
       }//end if doing matches
 
       for(const auto& p : j.particles){
@@ -215,6 +257,11 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   }
   if(doOtherMatch_){
       table->addColumn<int>("onmatch", othernmatch, "number of particle matches [other]", nanoaod::FlatTable::IntColumn);
+  }
+  if(addMatch_ && !isGen_){
+      table->addColumn<float>("matchPt", matchPt, "predicted particle pt", nanoaod::FlatTable::FloatColumn);
+      table->addColumn<float>("matchEta", matchEta, "predicted particle eta", nanoaod::FlatTable::FloatColumn);
+      table->addColumn<float>("matchPhi", matchPhi, "predicted particle phi", nanoaod::FlatTable::FloatColumn);
   }
   evt.put(std::move(table), name_);
   if(verbose_){

@@ -8,5 +8,6 @@ SimonJetTableProducer = cms.EDProducer("SimonJetTableProducer",
     matchSrc = cms.InputTag(""),
     otherMatchSrc = cms.InputTag(""),
     doOtherMatch = cms.bool(False),
-    verbose = cms.int32(1)
+    verbose = cms.int32(1),
+    genJets = cms.InputTag("")
 )
