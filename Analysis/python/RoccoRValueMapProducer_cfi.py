@@ -8,8 +8,8 @@ RoccoRValueMapProducer = cms.EDProducer('RoccoRValueMapProducer',
     verbose = cms.int32(0)
 )
 
-from Configuration.Eras.Era_Run2_2017_cff import Run2_2017
-from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
+from Configuration.Eras.Modifier_run2_muon_2017_cff import run2_muon_2017
+from Configuration.Eras.Modifier_run2_muon_2018_cff import run2_muon_2018
 
-Run2_2017.toModify(RoccoRValueMapProducer, dataFile="SRothman/Analysis/data/RoccoR2017UL.txt")
-Run2_2018.toModify(RoccoRValueMapProducer, dataFile="SRothman/Analysis/data/RoccoR2018UL.txt")
+run2_muon_2017.toModify(RoccoRValueMapProducer, dataFile="SRothman/Analysis/data/RoccoR2017UL.txt")
+run2_muon_2018.toModify(RoccoRValueMapProducer, dataFile="SRothman/Analysis/data/RoccoR2018UL.txt")
