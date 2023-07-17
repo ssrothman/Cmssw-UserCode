@@ -3,7 +3,7 @@ from SRothman.JetToolbox.jetToolbox_cff import jetToolbox
 from SRothman.CustomJets.SimonJetProducer_cfi import *
 from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
-def addCustomJets(process, verbose=False):
+def addCustomJets(process, verbose=False, table=False):
 
     btags = [
         'pfDeepCSVJetTags:probb',
@@ -46,23 +46,26 @@ def addCustomJets(process, verbose=False):
         doEventSelection = True,
         verbose = verbose
     )
-    process.SimonJetTable = SimonJetTableProducer.clone(
-        src = "SimonJets",
-        name = "SimonJets",
-        verbose = verbose,
-        isGen = False
-    )
-    process.GenSimonJetTable = SimonJetTableProducer.clone(
-        src = "GenSimonJets",
-        name = "GenSimonJets",
-        verbose = verbose,
-        isGen = True
-    )
+
+    if table:
+        process.SimonJetTable = SimonJetTableProducer.clone(
+            src = "SimonJets",
+            name = "SimonJets",
+            verbose = verbose,
+            isGen = False
+        )
+        process.GenSimonJetTable = SimonJetTableProducer.clone(
+            src = "GenSimonJets",
+            name = "GenSimonJets",
+            verbose = verbose,
+            isGen = True
+        )
+        process.JetsTableTask = cms.Task(process.SimonJetTable,
+                                         process.GenSimonJetTable)
+        process.schedule.associate(process.JetsTableTask)
+
     process.JetsTask = cms.Task(process.SimonJets,
                                 process.GenSimonJets)
-    process.JetsTableTask = cms.Task(process.SimonJetTable,
-                                     process.GenSimonJetTable)
     process.schedule.associate(process.JetsTask)
-    process.schedule.associate(process.JetsTableTask)
 
     return process
