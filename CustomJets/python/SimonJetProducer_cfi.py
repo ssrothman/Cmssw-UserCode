@@ -27,5 +27,5 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     maxChEmFrac = cms.double(0.8),
     eventSelection = cms.InputTag(""),
     doEventSelection = cms.bool(False),
-    applyJEC=cms.bool(True)
+    applyJEC=cms.bool(False)
 )
