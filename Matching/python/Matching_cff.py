@@ -9,7 +9,10 @@ def addGenMatching(process, verbose=0,
                   uncertainty = GenMatchProducer.uncertainty,
                   prefitters = GenMatchProducer.prefitters,
                   recoverLostTracks = GenMatchProducer.recoverLostTracks,
-                  cutoff = GenMatchProducer.cutoff):
+                  cutoff = GenMatchProducer.cutoff,
+                  greedyDropGen = GenMatchProducer.greedyDropGen,
+                  PUexp = GenMatchProducer.PUexp,
+                  PUpenalty = GenMatchProducer.PUpenalty):
 
     setattr(process, name, 
         GenMatchProducer.clone(
@@ -24,7 +27,11 @@ def addGenMatching(process, verbose=0,
             uncertainty = uncertainty,
             prefitters = prefitters,
             recoverLostTracks = recoverLostTracks,
-            cutoff = cutoff
+            cutoff = cutoff,
+            greedyDropGen = greedyDropGen,
+
+            PUexp = PUexp,
+            PUpenalty = PUpenalty
         )
     )
 

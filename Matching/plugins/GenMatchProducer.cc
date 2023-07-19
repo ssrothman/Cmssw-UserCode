@@ -35,7 +35,7 @@
 bool hasNearby(const jet& source, const reco::Candidate& cand){
     for(const auto& part : source.particles){
         double dist = dR2(part.eta, part.phi,
-                          cand.eta(), cand.phi());
+                        cand.eta(), cand.phi());
         if(dist < 0.2*0.2){
             return true;
         }
@@ -44,15 +44,15 @@ bool hasNearby(const jet& source, const reco::Candidate& cand){
 }
 
 void makeNearbyJet(jet& result, const jet& source, 
-                   const edm::Handle<edm::View<reco::Candidate>>& candidates){
+                 const edm::Handle<edm::View<reco::Candidate>>& candidates){
     for(const auto& cand : *candidates){
         if(cand.pt() <= 1e-3){
             continue;
         }
         if(hasNearby(source, cand)){
             particle nextpart(cand.pt(), cand.eta(), cand.phi(),
-                              0.0, 0.0, 0.0,
-                              std::abs(cand.pdgId()), cand.charge());
+                            0.0, 0.0, 0.0,
+                            std::abs(cand.pdgId()), cand.charge());
             result.particles.push_back(std::move(nextpart));
             result.nPart++;
             result.sumpt += cand.pt();
@@ -70,14 +70,16 @@ private:
     int verbose_;
 
     double jetMatchingDR2_;
-    
+        
     double clipval_;
+    double PUexp_, PUpenalty_;
 
     enum spatialLoss loss_;
     enum matchFilterType filter_;
     enum uncertaintyType uncertainty_;
     std::vector<enum prefitterType> prefitters_;
     bool recoverLostTracks_;
+    bool greedyDropGen_;
 
     double cutoff_;
 
@@ -107,50 +109,53 @@ private:
 };
 
 GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
-        : verbose_(conf.getParameter<int>("verbose")),
-          jetMatchingDR2_(square(conf.getParameter<double>("jetMatchingDR"))),
+                : verbose_(conf.getParameter<int>("verbose")),
+                jetMatchingDR2_(square(conf.getParameter<double>("jetMatchingDR"))),
 
-          clipval_(conf.getParameter<double>("clipval")),
+                clipval_(conf.getParameter<double>("clipval")),
+                PUexp_(conf.getParameter<double>("PUexp")),
+                PUpenalty_(conf.getParameter<double>("PUpenalty")),
 
-          loss_(static_cast<enum spatialLoss>(conf.getParameter<int>("spatialLoss"))),
-          filter_(static_cast<enum matchFilterType>(conf.getParameter<int>("filter"))),
-          uncertainty_(static_cast<enum uncertaintyType>(conf.getParameter<int>("uncertainty"))),
-          prefitters_(),
-          recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
+                loss_(static_cast<enum spatialLoss>(conf.getParameter<int>("spatialLoss"))),
+                filter_(static_cast<enum matchFilterType>(conf.getParameter<int>("filter"))),
+                uncertainty_(static_cast<enum uncertaintyType>(conf.getParameter<int>("uncertainty"))),
+                prefitters_(),
+                recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
+                greedyDropGen_(conf.getParameter<bool>("greedyDropGen")),
 
-          cutoff_(conf.getParameter<double>("cutoff")),
+                cutoff_(conf.getParameter<double>("cutoff")),
 
-          softPt_(conf.getParameter<double>("softPt")),
-          hardPt_(conf.getParameter<double>("hardPt")),
+                softPt_(conf.getParameter<double>("softPt")),
+                hardPt_(conf.getParameter<double>("hardPt")),
 
-          EMstochastic_(conf.getParameter<std::vector<double>>("EMstochastic")),
-          EMnoise_(conf.getParameter<std::vector<double>>("EMnoise")),
-          EMconstant_(conf.getParameter<std::vector<double>>("EMconstant")),
-          ECALgranularity_(conf.getParameter<std::vector<double>>("ECALgranularity")),
-          ECALEtaBoundaries_(conf.getParameter<std::vector<double>>("ECALEtaBoundaries")),
+                EMstochastic_(conf.getParameter<std::vector<double>>("EMstochastic")),
+                EMnoise_(conf.getParameter<std::vector<double>>("EMnoise")),
+                EMconstant_(conf.getParameter<std::vector<double>>("EMconstant")),
+                ECALgranularity_(conf.getParameter<std::vector<double>>("ECALgranularity")),
+                ECALEtaBoundaries_(conf.getParameter<std::vector<double>>("ECALEtaBoundaries")),
 
-          HADstochastic_(conf.getParameter<std::vector<double>>("HADstochastic")),
-          HADconstant_(conf.getParameter<std::vector<double>>("HADconstant")),
-          HCALgranularity_(conf.getParameter<std::vector<double>>("HCALgranularity")),
-          HCALEtaBoundaries_(conf.getParameter<std::vector<double>>("HCALEtaBoundaries")),
+                HADstochastic_(conf.getParameter<std::vector<double>>("HADstochastic")),
+                HADconstant_(conf.getParameter<std::vector<double>>("HADconstant")),
+                HCALgranularity_(conf.getParameter<std::vector<double>>("HCALgranularity")),
+                HCALEtaBoundaries_(conf.getParameter<std::vector<double>>("HCALEtaBoundaries")),
 
-          CHlinear_(conf.getParameter<std::vector<double>>("CHlinear")),
-          CHconstant_(conf.getParameter<std::vector<double>>("CHconstant")),
-          CHMS_(conf.getParameter<std::vector<double>>("CHMS")),
-          CHangular_(conf.getParameter<std::vector<double>>("CHangular")),
-          trkEtaBoundaries_(conf.getParameter<std::vector<double>>("trkEtaBoundaries")),
+                CHlinear_(conf.getParameter<std::vector<double>>("CHlinear")),
+                CHconstant_(conf.getParameter<std::vector<double>>("CHconstant")),
+                CHMS_(conf.getParameter<std::vector<double>>("CHMS")),
+                CHangular_(conf.getParameter<std::vector<double>>("CHangular")),
+                trkEtaBoundaries_(conf.getParameter<std::vector<double>>("trkEtaBoundaries")),
 
-          maxReFit_(conf.getParameter<unsigned>("maxReFit")),
+                maxReFit_(conf.getParameter<unsigned>("maxReFit")),
 
-          recoTag_(conf.getParameter<edm::InputTag>("reco")),
-          recoToken_(consumes<edm::View<jet>>(recoTag_)),
-          genTag_(conf.getParameter<edm::InputTag>("gen")),
-          genToken_(consumes<edm::View<jet>>(genTag_)),
-          recoPartsTag_(conf.getParameter<edm::InputTag>("recoParts")),
-          recoPartsToken_(consumes<edm::View<reco::Candidate>>(recoPartsTag_)),
-          genPartsTag_(conf.getParameter<edm::InputTag>("genParts")),
-          genPartsToken_(consumes<edm::View<reco::Candidate>>(genPartsTag_)),
-          doLargerCollections_(conf.getParameter<bool>("doLargerCollections")) {
+                recoTag_(conf.getParameter<edm::InputTag>("reco")),
+                recoToken_(consumes<edm::View<jet>>(recoTag_)),
+                genTag_(conf.getParameter<edm::InputTag>("gen")),
+                genToken_(consumes<edm::View<jet>>(genTag_)),
+                recoPartsTag_(conf.getParameter<edm::InputTag>("recoParts")),
+                recoPartsToken_(consumes<edm::View<reco::Candidate>>(recoPartsTag_)),
+                genPartsTag_(conf.getParameter<edm::InputTag>("genParts")),
+                genPartsToken_(consumes<edm::View<reco::Candidate>>(genPartsTag_)),
+                doLargerCollections_(conf.getParameter<bool>("doLargerCollections")) {
 
     for(const auto& pft : conf.getParameter<std::vector<int>>("prefitters")){
         prefitters_.push_back(static_cast<enum prefitterType>(pft));
@@ -168,45 +173,48 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
 }
 
 void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  edm::ParameterSetDescription desc;
-  desc.add<double>("jetMatchingDR");
-  desc.add<double>("clipval");
-  desc.add<int>("spatialLoss");
-  desc.add<int>("filter");
-  desc.add<int>("uncertainty");
-  desc.add<std::vector<int>>("prefitters");
-  desc.add<bool>("recoverLostTracks");
-  desc.add<double>("cutoff");
-  desc.add<double>("softPt");
-  desc.add<double>("hardPt");
-  desc.add<std::vector<double>>("EMstochastic");
-  desc.add<std::vector<double>>("EMnoise");
-  desc.add<std::vector<double>>("EMconstant");
-  desc.add<std::vector<double>>("ECALgranularity");
-  desc.add<std::vector<double>>("ECALEtaBoundaries");
-  desc.add<std::vector<double>>("HADstochastic");
-  desc.add<std::vector<double>>("HADconstant");
-  desc.add<std::vector<double>>("HCALgranularity");
-  desc.add<std::vector<double>>("HCALEtaBoundaries");
-  desc.add<std::vector<double>>("CHlinear");
-  desc.add<std::vector<double>>("CHconstant");
-  desc.add<std::vector<double>>("CHMS");
-  desc.add<std::vector<double>>("CHangular");
-  desc.add<std::vector<double>>("trkEtaBoundaries");
-  desc.add<unsigned>("maxReFit");
+    edm::ParameterSetDescription desc;
+    desc.add<double>("jetMatchingDR");
+    desc.add<double>("clipval");
+    desc.add<double>("PUexp");
+    desc.add<double>("PUpenalty");
+    desc.add<int>("spatialLoss");
+    desc.add<int>("filter");
+    desc.add<int>("uncertainty");
+    desc.add<std::vector<int>>("prefitters");
+    desc.add<bool>("recoverLostTracks");
+    desc.add<bool>("greedyDropGen");
+    desc.add<double>("cutoff");
+    desc.add<double>("softPt");
+    desc.add<double>("hardPt");
+    desc.add<std::vector<double>>("EMstochastic");
+    desc.add<std::vector<double>>("EMnoise");
+    desc.add<std::vector<double>>("EMconstant");
+    desc.add<std::vector<double>>("ECALgranularity");
+    desc.add<std::vector<double>>("ECALEtaBoundaries");
+    desc.add<std::vector<double>>("HADstochastic");
+    desc.add<std::vector<double>>("HADconstant");
+    desc.add<std::vector<double>>("HCALgranularity");
+    desc.add<std::vector<double>>("HCALEtaBoundaries");
+    desc.add<std::vector<double>>("CHlinear");
+    desc.add<std::vector<double>>("CHconstant");
+    desc.add<std::vector<double>>("CHMS");
+    desc.add<std::vector<double>>("CHangular");
+    desc.add<std::vector<double>>("trkEtaBoundaries");
+    desc.add<unsigned>("maxReFit");
 
-  desc.add<edm::InputTag>("reco");
-  desc.add<edm::InputTag>("gen");
-  desc.add<edm::InputTag>("recoParts");
-  desc.add<edm::InputTag>("genParts");
-  desc.add<bool>("doLargerCollections");
-  desc.add<int>("verbose");
-  descriptions.addWithDefaultLabel(desc);
+    desc.add<edm::InputTag>("reco");
+    desc.add<edm::InputTag>("gen");
+    desc.add<edm::InputTag>("recoParts");
+    desc.add<edm::InputTag>("genParts");
+    desc.add<bool>("doLargerCollections");
+    desc.add<int>("verbose");
+    descriptions.addWithDefaultLabel(desc);
 }
 
 void printParticle(const particle& part){
     printf("pt: %f, eta: %f, phi: %f, pdgId: %d, charge: %d\n",
-           part.pt, part.eta, part.phi, part.pdgid, part.charge);
+             part.pt, part.eta, part.phi, part.pdgid, part.charge);
 }
 void printJet(const jet& jet){
     for(const auto& part : jet.particles){
@@ -215,77 +223,80 @@ void printJet(const jet& jet){
 }
 
 void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
-  if(verbose_){
-    printf("Top of GenMatchProducer::produce()\n");
-  }
-  edm::Handle<edm::View<jet>> reco;
-  evt.getByToken(recoToken_, reco);
+    if(verbose_){
+        printf("Top of GenMatchProducer::produce()\n");
+    }
+    edm::Handle<edm::View<jet>> reco;
+    evt.getByToken(recoToken_, reco);
 
-  edm::Handle<edm::View<jet>> gen;
-  evt.getByToken(genToken_, gen);
+    edm::Handle<edm::View<jet>> gen;
+    evt.getByToken(genToken_, gen);
 
-  edm::Handle<edm::View<reco::Candidate>> genParts;
-  edm::Handle<edm::View<reco::Candidate>> recoParts;
-  if(doLargerCollections_){
-      evt.getByToken(genPartsToken_, genParts);
-      evt.getByToken(recoPartsToken_, recoParts);
-  }
+    edm::Handle<edm::View<reco::Candidate>> genParts;
+    edm::Handle<edm::View<reco::Candidate>> recoParts;
+    if(doLargerCollections_){
+        evt.getByToken(genPartsToken_, genParts);
+        evt.getByToken(recoPartsToken_, recoParts);
+    }
 
-  auto result = std::make_unique<std::vector<jetmatch>>();
-  auto resultBigGen = std::make_unique<std::vector<jetmatch>>();
-  auto resultBigReco = std::make_unique<std::vector<jetmatch>>();
+    auto result = std::make_unique<std::vector<jetmatch>>();
+    auto resultBigGen = std::make_unique<std::vector<jetmatch>>();
+    auto resultBigReco = std::make_unique<std::vector<jetmatch>>();
 
-  std::vector<bool> taken(gen->size(), false);
-  for(unsigned iReco=0; iReco<reco->size(); ++iReco){//for each reco jet
-      if(verbose_){
-          printf("doing jet %u\n", iReco);
-      }
-      const jet& jreco = reco->at(iReco);
-      int matchedgen = -1;
-      for(unsigned iGen=0; iGen<gen->size(); ++iGen){//for each gen jet
-          if(taken[iGen]){
-              continue;
-          }
-          const jet& jgen = gen->at(iGen);
-    
-          double dist = dR2(jreco.eta, jreco.phi, 
+    std::vector<bool> taken(gen->size(), false);
+    for(unsigned iReco=0; iReco<reco->size(); ++iReco){//for each reco jet
+        if(verbose_){
+            printf("doing jet %u\n", iReco);
+        }
+        const jet& jreco = reco->at(iReco);
+        int matchedgen = -1;
+        for(unsigned iGen=0; iGen<gen->size(); ++iGen){//for each gen jet
+            if(taken[iGen]){
+                continue;
+            }
+            const jet& jgen = gen->at(iGen);
+        
+            double dist = dR2(jreco.eta, jreco.phi, 
                             jgen.eta, jgen.phi);
-          if(dist > jetMatchingDR2_){
-              continue;
-          }
+            if(dist > jetMatchingDR2_){
+                continue;
+            }
 
-          matchedgen = iGen;
-          taken[iGen] = true;
-          break;
-      }//end for each gen
+            matchedgen = iGen;
+            taken[iGen] = true;
+            break;
+        }//end for each gen
 
-      if(matchedgen >= 0){//if matched
-          if(verbose_){
-              printf("matched with %u\n", matchedgen);
-          }
-          jetmatch next;
-          next.iReco = iReco;
-          next.iGen = matchedgen;
+        if(matchedgen >= 0){//if matched
+            if(verbose_){
+                printf("matched with %u\n", matchedgen);
+            }
+            jetmatch next;
+            next.iReco = iReco;
+            next.iGen = matchedgen;
 
-          const jet& jgen = gen->at(matchedgen);
+            const jet& jgen = gen->at(matchedgen);
 
-          if(verbose_){
-              printf("fit is between %lu and %lu particles\n", 
-                      jreco.particles.size(), jgen.particles.size());
+            if(verbose_){
+                printf("fit is between %lu and %lu particles\n", 
+                        jreco.particles.size(), jgen.particles.size());
 
-              printf("\nRECO JET\n");
-              printJet(jreco);
-              printf("\nGEN JET\n");
-              printJet(jgen);
-          }
+                printf("\nRECO JET\n");
+                printJet(jreco);
+                printf("\nGEN JET\n");
+                printJet(jgen);
+            }
 
-        if(verbose_)
-            printf("doing fit\n");
+            if(verbose_)
+                printf("doing fit\n");
 
-        matcher thismatch(
-                jreco, jgen, clipval_,
+            std::vector<bool> excludeGen(jgen.nPart, false);
+            std::unique_ptr<matcher> thismatch = std::make_unique<matcher>(
+                jreco, jgen, excludeGen,
+                clipval_,
                 loss_, filter_, uncertainty_,
                 prefitters_,
+                PUexp_, PUpenalty_,
                 recoverLostTracks_,
                 cutoff_, softPt_, hardPt_,
                 EMstochastic_, EMnoise_, EMconstant_,
@@ -294,103 +305,151 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 HCALgranularity_, HCALEtaBoundaries_,
                 CHlinear_, CHconstant_, CHMS_, CHangular_,
                 trkEtaBoundaries_, maxReFit_, verbose_);
-        thismatch.minimize();
+            thismatch->minimize();
 
-          next.ptrans = thismatch.ptrans();
-          next.rawmat = thismatch.rawmat();
+            double bestchisq = thismatch->chisq();
 
-          if(verbose_){
-              printf("\nMatching\n");
-              std::cout << next.rawmat;
-          }
+            if(greedyDropGen_){
+                for(unsigned iGenPart=0; iGenPart<jgen.nPart; ++iGenPart){
+                    if(verbose_){
+                        printf("considering dropping gen part %u\n", iGenPart);
+                    }
+                    excludeGen[iGenPart] = true;
+                    std::unique_ptr<matcher> testmatch = std::make_unique<matcher>(
+                        jreco, jgen, excludeGen,
+                        clipval_,
+                        loss_, filter_, uncertainty_,
+                        prefitters_,
+                        PUexp_, PUpenalty_,
+                        recoverLostTracks_,
+                        cutoff_, softPt_, hardPt_,
+                        EMstochastic_, EMnoise_, EMconstant_,
+                        ECALgranularity_, ECALEtaBoundaries_,
+                        HADstochastic_, HADconstant_,
+                        HCALgranularity_, HCALEtaBoundaries_,
+                        CHlinear_, CHconstant_, CHMS_, CHangular_,
+                        trkEtaBoundaries_, maxReFit_, verbose_);
+                    testmatch->minimize();
 
-          result->push_back(std::move(next));
-          if(verbose_){
-              printf("did fit\n");
-          }
-      }//end if matched
+                    if(testmatch->chisq() < bestchisq){
+                        if(verbose_){
+                            printf("\tchisq improved from %f to %f\n", 
+                                    bestchisq, testmatch->chisq());
+                            printf("\tlocking in dropped gen part %u\n", iGenPart);
+                        }
+                        bestchisq = testmatch->chisq();
+                        thismatch = std::move(testmatch);
+                    } else {
+                        excludeGen[iGenPart] = false;
+                        if(verbose_){
+                            printf("\tchisq did not improve\n");
+                        }
+                    }
+                }             
+            }
 
-      if(doLargerCollections_){//if also want to match with everything
-          if(verbose_){
-              printf("matching with full event\n");
-          }
-          jet biggen;
-          makeNearbyJet(biggen, jreco, genParts);
+            next.ptrans = thismatch->ptrans();
+            next.rawmat = thismatch->rawmat();
 
-          if(verbose_){
-              printf("fit is between %lu and %lu particles\n", 
-                      jreco.particles.size(), biggen.particles.size());
-          }
-          matcher biggenmatch (jreco, biggen, clipval_,
-                               loss_, filter_, uncertainty_,
-                               prefitters_,
-                               recoverLostTracks_,
-                               cutoff_, softPt_, hardPt_,
-                               EMstochastic_, EMnoise_, EMconstant_,
-                               ECALgranularity_, ECALEtaBoundaries_,
-                               HADstochastic_, HADconstant_,
-                               HCALgranularity_, HCALEtaBoundaries_,
-                               CHlinear_, CHconstant_, CHMS_, CHangular_,
-                               trkEtaBoundaries_, maxReFit_, verbose_);
-          biggenmatch.minimize();
+            if(verbose_){
+                printf("\nMatching\n");
+                std::cout << next.rawmat;
+            }
 
-          jetmatch nextbiggen;
-          nextbiggen.iReco = iReco;
-          nextbiggen.iGen = 999999;
-          nextbiggen.ptrans = biggenmatch.ptrans();
-          nextbiggen.rawmat = biggenmatch.rawmat();
+            result->push_back(std::move(next));
+            if(verbose_){
+                printf("did fit\n");
+            }
+        }//end if matched
 
-          resultBigGen->push_back(std::move(nextbiggen));
-          if(verbose_){
-              printf("did fit\n");
-          }
-      }//end if also want to match with everything
-  }//end for each reco
+        if(doLargerCollections_){//if also want to match with everything
+            if(verbose_){
+                printf("matching with full event\n");
+            }
+            jet biggen;
+            makeNearbyJet(biggen, jreco, genParts);
 
-  if(doLargerCollections_){//if want to match gen with everything
-      for(unsigned iGen=0; iGen<gen->size(); ++iGen){
-        if(verbose_){
-          printf("matching genJet %u with full event\n", iGen);
+            if(verbose_){
+                printf("fit is between %lu and %lu particles\n", 
+                        jreco.particles.size(), biggen.particles.size());
+            }
+            std::vector<bool> excludeGen(biggen.nPart, false);
+            matcher biggenmatch (jreco, biggen, excludeGen,
+                                 clipval_,
+                                 loss_, filter_, uncertainty_,
+                                 prefitters_,
+                                 PUexp_, PUpenalty_,
+                                 recoverLostTracks_,
+                                 cutoff_, softPt_, hardPt_,
+                                 EMstochastic_, EMnoise_, EMconstant_,
+                                 ECALgranularity_, ECALEtaBoundaries_,
+                                 HADstochastic_, HADconstant_,
+                                 HCALgranularity_, HCALEtaBoundaries_,
+                                 CHlinear_, CHconstant_, CHMS_, CHangular_,
+                                 trkEtaBoundaries_, maxReFit_, verbose_);
+            biggenmatch.minimize();
+
+            jetmatch nextbiggen;
+            nextbiggen.iReco = iReco;
+            nextbiggen.iGen = 999999;
+            nextbiggen.ptrans = biggenmatch.ptrans();
+            nextbiggen.rawmat = biggenmatch.rawmat();
+
+            resultBigGen->push_back(std::move(nextbiggen));
+            if(verbose_){
+                printf("did fit\n");
+            }
+        }//end if also want to match with everything
+    }//end for each reco
+
+    if(doLargerCollections_){//if want to match gen with everything
+        for(unsigned iGen=0; iGen<gen->size(); ++iGen){
+            if(verbose_){
+                printf("matching genJet %u with full event\n", iGen);
+            }
+            const jet& jgen = gen->at(iGen);
+
+            jet bigreco;
+            makeNearbyJet(bigreco, jgen, recoParts);
+
+            if(verbose_){
+                printf("fit is between %lu and %lu particles\n", 
+                        bigreco.particles.size(), jgen.particles.size());
+            }
+
+            std::vector<bool> excludeGen(jgen.nPart, false);
+            matcher bigrecomatch (bigreco, jgen, excludeGen,
+                                clipval_,
+                                loss_, filter_, uncertainty_,
+                                prefitters_,
+                                PUexp_, PUpenalty_,
+                                recoverLostTracks_,
+                                cutoff_, softPt_, hardPt_,
+                                EMstochastic_, EMnoise_, EMconstant_,
+                                ECALgranularity_, ECALEtaBoundaries_,
+                                HADstochastic_, HADconstant_,
+                                HCALgranularity_, HCALEtaBoundaries_,
+                                CHlinear_, CHconstant_, CHMS_, CHangular_,
+                                trkEtaBoundaries_, maxReFit_, verbose_);
+
+            jetmatch nextbigreco;
+            nextbigreco.iReco = 99999999;
+            nextbigreco.iGen = iGen;
+            nextbigreco.ptrans = bigrecomatch.ptrans();
+            nextbigreco.rawmat = bigrecomatch.rawmat();
+
+            resultBigReco->push_back(std::move(nextbigreco));
+            if(verbose_){
+                printf("did fit\n");
+            }
         }
-        const jet& jgen = gen->at(iGen);
+    }
 
-        jet bigreco;
-        makeNearbyJet(bigreco, jgen, recoParts);
-
-        if(verbose_){
-          printf("fit is between %lu and %lu particles\n", 
-                  bigreco.particles.size(), jgen.particles.size());
-        }
-        matcher bigrecomatch (bigreco, jgen, clipval_,
-                              loss_, filter_, uncertainty_,
-                              prefitters_,
-                              recoverLostTracks_,
-                              cutoff_, softPt_, hardPt_,
-                              EMstochastic_, EMnoise_, EMconstant_,
-                              ECALgranularity_, ECALEtaBoundaries_,
-                              HADstochastic_, HADconstant_,
-                              HCALgranularity_, HCALEtaBoundaries_,
-                              CHlinear_, CHconstant_, CHMS_, CHangular_,
-                              trkEtaBoundaries_, maxReFit_, verbose_);
-
-        jetmatch nextbigreco;
-        nextbigreco.iReco = 99999999;
-        nextbigreco.iGen = iGen;
-        nextbigreco.ptrans = bigrecomatch.ptrans();
-        nextbigreco.rawmat = bigrecomatch.rawmat();
-
-        resultBigReco->push_back(std::move(nextbigreco));
-        if(verbose_){
-          printf("did fit\n");
-        }
-      }
-  }
-
-  evt.put(std::move(result));
-  if(doLargerCollections_){
-      evt.put(std::move(resultBigGen), "bigGen");
-      evt.put(std::move(resultBigReco), "bigReco");
-  }
+    evt.put(std::move(result));
+    if(doLargerCollections_){
+            evt.put(std::move(resultBigGen), "bigGen");
+            evt.put(std::move(resultBigReco), "bigReco");
+    }
 }  // end produce()
 
 DEFINE_FWK_MODULE(GenMatchProducer);
