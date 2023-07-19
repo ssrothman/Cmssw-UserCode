@@ -22,4 +22,7 @@ def setupResolutionStudy(process, verbose=0):
     process = addGenMatching(process, verbose=verbose,
                              name="SmallCutoffMatch",
                              cutoff = 2.0)
+    process = addGenMatching(process, verbose=verbose,
+                             name="NoDropMatch",
+                             greedyDropGen = False)
     return process
