@@ -78,8 +78,11 @@ private:
     enum matchFilterType filter_;
     enum uncertaintyType uncertainty_;
     std::vector<enum prefitterType> prefitters_;
+    enum prefitRefinerType refiner_;
     bool recoverLostTracks_;
+    bool greedyDropMatches_;
     bool greedyDropGen_;
+    bool greedyDropReco_;
 
     double cutoff_;
 
@@ -120,8 +123,11 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 filter_(static_cast<enum matchFilterType>(conf.getParameter<int>("filter"))),
                 uncertainty_(static_cast<enum uncertaintyType>(conf.getParameter<int>("uncertainty"))),
                 prefitters_(),
+                refiner_(static_cast<enum prefitRefinerType>(conf.getParameter<int>("refiner"))),
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
+                greedyDropMatches_(conf.getParameter<bool>("greedyDropMatches")),
                 greedyDropGen_(conf.getParameter<bool>("greedyDropGen")),
+                greedyDropReco_(conf.getParameter<bool>("greedyDropReco")),
 
                 cutoff_(conf.getParameter<double>("cutoff")),
 
@@ -182,8 +188,11 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<int>("filter");
     desc.add<int>("uncertainty");
     desc.add<std::vector<int>>("prefitters");
+    desc.add<int>("refiner");
     desc.add<bool>("recoverLostTracks");
+    desc.add<bool>("greedyDropMatches");
     desc.add<bool>("greedyDropGen");
+    desc.add<bool>("greedyDropReco");
     desc.add<double>("cutoff");
     desc.add<double>("softPt");
     desc.add<double>("hardPt");
@@ -293,9 +302,12 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             std::vector<bool> excludeGen(jgen.nPart, false);
             std::unique_ptr<matcher> thismatch = std::make_unique<matcher>(
                 jreco, jgen, excludeGen,
+                greedyDropMatches_,
+                greedyDropGen_,
+                greedyDropReco_,
                 clipval_,
                 loss_, filter_, uncertainty_,
-                prefitters_,
+                prefitters_, refiner_,
                 PUexp_, PUpenalty_,
                 recoverLostTracks_,
                 cutoff_, softPt_, hardPt_,
@@ -307,52 +319,11 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 trkEtaBoundaries_, maxReFit_, verbose_);
             thismatch->minimize();
 
-            double bestchisq = thismatch->chisq();
-
-            if(greedyDropGen_){
-                for(unsigned iGenPart=0; iGenPart<jgen.nPart; ++iGenPart){
-                    if(verbose_){
-                        printf("considering dropping gen part %u\n", iGenPart);
-                    }
-                    excludeGen[iGenPart] = true;
-                    std::unique_ptr<matcher> testmatch = std::make_unique<matcher>(
-                        jreco, jgen, excludeGen,
-                        clipval_,
-                        loss_, filter_, uncertainty_,
-                        prefitters_,
-                        PUexp_, PUpenalty_,
-                        recoverLostTracks_,
-                        cutoff_, softPt_, hardPt_,
-                        EMstochastic_, EMnoise_, EMconstant_,
-                        ECALgranularity_, ECALEtaBoundaries_,
-                        HADstochastic_, HADconstant_,
-                        HCALgranularity_, HCALEtaBoundaries_,
-                        CHlinear_, CHconstant_, CHMS_, CHangular_,
-                        trkEtaBoundaries_, maxReFit_, verbose_);
-                    testmatch->minimize();
-
-                    if(testmatch->chisq() < bestchisq){
-                        if(verbose_){
-                            printf("\tchisq improved from %f to %f\n", 
-                                    bestchisq, testmatch->chisq());
-                            printf("\tlocking in dropped gen part %u\n", iGenPart);
-                        }
-                        bestchisq = testmatch->chisq();
-                        thismatch = std::move(testmatch);
-                    } else {
-                        excludeGen[iGenPart] = false;
-                        if(verbose_){
-                            printf("\tchisq did not improve\n");
-                        }
-                    }
-                }             
-            }
-
             next.ptrans = thismatch->ptrans();
             next.rawmat = thismatch->rawmat();
 
             if(verbose_){
-                printf("\nMatching\n");
+                printf("\nMatching complete:\n");
                 std::cout << next.rawmat;
             }
 
@@ -375,9 +346,12 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             }
             std::vector<bool> excludeGen(biggen.nPart, false);
             matcher biggenmatch (jreco, biggen, excludeGen,
+                                 greedyDropMatches_,
+                                 greedyDropGen_,
+                                 greedyDropReco_,
                                  clipval_,
                                  loss_, filter_, uncertainty_,
-                                 prefitters_,
+                                 prefitters_, refiner_,
                                  PUexp_, PUpenalty_,
                                  recoverLostTracks_,
                                  cutoff_, softPt_, hardPt_,
@@ -419,9 +393,12 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
             std::vector<bool> excludeGen(jgen.nPart, false);
             matcher bigrecomatch (bigreco, jgen, excludeGen,
+                                greedyDropMatches_,
+                                greedyDropGen_,
+                                greedyDropReco_,
                                 clipval_,
                                 loss_, filter_, uncertainty_,
-                                prefitters_,
+                                prefitters_, refiner_,
                                 PUexp_, PUpenalty_,
                                 recoverLostTracks_,
                                 cutoff_, softPt_, hardPt_,
