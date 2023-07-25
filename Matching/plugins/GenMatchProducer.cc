@@ -80,7 +80,6 @@ private:
     std::vector<enum prefitterType> prefitters_;
     enum prefitRefinerType refiner_;
     bool recoverLostTracks_;
-    bool greedyDropMatches_;
     bool greedyDropGen_;
     bool greedyDropReco_;
 
@@ -125,7 +124,6 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 prefitters_(),
                 refiner_(static_cast<enum prefitRefinerType>(conf.getParameter<int>("refiner"))),
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
-                greedyDropMatches_(conf.getParameter<bool>("greedyDropMatches")),
                 greedyDropGen_(conf.getParameter<bool>("greedyDropGen")),
                 greedyDropReco_(conf.getParameter<bool>("greedyDropReco")),
 
@@ -190,7 +188,6 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<std::vector<int>>("prefitters");
     desc.add<int>("refiner");
     desc.add<bool>("recoverLostTracks");
-    desc.add<bool>("greedyDropMatches");
     desc.add<bool>("greedyDropGen");
     desc.add<bool>("greedyDropReco");
     desc.add<double>("cutoff");
@@ -299,10 +296,8 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             if(verbose_)
                 printf("doing fit\n");
 
-            std::vector<bool> excludeGen(jgen.nPart, false);
             std::unique_ptr<matcher> thismatch = std::make_unique<matcher>(
-                jreco, jgen, excludeGen,
-                greedyDropMatches_,
+                jreco, jgen, 
                 greedyDropGen_,
                 greedyDropReco_,
                 clipval_,
@@ -344,9 +339,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 printf("fit is between %lu and %lu particles\n", 
                         jreco.particles.size(), biggen.particles.size());
             }
-            std::vector<bool> excludeGen(biggen.nPart, false);
-            matcher biggenmatch (jreco, biggen, excludeGen,
-                                 greedyDropMatches_,
+            matcher biggenmatch (jreco, biggen, 
                                  greedyDropGen_,
                                  greedyDropReco_,
                                  clipval_,
@@ -391,9 +384,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                         bigreco.particles.size(), jgen.particles.size());
             }
 
-            std::vector<bool> excludeGen(jgen.nPart, false);
-            matcher bigrecomatch (bigreco, jgen, excludeGen,
-                                greedyDropMatches_,
+            matcher bigrecomatch (bigreco, jgen, 
                                 greedyDropGen_,
                                 greedyDropReco_,
                                 clipval_,

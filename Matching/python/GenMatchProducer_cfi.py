@@ -16,7 +16,6 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
 
     recoverLostTracks = cms.bool(True),
 
-    greedyDropMatches = cms.bool(False),
     greedyDropGen = cms.bool(False),
     greedyDropReco = cms.bool(False),
 
