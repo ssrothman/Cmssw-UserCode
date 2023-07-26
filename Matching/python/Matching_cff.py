@@ -12,7 +12,6 @@ def addGenMatching(process, verbose=0,
                   cutoff = GenMatchProducer.cutoff,
                   greedyDropGen = GenMatchProducer.greedyDropGen,
                    greedyDropReco = GenMatchProducer.greedyDropReco,
-                   greedyDropMatches = GenMatchProducer.greedyDropMatches,
                   PUexp = GenMatchProducer.PUexp,
                   PUpenalty = GenMatchProducer.PUpenalty):
 
@@ -32,7 +31,6 @@ def addGenMatching(process, verbose=0,
             cutoff = cutoff,
             greedyDropGen = greedyDropGen,
             greedyDropReco = greedyDropReco,
-            greedyDropMatches = greedyDropMatches,
 
             PUexp = PUexp,
             PUpenalty = PUpenalty

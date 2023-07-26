@@ -10,7 +10,7 @@ def setupResolutionStudy(process, verbose=0):
     process.SimonJets.doEventSelection = False
     process.GenSimonJets.doEventSelection = False
 
-    process = addGenMatching(process, verbose=1,
+    process = addGenMatching(process, verbose=5,
                              name='DefaultMatch')
     process = addGenMatching(process, verbose=verbose,
                              name='NaiveMatch',

@@ -9,15 +9,15 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     filter = cms.int32(2),
     uncertainty = cms.int32(1),
     prefitters = cms.vint32([4, 4, 3]),
-    refiner = cms.int32(2),
+    refiner = cms.int32(0),
 
     PUexp = cms.double(4),
     PUpenalty = cms.double(2),
 
     recoverLostTracks = cms.bool(True),
 
-    greedyDropGen = cms.bool(False),
-    greedyDropReco = cms.bool(False),
+    greedyDropGen = cms.bool(True),
+    greedyDropReco = cms.bool(True),
 
     cutoff = cms.double(3.0),
 
