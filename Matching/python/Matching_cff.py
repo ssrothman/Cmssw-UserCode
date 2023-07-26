@@ -10,8 +10,8 @@ def addGenMatching(process, verbose=0,
                   prefitters = GenMatchProducer.prefitters,
                   recoverLostTracks = GenMatchProducer.recoverLostTracks,
                   cutoff = GenMatchProducer.cutoff,
-                  greedyDropGen = GenMatchProducer.greedyDropGen,
-                   greedyDropReco = GenMatchProducer.greedyDropReco,
+                  dropGenFilter = GenMatchProducer.dropGenFilter,
+                   dropRecoFilter = GenMatchProducer.dropRecoFilter,
                   PUexp = GenMatchProducer.PUexp,
                   PUpenalty = GenMatchProducer.PUpenalty):
 
@@ -29,8 +29,8 @@ def addGenMatching(process, verbose=0,
             prefitters = prefitters,
             recoverLostTracks = recoverLostTracks,
             cutoff = cutoff,
-            greedyDropGen = greedyDropGen,
-            greedyDropReco = greedyDropReco,
+            dropGenFilter = dropGenFilter,
+            dropRecoFilter = dropRecoFilter,
 
             PUexp = PUexp,
             PUpenalty = PUpenalty

@@ -16,10 +16,10 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
 
     recoverLostTracks = cms.bool(True),
 
-    greedyDropGen = cms.bool(True),
-    greedyDropReco = cms.bool(True),
+    dropGenFilter = cms.int32(2),
+    dropRecoFilter = cms.int32(1),
 
-    cutoff = cms.double(3.0),
+    cutoff = cms.double(4.0),
 
     softPt = cms.double(1.0),
     hardPt = cms.double(110),

@@ -80,8 +80,8 @@ private:
     std::vector<enum prefitterType> prefitters_;
     enum prefitRefinerType refiner_;
     bool recoverLostTracks_;
-    bool greedyDropGen_;
-    bool greedyDropReco_;
+    enum particleFilterType dropGenFilter_;
+    enum particleFilterType dropRecoFilter_;
 
     double cutoff_;
 
@@ -124,8 +124,8 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 prefitters_(),
                 refiner_(static_cast<enum prefitRefinerType>(conf.getParameter<int>("refiner"))),
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
-                greedyDropGen_(conf.getParameter<bool>("greedyDropGen")),
-                greedyDropReco_(conf.getParameter<bool>("greedyDropReco")),
+                dropGenFilter_(static_cast<enum particleFilterType>(conf.getParameter<int>("dropGenFilter"))),
+                dropRecoFilter_(static_cast<enum particleFilterType>(conf.getParameter<int>("dropRecoFilter"))),
 
                 cutoff_(conf.getParameter<double>("cutoff")),
 
@@ -188,8 +188,8 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<std::vector<int>>("prefitters");
     desc.add<int>("refiner");
     desc.add<bool>("recoverLostTracks");
-    desc.add<bool>("greedyDropGen");
-    desc.add<bool>("greedyDropReco");
+    desc.add<int>("dropGenFilter");
+    desc.add<int>("dropRecoFilter");
     desc.add<double>("cutoff");
     desc.add<double>("softPt");
     desc.add<double>("hardPt");
@@ -298,11 +298,10 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
             std::unique_ptr<matcher> thismatch = std::make_unique<matcher>(
                 jreco, jgen, 
-                greedyDropGen_,
-                greedyDropReco_,
                 clipval_,
                 loss_, filter_, uncertainty_,
                 prefitters_, refiner_,
+                dropGenFilter_, dropRecoFilter_,
                 PUexp_, PUpenalty_,
                 recoverLostTracks_,
                 cutoff_, softPt_, hardPt_,
@@ -340,11 +339,10 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                         jreco.particles.size(), biggen.particles.size());
             }
             matcher biggenmatch (jreco, biggen, 
-                                 greedyDropGen_,
-                                 greedyDropReco_,
                                  clipval_,
                                  loss_, filter_, uncertainty_,
                                  prefitters_, refiner_,
+                                 dropGenFilter_, dropRecoFilter_,
                                  PUexp_, PUpenalty_,
                                  recoverLostTracks_,
                                  cutoff_, softPt_, hardPt_,
@@ -385,11 +383,10 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             }
 
             matcher bigrecomatch (bigreco, jgen, 
-                                greedyDropGen_,
-                                greedyDropReco_,
                                 clipval_,
                                 loss_, filter_, uncertainty_,
                                 prefitters_, refiner_,
+                                dropGenFilter_, dropRecoFilter_,
                                 PUexp_, PUpenalty_,
                                 recoverLostTracks_,
                                 cutoff_, softPt_, hardPt_,
