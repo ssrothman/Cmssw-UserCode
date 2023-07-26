@@ -10,19 +10,10 @@ def setupResolutionStudy(process, verbose=0):
     process.SimonJets.doEventSelection = False
     process.GenSimonJets.doEventSelection = False
 
-    process = addGenMatching(process, verbose=5,
+    process = addGenMatching(process, verbose=verbose,
                              name='DefaultMatch')
     process = addGenMatching(process, verbose=verbose,
                              name='NaiveMatch',
                              prefitters = [3,3,3],
                              recoverLostTracks = False)
-    #process = addGenMatching(process, verbose=verbose,
-    #                         name='NoRecoverMatch',
-    #                         recoverLostTracks = False)
-    #process = addGenMatching(process, verbose=verbose,
-    #                         name="SmallCutoffMatch",
-    #                         cutoff = 2.0)
-    #process = addGenMatching(process, verbose=verbose,
-    #                         name="TinyCutoffMatch",
-    #                         cutoff = 1.0)
     return process

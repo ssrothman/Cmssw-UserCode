@@ -7,7 +7,7 @@ defaults:
   pset: $CMSSW_BASE/src/SRothman/ResolutionStudy/test/test_res.py
   allowInvalid: False
   unitsPerJob: 100
-  totalUnits: 10000
+  totalUnits: 3000
 
 samples:
   DYJetsToLL: 
