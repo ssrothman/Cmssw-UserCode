@@ -72,29 +72,33 @@ private:
     double jetMatchingDR2_;
         
     double clipval_;
-    double PUexp_, PUpenalty_;
 
     enum spatialLoss loss_;
-    enum matchFilterType filter_;
-    enum uncertaintyType uncertainty_;
-    std::vector<enum prefitterType> prefitters_;
-    enum prefitRefinerType refiner_;
+    std::vector<double> PUpt0s_, PUexps_, PUpenalties_;
+
+    std::string uncertainty_;
+
+    std::vector<std::string> filters_;
+    std::vector<double> cutoffs_;
+    std::vector<std::string> prefitters_;
+    std::string refiner_;
+    std::string dropGenFilter_;
+    std::string dropRecoFilter_;
+
     bool recoverLostTracks_;
-    enum particleFilterType dropGenFilter_;
-    enum particleFilterType dropRecoFilter_;
-
-    double cutoff_;
-
-    double softPt_, hardPt_;
 
     std::vector<double> EMstochastic_, EMnoise_, EMconstant_;
-    std::vector<double> ECALgranularity_, ECALEtaBoundaries_;
+    std::vector<double> ECALgranularityEta_, ECALgranularityPhi_;
+    std::vector<double> ECALEtaBoundaries_;
 
     std::vector<double> HADstochastic_, HADconstant_;
-    std::vector<double> HCALgranularity_, HCALEtaBoundaries_;
+    std::vector<double> HCALgranularityEta_, HCALgranularityPhi_;
+    std::vector<double> HCALEtaBoundaries_;
 
     std::vector<double> CHlinear_, CHconstant_;
-    std::vector<double> CHMS_, CHangular_, trkEtaBoundaries_;
+    std::vector<double> CHMSeta_, CHMSphi_;
+    std::vector<double> CHangularEta_, CHangularPhi_;
+    std::vector<double> trkEtaBoundaries_;
 
     unsigned maxReFit_;
 
@@ -115,38 +119,42 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 jetMatchingDR2_(square(conf.getParameter<double>("jetMatchingDR"))),
 
                 clipval_(conf.getParameter<double>("clipval")),
-                PUexp_(conf.getParameter<double>("PUexp")),
-                PUpenalty_(conf.getParameter<double>("PUpenalty")),
 
                 loss_(static_cast<enum spatialLoss>(conf.getParameter<int>("spatialLoss"))),
-                filter_(static_cast<enum matchFilterType>(conf.getParameter<int>("filter"))),
-                uncertainty_(static_cast<enum uncertaintyType>(conf.getParameter<int>("uncertainty"))),
-                prefitters_(),
-                refiner_(static_cast<enum prefitRefinerType>(conf.getParameter<int>("refiner"))),
+                PUpt0s_(conf.getParameter<std::vector<double>>("PUpt0s")),
+                PUexps_(conf.getParameter<std::vector<double>>("PUexps")),
+                PUpenalties_(conf.getParameter<std::vector<double>>("PUpenalties")),
+
+                uncertainty_(conf.getParameter<std::string>("uncertainty")),
+
+                filters_(conf.getParameter<std::vector<std::string>>("filters")),
+                cutoffs_(conf.getParameter<std::vector<double>>("cutoffs")),
+                prefitters_(conf.getParameter<std::vector<std::string>>("prefitters")),
+                refiner_(conf.getParameter<std::string>("refiner")),
+                dropGenFilter_(conf.getParameter<std::string>("dropGenFilter")),
+                dropRecoFilter_(conf.getParameter<std::string>("dropRecoFilter")),
+
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
-                dropGenFilter_(static_cast<enum particleFilterType>(conf.getParameter<int>("dropGenFilter"))),
-                dropRecoFilter_(static_cast<enum particleFilterType>(conf.getParameter<int>("dropRecoFilter"))),
-
-                cutoff_(conf.getParameter<double>("cutoff")),
-
-                softPt_(conf.getParameter<double>("softPt")),
-                hardPt_(conf.getParameter<double>("hardPt")),
 
                 EMstochastic_(conf.getParameter<std::vector<double>>("EMstochastic")),
                 EMnoise_(conf.getParameter<std::vector<double>>("EMnoise")),
                 EMconstant_(conf.getParameter<std::vector<double>>("EMconstant")),
-                ECALgranularity_(conf.getParameter<std::vector<double>>("ECALgranularity")),
+                ECALgranularityEta_(conf.getParameter<std::vector<double>>("ECALgranularityEta")),
+                ECALgranularityPhi_(conf.getParameter<std::vector<double>>("ECALgranularityPhi")),
                 ECALEtaBoundaries_(conf.getParameter<std::vector<double>>("ECALEtaBoundaries")),
 
                 HADstochastic_(conf.getParameter<std::vector<double>>("HADstochastic")),
                 HADconstant_(conf.getParameter<std::vector<double>>("HADconstant")),
-                HCALgranularity_(conf.getParameter<std::vector<double>>("HCALgranularity")),
+                HCALgranularityEta_(conf.getParameter<std::vector<double>>("HCALgranularityEta")),
+                HCALgranularityPhi_(conf.getParameter<std::vector<double>>("HCALgranularityPhi")),
                 HCALEtaBoundaries_(conf.getParameter<std::vector<double>>("HCALEtaBoundaries")),
 
                 CHlinear_(conf.getParameter<std::vector<double>>("CHlinear")),
                 CHconstant_(conf.getParameter<std::vector<double>>("CHconstant")),
-                CHMS_(conf.getParameter<std::vector<double>>("CHMS")),
-                CHangular_(conf.getParameter<std::vector<double>>("CHangular")),
+                CHMSeta_(conf.getParameter<std::vector<double>>("CHMSeta")),
+                CHMSphi_(conf.getParameter<std::vector<double>>("CHMSphi")),
+                CHangularEta_(conf.getParameter<std::vector<double>>("CHangularEta")),
+                CHangularPhi_(conf.getParameter<std::vector<double>>("CHangularPhi")),
                 trkEtaBoundaries_(conf.getParameter<std::vector<double>>("trkEtaBoundaries")),
 
                 maxReFit_(conf.getParameter<unsigned>("maxReFit")),
@@ -160,15 +168,6 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 genPartsTag_(conf.getParameter<edm::InputTag>("genParts")),
                 genPartsToken_(consumes<edm::View<reco::Candidate>>(genPartsTag_)),
                 doLargerCollections_(conf.getParameter<bool>("doLargerCollections")) {
-
-    for(const auto& pft : conf.getParameter<std::vector<int>>("prefitters")){
-        prefitters_.push_back(static_cast<enum prefitterType>(pft));
-    }
-
-    if(prefitters_.size() != 3){
-        throw cms::Exception("Configuration") << "prefitters must be a vector of length 3";
-    }
-
     produces<std::vector<jetmatch>>();
     if(doLargerCollections_){
         produces<std::vector<jetmatch>>("bigReco");
@@ -178,35 +177,48 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
 
 void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
+
     desc.add<double>("jetMatchingDR");
+
     desc.add<double>("clipval");
-    desc.add<double>("PUexp");
-    desc.add<double>("PUpenalty");
+
     desc.add<int>("spatialLoss");
-    desc.add<int>("filter");
-    desc.add<int>("uncertainty");
-    desc.add<std::vector<int>>("prefitters");
-    desc.add<int>("refiner");
+    desc.add<std::vector<double>>("PUpt0s");
+    desc.add<std::vector<double>>("PUexps");
+    desc.add<std::vector<double>>("PUpenalties");
+
+    desc.add<std::string>("uncertainty");
+
+    desc.add<std::vector<std::string>>("filters");
+    desc.add<std::vector<double>>("cutoffs");
+    desc.add<std::vector<std::string>>("prefitters");
+    desc.add<std::string>("refiner");
+    desc.add<std::string>("dropGenFilter");
+    desc.add<std::string>("dropRecoFilter");
+
     desc.add<bool>("recoverLostTracks");
-    desc.add<int>("dropGenFilter");
-    desc.add<int>("dropRecoFilter");
-    desc.add<double>("cutoff");
-    desc.add<double>("softPt");
-    desc.add<double>("hardPt");
+
     desc.add<std::vector<double>>("EMstochastic");
     desc.add<std::vector<double>>("EMnoise");
     desc.add<std::vector<double>>("EMconstant");
-    desc.add<std::vector<double>>("ECALgranularity");
+    desc.add<std::vector<double>>("ECALgranularityEta");
+    desc.add<std::vector<double>>("ECALgranularityPhi");
     desc.add<std::vector<double>>("ECALEtaBoundaries");
+
     desc.add<std::vector<double>>("HADstochastic");
     desc.add<std::vector<double>>("HADconstant");
-    desc.add<std::vector<double>>("HCALgranularity");
+    desc.add<std::vector<double>>("HCALgranularityEta");
+    desc.add<std::vector<double>>("HCALgranularityPhi");
     desc.add<std::vector<double>>("HCALEtaBoundaries");
+
     desc.add<std::vector<double>>("CHlinear");
     desc.add<std::vector<double>>("CHconstant");
-    desc.add<std::vector<double>>("CHMS");
-    desc.add<std::vector<double>>("CHangular");
+    desc.add<std::vector<double>>("CHMSeta");
+    desc.add<std::vector<double>>("CHMSphi");
+    desc.add<std::vector<double>>("CHangularEta");
+    desc.add<std::vector<double>>("CHangularPhi");
     desc.add<std::vector<double>>("trkEtaBoundaries");
+
     desc.add<unsigned>("maxReFit");
 
     desc.add<edm::InputTag>("reco");
@@ -214,6 +226,7 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<edm::InputTag>("recoParts");
     desc.add<edm::InputTag>("genParts");
     desc.add<bool>("doLargerCollections");
+
     desc.add<int>("verbose");
     descriptions.addWithDefaultLabel(desc);
 }
@@ -299,18 +312,25 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             std::unique_ptr<matcher> thismatch = std::make_unique<matcher>(
                 jreco, jgen, 
                 clipval_,
-                loss_, filter_, uncertainty_,
-                prefitters_, refiner_,
+                loss_, PUpt0s_,
+                PUexps_, PUpenalties_,
+                uncertainty_,
+                filters_, cutoffs_,
+                prefitters_,
+                refiner_,
                 dropGenFilter_, dropRecoFilter_,
-                PUexp_, PUpenalty_,
                 recoverLostTracks_,
-                cutoff_, softPt_, hardPt_,
                 EMstochastic_, EMnoise_, EMconstant_,
-                ECALgranularity_, ECALEtaBoundaries_,
+                ECALgranularityEta_, ECALgranularityPhi_,
+                ECALEtaBoundaries_,
                 HADstochastic_, HADconstant_,
-                HCALgranularity_, HCALEtaBoundaries_,
-                CHlinear_, CHconstant_, CHMS_, CHangular_,
-                trkEtaBoundaries_, maxReFit_, verbose_);
+                HCALgranularityEta_, HCALgranularityPhi_,
+                HCALEtaBoundaries_,
+                CHlinear_, CHconstant_, 
+                CHMSeta_, CHMSphi_,
+                CHangularEta_, CHangularPhi_,
+                trkEtaBoundaries_, 
+                maxReFit_, verbose_);
             thismatch->minimize();
 
             next.ptrans = thismatch->ptrans();
@@ -340,18 +360,24 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             }
             matcher biggenmatch (jreco, biggen, 
                                  clipval_,
-                                 loss_, filter_, uncertainty_,
+                                 loss_, PUpt0s_,
+                                 PUexps_, PUpenalties_,
+                                 uncertainty_,
+                                 filters_, cutoffs_,
                                  prefitters_, refiner_,
                                  dropGenFilter_, dropRecoFilter_,
-                                 PUexp_, PUpenalty_,
                                  recoverLostTracks_,
-                                 cutoff_, softPt_, hardPt_,
                                  EMstochastic_, EMnoise_, EMconstant_,
-                                 ECALgranularity_, ECALEtaBoundaries_,
+                                 ECALgranularityEta_, ECALgranularityPhi_,
+                                 ECALEtaBoundaries_,
                                  HADstochastic_, HADconstant_,
-                                 HCALgranularity_, HCALEtaBoundaries_,
-                                 CHlinear_, CHconstant_, CHMS_, CHangular_,
-                                 trkEtaBoundaries_, maxReFit_, verbose_);
+                                 HCALgranularityEta_, HCALgranularityPhi_,
+                                 HCALEtaBoundaries_,
+                                 CHlinear_, CHconstant_, 
+                                 CHMSeta_, CHMSphi_,
+                                 CHangularEta_, CHangularPhi_,
+                                 trkEtaBoundaries_, 
+                                 maxReFit_, verbose_);
             biggenmatch.minimize();
 
             jetmatch nextbiggen;
@@ -384,18 +410,24 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
             matcher bigrecomatch (bigreco, jgen, 
                                 clipval_,
-                                loss_, filter_, uncertainty_,
+                                loss_, PUpt0s_,
+                                PUexps_, PUpenalties_, 
+                                uncertainty_,
+                                filters_, cutoffs_,
                                 prefitters_, refiner_,
                                 dropGenFilter_, dropRecoFilter_,
-                                PUexp_, PUpenalty_,
                                 recoverLostTracks_,
-                                cutoff_, softPt_, hardPt_,
                                 EMstochastic_, EMnoise_, EMconstant_,
-                                ECALgranularity_, ECALEtaBoundaries_,
+                                ECALgranularityEta_, ECALgranularityPhi_,
+                                ECALEtaBoundaries_,
                                 HADstochastic_, HADconstant_,
-                                HCALgranularity_, HCALEtaBoundaries_,
-                                CHlinear_, CHconstant_, CHMS_, CHangular_,
-                                trkEtaBoundaries_, maxReFit_, verbose_);
+                                HCALgranularityEta_, HCALgranularityPhi_,
+                                HCALEtaBoundaries_,
+                                CHlinear_, CHconstant_, 
+                                CHMSeta_, CHMSphi_,
+                                CHangularEta_, CHangularPhi_,
+                                trkEtaBoundaries_, 
+                                maxReFit_, verbose_);
 
             jetmatch nextbigreco;
             nextbigreco.iReco = 99999999;

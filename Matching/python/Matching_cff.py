@@ -5,15 +5,15 @@ from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def addGenMatching(process, verbose=0,
                   name='GenMatch',
-                  filter = GenMatchProducer.filter,
+                  filters = GenMatchProducer.filters,
                   uncertainty = GenMatchProducer.uncertainty,
                   prefitters = GenMatchProducer.prefitters,
                   recoverLostTracks = GenMatchProducer.recoverLostTracks,
-                  cutoff = GenMatchProducer.cutoff,
+                  cutoffs = GenMatchProducer.cutoffs,
                   dropGenFilter = GenMatchProducer.dropGenFilter,
-                   dropRecoFilter = GenMatchProducer.dropRecoFilter,
-                  PUexp = GenMatchProducer.PUexp,
-                  PUpenalty = GenMatchProducer.PUpenalty):
+                  dropRecoFilter = GenMatchProducer.dropRecoFilter,
+                  PUexps = GenMatchProducer.PUexps,
+                  PUpenalties = GenMatchProducer.PUpenalties):
 
     setattr(process, name, 
         GenMatchProducer.clone(
@@ -24,16 +24,16 @@ def addGenMatching(process, verbose=0,
             doLargerCollections = cms.bool(False),
             verbose = verbose,
 
-            filter = filter,
+            filters = filters,
             uncertainty = uncertainty,
             prefitters = prefitters,
             recoverLostTracks = recoverLostTracks,
-            cutoff = cutoff,
+            cutoffs = cutoffs,
             dropGenFilter = dropGenFilter,
             dropRecoFilter = dropRecoFilter,
 
-            PUexp = PUexp,
-            PUpenalty = PUpenalty
+            PUexps = PUexps,
+            PUpenalties = PUpenalties
         )
     )
 
