@@ -4,16 +4,18 @@ from SRothman.Matching.GenMatchTableProducer_cfi import *
 from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def addGenMatching(process, verbose=0,
-                  name='GenMatch',
-                  filters = GenMatchProducer.filters,
-                  uncertainty = GenMatchProducer.uncertainty,
-                  prefitters = GenMatchProducer.prefitters,
-                  recoverLostTracks = GenMatchProducer.recoverLostTracks,
-                  cutoffs = GenMatchProducer.cutoffs,
-                  dropGenFilter = GenMatchProducer.dropGenFilter,
-                  dropRecoFilter = GenMatchProducer.dropRecoFilter,
-                  PUexps = GenMatchProducer.PUexps,
-                  PUpenalties = GenMatchProducer.PUpenalties):
+                   name='GenMatch',
+                   PUpt0s = GenMatchProducer.PUpt0s,
+                   PUexps = GenMatchProducer.PUexps,
+                   PUpenalties = GenMatchProducer.PUpenalties,
+                   uncertainty = GenMatchProducer.uncertainty,
+                   filters = GenMatchProducer.filters,
+                   cutoffs = GenMatchProducer.cutoffs,
+                   prefitters = GenMatchProducer.prefitters,
+                   refiner = GenMatchProducer.refiner,
+                   dropGenFilter = GenMatchProducer.dropGenFilter,
+                   dropRecoFilter = GenMatchProducer.dropRecoFilter,
+                   recoverLostTracks = GenMatchProducer.recoverLostTracks):
 
     setattr(process, name, 
         GenMatchProducer.clone(
@@ -24,16 +26,20 @@ def addGenMatching(process, verbose=0,
             doLargerCollections = cms.bool(False),
             verbose = verbose,
 
-            filters = filters,
+            PUpt0s = PUpt0s,
+            PUexps = PUexps,
+            PUpenalties = PUpenalties,
+
             uncertainty = uncertainty,
-            prefitters = prefitters,
-            recoverLostTracks = recoverLostTracks,
+
+            filters = filters,
             cutoffs = cutoffs,
+            prefitters = prefitters,
+            refiner = refiner,
             dropGenFilter = dropGenFilter,
             dropRecoFilter = dropRecoFilter,
 
-            PUexps = PUexps,
-            PUpenalties = PUpenalties
+            recoverLostTracks = recoverLostTracks,
         )
     )
 

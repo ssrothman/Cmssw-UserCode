@@ -16,4 +16,17 @@ def setupResolutionStudy(process, verbose=0):
                              name='NaiveMatch',
                              prefitters = ["Best","Best","Best"],
                              recoverLostTracks = False)
+    process = addGenMatching(process, verbose=verbose,
+                             name='NoDropMatch',
+                             dropGenFilter = 'NONE',
+                             dropRecoFilter = 'NONE')
+    process = addGenMatching(process, verbose=verbose,
+                             name='NoRecoverMatch',
+                             recoverLostTracks = False)
+    process = addGenMatching(process, verbose=verbose,
+                             name='GlobalRefineMatch',
+                             refiner='OneGenOneReco')
+    process = addGenMatching(process, verbose=verbose,
+                             name='NoRefineMatch',
+                             refiner = 'None')
     return process
