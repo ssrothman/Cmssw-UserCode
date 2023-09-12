@@ -20,9 +20,9 @@ from production_tag import production_tag # Get from a text file
 # Get from git tag (tbd)
 #production_tag = "vTEST9" # Specify by hand
 requestname_base = "srothman"
-#output_site = "T3_US_FNALLPC"
-output_site = "T3_US_FNALLPC"
-output_lfn_base = "/store/group/lpcpfnano/srothman/{production_tag}".format(
+
+output_site = "T3_US_MIT"
+output_lfn_base = "/store/user/srothman/{production_tag}".format(
                                                     username=getUsernameFromCRIC(), 
                                                     production_tag=production_tag)
 
