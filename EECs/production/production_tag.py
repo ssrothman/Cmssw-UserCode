@@ -1,1 +1,1 @@
-production_tag = "EEC_Jul16_rawmat"
+production_tag = "test_crab_2"
