@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+# goes [EM0, HAD0, CH]
+
 GenMatchProducer = cms.EDProducer("GenMatchProducer",
     jetMatchingDR = cms.double(0.2),
 

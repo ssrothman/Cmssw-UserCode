@@ -15,7 +15,25 @@ def addGenMatching(process, verbose=0,
                    refiner = GenMatchProducer.refiner,
                    dropGenFilter = GenMatchProducer.dropGenFilter,
                    dropRecoFilter = GenMatchProducer.dropRecoFilter,
-                   recoverLostTracks = GenMatchProducer.recoverLostTracks):
+                   recoverLostTracks = GenMatchProducer.recoverLostTracks,
+                   EMstochastic = GenMatchProducer.EMstochastic,
+                   EMnoise = GenMatchProducer.EMnoise,
+                   EMconstant = GenMatchProducer.EMconstant,
+                   ECALgranularityEta = GenMatchProducer.ECALgranularityEta,
+                   ECALgranularityPhi = GenMatchProducer.ECALgranularityPhi,
+                   ECALEtaBoundaries = GenMatchProducer.ECALEtaBoundaries,
+                   HADstochastic = GenMatchProducer.HADstochastic,
+                   HADconstant = GenMatchProducer.HADconstant,
+                   HCALgranularityEta = GenMatchProducer.HCALgranularityEta,
+                   HCALgranularityPhi = GenMatchProducer.HCALgranularityPhi,
+                   HCALEtaBoundaries = GenMatchProducer.HCALEtaBoundaries,
+                   CHlinear = GenMatchProducer.CHlinear,
+                   CHconstant = GenMatchProducer.CHconstant,
+                   CHMSeta = GenMatchProducer.CHMSeta,
+                   CHMSphi = GenMatchProducer.CHMSphi,
+                   CHangularEta = GenMatchProducer.CHangularEta,
+                   CHangularPhi = GenMatchProducer.CHangularPhi,
+                   trkEtaBoundaries = GenMatchProducer.trkEtaBoundaries):
 
     setattr(process, name, 
         GenMatchProducer.clone(
@@ -40,6 +58,27 @@ def addGenMatching(process, verbose=0,
             dropRecoFilter = dropRecoFilter,
 
             recoverLostTracks = recoverLostTracks,
+
+            EMstochastic = EMstochastic,
+            EMnoise = EMnoise,
+            EMconstant = EMconstant,
+            ECALgranularityEta = ECALgranularityEta,
+            ECALgranularityPhi = ECALgranularityPhi,
+            ECALEtaBoundaries = ECALEtaBoundaries,
+
+            HADstochastic = HADstochastic,
+            HADconstant = HADconstant,
+            HCALgranularityEta = HCALgranularityEta,
+            HCALgranularityPhi = HCALgranularityPhi,
+            HCALEtaBoundaries = HCALEtaBoundaries,
+
+            CHlinear = CHlinear,
+            CHconstant = CHconstant,
+            CHMSeta = CHMSeta,
+            CHMSphi = CHMSphi,
+            CHangularEta = CHangularEta,
+            CHangularPhi = CHangularPhi,
+            trkEtaBoundaries = trkEtaBoundaries
         )
     )
 
