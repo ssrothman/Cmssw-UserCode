@@ -1,1 +1,1 @@
-production_tag = "Sep20_2023_2"
+production_tag = "Sep22_2023_AOD"

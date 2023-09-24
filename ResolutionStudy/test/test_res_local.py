@@ -23,13 +23,14 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL18MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/120000/001C8DDF-599C-5E45-BF2C-76F887C9ADE9.root'),
     secondaryFileNames = cms.untracked.vstring(),
+    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1,2330002,1,2330004))
 )
 
 process.options = cms.untracked.PSet(
@@ -76,8 +77,8 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(4)
-process.options.numberOfStreams=cms.untracked.uint32(4)
+process.options.numberOfThreads=cms.untracked.uint32(1)
+process.options.numberOfStreams=cms.untracked.uint32(1)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 # customisation of the process.
@@ -89,7 +90,7 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 process = nanoAOD_customizeMC(process)
 
 from SRothman.ResolutionStudy.ResolutionStudy_cff import *
-process = setupResolutionStudy(process, 0)
+process = setupResolutionStudy(process, 5)
 
 # End of customisation functions
 

@@ -4,12 +4,12 @@ defaults:
   reco_version: UL
   year: 2018
   globaltag: 106X_upgrade2018_realistic_v16_L1v1
-  pset: $CMSSW_BASE/src/SRothman/ResolutionStudy/test/test_res.py
+  pset: $CMSSW_BASE/src/SRothman/ResolutionStudy/test/test_res_AOD.py
   allowInvalid: False
-  unitsPerJob: 1
-  totalUnits: 100
+  unitsPerJob: 10
+  totalUnits: 1000
 
 samples:
   DYJetsToLL: 
     datasets: 
-      DYJetsToLL : /DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM
+      DYJetsToLL : /DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v1/AODSIM
