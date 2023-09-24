@@ -43,7 +43,7 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     CHMSphi = cms.vdouble(0.00185, 0.00215, 0.0035),
     CHangularEta = cms.vdouble(0.00053, 0.00053, 0.0007),
     CHangularPhi = cms.vdouble(0.00053, 0.00053, 0.0007),
-    trkEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 2.5),
+    trkEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
     maxReFit = cms.uint32(50),
 
