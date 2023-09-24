@@ -17,9 +17,10 @@ def addCustomJets(process, verbose=False, table=False):
         'pfDeepFlavourJetTags:probuds',
         'pfDeepFlavourJetTags:probg'
     ]
+    btags = None
 
     jetToolbox(process, "ak4", "customJets", "noOutput",
-               PUMethod="Puppi", dataTier="nanoAOD",
+               PUMethod="Puppi", dataTier="AOD",
                runOnMC=True, 
                JETCorrPayload="AK4PFPuppi",
                JETCorrLevels=["L1FastJet", "L2Relative","L3Absolute", "L2L3Residual"],
