@@ -122,6 +122,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
 
   std::vector<int> nmatch;
   std::vector<float> matchPt, matchEta, matchPhi;
+  std::vector<int> nmatchMuon, nmatchEle, nmatchEM0, nmatchHAD0, nmatchHADCH;
 
   std::vector<int> othernmatch;
 
@@ -172,9 +173,14 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
       }
 
       if(addMatch_){//if doing matches
-          std::vector<int> nextMatches;
+          std::vector<int> nextMatches, nextMatchMuon, nextMatchEle, nextMatchEM0, nextMatchHAD0, nextMatchHADCH;
           std::vector<float> nextPt, nextEta, nextPhi;
           nextMatches.resize(j.particles.size(), 0);
+          nextMatchMuon.resize(j.particles.size(), 0);
+          nextMatchEle.resize(j.particles.size(), 0);
+          nextMatchEM0.resize(j.particles.size(), 0);
+          nextMatchHAD0.resize(j.particles.size(), 0);
+          nextMatchHADCH.resize(j.particles.size(), 0);
           nextPt.resize(j.particles.size(), 0);
           nextEta.resize(j.particles.size(), 0);
           nextPhi.resize(j.particles.size(), 0);
@@ -194,11 +200,23 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
               for(unsigned i=0; i<match.rawmat.n_rows; ++i){//for i
                   for(unsigned j=0; j<match.rawmat.n_cols; ++j){// for j
                       if(match.rawmat(i, j) > 0){//if matched
-                          if(isGen_){//if gen
-                              nextMatches.at(j) += 1;
-                          } else {//else if reco
-                              nextMatches.at(i) += 1;
-                          }//endif (gen)
+                          unsigned idx = isGen_ ? j : i;
+                          nextMatches.at(idx) += 1;
+                          if (!isGen_){
+                              unsigned pdgId = genJets->at(match.iGen).particles.at(j).pdgid;
+                              int charge = genJets->at(match.iGen).particles.at(j).charge;
+                              if(pdgId == 13){
+                                  nextMatchMuon.at(idx) += 1;
+                              } else if(pdgId == 11){
+                                  nextMatchEle.at(idx) += 1;
+                              } else if(pdgId == 22){
+                                  nextMatchEM0.at(idx) += 1;
+                              } else if(charge == 0){
+                                  nextMatchHAD0.at(idx) += 1;
+                              } else {
+                                  nextMatchHADCH.at(idx) += 1;
+                              }
+                          }
                       }//end if matched
                   }//end for j
               }//end for i
@@ -227,6 +245,16 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
           
           nmatch.insert(nmatch.end(), nextMatches.begin(), 
                                       nextMatches.end());
+          nmatchMuon.insert(nmatchMuon.end(), nextMatchMuon.begin(),
+                                              nextMatchMuon.end());
+          nmatchEle.insert(nmatchEle.end(), nextMatchEle.begin(),
+                                            nextMatchEle.end());
+          nmatchEM0.insert(nmatchEM0.end(), nextMatchEM0.begin(),
+                                            nextMatchEM0.end());
+          nmatchHAD0.insert(nmatchHAD0.end(), nextMatchHAD0.begin(),
+                                              nextMatchHAD0.end());
+          nmatchHADCH.insert(nmatchHADCH.end(), nextMatchHADCH.begin(),
+                                                nextMatchHADCH.end());
           matchPt.insert(matchPt.end(), nextPt.begin(), nextPt.end());
           matchEta.insert(matchEta.end(), nextEta.begin(), nextEta.end());
           matchPhi.insert(matchPhi.end(), nextPhi.begin(), nextPhi.end());
@@ -262,6 +290,11 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
       table->addColumn<float>("matchPt", matchPt, "predicted particle pt", nanoaod::FlatTable::FloatColumn);
       table->addColumn<float>("matchEta", matchEta, "predicted particle eta", nanoaod::FlatTable::FloatColumn);
       table->addColumn<float>("matchPhi", matchPhi, "predicted particle phi", nanoaod::FlatTable::FloatColumn);
+      table->addColumn<int>("nmatchMuon", nmatchMuon, "number of muon matches", nanoaod::FlatTable::IntColumn);
+      table->addColumn<int>("nmatchEle", nmatchEle, "number of electron matches", nanoaod::FlatTable::IntColumn);
+      table->addColumn<int>("nmatchEM0", nmatchEM0, "number of photon matches", nanoaod::FlatTable::IntColumn);
+      table->addColumn<int>("nmatchHAD0", nmatchHAD0, "number of neutral hadron matches", nanoaod::FlatTable::IntColumn);
+      table->addColumn<int>("nmatchHADCH", nmatchHADCH, "number of charged hadron matches", nanoaod::FlatTable::IntColumn);
   }
   evt.put(std::move(table), name_);
   if(verbose_){
