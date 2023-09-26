@@ -30,6 +30,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL18RECO/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v1/260000/000B833A-57AD-E848-8540-903AE7834D8A.root'),
     secondaryFileNames = cms.untracked.vstring(),
+    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1,189432088-1,1,189432088+1))
 )
 
 process.options = cms.untracked.PSet(
@@ -54,7 +55,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     #fileName = cms.untracked.string('/data/submit/cms/store/user/srothman/NANO_NANO_10k_3.root'),
     #fileName = cms.untracked.string('~/cmsdata/NANO_NANO.root'),
-    fileName = cms.untracked.string('NANO_NANO.root'),
+    fileName = cms.untracked.string('NANO_NANO_NANO.root'),
     outputCommands = process.NANOAODSIMEventContent.outputCommands,
     #autoFlush = cms.untracked.int32(1)
 )
