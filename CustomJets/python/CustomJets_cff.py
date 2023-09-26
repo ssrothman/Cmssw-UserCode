@@ -1,6 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 from SRothman.JetToolbox.jetToolbox_cff import jetToolbox
 from SRothman.CustomJets.SimonJetProducer_cfi import *
+from SRothman.CustomJets.ShadowJetProducer_cfi import *
+from SRothman.CustomJets.FullEventJetProducer_cfi import *
 from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def addCustomJets(process, verbose=False, table=False):
@@ -48,6 +50,22 @@ def addCustomJets(process, verbose=False, table=False):
         verbose = verbose
     )
 
+    process.GenFullEventJets = CandidateFullEventJetProducer.clone(
+        partSrc = "genParticlesForJetsNoNuTMP",
+        #jetSrc = "SimonJets",
+        eventSelection = "ZMuMu",
+        doEventSelection = True,
+        verbose = verbose
+    )
+
+    process.FullEventJets = RecoFullEventJetProducer.clone(
+        partSrc = "puppi",
+        #jetSrc = "GenSimonJets",
+        eventSelection = "ZMuMu",
+        doEventSelection = True,
+        verbose = verbose
+    )
+
     if table:
         process.SimonJetTable = SimonJetTableProducer.clone(
             src = "SimonJets",
@@ -61,12 +79,29 @@ def addCustomJets(process, verbose=False, table=False):
             verbose = verbose,
             isGen = True
         )
+        process.FullEventJetTable = SimonJetTableProducer.clone(
+            src = "FullEventJets",
+            name = "FullEventJets",
+            verbose = verbose,
+            isGen = False
+        )
+        process.GenFullEventJetTable = SimonJetTableProducer.clone(
+            src = "GenFullEventJets",
+            name = "GenFullEventJets",
+            verbose = verbose,
+            isGen = True
+        )
+
         process.JetsTableTask = cms.Task(process.SimonJetTable,
-                                         process.GenSimonJetTable)
+                                         process.GenSimonJetTable,
+                                         process.FullEventJetTable,
+                                         process.GenFullEventJetTable)
         process.schedule.associate(process.JetsTableTask)
 
     process.JetsTask = cms.Task(process.SimonJets,
-                                process.GenSimonJets)
+                                process.GenSimonJets,
+                                process.FullEventJets,
+                                process.GenFullEventJets)
     process.schedule.associate(process.JetsTask)
 
     return process

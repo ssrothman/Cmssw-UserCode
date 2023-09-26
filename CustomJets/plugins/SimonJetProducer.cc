@@ -171,6 +171,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup
     ans.nPart = 0;
     ans.iJet = iJet;
     ans.sumpt = 0;
+    ans.particles.clear();
 
     if (verbose_){
       std::cout << "\tjet: (" << pt << ", " << eta << ", " << phi << ")" << std::endl;

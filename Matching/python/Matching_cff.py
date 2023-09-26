@@ -37,10 +37,11 @@ def addGenMatching(process, verbose=0,
 
     setattr(process, name, 
         GenMatchProducer.clone(
-            reco = "SimonJets",
-            gen = "GenSimonJets",
+            reco = "FullEventJets",
+            gen = "GenFullEventJets",
             recoParts = cms.InputTag("puppi"),
-            genParts = cms.InputTag("packedGenParticlesForJetsNoNu"),
+            #genParts = cms.InputTag("packedGenParticlesForJetsNoNu"),
+            genParts = cms.InputTag("genParticlesForJetsNoNuTMP"),
             doLargerCollections = cms.bool(False),
             verbose = verbose,
 
@@ -92,19 +93,19 @@ def addGenMatching(process, verbose=0,
 
     setattr(process, name+"ParticleTable", 
         SimonJetTableProducer.clone(
-            src = 'SimonJets',
+            src = 'FullEventJets',
             name = name+"Particles",
             verbose = verbose,
             isGen = False,
             addMatch = True,
             matchSrc = name,
-            genJets = 'GenSimonJets'
+            genJets = 'GenFullEventJets'
         )
     )
 
     setattr(process, name+"GenParticleTable",
         SimonJetTableProducer.clone(
-            src = 'GenSimonJets',
+            src = 'GenFullEventJets',
             name = name+"GenParticles",
             verbose = verbose,
             isGen = True,

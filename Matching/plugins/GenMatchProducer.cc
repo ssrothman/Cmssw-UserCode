@@ -45,8 +45,16 @@ bool hasNearby(const jet& source, const reco::Candidate& cand){
 
 void makeNearbyJet(jet& result, const jet& source, 
                  const edm::Handle<edm::View<reco::Candidate>>& candidates){
+    result.nPart = 0;
+    result.sumpt = 0.0;
+    result.particles.clear();
+
     for(const auto& cand : *candidates){
         if(cand.pt() <= 1e-3){
+            continue;
+        }
+        if(std::abs(cand.pdgId()) < 10){
+            printf("warning: particle with pdgId=%d???? (pT = %0.4f) Skipping\n", cand.pdgId(), cand.pt());
             continue;
         }
         if(hasNearby(source, cand)){
@@ -58,6 +66,7 @@ void makeNearbyJet(jet& result, const jet& source,
             result.sumpt += cand.pt();
         }
     } 
+    //TODO: sort?
 }
 
 class GenMatchProducer : public edm::stream::EDProducer<> {
@@ -357,34 +366,41 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             if(verbose_){
                 printf("fit is between %lu and %lu particles\n", 
                         jreco.particles.size(), biggen.particles.size());
+                printf("\nRECO JET\n");
+                printJet(jreco);
+                printf("\nGEN JET\n");
+                printJet(biggen);
             }
-            matcher biggenmatch (jreco, biggen, 
-                                 clipval_,
-                                 loss_, PUpt0s_,
-                                 PUexps_, PUpenalties_,
-                                 uncertainty_,
-                                 filters_, cutoffs_,
-                                 prefitters_, refiner_,
-                                 dropGenFilter_, dropRecoFilter_,
-                                 recoverLostTracks_,
-                                 EMstochastic_, EMnoise_, EMconstant_,
-                                 ECALgranularityEta_, ECALgranularityPhi_,
-                                 ECALEtaBoundaries_,
-                                 HADstochastic_, HADconstant_,
-                                 HCALgranularityEta_, HCALgranularityPhi_,
-                                 HCALEtaBoundaries_,
-                                 CHlinear_, CHconstant_, 
-                                 CHMSeta_, CHMSphi_,
-                                 CHangularEta_, CHangularPhi_,
-                                 trkEtaBoundaries_, 
-                                 maxReFit_, verbose_);
-            biggenmatch.minimize();
+
+            std::unique_ptr<matcher> biggenmatch = std::make_unique<matcher>(
+                jreco, biggen, 
+                clipval_,
+                loss_, PUpt0s_,
+                PUexps_, PUpenalties_,
+                uncertainty_,
+                filters_, cutoffs_,
+                prefitters_,
+                refiner_,
+                dropGenFilter_, dropRecoFilter_,
+                recoverLostTracks_,
+                EMstochastic_, EMnoise_, EMconstant_,
+                ECALgranularityEta_, ECALgranularityPhi_,
+                ECALEtaBoundaries_,
+                HADstochastic_, HADconstant_,
+                HCALgranularityEta_, HCALgranularityPhi_,
+                HCALEtaBoundaries_,
+                CHlinear_, CHconstant_, 
+                CHMSeta_, CHMSphi_,
+                CHangularEta_, CHangularPhi_,
+                trkEtaBoundaries_, 
+                maxReFit_, verbose_);
+            biggenmatch->minimize();
 
             jetmatch nextbiggen;
             nextbiggen.iReco = iReco;
             nextbiggen.iGen = 999999;
-            nextbiggen.ptrans = biggenmatch.ptrans();
-            nextbiggen.rawmat = biggenmatch.rawmat();
+            nextbiggen.ptrans = biggenmatch->ptrans();
+            nextbiggen.rawmat = biggenmatch->rawmat();
 
             resultBigGen->push_back(std::move(nextbiggen));
             if(verbose_){
@@ -406,34 +422,41 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             if(verbose_){
                 printf("fit is between %lu and %lu particles\n", 
                         bigreco.particles.size(), jgen.particles.size());
+                printf("\nRECO JET\n");
+                printJet(bigreco);
+                printf("\nGEN JET\n");
+                printJet(jgen);
             }
 
-            matcher bigrecomatch (bigreco, jgen, 
-                                clipval_,
-                                loss_, PUpt0s_,
-                                PUexps_, PUpenalties_, 
-                                uncertainty_,
-                                filters_, cutoffs_,
-                                prefitters_, refiner_,
-                                dropGenFilter_, dropRecoFilter_,
-                                recoverLostTracks_,
-                                EMstochastic_, EMnoise_, EMconstant_,
-                                ECALgranularityEta_, ECALgranularityPhi_,
-                                ECALEtaBoundaries_,
-                                HADstochastic_, HADconstant_,
-                                HCALgranularityEta_, HCALgranularityPhi_,
-                                HCALEtaBoundaries_,
-                                CHlinear_, CHconstant_, 
-                                CHMSeta_, CHMSphi_,
-                                CHangularEta_, CHangularPhi_,
-                                trkEtaBoundaries_, 
-                                maxReFit_, verbose_);
+            std::unique_ptr<matcher> bigrecomatch = std::make_unique<matcher>(
+                bigreco, jgen, 
+                clipval_,
+                loss_, PUpt0s_,
+                PUexps_, PUpenalties_,
+                uncertainty_,
+                filters_, cutoffs_,
+                prefitters_,
+                refiner_,
+                dropGenFilter_, dropRecoFilter_,
+                recoverLostTracks_,
+                EMstochastic_, EMnoise_, EMconstant_,
+                ECALgranularityEta_, ECALgranularityPhi_,
+                ECALEtaBoundaries_,
+                HADstochastic_, HADconstant_,
+                HCALgranularityEta_, HCALgranularityPhi_,
+                HCALEtaBoundaries_,
+                CHlinear_, CHconstant_, 
+                CHMSeta_, CHMSphi_,
+                CHangularEta_, CHangularPhi_,
+                trkEtaBoundaries_, 
+                maxReFit_, verbose_);
+            bigrecomatch->minimize();
 
             jetmatch nextbigreco;
             nextbigreco.iReco = 99999999;
             nextbigreco.iGen = iGen;
-            nextbigreco.ptrans = bigrecomatch.ptrans();
-            nextbigreco.rawmat = bigrecomatch.rawmat();
+            nextbigreco.ptrans = bigrecomatch->ptrans();
+            nextbigreco.rawmat = bigrecomatch->rawmat();
 
             resultBigReco->push_back(std::move(nextbigreco));
             if(verbose_){
