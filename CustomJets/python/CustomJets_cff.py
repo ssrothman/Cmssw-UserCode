@@ -22,7 +22,7 @@ def addCustomJets(process, verbose=False, table=False):
     btags = None
 
     jetToolbox(process, "ak4", "customJets", "noOutput",
-               PUMethod="Puppi", dataTier="AOD",
+               PUMethod="Puppi", dataTier="nanoAOD",
                runOnMC=True, 
                JETCorrPayload="AK4PFPuppi",
                JETCorrLevels=["L1FastJet", "L2Relative","L3Absolute", "L2L3Residual"],
@@ -42,8 +42,10 @@ def addCustomJets(process, verbose=False, table=False):
         eventSelection = "ZMuMu",
         doEventSelection = True,
         verbose = verbose,
+        minPartPt = 1.0,
     )
     process.GenSimonJets = GenSimonJetProducer.clone(
+        minPartPt = 0.0,
         src = "ak4GenJetsNoNu",
         eventSelection = "ZMuMu",
         doEventSelection = True,
@@ -51,16 +53,36 @@ def addCustomJets(process, verbose=False, table=False):
     )
 
     process.GenFullEventJets = CandidateFullEventJetProducer.clone(
-        partSrc = "genParticlesForJetsNoNuTMP",
+        minPartPt = 0.0,
+        partSrc = "packedGenParticlesForJetsNoNu",
         #jetSrc = "SimonJets",
         eventSelection = "ZMuMu",
         doEventSelection = True,
         verbose = verbose
     )
 
+    process.GenShadowJets = CandidateShadowJetProducer.clone(
+        minPartPt = 0.0,
+        jetSrc = "SimonJets",
+        partSrc = "packedGenParticlesForJetsNoNu",
+        eventSelection = "ZMuMu",
+        doEventSelection = True,
+        verbose = verbose
+    )
+
     process.FullEventJets = RecoFullEventJetProducer.clone(
+        minPartPt = 1.0,
         partSrc = "puppi",
         #jetSrc = "GenSimonJets",
+        eventSelection = "ZMuMu",
+        doEventSelection = True,
+        verbose = verbose
+    )
+
+    process.ShadowJets = RecoShadowJetProducer.clone(
+        minPartPt = 1.0,
+        jetSrc = "GenSimonJets",
+        partSrc = "puppi",
         eventSelection = "ZMuMu",
         doEventSelection = True,
         verbose = verbose
@@ -91,17 +113,33 @@ def addCustomJets(process, verbose=False, table=False):
             verbose = verbose,
             isGen = True
         )
+        process.ShadowJetTable = SimonJetTableProducer.clone(
+            src = "ShadowJets",
+            name = "ShadowJets",
+            verbose = verbose,
+            isGen = False
+        )
+        process.GenShadowJetTable = SimonJetTableProducer.clone(
+            src = "GenShadowJets",
+            name = "GenShadowJets",
+            verbose = verbose,
+            isGen = True
+        )
 
         process.JetsTableTask = cms.Task(process.SimonJetTable,
                                          process.GenSimonJetTable,
                                          process.FullEventJetTable,
-                                         process.GenFullEventJetTable)
+                                         process.GenFullEventJetTable,
+                                         process.ShadowJetTable,
+                                         process.GenShadowJetTable)
         process.schedule.associate(process.JetsTableTask)
 
     process.JetsTask = cms.Task(process.SimonJets,
                                 process.GenSimonJets,
                                 process.FullEventJets,
-                                process.GenFullEventJets)
+                                process.GenFullEventJets,
+                                process.ShadowJets,
+                                process.GenShadowJets)
     process.schedule.associate(process.JetsTask)
 
     return process

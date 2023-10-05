@@ -96,7 +96,7 @@ private:
 
     bool recoverLostTracks_;
 
-    std::vector<double> EMstochastic_, EMnoise_, EMconstant_;
+    std::vector<double> EMstochastic_, EMconstant_;
     std::vector<double> ECALgranularityEta_, ECALgranularityPhi_;
     std::vector<double> ECALEtaBoundaries_;
 
@@ -115,12 +115,6 @@ private:
     edm::EDGetTokenT<edm::View<jet>> recoToken_;
     edm::InputTag genTag_;
     edm::EDGetTokenT<edm::View<jet>> genToken_;
-
-    edm::InputTag recoPartsTag_;
-    edm::EDGetTokenT<edm::View<reco::Candidate>> recoPartsToken_;
-    edm::InputTag genPartsTag_;
-    edm::EDGetTokenT<edm::View<reco::Candidate>> genPartsToken_;
-    bool doLargerCollections_;
 };
 
 GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
@@ -146,7 +140,6 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
 
                 EMstochastic_(conf.getParameter<std::vector<double>>("EMstochastic")),
-                EMnoise_(conf.getParameter<std::vector<double>>("EMnoise")),
                 EMconstant_(conf.getParameter<std::vector<double>>("EMconstant")),
                 ECALgranularityEta_(conf.getParameter<std::vector<double>>("ECALgranularityEta")),
                 ECALgranularityPhi_(conf.getParameter<std::vector<double>>("ECALgranularityPhi")),
@@ -171,17 +164,8 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 recoTag_(conf.getParameter<edm::InputTag>("reco")),
                 recoToken_(consumes<edm::View<jet>>(recoTag_)),
                 genTag_(conf.getParameter<edm::InputTag>("gen")),
-                genToken_(consumes<edm::View<jet>>(genTag_)),
-                recoPartsTag_(conf.getParameter<edm::InputTag>("recoParts")),
-                recoPartsToken_(consumes<edm::View<reco::Candidate>>(recoPartsTag_)),
-                genPartsTag_(conf.getParameter<edm::InputTag>("genParts")),
-                genPartsToken_(consumes<edm::View<reco::Candidate>>(genPartsTag_)),
-                doLargerCollections_(conf.getParameter<bool>("doLargerCollections")) {
+                genToken_(consumes<edm::View<jet>>(genTag_)){
     produces<std::vector<jetmatch>>();
-    if(doLargerCollections_){
-        produces<std::vector<jetmatch>>("bigReco");
-        produces<std::vector<jetmatch>>("bigGen");
-    }
 }
 
 void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -208,7 +192,6 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<bool>("recoverLostTracks");
 
     desc.add<std::vector<double>>("EMstochastic");
-    desc.add<std::vector<double>>("EMnoise");
     desc.add<std::vector<double>>("EMconstant");
     desc.add<std::vector<double>>("ECALgranularityEta");
     desc.add<std::vector<double>>("ECALgranularityPhi");
@@ -232,9 +215,6 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
 
     desc.add<edm::InputTag>("reco");
     desc.add<edm::InputTag>("gen");
-    desc.add<edm::InputTag>("recoParts");
-    desc.add<edm::InputTag>("genParts");
-    desc.add<bool>("doLargerCollections");
 
     desc.add<int>("verbose");
     descriptions.addWithDefaultLabel(desc);
@@ -259,13 +239,6 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
     edm::Handle<edm::View<jet>> gen;
     evt.getByToken(genToken_, gen);
-
-    edm::Handle<edm::View<reco::Candidate>> genParts;
-    edm::Handle<edm::View<reco::Candidate>> recoParts;
-    if(doLargerCollections_){
-        evt.getByToken(genPartsToken_, genParts);
-        evt.getByToken(recoPartsToken_, recoParts);
-    }
 
     auto result = std::make_unique<std::vector<jetmatch>>();
     auto resultBigGen = std::make_unique<std::vector<jetmatch>>();
@@ -329,7 +302,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 refiner_,
                 dropGenFilter_, dropRecoFilter_,
                 recoverLostTracks_,
-                EMstochastic_, EMnoise_, EMconstant_,
+                EMstochastic_, EMconstant_,
                 ECALgranularityEta_, ECALgranularityPhi_,
                 ECALEtaBoundaries_,
                 HADstochastic_, HADconstant_,
@@ -355,121 +328,9 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 printf("did fit\n");
             }
         }//end if matched
-
-        if(doLargerCollections_){//if also want to match with everything
-            if(verbose_){
-                printf("matching with full event\n");
-            }
-            jet biggen;
-            makeNearbyJet(biggen, jreco, genParts);
-
-            if(verbose_){
-                printf("fit is between %lu and %lu particles\n", 
-                        jreco.particles.size(), biggen.particles.size());
-                printf("\nRECO JET\n");
-                printJet(jreco);
-                printf("\nGEN JET\n");
-                printJet(biggen);
-            }
-
-            std::unique_ptr<matcher> biggenmatch = std::make_unique<matcher>(
-                jreco, biggen, 
-                clipval_,
-                loss_, PUpt0s_,
-                PUexps_, PUpenalties_,
-                uncertainty_,
-                filters_, cutoffs_,
-                prefitters_,
-                refiner_,
-                dropGenFilter_, dropRecoFilter_,
-                recoverLostTracks_,
-                EMstochastic_, EMnoise_, EMconstant_,
-                ECALgranularityEta_, ECALgranularityPhi_,
-                ECALEtaBoundaries_,
-                HADstochastic_, HADconstant_,
-                HCALgranularityEta_, HCALgranularityPhi_,
-                HCALEtaBoundaries_,
-                CHlinear_, CHconstant_, 
-                CHMSeta_, CHMSphi_,
-                CHangularEta_, CHangularPhi_,
-                trkEtaBoundaries_, 
-                maxReFit_, verbose_);
-            biggenmatch->minimize();
-
-            jetmatch nextbiggen;
-            nextbiggen.iReco = iReco;
-            nextbiggen.iGen = 999999;
-            nextbiggen.ptrans = biggenmatch->ptrans();
-            nextbiggen.rawmat = biggenmatch->rawmat();
-
-            resultBigGen->push_back(std::move(nextbiggen));
-            if(verbose_){
-                printf("did fit\n");
-            }
-        }//end if also want to match with everything
     }//end for each reco
 
-    if(doLargerCollections_){//if want to match gen with everything
-        for(unsigned iGen=0; iGen<gen->size(); ++iGen){
-            if(verbose_){
-                printf("matching genJet %u with full event\n", iGen);
-            }
-            const jet& jgen = gen->at(iGen);
-
-            jet bigreco;
-            makeNearbyJet(bigreco, jgen, recoParts);
-
-            if(verbose_){
-                printf("fit is between %lu and %lu particles\n", 
-                        bigreco.particles.size(), jgen.particles.size());
-                printf("\nRECO JET\n");
-                printJet(bigreco);
-                printf("\nGEN JET\n");
-                printJet(jgen);
-            }
-
-            std::unique_ptr<matcher> bigrecomatch = std::make_unique<matcher>(
-                bigreco, jgen, 
-                clipval_,
-                loss_, PUpt0s_,
-                PUexps_, PUpenalties_,
-                uncertainty_,
-                filters_, cutoffs_,
-                prefitters_,
-                refiner_,
-                dropGenFilter_, dropRecoFilter_,
-                recoverLostTracks_,
-                EMstochastic_, EMnoise_, EMconstant_,
-                ECALgranularityEta_, ECALgranularityPhi_,
-                ECALEtaBoundaries_,
-                HADstochastic_, HADconstant_,
-                HCALgranularityEta_, HCALgranularityPhi_,
-                HCALEtaBoundaries_,
-                CHlinear_, CHconstant_, 
-                CHMSeta_, CHMSphi_,
-                CHangularEta_, CHangularPhi_,
-                trkEtaBoundaries_, 
-                maxReFit_, verbose_);
-            bigrecomatch->minimize();
-
-            jetmatch nextbigreco;
-            nextbigreco.iReco = 99999999;
-            nextbigreco.iGen = iGen;
-            nextbigreco.ptrans = bigrecomatch->ptrans();
-            nextbigreco.rawmat = bigrecomatch->rawmat();
-
-            resultBigReco->push_back(std::move(nextbigreco));
-            if(verbose_){
-                printf("did fit\n");
-            }
-        }
-    }
-
     evt.put(std::move(result));
-    if(doLargerCollections_){
-            evt.put(std::move(resultBigGen), "bigGen");
-            evt.put(std::move(resultBigReco), "bigReco");
-    }
 }  // end produce()
 
 DEFINE_FWK_MODULE(GenMatchProducer);

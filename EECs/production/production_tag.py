@@ -1,1 +1,1 @@
-production_tag = "test_crab_4"
+production_tag = "test_crab_8"

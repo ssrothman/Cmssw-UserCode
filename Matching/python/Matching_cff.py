@@ -17,7 +17,6 @@ def addGenMatching(process, verbose=0,
                    dropRecoFilter = GenMatchProducer.dropRecoFilter,
                    recoverLostTracks = GenMatchProducer.recoverLostTracks,
                    EMstochastic = GenMatchProducer.EMstochastic,
-                   EMnoise = GenMatchProducer.EMnoise,
                    EMconstant = GenMatchProducer.EMconstant,
                    ECALgranularityEta = GenMatchProducer.ECALgranularityEta,
                    ECALgranularityPhi = GenMatchProducer.ECALgranularityPhi,
@@ -37,12 +36,8 @@ def addGenMatching(process, verbose=0,
 
     setattr(process, name, 
         GenMatchProducer.clone(
-            reco = "FullEventJets",
-            gen = "GenFullEventJets",
-            recoParts = cms.InputTag("puppi"),
-            #genParts = cms.InputTag("packedGenParticlesForJetsNoNu"),
-            genParts = cms.InputTag("genParticlesForJetsNoNuTMP"),
-            doLargerCollections = cms.bool(False),
+            reco = "SimonJets",
+            gen = "GenSimonJets",
             verbose = verbose,
 
             PUpt0s = PUpt0s,
@@ -61,7 +56,6 @@ def addGenMatching(process, verbose=0,
             recoverLostTracks = recoverLostTracks,
 
             EMstochastic = EMstochastic,
-            EMnoise = EMnoise,
             EMconstant = EMconstant,
             ECALgranularityEta = ECALgranularityEta,
             ECALgranularityPhi = ECALgranularityPhi,
@@ -93,19 +87,19 @@ def addGenMatching(process, verbose=0,
 
     setattr(process, name+"ParticleTable", 
         SimonJetTableProducer.clone(
-            src = 'FullEventJets',
+            src = 'SimonJets',
             name = name+"Particles",
             verbose = verbose,
             isGen = False,
             addMatch = True,
             matchSrc = name,
-            genJets = 'GenFullEventJets'
+            genJets = 'GenSimonJets'
         )
     )
 
     setattr(process, name+"GenParticleTable",
         SimonJetTableProducer.clone(
-            src = 'GenFullEventJets',
+            src = 'GenSimonJets',
             name = name+"GenParticles",
             verbose = verbose,
             isGen = True,
