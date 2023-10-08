@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Config as cms
 GenMatchProducer = cms.EDProducer("GenMatchProducer",
     jetMatchingDR = cms.double(0.2),
 
-    clipval = cms.double(0.05),
+    clipval = cms.double(0.01),
 
     spatialLoss = cms.int32(0),
 
@@ -32,22 +32,22 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
 
     EMstochastic = cms.vdouble(0.17, 0.18, 0.80),
     EMconstant = cms.vdouble(0.0074, 0.0253, 0.0253),
-    ECALgranularityEta = cms.vdouble(0.0017, 0.0035, 0.0045),
-    ECALgranularityPhi = cms.vdouble(0.0018, 0.0050, 0.0055),
+    ECALgranularityEta = cms.vdouble(0.01, 0.01, 0.01),
+    ECALgranularityPhi = cms.vdouble(0.01, 0.01, 0.01),
     ECALEtaBoundaries = cms.vdouble(0.0, 1.1, 1.6, 3.0),
 
     HADstochastic = cms.vdouble(1.63, 3.90, 6.44),
     HADconstant = cms.vdouble(0.21, 0.14, 0.10),
-    HCALgranularityEta = cms.vdouble(0.016, 0.030, 0.023),
-    HCALgranularityPhi = cms.vdouble(0.018, 0.024, 0.020),
+    HCALgranularityEta = cms.vdouble(0.01, 0.01, 0.01),
+    HCALgranularityPhi = cms.vdouble(0.01, 0.01, 0.01),
     HCALEtaBoundaries = cms.vdouble(0.0, 1.3, 1.74, 3.0),
 
     CHlinear = cms.vdouble(0.000069, 0.000072, 0.000072),
     CHconstant = cms.vdouble(0.0076, 0.014, 0.018),
-    CHMSeta = cms.vdouble(0.0015, 0.0017, 0.0022),
-    CHMSphi = cms.vdouble(0.0016, 0.0020, 0.0026),
-    CHangularEta = cms.vdouble(0.00024, 0.00026, 0.00024),
-    CHangularPhi = cms.vdouble(0.00017, 0.00020, 0.00019),
+    CHMSeta = cms.vdouble(0.0000, 0.0000, 0.0000),
+    CHMSphi = cms.vdouble(0.0000, 0.0000, 0.0000),
+    CHangularEta = cms.vdouble(0.001, 0.001, 0.001),
+    CHangularPhi = cms.vdouble(0.001, 0.001, 0.001),
     trkEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
     maxReFit = cms.uint32(50),

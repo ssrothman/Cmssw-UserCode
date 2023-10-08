@@ -1,1 +1,1 @@
-production_tag = "Oct05_2023_cutoffscan"
+production_tag = "Oct06_2023_cutoffscan_fixed_highstats"
