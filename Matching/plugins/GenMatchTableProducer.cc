@@ -99,7 +99,7 @@ void GenMatchTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
 
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iReco.size(), name_+"BK", false);
   tableBK->addColumn<int>("iReco", iReco, "index in reco jet array", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("iGen", iReco, "index in gen jet array", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("iGen", iGen, "index in gen jet array", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("n_rows", n_rows, "number of rows in transfer matrix", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("n_cols", n_cols, "number of columns in transfer matrix", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
