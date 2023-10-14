@@ -7,7 +7,7 @@ defaults:
   pset: $CMSSW_BASE/src/SRothman/ResolutionStudy/test/test_res_AOD.py
   allowInvalid: False
   unitsPerJob: 10
-  totalUnits: 1000
+  totalUnits: 9900
 
 samples:
   DYJetsToLL: 

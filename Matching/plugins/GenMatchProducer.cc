@@ -87,14 +87,19 @@ private:
 
     std::string uncertainty_;
 
-    std::vector<std::string> filters_;
-    std::vector<double> cutoffs_;
+    std::vector<std::string> softflavorfilters_;
+    std::vector<std::string> hardflavorfilters_;
+    std::vector<double> filterthresholds_;
+
+    std::vector<std::string> chargefilters_;
+
     std::vector<std::string> prefitters_;
     std::string refiner_;
     std::string dropGenFilter_;
     std::string dropRecoFilter_;
 
     bool recoverLostTracks_;
+    std::vector<double> minRecoverPts_;
 
     std::vector<double> EMstochastic_, EMconstant_;
     std::vector<double> ECALgranularityEta_, ECALgranularityPhi_;
@@ -108,6 +113,12 @@ private:
     std::vector<double> CHMSeta_, CHMSphi_;
     std::vector<double> CHangularEta_, CHangularPhi_;
     std::vector<double> trkEtaBoundaries_;
+
+    std::vector<double> EM0thresholds_, HAD0thresholds_;
+    std::vector<double> HADCHthresholds_, ELEthresholds_, MUthresholds_;
+
+    std::vector<double> EM0dRcuts_, HAD0dRcuts_;
+    std::vector<double> HADCHdRcuts_, ELEdRcuts_, MUdRcuts_;
 
     unsigned maxReFit_;
 
@@ -130,15 +141,18 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
 
                 uncertainty_(conf.getParameter<std::string>("uncertainty")),
 
-                filters_(conf.getParameter<std::vector<std::string>>("filters")),
-                cutoffs_(conf.getParameter<std::vector<double>>("cutoffs")),
+                softflavorfilters_(conf.getParameter<std::vector<std::string>>("softflavorfilters")),
+                hardflavorfilters_(conf.getParameter<std::vector<std::string>>("hardflavorfilters")),
+                filterthresholds_(conf.getParameter<std::vector<double>>("filterthresholds")),
+                chargefilters_(conf.getParameter<std::vector<std::string>>("chargefilters")),
+
                 prefitters_(conf.getParameter<std::vector<std::string>>("prefitters")),
                 refiner_(conf.getParameter<std::string>("refiner")),
                 dropGenFilter_(conf.getParameter<std::string>("dropGenFilter")),
                 dropRecoFilter_(conf.getParameter<std::string>("dropRecoFilter")),
 
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
-
+                minRecoverPts_(conf.getParameter<std::vector<double>>("minRecoverPts")),
                 EMstochastic_(conf.getParameter<std::vector<double>>("EMstochastic")),
                 EMconstant_(conf.getParameter<std::vector<double>>("EMconstant")),
                 ECALgranularityEta_(conf.getParameter<std::vector<double>>("ECALgranularityEta")),
@@ -158,6 +172,18 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 CHangularEta_(conf.getParameter<std::vector<double>>("CHangularEta")),
                 CHangularPhi_(conf.getParameter<std::vector<double>>("CHangularPhi")),
                 trkEtaBoundaries_(conf.getParameter<std::vector<double>>("trkEtaBoundaries")),
+
+                EM0thresholds_(conf.getParameter<std::vector<double>>("EM0thresholds")),
+                HAD0thresholds_(conf.getParameter<std::vector<double>>("HAD0thresholds")),
+                HADCHthresholds_(conf.getParameter<std::vector<double>>("HADCHthresholds")),
+                ELEthresholds_(conf.getParameter<std::vector<double>>("ELEthresholds")),
+                MUthresholds_(conf.getParameter<std::vector<double>>("MUthresholds")),
+
+                EM0dRcuts_(conf.getParameter<std::vector<double>>("EM0dRcuts")),
+                HAD0dRcuts_(conf.getParameter<std::vector<double>>("HAD0dRcuts")),
+                HADCHdRcuts_(conf.getParameter<std::vector<double>>("HADCHdRcuts")),
+                ELEdRcuts_(conf.getParameter<std::vector<double>>("ELEdRcuts")),
+                MUdRcuts_(conf.getParameter<std::vector<double>>("MUdRcuts")),
 
                 maxReFit_(conf.getParameter<unsigned>("maxReFit")),
 
@@ -182,14 +208,19 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
 
     desc.add<std::string>("uncertainty");
 
-    desc.add<std::vector<std::string>>("filters");
-    desc.add<std::vector<double>>("cutoffs");
+    desc.add<std::vector<std::string>>("softflavorfilters");
+    desc.add<std::vector<std::string>>("hardflavorfilters");
+    desc.add<std::vector<double>>("filterthresholds");
+
+    desc.add<std::vector<std::string>>("chargefilters");
+
     desc.add<std::vector<std::string>>("prefitters");
     desc.add<std::string>("refiner");
     desc.add<std::string>("dropGenFilter");
     desc.add<std::string>("dropRecoFilter");
 
     desc.add<bool>("recoverLostTracks");
+    desc.add<std::vector<double>>("minRecoverPts");
 
     desc.add<std::vector<double>>("EMstochastic");
     desc.add<std::vector<double>>("EMconstant");
@@ -210,6 +241,18 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<std::vector<double>>("CHangularEta");
     desc.add<std::vector<double>>("CHangularPhi");
     desc.add<std::vector<double>>("trkEtaBoundaries");
+
+    desc.add<std::vector<double>>("EM0thresholds");
+    desc.add<std::vector<double>>("HAD0thresholds");
+    desc.add<std::vector<double>>("HADCHthresholds");
+    desc.add<std::vector<double>>("ELEthresholds");
+    desc.add<std::vector<double>>("MUthresholds");
+
+    desc.add<std::vector<double>>("EM0dRcuts");
+    desc.add<std::vector<double>>("HAD0dRcuts");
+    desc.add<std::vector<double>>("HADCHdRcuts");
+    desc.add<std::vector<double>>("ELEdRcuts");
+    desc.add<std::vector<double>>("MUdRcuts");
 
     desc.add<unsigned>("maxReFit");
 
@@ -297,11 +340,15 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 loss_, PUpt0s_,
                 PUexps_, PUpenalties_,
                 uncertainty_,
-                filters_, cutoffs_,
+                softflavorfilters_, 
+                hardflavorfilters_,
+                filterthresholds_,
+                chargefilters_,
                 prefitters_,
                 refiner_,
                 dropGenFilter_, dropRecoFilter_,
                 recoverLostTracks_,
+                minRecoverPts_,
                 EMstochastic_, EMconstant_,
                 ECALgranularityEta_, ECALgranularityPhi_,
                 ECALEtaBoundaries_,
@@ -312,6 +359,11 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 CHMSeta_, CHMSphi_,
                 CHangularEta_, CHangularPhi_,
                 trkEtaBoundaries_, 
+                EM0thresholds_, HAD0thresholds_, 
+                HADCHthresholds_, ELEthresholds_, MUthresholds_,
+                EM0dRcuts_, HAD0dRcuts_, 
+                HADCHdRcuts_, ELEdRcuts_, MUdRcuts_,
+
                 maxReFit_, verbose_);
             thismatch->minimize();
 

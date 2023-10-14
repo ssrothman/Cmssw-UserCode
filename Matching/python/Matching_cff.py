@@ -5,17 +5,34 @@ from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def addGenMatching(process, verbose=0,
                    name='GenMatch',
+                   
+                   jetMatchingDR = GenMatchProducer.jetMatchingDR,
+
+                   clipval = GenMatchProducer.clipval,
+
+                   spatialLoss = GenMatchProducer.spatialLoss,
+
                    PUpt0s = GenMatchProducer.PUpt0s,
                    PUexps = GenMatchProducer.PUexps,
                    PUpenalties = GenMatchProducer.PUpenalties,
+
                    uncertainty = GenMatchProducer.uncertainty,
-                   filters = GenMatchProducer.filters,
-                   cutoffs = GenMatchProducer.cutoffs,
+
+                   softflavorfilters = GenMatchProducer.softflavorfilters,
+                   hardflavorfilters = GenMatchProducer.hardflavorfilters,
+                   filterthresholds = GenMatchProducer.filterthresholds,
+
+                   chargefilters = GenMatchProducer.chargefilters,
+
                    prefitters = GenMatchProducer.prefitters,
+
                    refiner = GenMatchProducer.refiner,
                    dropGenFilter = GenMatchProducer.dropGenFilter,
                    dropRecoFilter = GenMatchProducer.dropRecoFilter,
+
                    recoverLostTracks = GenMatchProducer.recoverLostTracks,
+                   minRecoverPts = GenMatchProducer.minRecoverPts,
+
                    EMstochastic = GenMatchProducer.EMstochastic,
                    EMconstant = GenMatchProducer.EMconstant,
                    ECALgranularityEta = GenMatchProducer.ECALgranularityEta,
@@ -32,7 +49,21 @@ def addGenMatching(process, verbose=0,
                    CHMSphi = GenMatchProducer.CHMSphi,
                    CHangularEta = GenMatchProducer.CHangularEta,
                    CHangularPhi = GenMatchProducer.CHangularPhi,
-                   trkEtaBoundaries = GenMatchProducer.trkEtaBoundaries):
+                   trkEtaBoundaries = GenMatchProducer.trkEtaBoundaries,
+
+                   EM0thresholds = GenMatchProducer.EM0thresholds,
+                   HAD0thresholds = GenMatchProducer.HAD0thresholds,
+                   HADCHthresholds = GenMatchProducer.HADCHthresholds,
+                   ELEthresholds = GenMatchProducer.ELEthresholds,
+                   MUthresholds = GenMatchProducer.MUthresholds,
+
+                   EM0dRcuts = GenMatchProducer.EM0dRcuts,
+                   HAD0dRcuts = GenMatchProducer.HAD0dRcuts,
+                   HADCHdRcuts = GenMatchProducer.HADCHdRcuts,
+                   ELEdRcuts = GenMatchProducer.ELEdRcuts,
+                   MUdRcuts = GenMatchProducer.MUdRcuts,
+
+                   maxReFit = GenMatchProducer.maxReFit):
 
     setattr(process, name, 
         GenMatchProducer.clone(
@@ -40,20 +71,31 @@ def addGenMatching(process, verbose=0,
             gen = "GenSimonJets",
             verbose = verbose,
 
+            jetMatchingDR = jetMatchingDR,
+
+            clipval = clipval,
+
+            spatialLoss = spatialLoss,
+
             PUpt0s = PUpt0s,
             PUexps = PUexps,
             PUpenalties = PUpenalties,
 
             uncertainty = uncertainty,
 
-            filters = filters,
-            cutoffs = cutoffs,
+            softflavorfilters = softflavorfilters,
+            hardflavorfilters = hardflavorfilters,
+            filterthresholds = filterthresholds,
+            chargefilters = chargefilters,
+
             prefitters = prefitters,
+
             refiner = refiner,
             dropGenFilter = dropGenFilter,
             dropRecoFilter = dropRecoFilter,
 
             recoverLostTracks = recoverLostTracks,
+            minRecoverPts = minRecoverPts,
 
             EMstochastic = EMstochastic,
             EMconstant = EMconstant,
@@ -73,7 +115,19 @@ def addGenMatching(process, verbose=0,
             CHMSphi = CHMSphi,
             CHangularEta = CHangularEta,
             CHangularPhi = CHangularPhi,
-            trkEtaBoundaries = trkEtaBoundaries
+            trkEtaBoundaries = trkEtaBoundaries,
+
+            EM0thresholds = EM0thresholds,
+            HAD0thresholds = HAD0thresholds,
+            HADCHthresholds = HADCHthresholds,
+            ELEthresholds = ELEthresholds,
+            MUthresholds = MUthresholds,
+
+            EM0dRcuts = EM0dRcuts,
+            HAD0dRcuts = HAD0dRcuts,
+            HADCHdRcuts = HADCHdRcuts,
+            ELEdRcuts = ELEdRcuts,
+            MUdRcuts = MUdRcuts,
         )
     )
 
