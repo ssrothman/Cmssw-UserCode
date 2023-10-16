@@ -5,10 +5,6 @@ from SRothman.CustomJets.CustomJets_cff import *
 from SRothman.Matching.RuleMatchProducer_cfi import *
 from SRothman.ResolutionStudy.ResolutionStudyTable_cfi import *
 
-chargedfilters = ['Tight', 'Loose', 'Looser']
-calosharings = ['Off', 'Normal', 'Thresholded', 'GenThresholded', 'Both']
-recoveries = ['Free', 'Limited', 'No']
-
 def setupResolutionStudy(process, verbose=0):
     process = addCustomJets(process, verbose=verbose, table=False)
     process.SimonJets.doEventSelection = False
@@ -20,44 +16,9 @@ def setupResolutionStudy(process, verbose=0):
 
     import itertools
 
-    for setting in itertools.product(chargedfilters, calosharings, recoveries):
-        print(setting)
-        chargedfilter, calosharing, recover = setting
-
-        name = '%s%s%s'%(chargedfilter, calosharing, recover)
-
-        if chargedfilter == 'Loose':
-            loosech = 'AnyChargedNoMu'
-        elif chargedfilter == 'Looser':
-            loosech = 'AnyCharged'
-
-        hardflavorfilters = [
-            'AnyNeutral',
-            'AnyNeutralHadron',
-            'AnyChargedHadron' if chargedfilter == 'Tight' else loosech,
-            'AnyElectron' if chargedfilter == 'Tight' else loosech,
-            'AnyCharged' if chargedfilter == 'Looser' else 'AnyMuon'
-        ]
-        softflavorfilters = hardflavorfilters[:]
-        filterthresholds = [0.0, 0.0, 0.0, 0.0, 0.0]
-
-        if calosharing == 'Thresholded':
-            hardflavorfilters[0] = 'AnyNeutral'
-            softflavorfilters[0] = 'AnyPhoton'
-            filterthresholds[0] = 1.0
-        elif calosharing == 'GenThresholded':
-            hardflavorfilters[0] = 'AnyPhotonHardHadron1'
-            filterthresholds[0] = 0.0
-        elif calosharing == 'Off':
-            hardflavorfilters[0] = 'AnyPhoton'
-            filterthresholds[0] = 0.0
-        elif calosharing == 'Normal':
-            hardflavorfilters[0] = 'AnyNeutral'
-            filterthresholds[0] = 0.0
-        elif calosharing == 'Both':
-            hardflavorfilters[0] = 'AnyNeutral'
-            hardflavorfilters[1] = 'AnyNeutral'
-            filterthresholds[0] = 0.0
+    multipliers = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]
+    for mult in multipliers:
+        name = 'dRx%d'%(mult*10)
 
         process = addGenMatching(process, verbose=verbose,
                              name = name,
@@ -77,21 +38,33 @@ def setupResolutionStudy(process, verbose=0):
                              ELEthresholds =   [0.0, 0.0, 0.0],
                              MUthresholds =    [0.0, 0.0, 0.0],
 
-                             EM0dRcuts =   [0.050, 0.050, 0.070],
-                             HAD0dRcuts =  [0.100, 0.100, 0.150],
-                             HADCHdRcuts = [0.010, 0.010, 0.015],
-                             ELEdRcuts =   [0.003, 0.003, 0.005],
-                             MUdRcuts =    [0.003, 0.003, 0.005],
+                             EM0dRcuts =   [0.050*mult, 0.050*mult, 0.050*mult],
+                             HAD0dRcuts =  [0.100*mult, 0.100*mult, 0.100*mult],
+                             HADCHdRcuts = [0.010*mult, 0.010*mult, 0.010*mult],
+                             ELEdRcuts =   [0.005*mult, 0.005*mult, 0.005*mult],
+                             MUdRcuts =    [0.005*mult, 0.005*mult, 0.005*mult],
 
-                             hardflavorfilters = hardflavorfilters,
-                             softflavorfilters = softflavorfilters,
-                             filterthresholds = filterthresholds,
+                             hardflavorfilters = [
+                                'AnyNeutral',
+                                'AnyNeutralHadron',
+                                'AnyCharged',
+                                'AnyCharged',
+                                'AnyCharged'
+                             ],
+                             softflavorfilters = [
+                                'AnyPhoton',
+                                'AnyNeutralHadron',
+                                'AnyCharged',
+                                'AnyCharged',
+                                'AnyCharged'
+                             ],
+                             filterthresholds = [4.0, 0.0, 0.0, 0.0, 0.0],
 
                              chargefilters = ['ChargeSign']*5,
 
                              dropGenFilter = 'NONE',
 
-                             recoverLostTracks = recover != 'No',
-                             minRecoverPts = [0.2, 1.0] if recover == 'Limited' else [0.0, 0.0])
+                             recoverLostTracks = True,
+                             minRecoverPts = [2.0, 5.0])
                 
     return process
