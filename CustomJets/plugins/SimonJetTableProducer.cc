@@ -85,6 +85,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
     if(verbose_){
         printf("top of SimonJetTableProducer::produce()\n");
     }
+    //std::cout << "The name is " << name_ << std::endl;
   edm::Handle<edm::View<jet>> jets;
   evt.getByToken(srcToken_, jets);
 

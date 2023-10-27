@@ -1,5 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
+import numpy as np
+
+dRedges = np.linspace(0, 0.5, 51)
+dRedges[0] = 1e-10
+
 EECProducer = cms.EDProducer("EECProducer",
     reco = cms.InputTag("SimonJets"),
     gen = cms.InputTag("GenSimonJets"),
@@ -13,4 +18,6 @@ EECProducer = cms.EDProducer("EECProducer",
     p2s = cms.vuint32(1, 2, 1),
 
     verbose = cms.int32(1),
+
+    dRbinEdges = cms.vdouble(*dRedges), 
 )

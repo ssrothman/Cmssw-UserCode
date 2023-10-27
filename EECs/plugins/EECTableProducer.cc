@@ -71,6 +71,7 @@ void EECTableProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
 void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   if(verbose_){
     printf("top of EECTableProducer::produce()\n");
+    fflush(stdout);
   }
   edm::Handle<edm::View<EECresult>> EECs;
   evt.getByToken(srcToken_, EECs);
@@ -87,7 +88,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   std::vector<float> res4x3cov;
   std::vector<std::vector<float>> res4xPcov;
 
-  std::vector<int> iJet;
+  std::vector<int> iJet, iReco;
   std::vector<int> nprojwts;
   std::vector<int> nprojcov;
   std::vector<int> nres3wts;
@@ -105,6 +106,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
   for(const auto& EEC : *EECs){
       iJet.push_back(EEC.iJet);
+      iReco.push_back(EEC.iReco);
 
       for(unsigned i=0; i<EEC.wts.size(); ++i){
           projwts[i].insert(projwts[i].end(), EEC.wts[i].begin(), EEC.wts[i].end());
@@ -117,7 +119,6 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       res4wts.insert(res4wts.end(), EEC.res4wts.begin(), EEC.res4wts.end());
       nres4wts.emplace_back(EEC.res4wts.size());
   }
-
 
   auto table = std::make_unique<nanoaod::FlatTable>(projwts[0].size(), name_+"proj", false);
   for(unsigned i=0; i<orders_.size(); ++i){
@@ -135,6 +136,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iJet.size(), name_+"BK", false);
   tableBK->addColumn<int>("iJet", iJet, "index of jet", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("iReco", iReco, "index of jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nproj", nprojwts, "number of projected EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres3", nres3wts, "number of res3 EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres4", nres4wts, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);

@@ -57,39 +57,37 @@ private:
     edm::InputTag matchTag_;
     edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
 
-    void addProjected(EECresult& next, const ProjectedEECCalculator& calc);
-    void addResolved(EECresult& next, const ResolvedEECCalculator& calc);
-    template <bool PU>
-    void addNonIRC(EECresult& next, const std::vector<NonIRCEECCalculator<PU>>& calc);
-    template <bool PU1, bool PU2=false>
+    std::vector<double> dRbinEdges_, wtBinEdges_;
+
+    void addProjected(EECresult& next, const ProjectedEECCalculator& calc, bool PU);
+    void addResolved(EECresult& next, const ResolvedEECCalculator& calc, bool PU);
+    void addNonIRC(EECresult& next, const std::vector<NonIRCEECCalculator>& calc, bool PU);
     void addTransfer(EECtransfer& next, const ProjectedEECCalculator& proj, 
-                                        const std::vector<NonIRCEECCalculator<PU1>>& nonIRC, 
+                                        const std::vector<NonIRCEECCalculator>& nonIRC, 
                                         const ResolvedEECCalculator& res,
-                                        const std::vector<NonIRCEECCalculator<PU2>> * const nonIRC_reco=nullptr);
+                                        const std::vector<NonIRCEECCalculator>& nonIRC_reco);
 };
 
-template <bool PU1, bool PU2=false>
+
 void EECProducer::addTransfer(EECtransfer& next, const ProjectedEECCalculator& proj, 
-                                        const std::vector<NonIRCEECCalculator<PU1>>& nonIRC, 
+                                        const std::vector<NonIRCEECCalculator>& nonIRC, 
                                         const ResolvedEECCalculator& res,
-                                        const std::vector<NonIRCEECCalculator<PU2>> * const nonIRC_reco){
+                                        const std::vector<NonIRCEECCalculator>& nonIRC_reco){
+
     for(unsigned order=2; order<=proj.getMaxOrder(); ++order){
         next.orders.emplace_back(order);
         next.proj.emplace_back(proj.getTransfer(order));
     }
+
     for(unsigned i=0; i<nonIRC.size(); ++i){
         int larger = std::max(p1s_[i], p2s_[i]);
         int smaller = std::min(p1s_[i], p2s_[i]);
 
         next.orders.emplace_back(-10*larger-smaller);
 
-        if(nonIRC_reco){
-            next.proj.emplace_back(nonIRC[i].getTransfer(2, (*nonIRC_reco)[i]));
-        }
-        else{
-            next.proj.emplace_back(nonIRC[i].getTransfer(2));
-        }
+        next.proj.emplace_back(nonIRC[i].getTransfer(2, nonIRC_reco[i]));
     }
+
     if(doRes3_){
         next.res3 = res.getTransfer(3);
     }
@@ -98,33 +96,48 @@ void EECProducer::addTransfer(EECtransfer& next, const ProjectedEECCalculator& p
     }
 }
 
-void EECProducer::addProjected(EECresult& next, const ProjectedEECCalculator& calc){
+void EECProducer::addProjected(EECresult& next, const ProjectedEECCalculator& calc, bool PU){
     for(unsigned order=2; order<=calc.getMaxOrder(); ++order){
         next.orders.emplace_back(order);
-        next.wts.emplace_back(calc.getwts(order));
+        if(PU){
+            next.wts.emplace_back(calc.getwts_PU(order));
+        } else {
+            next.wts.emplace_back(calc.getwts(order));
+        }
         next.covs.emplace_back(calc.getCov(order));
     }
 }
 
-void EECProducer::addResolved(EECresult& next, const ResolvedEECCalculator& calc){
+void EECProducer::addResolved(EECresult& next, const ResolvedEECCalculator& calc, bool PU){
     if(doRes3_){
-        next.res3wts = calc.getwts(3);
+        if(PU){
+            next.res3wts = calc.getwts_PU(3);
+        } else {
+            next.res3wts = calc.getwts(3);
+        }
         next.cov3 = calc.getCov(3);
     }
     if(doRes4_){
-        next.res4wts = calc.getwts(4);
+        if(PU){
+            next.res4wts = calc.getwts_PU(4);
+        } else {
+            next.res4wts = calc.getwts(4);
+        }
         next.cov4 = calc.getCov(4);
     }
 }
 
-template<bool PU>
-void EECProducer::addNonIRC(EECresult& next, const std::vector<NonIRCEECCalculator<PU>>& calc){
+void EECProducer::addNonIRC(EECresult& next, const std::vector<NonIRCEECCalculator>& calc, bool PU){
     for(unsigned i=0; i<calc.size(); ++i){
         int larger = std::max(p1s_[i], p2s_[i]);
         int smaller = std::min(p1s_[i], p2s_[i]);
 
         next.orders.emplace_back(-10*larger-smaller);
-        next.wts.emplace_back(calc[i].getwts(2));
+        if(PU){
+            next.wts.emplace_back(calc[i].getwts_PU(2));
+        } else {
+            next.wts.emplace_back(calc[i].getwts(2));
+        }
         next.covs.emplace_back(calc[i].getCov(2));
     }
 }
@@ -140,10 +153,13 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
           recoToken_(consumes<edm::View<jet>>(recoTag_)),
           doGen_(conf.getParameter<bool>("doGen")),
           genTag_(conf.getParameter<edm::InputTag>("gen")),
-          matchTag_(conf.getParameter<edm::InputTag>("match")){
+          matchTag_(conf.getParameter<edm::InputTag>("match")),
+          dRbinEdges_(conf.getParameter<std::vector<double>>("dRbinEdges")){
     produces<std::vector<EECresult>>("reco");
+    produces<std::vector<EECresult>>("recoPU");
     if(doGen_){
         produces<std::vector<EECresult>>("gen");
+        produces<std::vector<EECresult>>("genUNMATCH");
         produces<std::vector<EECtransfer>>("transfer");
         genToken_ = consumes<edm::View<jet>>(genTag_);
         matchToken_ = consumes<edm::View<jetmatch>>(matchTag_);
@@ -165,13 +181,16 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<bool>("doRes3");
   desc.add<bool>("doRes4");
   desc.add<unsigned>("maxOrder");
+  desc.add<std::vector<double>>("dRbinEdges");
   descriptions.addWithDefaultLabel(desc);
 }
 
 void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   if(verbose_){
     printf("top of produce\n");
+    fflush(stdout);
   }
+
   edm::Handle<edm::View<jet>> reco;
   evt.getByToken(recoToken_, reco);
 
@@ -183,22 +202,28 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   }
   if(verbose_){
     printf("got from event\n");
+    fflush(stdout);
   }
 
   auto result = std::make_unique<std::vector<EECresult>>();
+  auto resultPU = std::make_unique<std::vector<EECresult>>();
 
   auto resultgen = std::make_unique<std::vector<EECresult>>();
+  auto resultUNMATCH = std::make_unique<std::vector<EECresult>>();
   auto resulttrans = std::make_unique<std::vector<EECtransfer>>();
 
-  boost::histogram::axis::regular<double, boost::histogram::axis::transform::log> ax{20, 1e-4, 1.0};
+  boost::histogram::axis::variable<double> dRax(dRbinEdges_);
 
   for(unsigned iReco=0; iReco<reco->size(); ++iReco){
       if(verbose_){
         printf("iReco %u\n", iReco);
+        fflush(stdout);
       }
       int iGen=-1;
       arma::mat ptrans;
-      std::vector<bool> PU;
+      std::vector<bool> PU, UNMATCHED;
+
+      PU.resize(reco->at(iReco).nPart, true);
 
       if(doGen_){
           int matchidx=-1;
@@ -210,34 +235,37 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           }
           if(matchidx>=0){
               iGen = matches->at(matchidx).iGen;
+              UNMATCHED.resize(gen->at(iGen).nPart, true);
               ptrans = matches->at(matchidx).ptrans;
 
-              arma::vec puvec = arma::sum(ptrans, 1);
-              for(unsigned i=0; i<reco->at(iReco).nPart; ++i){
-                  PU.emplace_back(puvec(i) == 0);
+              for(unsigned iPReco=0; iPReco<reco->at(iReco).nPart; ++iPReco){
+                  for(unsigned iPGen=0; iPGen<gen->at(iGen).nPart; ++iPGen){
+                      if(ptrans(iPReco, iPGen) > 0.){
+                          PU.at(iPReco) = false;
+                          UNMATCHED.at(iPGen) = false;
+                      }
+                  }
               }
           }
-      }
-      if(iGen<0){
-          PU.resize(reco->at(iReco).nPart, true);
       }
 
       if(verbose_){
         printf("iGen %d\n", iGen);
       }
       ProjectedEECCalculator projcalc(verbose_);
-      projcalc.setup(reco->at(iReco), maxOrder_, ax);
+      projcalc.setup(reco->at(iReco), maxOrder_, PU, dRax);
 
-      std::vector<NonIRCEECCalculator<true>> nirccalcs(p1s_.size());
+      std::vector<NonIRCEECCalculator> nirccalcs(p1s_.size());
       for(unsigned i=0; i<p1s_.size(); ++i){
           nirccalcs.at(i).setVerbosity(verbose_);
-          nirccalcs.at(i).setup(reco->at(iReco), 2u, PU, p1s_.at(i), p2s_.at(i), ax);
+          nirccalcs.at(i).setup(reco->at(iReco), 2u, PU, 
+                                p1s_.at(i), p2s_.at(i), dRax);
       }
 
       ResolvedEECCalculator rescalc(verbose_);
       if(doRes4_ || doRes3_){
           unsigned resorder = doRes4_ ? 4 : 3;
-          rescalc.setup(reco->at(iReco), resorder, ax);
+          rescalc.setup(reco->at(iReco), resorder, PU, dRax);
       }
       if(verbose_){
         printf("setup reco calculators with %u particles\n", reco->at(iReco).nPart);
@@ -264,33 +292,46 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       }
       EECresult next;
       next.iJet = iReco;
-      addProjected(next, projcalc);
-      addNonIRC(next, nirccalcs);
-      addResolved(next, rescalc);
+      next.iReco = iReco;
+      addProjected(next, projcalc, false);
+      addNonIRC(next, nirccalcs, false);
+      addResolved(next, rescalc, false);
 
       result->push_back(std::move(next));
       if(verbose_){
         printf("pushed back result\n");
       }
 
+      EECresult nextPU;
+      nextPU.iJet = iReco;
+      nextPU.iReco = iReco;
+      addProjected(nextPU, projcalc, true);
+      addNonIRC(nextPU, nirccalcs, true);
+      addResolved(nextPU, rescalc, true);
+
+      resultPU->push_back(std::move(nextPU));
+      if(verbose_){
+        printf("pushed back resultPU\n");
+      }
+
       if(iGen >=0 ){
         ProjectedEECCalculator projTcalc(verbose_);
-        projTcalc.setup(gen->at(iGen), maxOrder_, 
-                        ptrans, reco->at(iReco), ax);
+        projTcalc.setup(gen->at(iGen), maxOrder_, UNMATCHED,
+                        ptrans, reco->at(iReco), dRax);
 
-        std::vector<NonIRCEECCalculator<false>> nircTcalcs(p1s_.size());
+        std::vector<NonIRCEECCalculator> nircTcalcs(p1s_.size());
         for(unsigned i=0; i<p1s_.size(); ++i){
-            nircTcalcs.at(i).setup(gen->at(iGen), 2,
+            nircTcalcs.at(i).setup(gen->at(iGen), 2, UNMATCHED,
                                    ptrans, reco->at(iReco),
-                                   p1s_.at(i), p2s_.at(i), ax);
+                                   p1s_.at(i), p2s_.at(i), dRax);
             nircTcalcs.at(i).setVerbosity(verbose_);
         }
 
         ResolvedEECCalculator resTcalc(verbose_);
         if(doRes4_ || doRes3_){
             unsigned resorder = doRes4_ ? 4 : 3;
-            resTcalc.setup(gen->at(iGen), resorder,
-                           ptrans, reco->at(iReco), ax);
+            resTcalc.setup(gen->at(iGen), resorder, UNMATCHED,
+                           ptrans, reco->at(iReco), dRax);
         }
 
         if(verbose_){
@@ -316,19 +357,32 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
         EECresult nextGen;
         nextGen.iJet = iGen;
-        addProjected(nextGen, projTcalc);
-        addNonIRC(nextGen, nircTcalcs);
-        addResolved(nextGen, resTcalc);
+        nextGen.iReco = iReco;
+        addProjected(nextGen, projTcalc, false);
+        addNonIRC(nextGen, nircTcalcs, false);
+        addResolved(nextGen, resTcalc, false);
 
         resultgen->push_back(std::move(nextGen));
         if(verbose_){
           printf("pushed back gen result\n");
         }
 
+        EECresult nextGenUNMATCH;
+        nextGenUNMATCH.iReco = iReco;
+        nextGenUNMATCH.iJet = iGen;
+        addProjected(nextGenUNMATCH, projTcalc, true);
+        addNonIRC(nextGenUNMATCH, nircTcalcs, true);
+        addResolved(nextGenUNMATCH, resTcalc, true);
+
+        resultUNMATCH->push_back(std::move(nextGenUNMATCH));
+        if(verbose_){
+          printf("pushed back genUNMATCH result\n");
+        }
+
         EECtransfer nextTransfer;
         nextTransfer.iReco = iReco;
         nextTransfer.iGen = iGen;
-        addTransfer(nextTransfer, projTcalc, nircTcalcs, resTcalc, &nirccalcs);
+        addTransfer(nextTransfer, projTcalc, nircTcalcs, resTcalc, nirccalcs);
 
         resulttrans->push_back(std::move(nextTransfer));
         if(verbose_){
@@ -338,9 +392,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   }
 
   evt.put(std::move(result), "reco");
+  evt.put(std::move(resultPU), "recoPU");
   if(doGen_){
       evt.put(std::move(resultgen), "gen");
       evt.put(std::move(resulttrans), "transfer");
+      evt.put(std::move(resultUNMATCH), "genUNMATCH");
   }
   if(verbose_){
       printf("put into event\n");

@@ -2,7 +2,7 @@
 #define SROTHMAN_DATAFORMATS_EEC_H
 
 struct EECresult{
-    unsigned iJet; 
+    unsigned iJet, iReco; 
 
     std::vector<int> orders;
     std::vector<std::vector<double>> wts;
@@ -13,6 +13,11 @@ struct EECresult{
 
     std::vector<double> res4wts;
     arma::mat cov4;
+
+    EECresult() : iJet(0), iReco(0), orders(), 
+                  wts(), covs(), 
+                  res3wts(), cov3(), 
+                  res4wts(), cov4() {}
 };
 
 struct EECtransfer{
