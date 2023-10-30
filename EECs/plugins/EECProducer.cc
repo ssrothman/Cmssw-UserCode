@@ -47,6 +47,7 @@ private:
     unsigned maxOrder_;
     std::vector<unsigned> p1s_, p2s_;
     bool doRes3_, doRes4_;
+    bool normToRaw_;
 
     edm::InputTag recoTag_;
     edm::EDGetTokenT<edm::View<jet>> recoToken_;
@@ -57,7 +58,7 @@ private:
     edm::InputTag matchTag_;
     edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
 
-    std::vector<double> dRbinEdges_, wtBinEdges_;
+    std::vector<double> dRbinEdges_;
 
     void addProjected(EECresult& next, const ProjectedEECCalculator& calc, bool PU);
     void addResolved(EECresult& next, const ResolvedEECCalculator& calc, bool PU);
@@ -149,6 +150,7 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
           p2s_(conf.getParameter<std::vector<unsigned>>("p2s")),
           doRes3_(conf.getParameter<bool>("doRes3")),
           doRes4_(conf.getParameter<bool>("doRes4")),
+          normToRaw_(conf.getParameter<bool>("normToRaw")),
           recoTag_(conf.getParameter<edm::InputTag>("reco")),
           recoToken_(consumes<edm::View<jet>>(recoTag_)),
           doGen_(conf.getParameter<bool>("doGen")),
@@ -180,6 +182,7 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<bool>("doGen");
   desc.add<bool>("doRes3");
   desc.add<bool>("doRes4");
+  desc.add<bool>("normToRaw");
   desc.add<unsigned>("maxOrder");
   desc.add<std::vector<double>>("dRbinEdges");
   descriptions.addWithDefaultLabel(desc);
@@ -253,19 +256,19 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         printf("iGen %d\n", iGen);
       }
       ProjectedEECCalculator projcalc(verbose_);
-      projcalc.setup(reco->at(iReco), maxOrder_, PU, dRax);
+      projcalc.setup(reco->at(iReco), maxOrder_, PU, dRax, normToRaw_);
 
       std::vector<NonIRCEECCalculator> nirccalcs(p1s_.size());
       for(unsigned i=0; i<p1s_.size(); ++i){
           nirccalcs.at(i).setVerbosity(verbose_);
           nirccalcs.at(i).setup(reco->at(iReco), 2u, PU, 
-                                p1s_.at(i), p2s_.at(i), dRax);
+                                p1s_.at(i), p2s_.at(i), dRax, normToRaw_);
       }
 
       ResolvedEECCalculator rescalc(verbose_);
       if(doRes4_ || doRes3_){
           unsigned resorder = doRes4_ ? 4 : 3;
-          rescalc.setup(reco->at(iReco), resorder, PU, dRax);
+          rescalc.setup(reco->at(iReco), resorder, PU, dRax, normToRaw_);
       }
       if(verbose_){
         printf("setup reco calculators with %u particles\n", reco->at(iReco).nPart);
@@ -317,13 +320,13 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       if(iGen >=0 ){
         ProjectedEECCalculator projTcalc(verbose_);
         projTcalc.setup(gen->at(iGen), maxOrder_, UNMATCHED,
-                        ptrans, reco->at(iReco), dRax);
+                        ptrans, reco->at(iReco), dRax, normToRaw_);
 
         std::vector<NonIRCEECCalculator> nircTcalcs(p1s_.size());
         for(unsigned i=0; i<p1s_.size(); ++i){
             nircTcalcs.at(i).setup(gen->at(iGen), 2, UNMATCHED,
                                    ptrans, reco->at(iReco),
-                                   p1s_.at(i), p2s_.at(i), dRax);
+                                   p1s_.at(i), p2s_.at(i), dRax, normToRaw_);
             nircTcalcs.at(i).setVerbosity(verbose_);
         }
 
@@ -331,7 +334,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         if(doRes4_ || doRes3_){
             unsigned resorder = doRes4_ ? 4 : 3;
             resTcalc.setup(gen->at(iGen), resorder, UNMATCHED,
-                           ptrans, reco->at(iReco), dRax);
+                           ptrans, reco->at(iReco), dRax, normToRaw_);
         }
 
         if(verbose_){

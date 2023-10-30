@@ -113,11 +113,23 @@ def setupEECtest(process, verbose):
             minRecoverPts = [0.0, 0.0])
 
     process = addEECs(process, verbose,
-                      name = 'EEC',
-                      genMatch = 'GenMatch')
+                      name = 'FancyEEC',
+                      genMatch = 'GenMatch',
+                      normToRaw=True)
+
+    process = addEECs(process, verbose,
+                      name = 'FancyCorrEEC',
+                      genMatch = 'GenMatch',
+                      normToRaw=False)
 
     process = addEECs(process, verbose,
                       name = 'NaiveEEC',
-                      genMatch = 'NaiveGenMatch')
+                      genMatch = 'NaiveGenMatch',
+                      normToRaw=True)
+
+    process = addEECs(process, verbose,
+                      name = 'NaiveCorrEEC',
+                      genMatch = 'NaiveGenMatch',
+                      normToRaw=False)
     return process
  

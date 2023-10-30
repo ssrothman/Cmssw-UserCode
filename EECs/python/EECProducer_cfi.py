@@ -17,6 +17,8 @@ EECProducer = cms.EDProducer("EECProducer",
     p1s = cms.vuint32(2, 2, 3),
     p2s = cms.vuint32(1, 2, 1),
 
+    normToRaw = cms.bool(True),
+
     verbose = cms.int32(1),
 
     dRbinEdges = cms.vdouble(*dRedges), 

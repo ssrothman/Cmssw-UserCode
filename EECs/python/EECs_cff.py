@@ -4,7 +4,8 @@ from SRothman.EECs.EECTableProducer_cfi import *
 from SRothman.EECs.EECTransferTableProducer_cfi import *
 
 def addEECs(process, verbose,
-            name, genMatch):
+            name, genMatch,
+            normToRaw=EECProducer.normToRaw):
 
     setattr(process, name,
         EECProducer.clone(
@@ -16,6 +17,7 @@ def addEECs(process, verbose,
             doRes3 = False,
             p1s = [1],
             p2s = [2],
+            normToRaw = normToRaw,
             verbose = verbose
         )
     )
