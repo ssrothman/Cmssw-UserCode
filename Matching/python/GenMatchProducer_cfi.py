@@ -34,7 +34,11 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     dropRecoFilter = cms.string("NONE"),
 
     recoverLostTracks = cms.bool(False),
-    minRecoverPts = cms.vdouble(0.0, 0.0),
+    HADCHrecoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
+    ELErecoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
+
+    recoverLostHAD0 = cms.bool(False),
+    HAD0recoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
 
     EMstochastic = cms.vdouble(0.17, 0.18, 0.80),
     EMconstant = cms.vdouble(0.0074, 0.0253, 0.0253),

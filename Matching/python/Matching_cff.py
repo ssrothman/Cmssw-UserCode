@@ -31,7 +31,11 @@ def addGenMatching(process, verbose=0,
                    dropRecoFilter = GenMatchProducer.dropRecoFilter,
 
                    recoverLostTracks = GenMatchProducer.recoverLostTracks,
-                   minRecoverPts = GenMatchProducer.minRecoverPts,
+                   HADCHrecoverThresholds = GenMatchProducer.HADCHrecoverThresholds,
+                   ELErecoverThresholds = GenMatchProducer.ELErecoverThresholds,
+
+                   recoverLostHAD0 = GenMatchProducer.recoverLostHAD0,
+                   HAD0recoverThresholds = GenMatchProducer.HAD0recoverThresholds,
 
                    EMstochastic = GenMatchProducer.EMstochastic,
                    EMconstant = GenMatchProducer.EMconstant,
@@ -95,7 +99,11 @@ def addGenMatching(process, verbose=0,
             dropRecoFilter = dropRecoFilter,
 
             recoverLostTracks = recoverLostTracks,
-            minRecoverPts = minRecoverPts,
+            HADCHrecoverThresholds = HADCHrecoverThresholds,
+            ELErecoverThresholds = ELErecoverThresholds,
+
+            recoverLostHAD0 = recoverLostHAD0,
+            HAD0recoverThresholds = HAD0recoverThresholds,
 
             EMstochastic = EMstochastic,
             EMconstant = EMconstant,

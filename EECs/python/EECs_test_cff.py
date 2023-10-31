@@ -16,7 +16,7 @@ def setupEECtest(process, verbose):
     process.GenShadowJets.doEventSelection = False
 
     process = addGenMatching(process, verbose=0,
-            name = 'GenMatch',
+            name = 'CaloShare',
 
             ECALgranularityEta = [0.05, 0.05, 0.07],
             ECALgranularityPhi = [0.05, 0.05, 0.07],
@@ -60,10 +60,65 @@ def setupEECtest(process, verbose):
             dropGenFilter = 'NONE',
 
             recoverLostTracks = True,
-            minRecoverPts = [2.0, 5.0])
+            HADCHrecoverThresholds = [5.0, 5.0, 5.0],
+            ELErecoverThresholds = [5.0, 5.0, 5.0],
+
+            recoverLostHAD0 = False,
+            HAD0recoverThresholds = [5.0, 5.0, 5.0])
 
     process = addGenMatching(process, verbose=0,
-            name = 'NaiveGenMatch',
+            name = 'CaloRecover',
+
+            ECALgranularityEta = [0.05, 0.05, 0.07],
+            ECALgranularityPhi = [0.05, 0.05, 0.07],
+
+            HCALgranularityEta = [0.10, 0.10, 0.15],
+            HCALgranularityPhi = [0.10, 0.10, 0.15],
+
+            CHangularEta = [0.010, 0.010, 0.015],
+            CHangularPhi = [0.010, 0.010, 0.015],
+
+            EM0thresholds =   [0.0, 0.0, 0.0],
+            HAD0thresholds =  [0.0, 0.0, 0.0],
+            HADCHthresholds = [0.0, 0.0, 0.0],
+            ELEthresholds =   [0.0, 0.0, 0.0],
+            MUthresholds =    [0.0, 0.0, 0.0],
+
+            EM0dRcuts =   [0.050, 0.050, 0.070],
+            HAD0dRcuts =  [0.100, 0.100, 0.150],
+            HADCHdRcuts = [0.010, 0.010, 0.015],
+            ELEdRcuts =   [0.005, 0.005, 0.007],
+            MUdRcuts =    [0.005, 0.005, 0.007],
+
+            hardflavorfilters = [
+                'AnyPhoton',
+                'AnyNeutralHadron',
+                'AnyCharged',
+                'AnyCharged',
+                'AnyCharged'
+            ],
+            softflavorfilters = [
+                'AnyPhoton',
+                'AnyNeutralHadron',
+                'AnyCharged',
+                'AnyCharged',
+                'AnyCharged',
+            ],
+            filterthresholds = [3.0, 0.0, 0.0, 0.0, 0.0],
+
+            chargefilters = ['ChargeSign']*5,
+
+            dropGenFilter = 'NONE',
+
+            recoverLostTracks = True,
+            HADCHrecoverThresholds = [5.0, 5.0, 5.0],
+            ELErecoverThresholds = [5.0, 5.0, 5.0],
+
+            recoverLostHAD0 = True,
+            HAD0recoverThresholds = [5.0, 5.0, 5.0])
+
+    process = addGenMatching(process, verbose=0,
+            name = 'NaiveMatch',
 
             ECALgranularityEta = [0.05, 0.05, 0.05],
             ECALgranularityPhi = [0.05, 0.05, 0.05],
@@ -110,26 +165,36 @@ def setupEECtest(process, verbose):
             dropGenFilter = 'NONE',
 
             recoverLostTracks = False,
-            minRecoverPts = [0.0, 0.0])
+            recoverLostHAD0 = False)
 
     process = addEECs(process, verbose,
-                      name = 'FancyEEC',
-                      genMatch = 'GenMatch',
+                      name = 'CaloShareEEC',
+                      genMatch = 'CaloShare',
                       normToRaw=True)
 
     process = addEECs(process, verbose,
-                      name = 'FancyCorrEEC',
-                      genMatch = 'GenMatch',
+                      name = 'CaloRecoverEEC',
+                      genMatch = 'CaloRecover',
+                      normToRaw=True)
+
+    process = addEECs(process, verbose,
+                      name = 'CaloShareCorrEEC',
+                      genMatch = 'CaloShare',
+                      normToRaw=False)
+
+    process = addEECs(process, verbose,
+                      name = 'CaloShareCorrEEC',
+                      genMatch = 'CaloShare',
                       normToRaw=False)
 
     process = addEECs(process, verbose,
                       name = 'NaiveEEC',
-                      genMatch = 'NaiveGenMatch',
+                      genMatch = 'NaiveMatch',
                       normToRaw=True)
 
     process = addEECs(process, verbose,
-                      name = 'NaiveCorrEEC',
-                      genMatch = 'NaiveGenMatch',
+                      name = 'NaiveEEC',
+                      genMatch = 'NaiveMatch',
                       normToRaw=False)
     return process
  

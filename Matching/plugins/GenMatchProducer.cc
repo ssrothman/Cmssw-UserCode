@@ -99,7 +99,11 @@ private:
     std::string dropRecoFilter_;
 
     bool recoverLostTracks_;
-    std::vector<double> minRecoverPts_;
+    std::vector<double> HADCHrecoverThresholds_;
+    std::vector<double> ELErecoverThresholds_;
+
+    bool recoverLostHAD0_;
+    std::vector<double> HAD0recoverThresholds_;
 
     std::vector<double> EMstochastic_, EMconstant_;
     std::vector<double> ECALgranularityEta_, ECALgranularityPhi_;
@@ -152,7 +156,11 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 dropRecoFilter_(conf.getParameter<std::string>("dropRecoFilter")),
 
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
-                minRecoverPts_(conf.getParameter<std::vector<double>>("minRecoverPts")),
+                HADCHrecoverThresholds_(conf.getParameter<std::vector<double>>("HADCHrecoverThresholds")),
+                ELErecoverThresholds_(conf.getParameter<std::vector<double>>("ELErecoverThresholds")),
+                recoverLostHAD0_(conf.getParameter<bool>("recoverLostHAD0")),
+                HAD0recoverThresholds_(conf.getParameter<std::vector<double>>("HAD0recoverThresholds")),
+
                 EMstochastic_(conf.getParameter<std::vector<double>>("EMstochastic")),
                 EMconstant_(conf.getParameter<std::vector<double>>("EMconstant")),
                 ECALgranularityEta_(conf.getParameter<std::vector<double>>("ECALgranularityEta")),
@@ -220,7 +228,11 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<std::string>("dropRecoFilter");
 
     desc.add<bool>("recoverLostTracks");
-    desc.add<std::vector<double>>("minRecoverPts");
+    desc.add<std::vector<double>>("HADCHrecoverThresholds");
+    desc.add<std::vector<double>>("ELErecoverThresholds");
+
+    desc.add<bool>("recoverLostHAD0");
+    desc.add<std::vector<double>>("HAD0recoverThresholds");
 
     desc.add<std::vector<double>>("EMstochastic");
     desc.add<std::vector<double>>("EMconstant");
@@ -348,7 +360,10 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 refiner_,
                 dropGenFilter_, dropRecoFilter_,
                 recoverLostTracks_,
-                minRecoverPts_,
+                HADCHrecoverThresholds_,
+                ELErecoverThresholds_,
+                recoverLostHAD0_,
+                HAD0recoverThresholds_,
                 EMstochastic_, EMconstant_,
                 ECALgranularityEta_, ECALgranularityPhi_,
                 ECALEtaBoundaries_,
