@@ -1,1 +1,1 @@
-production_tag = "Oct30_2023_EECcorr_caloreco"
+production_tag = "Nov01_2023_highstats_herwig"

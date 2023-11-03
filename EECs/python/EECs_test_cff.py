@@ -172,29 +172,29 @@ def setupEECtest(process, verbose):
                       genMatch = 'CaloShare',
                       normToRaw=True)
 
-    process = addEECs(process, verbose,
-                      name = 'CaloRecoverEEC',
-                      genMatch = 'CaloRecover',
-                      normToRaw=True)
+    #process = addEECs(process, verbose,
+    #                  name = 'CaloShareCorrEEC',
+    #                  genMatch = 'CaloShare',
+    #                  normToRaw=False)
 
-    process = addEECs(process, verbose,
-                      name = 'CaloShareCorrEEC',
-                      genMatch = 'CaloShare',
-                      normToRaw=False)
+    #process = addEECs(process, verbose,
+    #                  name = 'CaloRecoverEEC',
+    #                  genMatch = 'CaloRecover',
+    #                  normToRaw=True)
 
-    process = addEECs(process, verbose,
-                      name = 'CaloShareCorrEEC',
-                      genMatch = 'CaloShare',
-                      normToRaw=False)
-
-    process = addEECs(process, verbose,
-                      name = 'NaiveEEC',
-                      genMatch = 'NaiveMatch',
-                      normToRaw=True)
+    #process = addEECs(process, verbose,
+    #                  name = 'CaloRecoverCorrEEC',
+    #                  genMatch = 'CaloRecover',
+    #                  normToRaw=False)
 
     process = addEECs(process, verbose,
                       name = 'NaiveEEC',
                       genMatch = 'NaiveMatch',
-                      normToRaw=False)
+                      normToRaw=True)
+
+    #process = addEECs(process, verbose,
+    #                  name = 'NaiveCorrEEC',
+    #                  genMatch = 'NaiveMatch',
+    #                  normToRaw=False)
     return process
  

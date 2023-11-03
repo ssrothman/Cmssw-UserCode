@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
@@ -94,7 +94,7 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #process = nanoAOD_customizeMC(process)
 
 from SRothman.EECs.EECs_test_cff import *
-process = setupEECtest(process, 0)
+process = setupEECtest(process, 5)
 
 # End of customisation functions
 
