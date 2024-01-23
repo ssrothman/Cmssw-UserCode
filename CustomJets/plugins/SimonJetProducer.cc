@@ -47,6 +47,7 @@ private:
     double EM0threshold_, HAD0threshold_;
     double HADCHthreshold_, ELEthreshold_, MUthreshold_;
     bool onlyFromPV_;
+    bool onlyCharged_;
 
     unsigned int maxNumPart_, minNumPart_;
 
@@ -72,7 +73,6 @@ private:
 
     bool applyJEC_;
     bool applyPuppi_;
-    bool rescaleMiniAODtruncation_;
 };
 
 template <typename T>
@@ -83,6 +83,7 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           ELEthreshold_(conf.getParameter<double>("ELEthreshold")),
           MUthreshold_(conf.getParameter<double>("MUthreshold")),
           onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
+          onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           minNumPart_(conf.getParameter<unsigned>("minNumPart")),
           verbose_(conf.getParameter<int>("verbose")),
@@ -100,8 +101,7 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           evtSelToken_(consumes<bool>(evtSelSrc_)),
           doEvtSel_(conf.getParameter<bool>("doEventSelection")),
           applyJEC_(conf.getParameter<bool>("applyJEC")),
-          applyPuppi_(conf.getParameter<bool>("applyPuppi")),
-          rescaleMiniAODtruncation_(conf.getParameter<bool>("rescaleMiniAODtruncation")){
+          applyPuppi_(conf.getParameter<bool>("applyPuppi")){
     produces<std::vector<jet>>();
 }
 
@@ -116,6 +116,7 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<double>("ELEthreshold");
 
   desc.add<bool>("onlyFromPV");
+  desc.add<bool>("onlyCharged");
 
   desc.add<unsigned>("maxNumPart");
   desc.add<unsigned>("minNumPart");
@@ -137,7 +138,6 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
 
   desc.add<bool>("applyJEC");
   desc.add<bool>("applyPuppi");
-  desc.add<bool>("rescaleMiniAODtruncation");
 
   descriptions.addWithDefaultLabel(desc);
 }
@@ -275,13 +275,13 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             if(partptr){
                 addParticle(partptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_, 
-                            onlyFromPV_,
+                            onlyFromPV_, onlyCharged_,
                             minpt, 9999,
                             maxNumPart_);
            } else if(genptr){
                 addParticle(genptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_,
-                            onlyFromPV_,
+                            onlyFromPV_, onlyCharged_,
                             minpt, 9999,
                             maxNumPart_);
            } else {
@@ -296,14 +296,6 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             printf("jec = %f\n", jecfactor);
         }
 
-        if(rescaleMiniAODtruncation_){
-            double factor = rawpt / ans.sumpt;
-            for(auto& part : ans.particles){
-                part.pt *= factor;
-            }
-            ans.sumpt *= factor;
-        }
-        
         if(ans.nPart >= 2){
             result->push_back(std::move(ans));
         }

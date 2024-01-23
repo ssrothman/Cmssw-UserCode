@@ -39,6 +39,7 @@ private:
 
     double minPartPt_;
     bool onlyFromPV_;
+    bool onlyCharged_;
     unsigned int maxNumPart_;
     double dR2window_;
 
@@ -69,6 +70,7 @@ template <typename T>
 ShadowJetProducerT<T>::ShadowJetProducerT(const edm::ParameterSet& conf)
         : minPartPt_(conf.getParameter<double>("minPartPt")),
           onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
+          onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           dR2window_(square(conf.getParameter<double>("dRwindow"))),
           verbose_(conf.getParameter<int>("verbose")),
@@ -88,6 +90,7 @@ void ShadowJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& des
 
   desc.add<double>("minPartPt");
   desc.add<bool>("onlyFromPV");
+  desc.add<bool>("onlyCharged");
   desc.add<unsigned>("maxNumPart");
   desc.add<double>("dRwindow");
 

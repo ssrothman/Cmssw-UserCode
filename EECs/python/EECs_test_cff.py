@@ -14,6 +14,7 @@ def setupEECtest(process, verbose):
                               ELEthreshold = -1.0,
                               MUthreshold = -1.0,
                               onlyFromPV = True,
+                              onlyCharged = True,
 
                               minPartPt_GEN = -1.0,
                               )
