@@ -25,5 +25,7 @@
   <use name="SRothman/DataFormats"/>
   <use name="rootminuit2"/>
   <use name="SRothman/Matching"/>
+  <use name="MagneticField/Engine"/>
+  <use name="MagneticField/Records"/>
 <Flags ADD_SUBDIR="1"/>
 </library>

@@ -1,40 +1,15 @@
 import FWCore.ParameterSet.Config as cms
 
-RecoFullEventJetProducer = cms.EDProducer("RecoFullEventJetProducer",
+FullEventJetProducer = cms.EDProducer("FullEventJetProducer",
     minPartPt = cms.double(1e-3),
-    maxNumPart = cms.uint32(512),
+    maxNumPart = cms.uint32(2048),
     maxEta = cms.double(2.4),
+    applyPuppi = cms.bool(True),
 
     eventSelection = cms.InputTag(""),
     doEventSelection = cms.bool(False),
 
     partSrc = cms.InputTag("pupppi"),
-
-    verbose = cms.int32(0)
-)
-
-GenFullEventJetProducer = cms.EDProducer("GenFullEventJetProducer",
-    minPartPt = cms.double(1e-3),
-    maxNumPart = cms.uint32(512),
-    maxEta = cms.double(2.4),
-
-    eventSelection = cms.InputTag(""),
-    doEventSelection = cms.bool(False),
-
-    partSrc = cms.InputTag("genParticles"),
-
-    verbose = cms.int32(0)
-)
-
-CandidateFullEventJetProducer = cms.EDProducer("CandidateFullEventJetProducer",
-    minPartPt = cms.double(1e-3),
-    maxNumPart = cms.uint32(512),
-    maxEta = cms.double(2.4),
-
-    eventSelection = cms.InputTag(""),
-    doEventSelection = cms.bool(False),
-
-    partSrc = cms.InputTag("genParticles"),
 
     verbose = cms.int32(0)
 )

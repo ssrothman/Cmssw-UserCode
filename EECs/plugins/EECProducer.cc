@@ -222,6 +222,14 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         printf("iReco %u\n", iReco);
         fflush(stdout);
       }
+
+      if(reco->at(iReco).nPart < 2){
+          printf("Reco jet with <2 constituents, skipping\n");
+          printf("Don't think this should actually ever happen\n");
+          throw cms::Exception("Bad reco jet");
+          continue;
+      }
+
       int iGen=-1;
       arma::mat ptrans;
       std::vector<bool> PU, UNMATCHED;

@@ -10,6 +10,9 @@
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -32,49 +35,13 @@
 #include <memory>
 #include <vector>
 
-bool hasNearby(const jet& source, const reco::Candidate& cand){
-    for(const auto& part : source.particles){
-        double dist = dR2(part.eta, part.phi,
-                        cand.eta(), cand.phi());
-        if(dist < 0.2*0.2){
-            return true;
-        }
-    }
-    return false;
-}
-
-void makeNearbyJet(jet& result, const jet& source, 
-                 const edm::Handle<edm::View<reco::Candidate>>& candidates){
-    result.nPart = 0;
-    result.sumpt = 0.0;
-    result.particles.clear();
-
-    for(const auto& cand : *candidates){
-        if(cand.pt() <= 1e-3){
-            continue;
-        }
-        if(std::abs(cand.pdgId()) < 10){
-            printf("warning: particle with pdgId=%d???? (pT = %0.4f) Skipping\n", cand.pdgId(), cand.pt());
-            continue;
-        }
-        if(hasNearby(source, cand)){
-            particle nextpart(cand.pt(), cand.eta(), cand.phi(),
-                            0.0, 0.0, 0.0,
-                            std::abs(cand.pdgId()), cand.charge());
-            result.particles.push_back(std::move(nextpart));
-            result.nPart++;
-            result.sumpt += cand.pt();
-        }
-    } 
-    //TODO: sort?
-}
-
 class GenMatchProducer : public edm::stream::EDProducer<> {
 public:
     explicit GenMatchProducer(const edm::ParameterSet&);
     ~GenMatchProducer() override {}
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
+    void beginRun(edm::Run const&, edm::EventSetup const&) override;
 private:
     int verbose_;
 
@@ -93,14 +60,18 @@ private:
 
     std::vector<std::string> chargefilters_;
 
+    std::vector<std::string> dRfilters_;
+
     std::vector<std::string> prefitters_;
     std::string refiner_;
     std::string dropGenFilter_;
     std::string dropRecoFilter_;
 
     bool recoverLostTracks_;
+    bool propagateLostTracks_;
     std::vector<double> HADCHrecoverThresholds_;
     std::vector<double> ELErecoverThresholds_;
+    math::XYZVector B_;
 
     bool recoverLostHAD0_;
     std::vector<double> HAD0recoverThresholds_;
@@ -121,8 +92,11 @@ private:
     std::vector<double> EM0thresholds_, HAD0thresholds_;
     std::vector<double> HADCHthresholds_, ELEthresholds_, MUthresholds_;
 
-    std::vector<double> EM0dRcuts_, HAD0dRcuts_;
-    std::vector<double> HADCHdRcuts_, ELEdRcuts_, MUdRcuts_;
+    std::vector<double> EM0constDR_, EM0floatDR_, EM0capDR_;
+    std::vector<double> HAD0constDR_, HAD0floatDR_, HAD0capDR_;
+    std::vector<double> HADCHconstDR_, HADCHfloatDR_, HADCHcapDR_;
+    std::vector<double> ELEconstDR_, ELEfloatDR_, ELEcapDR_;
+    std::vector<double> MUconstDR_, MUfloatDR_, MUcapDR_;
 
     unsigned maxReFit_;
 
@@ -149,6 +123,7 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 hardflavorfilters_(conf.getParameter<std::vector<std::string>>("hardflavorfilters")),
                 filterthresholds_(conf.getParameter<std::vector<double>>("filterthresholds")),
                 chargefilters_(conf.getParameter<std::vector<std::string>>("chargefilters")),
+                dRfilters_(conf.getParameter<std::vector<std::string>>("dRfilters")),
 
                 prefitters_(conf.getParameter<std::vector<std::string>>("prefitters")),
                 refiner_(conf.getParameter<std::string>("refiner")),
@@ -156,6 +131,7 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 dropRecoFilter_(conf.getParameter<std::string>("dropRecoFilter")),
 
                 recoverLostTracks_(conf.getParameter<bool>("recoverLostTracks")),
+                propagateLostTracks_(conf.getParameter<bool>("propagateLostTracks")),
                 HADCHrecoverThresholds_(conf.getParameter<std::vector<double>>("HADCHrecoverThresholds")),
                 ELErecoverThresholds_(conf.getParameter<std::vector<double>>("ELErecoverThresholds")),
                 recoverLostHAD0_(conf.getParameter<bool>("recoverLostHAD0")),
@@ -187,11 +163,25 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 ELEthresholds_(conf.getParameter<std::vector<double>>("ELEthresholds")),
                 MUthresholds_(conf.getParameter<std::vector<double>>("MUthresholds")),
 
-                EM0dRcuts_(conf.getParameter<std::vector<double>>("EM0dRcuts")),
-                HAD0dRcuts_(conf.getParameter<std::vector<double>>("HAD0dRcuts")),
-                HADCHdRcuts_(conf.getParameter<std::vector<double>>("HADCHdRcuts")),
-                ELEdRcuts_(conf.getParameter<std::vector<double>>("ELEdRcuts")),
-                MUdRcuts_(conf.getParameter<std::vector<double>>("MUdRcuts")),
+                EM0constDR_(conf.getParameter<std::vector<double>>("EM0constDR")),
+                EM0floatDR_(conf.getParameter<std::vector<double>>("EM0floatDR")),
+                EM0capDR_(conf.getParameter<std::vector<double>>("EM0capDR")),
+
+                HAD0constDR_(conf.getParameter<std::vector<double>>("HAD0constDR")),
+                HAD0floatDR_(conf.getParameter<std::vector<double>>("HAD0floatDR")),
+                HAD0capDR_(conf.getParameter<std::vector<double>>("HAD0capDR")),
+
+                HADCHconstDR_(conf.getParameter<std::vector<double>>("HADCHconstDR")),
+                HADCHfloatDR_(conf.getParameter<std::vector<double>>("HADCHfloatDR")),
+                HADCHcapDR_(conf.getParameter<std::vector<double>>("HADCHcapDR")),
+
+                ELEconstDR_(conf.getParameter<std::vector<double>>("ELEconstDR")),
+                ELEfloatDR_(conf.getParameter<std::vector<double>>("ELEfloatDR")),
+                ELEcapDR_(conf.getParameter<std::vector<double>>("ELEcapDR")),
+
+                MUconstDR_(conf.getParameter<std::vector<double>>("MUconstDR")),
+                MUfloatDR_(conf.getParameter<std::vector<double>>("MUfloatDR")),
+                MUcapDR_(conf.getParameter<std::vector<double>>("MUcapDR")),
 
                 maxReFit_(conf.getParameter<unsigned>("maxReFit")),
 
@@ -199,7 +189,19 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 recoToken_(consumes<edm::View<jet>>(recoTag_)),
                 genTag_(conf.getParameter<edm::InputTag>("gen")),
                 genToken_(consumes<edm::View<jet>>(genTag_)){
+
     produces<std::vector<jetmatch>>();
+}
+
+void GenMatchProducer::beginRun(edm::Run const& run, edm::EventSetup const& setup) {
+    if (verbose_ > 0) {
+        std::cout << "GenMatchProducer::beginRun" << std::endl;
+    }
+
+    edm::ESHandle<MagneticField> magfield;
+    setup.get<IdealMagneticFieldRecord>().get(magfield);
+    magfield=magfield.product();
+    B_=magfield->inTesla(GlobalPoint(0,0,0));
 }
 
 void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -221,6 +223,7 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<std::vector<double>>("filterthresholds");
 
     desc.add<std::vector<std::string>>("chargefilters");
+    desc.add<std::vector<std::string>>("dRfilters");
 
     desc.add<std::vector<std::string>>("prefitters");
     desc.add<std::string>("refiner");
@@ -228,6 +231,7 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<std::string>("dropRecoFilter");
 
     desc.add<bool>("recoverLostTracks");
+    desc.add<bool>("propagateLostTracks");
     desc.add<std::vector<double>>("HADCHrecoverThresholds");
     desc.add<std::vector<double>>("ELErecoverThresholds");
 
@@ -260,11 +264,25 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     desc.add<std::vector<double>>("ELEthresholds");
     desc.add<std::vector<double>>("MUthresholds");
 
-    desc.add<std::vector<double>>("EM0dRcuts");
-    desc.add<std::vector<double>>("HAD0dRcuts");
-    desc.add<std::vector<double>>("HADCHdRcuts");
-    desc.add<std::vector<double>>("ELEdRcuts");
-    desc.add<std::vector<double>>("MUdRcuts");
+    desc.add<std::vector<double>>("EM0constDR");
+    desc.add<std::vector<double>>("EM0floatDR");
+    desc.add<std::vector<double>>("EM0capDR");
+
+    desc.add<std::vector<double>>("HAD0constDR");
+    desc.add<std::vector<double>>("HAD0floatDR");
+    desc.add<std::vector<double>>("HAD0capDR");
+
+    desc.add<std::vector<double>>("HADCHconstDR");
+    desc.add<std::vector<double>>("HADCHfloatDR");
+    desc.add<std::vector<double>>("HADCHcapDR");
+
+    desc.add<std::vector<double>>("ELEconstDR");
+    desc.add<std::vector<double>>("ELEfloatDR");
+    desc.add<std::vector<double>>("ELEcapDR");
+
+    desc.add<std::vector<double>>("MUconstDR");
+    desc.add<std::vector<double>>("MUfloatDR");
+    desc.add<std::vector<double>>("MUcapDR");
 
     desc.add<unsigned>("maxReFit");
 
@@ -314,7 +332,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         
             double dist = dR2(jreco.eta, jreco.phi, 
                             jgen.eta, jgen.phi);
-            if(dist > jetMatchingDR2_){
+            if(dist > jetMatchingDR2_ && jgen.eta != 9999){
                 continue;
             }
 
@@ -356,12 +374,15 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 hardflavorfilters_,
                 filterthresholds_,
                 chargefilters_,
+                dRfilters_,
                 prefitters_,
                 refiner_,
                 dropGenFilter_, dropRecoFilter_,
                 recoverLostTracks_,
+                propagateLostTracks_,
                 HADCHrecoverThresholds_,
                 ELErecoverThresholds_,
+                B_.z(),
                 recoverLostHAD0_,
                 HAD0recoverThresholds_,
                 EMstochastic_, EMconstant_,
@@ -376,8 +397,12 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                 trkEtaBoundaries_, 
                 EM0thresholds_, HAD0thresholds_, 
                 HADCHthresholds_, ELEthresholds_, MUthresholds_,
-                EM0dRcuts_, HAD0dRcuts_, 
-                HADCHdRcuts_, ELEdRcuts_, MUdRcuts_,
+
+                EM0constDR_, EM0floatDR_, EM0capDR_,
+                HAD0constDR_, HAD0floatDR_, HAD0capDR_,
+                HADCHconstDR_, HADCHfloatDR_, HADCHcapDR_,
+                ELEconstDR_, ELEfloatDR_, ELEcapDR_,
+                MUconstDR_, MUfloatDR_, MUcapDR_,
 
                 maxReFit_, verbose_);
             thismatch->minimize();

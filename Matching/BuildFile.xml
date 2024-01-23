@@ -19,6 +19,7 @@
 <use name="PhysicsTools/TensorFlow" />
 <use name="rootminuit2"/>
 <use name="SRothman/SimonTools"/>
+<use name="CommonTools/BaseParticlePropagator"/>
 <Flags ADD_SUBDIR="1"/>
 <export>
   <lib name="1"/>

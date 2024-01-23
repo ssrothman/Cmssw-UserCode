@@ -5,6 +5,9 @@ from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def addGenMatching(process, verbose=0,
                    name='GenMatch',
+
+                   reco = 'SimonJets',
+                   gen = 'GenSimonJets',
                    
                    jetMatchingDR = GenMatchProducer.jetMatchingDR,
 
@@ -24,6 +27,8 @@ def addGenMatching(process, verbose=0,
 
                    chargefilters = GenMatchProducer.chargefilters,
 
+                   dRfilters = GenMatchProducer.dRfilters,
+
                    prefitters = GenMatchProducer.prefitters,
 
                    refiner = GenMatchProducer.refiner,
@@ -31,6 +36,7 @@ def addGenMatching(process, verbose=0,
                    dropRecoFilter = GenMatchProducer.dropRecoFilter,
 
                    recoverLostTracks = GenMatchProducer.recoverLostTracks,
+                   propagateLostTracks = GenMatchProducer.propagateLostTracks,
                    HADCHrecoverThresholds = GenMatchProducer.HADCHrecoverThresholds,
                    ELErecoverThresholds = GenMatchProducer.ELErecoverThresholds,
 
@@ -61,18 +67,32 @@ def addGenMatching(process, verbose=0,
                    ELEthresholds = GenMatchProducer.ELEthresholds,
                    MUthresholds = GenMatchProducer.MUthresholds,
 
-                   EM0dRcuts = GenMatchProducer.EM0dRcuts,
-                   HAD0dRcuts = GenMatchProducer.HAD0dRcuts,
-                   HADCHdRcuts = GenMatchProducer.HADCHdRcuts,
-                   ELEdRcuts = GenMatchProducer.ELEdRcuts,
-                   MUdRcuts = GenMatchProducer.MUdRcuts,
+                   EM0constDR = GenMatchProducer.EM0constDR,
+                   EM0floatDR = GenMatchProducer.EM0floatDR,
+                   EM0capDR = GenMatchProducer.EM0capDR,
+
+                   HAD0constDR = GenMatchProducer.HAD0constDR,
+                   HAD0floatDR = GenMatchProducer.HAD0floatDR,
+                   HAD0capDR = GenMatchProducer.HAD0capDR,
+
+                   HADCHconstDR = GenMatchProducer.HADCHconstDR,
+                   HADCHfloatDR = GenMatchProducer.HADCHfloatDR,
+                   HADCHcapDR = GenMatchProducer.HADCHcapDR,
+
+                   ELEconstDR = GenMatchProducer.ELEconstDR,
+                   ELEfloatDR = GenMatchProducer.ELEfloatDR,
+                   ELEcapDR = GenMatchProducer.ELEcapDR,
+
+                   MUconstDR = GenMatchProducer.MUconstDR,
+                   MUfloatDR = GenMatchProducer.MUfloatDR,
+                   MUcapDR = GenMatchProducer.MUcapDR,
 
                    maxReFit = GenMatchProducer.maxReFit):
 
     setattr(process, name, 
         GenMatchProducer.clone(
-            reco = "SimonJets",
-            gen = "GenSimonJets",
+            reco = reco,
+            gen = gen,
             verbose = verbose,
 
             jetMatchingDR = jetMatchingDR,
@@ -92,6 +112,8 @@ def addGenMatching(process, verbose=0,
             filterthresholds = filterthresholds,
             chargefilters = chargefilters,
 
+            dRfilters = dRfilters,
+
             prefitters = prefitters,
 
             refiner = refiner,
@@ -101,6 +123,7 @@ def addGenMatching(process, verbose=0,
             recoverLostTracks = recoverLostTracks,
             HADCHrecoverThresholds = HADCHrecoverThresholds,
             ELErecoverThresholds = ELErecoverThresholds,
+            propagateLostTracks = propagateLostTracks,
 
             recoverLostHAD0 = recoverLostHAD0,
             HAD0recoverThresholds = HAD0recoverThresholds,
@@ -131,11 +154,25 @@ def addGenMatching(process, verbose=0,
             ELEthresholds = ELEthresholds,
             MUthresholds = MUthresholds,
 
-            EM0dRcuts = EM0dRcuts,
-            HAD0dRcuts = HAD0dRcuts,
-            HADCHdRcuts = HADCHdRcuts,
-            ELEdRcuts = ELEdRcuts,
-            MUdRcuts = MUdRcuts,
+            EM0constDR = EM0constDR,
+            EM0floatDR = EM0floatDR,
+            EM0capDR = EM0capDR,
+
+            HAD0constDR = HAD0constDR,
+            HAD0floatDR = HAD0floatDR,
+            HAD0capDR = HAD0capDR,
+
+            HADCHconstDR = HADCHconstDR,
+            HADCHfloatDR = HADCHfloatDR,
+            HADCHcapDR = HADCHcapDR,
+
+            ELEconstDR = ELEconstDR,
+            ELEfloatDR = ELEfloatDR,
+            ELEcapDR = ELEcapDR,
+
+            MUconstDR = MUconstDR,
+            MUfloatDR = MUfloatDR,
+            MUcapDR = MUcapDR,
         )
     )
 
@@ -149,19 +186,19 @@ def addGenMatching(process, verbose=0,
 
     setattr(process, name+"ParticleTable", 
         SimonJetTableProducer.clone(
-            src = 'SimonJets',
+            src = reco,
             name = name+"Particles",
             verbose = verbose,
             isGen = False,
             addMatch = True,
             matchSrc = name,
-            genJets = 'GenSimonJets'
+            genJets = gen
         )
     )
 
     setattr(process, name+"GenParticleTable",
         SimonJetTableProducer.clone(
-            src = 'GenSimonJets',
+            src = gen,
             name = name+"GenParticles",
             verbose = verbose,
             isGen = True,

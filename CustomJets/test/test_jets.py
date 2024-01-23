@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 from Configuration.Eras.Modifier_run2_nanoAOD_106Xv2_cff import run2_nanoAOD_106Xv2
 
-process = cms.Process('NANO',Run2_2018)
+process = cms.Process('NANO',Run2_2018,run2_nanoAOD_106Xv2)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -18,21 +18,20 @@ process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
-#process.load('PhysicsTools.NanoAOD.nano_cff')
+process.load('PhysicsTools.NanoAOD.nano_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(50)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-    #fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL18RECO/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v1/260000/000B833A-57AD-E848-8540-903AE7834D8A.root'),
-    fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL18RECO/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v1/260004/890418A4-EED8-C24C-A784-3DAB9A0D1127.root'),
+    #fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL17MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120000/005B6A7C-B0B1-A745-879B-017FE7933B77.root'),
+    fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL18MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/120000/001C8DDF-599C-5E45-BF2C-76F887C9ADE9.root'),
     secondaryFileNames = cms.untracked.vstring(),
-    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1,189432088-1,1,189432088+1))
-    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1,185387769-1,1,185387769+1))
+    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1, 129169955, 1, 129169957))
 )
 
 process.options = cms.untracked.PSet(
@@ -57,7 +56,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     #fileName = cms.untracked.string('/data/submit/cms/store/user/srothman/NANO_NANO_10k_3.root'),
     #fileName = cms.untracked.string('~/cmsdata/NANO_NANO.root'),
-    fileName = cms.untracked.string('NANO_AOD.root'),
+    fileName = cms.untracked.string('NANO_miniAOD.root'),
     outputCommands = process.NANOAODSIMEventContent.outputCommands,
     #autoFlush = cms.untracked.int32(1)
 )
@@ -69,20 +68,18 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '106X_upgrade2018_realistic_v16_L1v1', '')
 
 # Path and EndPath definitions
-#process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
-#process.endjob_step = cms.EndPath(process.endOfProcess)
+process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
+process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 
 # Schedule definition
-#process.schedule = cms.Schedule(process.nanoAOD_step,process.endjob_step,process.NANOAODSIMoutput_step)
-process.schedule = cms.Schedule(process.NANOAODSIMoutput_step)
-
+process.schedule = cms.Schedule(process.nanoAOD_step,process.endjob_step,process.NANOAODSIMoutput_step)
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(4)
-process.options.numberOfStreams=cms.untracked.uint32(4)
+process.options.numberOfThreads=cms.untracked.uint32(1)
+process.options.numberOfStreams=cms.untracked.uint32(1)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 # customisation of the process.
@@ -91,11 +88,62 @@ process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC 
 
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
-#process = nanoAOD_customizeMC(process)
+process = nanoAOD_customizeMC(process)
 
-from SRothman.EECs.EECs_test_cff import *
-process = setupEECtest(process, 0, miniAOD=False)
+from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
+process.patJetsReapplyJECPuppi.tagInfoSources += ['slimmedJetsPuppi:tagInfos']
+process.patJetsReapplyJECPuppi.addBTagInfo = True
+process.patJetsReapplyJECPuppi.addTagInfos = True
+
+process.jetIdLepVetoPuppi = cms.EDProducer("PatJetIDValueMapProducer",
+    filterParams = cms.PSet(
+        quality = cms.string("TIGHTLEPVETO"),
+        version = cms.string("RUN2ULPUPPI"),
+    ),
+    src = cms.InputTag('patJetsReapplyJECPuppi')
+)
+
+from RecoJets.JetProducers.PileupJetID_cfi import _chsalgos_106X_UL18
+process.pileupJetIdPuppi = process.pileupJetId.clone( 
+    jets=cms.InputTag('patJetsReapplyJECPuppi'),
+    inputIsCorrected=True,
+    applyJec=False,
+    vertexes=cms.InputTag("offlineSlimmedPrimaryVertices"),
+    algos = cms.VPSet(_chsalgos_106X_UL18),
+)
+
+process.updatedJetsPuppi = cms.EDProducer("PATJetUserDataEmbedder",
+    src = cms.InputTag("patJetsReapplyJECPuppi"),
+    userInts = cms.PSet(
+        puID = cms.InputTag("pileupJetIdPuppi:fullId"),
+        jetIdLepVeto = cms.InputTag("jetIdLepVetoPuppi"),
+    ) 
+)
+
+process.extraJetTask = cms.Task(
+    process.pileupJetIdPuppi,
+    process.jetIdLepVetoPuppi,
+    process.updatedJetsPuppi,
+)
+process.schedule.associate(process.extraJetTask)
+
+process.PatJetTestProducer = cms.EDProducer("PatJetTestProducer",
+    verbose = cms.int32(1),
+    src = cms.InputTag("updatedJetsPuppi"),
+    packedCandSrc = cms.InputTag("packedPFCandidates")
+)
+process.PatJetTestTable = SimonJetTableProducer.clone(
+    src = 'PatJetTestProducer',
+    name = 'PatJetTest',
+    verbose=0,
+    isGen = False
+)
+process.PatJetTask = cms.Task(
+    process.PatJetTestProducer,
+    process.PatJetTestTable
+)
+process.schedule.associate(process.PatJetTask)
 # End of customisation functions
 
 # Customisation from command line
@@ -106,5 +154,3 @@ process.MessageLogger.cerr.FwkReport.reportEvery=1
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
 # End adding early deletion
-#print("PUPPI cands: ", process.puppi.candName)
-#print("deepflav cands: ", process.pfDeepFlavourTagInfosAK4PFPuppi.candidates)

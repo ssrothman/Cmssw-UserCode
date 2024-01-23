@@ -22,6 +22,7 @@
 
 #include "SRothman/DataFormats/interface/jets.h"
 #include "SRothman/DataFormats/interface/matching.h"
+#include "SRothman/SimonTools/src/isID.h"
 
 #include <iostream>
 #include <memory>
@@ -104,6 +105,11 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   std::vector<float> partPhi;
   std::vector<int> pdgid;
   std::vector<int> charge;
+  //extras
+  std::vector<float> vtx_x, vtx_y, vtx_z;
+  std::vector<float> dxy, dz;
+  std::vector<int> fromPV;
+  std::vector<float> puppiWeight;
 
   std::vector<int> nmatch;
   std::vector<float> matchPt, matchEta, matchPhi;
@@ -114,7 +120,11 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   std::vector<float> eta;
   std::vector<float> phi;
   std::vector<int> iJet;
+  std::vector<int> iCHS;
   std::vector<int> nPart;
+  std::vector<float> jecfactor;
+  //extras
+  std::vector<int> nELE, nMU, nHADCH, nEM0, nHAD0;
 
   std::vector<float> genPt;
   std::vector<float> genEta;
@@ -124,10 +134,17 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   for(const auto& j : *jets){
       pt.push_back(j.pt);
       rawPt.push_back(j.sumpt);
+      jecfactor.push_back(j.jecfactor);
       eta.push_back(j.eta);
       phi.push_back(j.phi);
       iJet.push_back(j.iJet);
+      iCHS.push_back(j.iCHS);
       nPart.push_back(j.nPart);
+      nEM0.push_back(j.nEM0);
+      nHAD0.push_back(j.nHAD0);
+      nHADCH.push_back(j.nHADCH);
+      nELE.push_back(j.nELE);
+      nMU.push_back(j.nMU);
 
       if(addMatch_){//if doing matches
           std::vector<int> nextMatches, nextMatchMuon, nextMatchEle, nextMatchEM0, nextMatchHAD0, nextMatchHADCH;
@@ -160,15 +177,14 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
                           unsigned idx = isGen_ ? j : i;
                           nextMatches.at(idx) += 1;
                           if (!isGen_){
-                              unsigned pdgId = genJets->at(match.iGen).particles.at(j).pdgid;
-                              int charge = genJets->at(match.iGen).particles.at(j).charge;
-                              if(pdgId == 13){
+                              const auto& part = genJets->at(match.iGen).particles.at(j);
+                              if(isMU(part)){
                                   nextMatchMuon.at(idx) += 1;
-                              } else if(pdgId == 11){
+                              } else if(isELE(part)){
                                   nextMatchEle.at(idx) += 1;
-                              } else if(pdgId == 22){
+                              } else if(isEM0(part)){
                                   nextMatchEM0.at(idx) += 1;
-                              } else if(charge == 0){
+                              } else if(isHAD0(part)){
                                   nextMatchHAD0.at(idx) += 1;
                               } else {
                                   nextMatchHADCH.at(idx) += 1;
@@ -232,6 +248,13 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
           partPhi.push_back(p.phi);
           pdgid.push_back(p.pdgid);
           charge.push_back(p.charge);
+          vtx_x.push_back(p.vtx_x);
+          vtx_y.push_back(p.vtx_y);
+          vtx_z.push_back(p.vtx_z);
+          dxy.push_back(p.dxy);
+          dz.push_back(p.dz);
+          fromPV.push_back(p.fromPV);
+          puppiWeight.push_back(p.puppiweight);
       }
       ++iJ;
   }
@@ -245,6 +268,13 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   table->addColumn<float>("phi", partPhi, "particle phi", nanoaod::FlatTable::FloatColumn);
   table->addColumn<int>("pdgid", pdgid, "particle pdgid", nanoaod::FlatTable::IntColumn);
   table->addColumn<int>("charge", charge, "particle charge", nanoaod::FlatTable::IntColumn);
+  table->addColumn<float>("vtx_x", vtx_x, "vertex x coord", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<float>("vtx_y", vtx_y, "vertex y coord", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<float>("vtx_z", vtx_z, "vertex z coord", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<float>("dxy", dxy, "dxy", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<float>("dz", dz, "dz", nanoaod::FlatTable::FloatColumn);
+  table->addColumn<int>("fromPV", fromPV, "from PV enum", nanoaod::FlatTable::IntColumn);
+  table->addColumn<float>("puppiWeight", puppiWeight, "Puppi weight", nanoaod::FlatTable::FloatColumn);
   if(addMatch_){
     table->addColumn<int>("nmatch", nmatch, "number of particle matches", nanoaod::FlatTable::IntColumn);
   }
@@ -266,9 +296,16 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   auto tableBK = std::make_unique<nanoaod::FlatTable>(pt.size(), name_+"BK", false);
   tableBK->addColumn<float>("jetPt", pt, "jet pt", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<float>("jetRawPt", rawPt, "raw jet pt", nanoaod::FlatTable::FloatColumn);
+  tableBK->addColumn<float>("jecfactor", jecfactor, "JEC factor", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<float>("jetEta", eta, "jet eta", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<float>("jetPhi", phi, "jet phi", nanoaod::FlatTable::FloatColumn);
+  tableBK->addColumn<int>("nELE", nELE, "num electrons", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nMU", nMU, "num muons", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nHADCH", nHADCH, "num charged had", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nHAD0", nHAD0, "num neutral had", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nEM0", nEM0, "num photons", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("iJet", iJet, "index in primary jet array", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("iCHS", iCHS, "index in CHS jet array", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nPart", nPart, "number of particles in jet", nanoaod::FlatTable::IntColumn);
   if(addMatch_ && !isGen_){
       tableBK->addColumn<float>("genPt", genPt, "gen jet pt", nanoaod::FlatTable::FloatColumn);

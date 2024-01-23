@@ -3,10 +3,11 @@ defaults:
   splitting: LumiBased
   reco_version: UL
   year: 2018
-  globaltag: 106X_upgrade2018_realistic_v11_L1v1
+  globaltag: 106X_upgrade2018_realistic_v16_L1v1
   pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC_AOD.py
   allowInvalid: False
-  unitsPerJob: 100
+  unitsPerJob: 10
+  totalUnits: 1000
 
 samples:
   DYJetsToLL: 

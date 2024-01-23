@@ -5,12 +5,13 @@ from SRothman.EECs.EECTransferTableProducer_cfi import *
 
 def addEECs(process, verbose,
             name, genMatch,
+            genjets, recojets,
             normToRaw=EECProducer.normToRaw):
 
     setattr(process, name,
         EECProducer.clone(
-            reco = "SimonJets",
-            gen = "GenSimonJets",
+            reco = recojets,
+            gen = genjets,
             match = genMatch,
             maxOrder = 3,
             doRes4 = False,

@@ -26,6 +26,9 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
 
     chargefilters = cms.vstring("Any", 'Any', 'Any', 'Any', 'Any'),
 
+    dRfilters = cms.vstring("Fixed", "Fixed", 
+                            'Fixed', 'Fixed', 'Fixed'),
+
     prefitters = cms.vstring("Float", "Float", 
                              "Best", "Best", "Best"),
 
@@ -34,6 +37,7 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     dropRecoFilter = cms.string("NONE"),
 
     recoverLostTracks = cms.bool(False),
+    propagateLostTracks = cms.bool(False),
     HADCHrecoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
     ELErecoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
 
@@ -66,16 +70,30 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     ELEthresholds = cms.vdouble(0.0, 0.0, 0.0),
     MUthresholds = cms.vdouble(0.0, 0.0, 0.0),
 
-    EM0dRcuts = cms.vdouble(0.01, 0.01, 0.01),
-    HAD0dRcuts = cms.vdouble(0.01, 0.01, 0.01),
-    HADCHdRcuts = cms.vdouble(0.01, 0.01, 0.01),
-    ELEdRcuts = cms.vdouble(0.01, 0.01, 0.01),
-    MUdRcuts = cms.vdouble(0.01, 0.01, 0.01),
+    EM0constDR = cms.vdouble(0.01, 0.01, 0.01),
+    EM0floatDR = cms.vdouble(0.0, 0.0, 0.0),
+    EM0capDR = cms.vdouble(0.0, 0.0, 0.0),
+
+    HAD0constDR = cms.vdouble(0.01, 0.01, 0.01),
+    HAD0floatDR = cms.vdouble(0.0, 0.0, 0.0),
+    HAD0capDR = cms.vdouble(0.0, 0.0, 0.0),
+
+    HADCHconstDR = cms.vdouble(0.01, 0.01, 0.01),
+    HADCHfloatDR = cms.vdouble(0.0, 0.0, 0.0),
+    HADCHcapDR = cms.vdouble(0.0, 0.0, 0.0),
+
+    ELEconstDR = cms.vdouble(0.01, 0.01, 0.01),
+    ELEfloatDR = cms.vdouble(0.0, 0.0, 0.0),
+    ELEcapDR = cms.vdouble(0.0, 0.0, 0.0),
+
+    MUconstDR = cms.vdouble(0.01, 0.01, 0.01),
+    MUfloatDR = cms.vdouble(0.0, 0.0, 0.0),
+    MUcapDR = cms.vdouble(0.0, 0.0, 0.0),
 
     maxReFit = cms.uint32(50),
 
     reco = cms.InputTag("SimonJets"),
-    gen = cms.InputTag("SimonGenJets"),
+    gen = cms.InputTag("GenSimonJets"),
 
     verbose = cms.int32(1)
 )

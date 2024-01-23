@@ -1,1 +1,1 @@
-production_tag = "Nov01_2023_highstats_herwig"
+production_tag = "Jan22_2024"

@@ -19,138 +19,143 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/util.h"
+
+#include "SRothman/CustomJets/plugins/AddParticle.h"
 
 #include <iostream>
 #include <memory>
 #include <vector>
 
-template <typename T>
-class FullEventJetProducerT : public edm::stream::EDProducer<> {
+class FullEventJetProducer : public edm::stream::EDProducer<> {
 public:
-    explicit FullEventJetProducerT(const edm::ParameterSet&);
-    ~FullEventJetProducerT() override {}
+    explicit FullEventJetProducer(const edm::ParameterSet&);
+    ~FullEventJetProducer() override {}
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     double minPartPt_;
     double maxEta_;
     unsigned int maxNumPart_;
+    bool applyPuppi_;
 
     int verbose_;
 
     edm::InputTag partSrc_;
-    edm::EDGetTokenT<edm::View<T>> partToken_;
+    edm::EDGetTokenT<edm::View<reco::Candidate>> partToken_;
 
     edm::InputTag evtSelSrc_;
     edm::EDGetTokenT<bool> evtSelToken_;
     bool doEvtSel_;
 };
 
-template <typename T>
-FullEventJetProducerT<T>::FullEventJetProducerT(const edm::ParameterSet& conf)
+FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
         : minPartPt_(conf.getParameter<double>("minPartPt")),
           maxEta_(conf.getParameter<double>("maxEta")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
+          applyPuppi_(conf.getParameter<bool>("applyPuppi")),
           verbose_(conf.getParameter<int>("verbose")),
           partSrc_(conf.getParameter<edm::InputTag>("partSrc")),
-          partToken_(consumes<edm::View<T>>(partSrc_)),
+          partToken_(consumes<edm::View<reco::Candidate>>(partSrc_)),
           evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
           evtSelToken_(consumes<bool>(evtSelSrc_)),
           doEvtSel_(conf.getParameter<bool>("doEventSelection")) {
     produces<std::vector<jet>>();
 }
 
-template <typename T>
-void FullEventJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  edm::ParameterSetDescription desc;
+void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+    edm::ParameterSetDescription desc;
 
-  desc.add<double>("minPartPt");
-  desc.add<double>("maxEta");
-  desc.add<unsigned>("maxNumPart");
+    desc.add<double>("minPartPt");
+    desc.add<double>("maxEta");
+    desc.add<unsigned>("maxNumPart");
+    desc.add<bool>("applyPuppi");
 
-  desc.add<edm::InputTag>("eventSelection");
-  desc.add<bool>("doEventSelection");
+    desc.add<edm::InputTag>("eventSelection");
+    desc.add<bool>("doEventSelection");
 
-  desc.add<edm::InputTag>("partSrc");
+    desc.add<edm::InputTag>("partSrc");
 
-  desc.add<int>("verbose");
+    desc.add<int>("verbose");
 
-  descriptions.addWithDefaultLabel(desc);
+    descriptions.addWithDefaultLabel(desc);
 }
 
-template <typename T>
-void FullEventJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setup) {
+void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
     if(verbose_){
-        printf("top of FullEventJetProducerT<T>::produce()\n");
+        printf("top of FullEventJetProducer::produce()\n");
     }
-  edm::Handle<edm::View<T>> parts;
-  evt.getByToken(partToken_, parts);
+    edm::Handle<edm::View<reco::Candidate>> parts;
+    evt.getByToken(partToken_, parts);
 
-  auto result = std::make_unique<std::vector<jet>>();
+    auto result = std::make_unique<std::vector<jet>>();
 
-  if(doEvtSel_){
-    edm::Handle<bool> evtSel;
-    evt.getByToken(evtSelToken_, evtSel);
-    if(!*evtSel){
-        evt.put(std::move(result));
-        return;
+    if(doEvtSel_){
+        edm::Handle<bool> evtSel;
+        evt.getByToken(evtSelToken_, evtSel);
+        if(!*evtSel){
+            evt.put(std::move(result));
+            return;
+        }
+        if(verbose_){
+            printf("passed event selection\n");
+        }
     }
+
+    jet ans;
+    ans.pt = -9999;
+    ans.eta = 9999;
+    ans.phi = 9999;
+    ans.iJet = 0;
+    ans.jecfactor = 9999;
+
+    ans.nPart = 0;
+    ans.sumpt = 0.0;
+    ans.particles.clear();
+
+    for(size_t iPart=0; iPart < parts->size(); ++iPart){
+        const auto& part = parts->at(iPart);
+
+        const auto* partptr=dynamic_cast<const pat::PackedCandidate*>(&part);
+        const auto* genptr=dynamic_cast<const pat::PackedGenParticle*>(&part);
+        if(partptr){
+            addParticle(partptr, ans, 1.0, 
+                    applyPuppi_, false, 
+                    minPartPt_, maxEta_,
+                    maxNumPart_);
+        } else if(genptr){
+            addParticle(genptr, ans, 1.0,
+                    applyPuppi_, false,
+                    minPartPt_, maxEta_,
+                    maxNumPart_);
+        } else {
+            throw cms::Exception("FullEventJetProducer::produce()")
+                << "particle is neither pat::PackedCandidate nor pat::PackedGenParticle\n";
+        }
+    }
+
+    std::sort(ans.particles.begin(), ans.particles.end(), [](const particle& a, const particle& b){
+        return a.pt > b.pt;
+    });
+
     if(verbose_){
-        printf("passed event selection\n");
+        printf("Made fullevent jet with %lu particles\n",ans.particles.size());
     }
-  }
 
-  jet ans;
-  ans.pt = -999;
-  ans.eta = 0.0;
-  ans.phi = 0.0;
-  ans.nPart = 0;
-  ans.sumpt = 0.0;
-  ans.iJet = 0;
-  ans.particles.clear();
+    result->push_back(std::move(ans));
 
-  for(size_t iPart=0; iPart < parts->size(); ++iPart){
-      const auto& part = parts->at(iPart);
+    if(verbose_){
+        printf("pushed back\n");
+    }
 
-      if (ans.nPart < maxNumPart_){
-          ans.sumpt += part.pt();
-          if (part.pt() > minPartPt_ && std::abs(part.eta()) < maxEta_){
-              particle next(part.pt(), part.eta(), part.phi(), 
-                              0.0, 0.0, 0.0,
-                              std::abs(part.pdgId()), part.charge());
-              ans.particles.push_back(next);
-              ans.nPart++;
-          }
-      }
-  }
-
-  std::sort(ans.particles.begin(), ans.particles.end(), [](const particle& a, const particle& b){
-      return a.pt > b.pt;
-  });
-
-  if(verbose_){
-      printf("Made full event jet with %lu particles\n", ans.particles.size());
-  }
-
-  result->push_back(std::move(ans));
-
-  if(verbose_){
-      printf("pushed back\n");
-  }
-
-  evt.put(std::move(result));
-  if(verbose_){
-      printf("put into event\n");
-  }
+    evt.put(std::move(result));
+    if(verbose_){
+        printf("put into event\n");
+    }
 }  // end produce()
 
-typedef FullEventJetProducerT<reco::Candidate> RecoFullEventJetProducer;
-typedef FullEventJetProducerT<reco::GenParticle> GenFullEventJetProducer;
-typedef FullEventJetProducerT<reco::Candidate> CandidateFullEventJetProducer;
-
-DEFINE_FWK_MODULE(RecoFullEventJetProducer);
-DEFINE_FWK_MODULE(GenFullEventJetProducer);
-DEFINE_FWK_MODULE(CandidateFullEventJetProducer);
+DEFINE_FWK_MODULE(FullEventJetProducer);
