@@ -19,8 +19,10 @@ def setupCustomJets(process, verbose=False, table=False,
                   maxMuFrac= PatSimonJetProducer.maxMuFrac,
                   maxChEmFrac= PatSimonJetProducer.maxChEmFrac,
 
-                  minPartPt_GEN=GenSimonJetProducer.minPt,
+                  minPartPt_GEN=GenSimonJetProducer.HADCHthreshold, 
                   maxEta_GEN=GenSimonJetProducer.maxEta,
+                  minPt_GEN=GenSimonJetProducer.minPt,
+
                   inputJets = 'patJetsReapplyJECPuppi',
                   jets = 'updatedJetsPuppi',
                   CHSjets = 'finalJets',
@@ -53,10 +55,17 @@ def setupCustomJets(process, verbose=False, table=False,
         ) 
     )
 
+    process.selectedGenJets = cms.EDFilter("GenJetSelector",
+        src = cms.InputTag(genJets),
+        cut = cms.string("pt > 10.0 && abs(eta) < 5.0"),
+        filter = cms.bool(False)
+    )
+
     process.extraJetTask = cms.Task(
         process.pileupJetIdPuppi,
         process.jetIdLepVetoPuppi,
         process.updatedJetsPuppi,
+        process.selectedGenJets
     )
     process.schedule.associate(process.extraJetTask)
 
@@ -90,7 +99,7 @@ def setupCustomJets(process, verbose=False, table=False,
         HADCHthreshold = minPartPt_GEN,
         ELEthreshold = minPartPt_GEN,
         MUthreshold = minPartPt_GEN,
-        minPt = minPartPt_GEN,
+        minPt = minPt_GEN, 
         maxEta = maxEta_GEN,
         maxNumPart = maxNumPart,
     )
