@@ -7,22 +7,27 @@ from SRothman.CustomJets.FullEventJetProducer_cfi import *
 from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def setupCustomJets(process, verbose=False, table=False, 
-                  EM0threshold = PatSimonJetProducer.EM0threshold,
-                  HAD0threshold = PatSimonJetProducer.HAD0threshold,
-                  HADCHthreshold = PatSimonJetProducer.HADCHthreshold,
-                  ELEthreshold = PatSimonJetProducer.ELEthreshold,
-                  MUthreshold = PatSimonJetProducer.MUthreshold,
+                  EM0thresholds =   PatSimonJetProducer.thresholds.EM0thresholds,
+                  HAD0thresholds =  PatSimonJetProducer.thresholds.HAD0thresholds,
+                  HADCHthresholds = PatSimonJetProducer.thresholds.HADCHthresholds,
+                  ELEthresholds =   PatSimonJetProducer.thresholds.ELEthresholds,
+                  MUthresholds =    PatSimonJetProducer.thresholds.MUthresholds,
+                  etaRegions =      PatSimonJetProducer.thresholds.etaRegions,
+
                   onlyFromPV = PatSimonJetProducer.onlyFromPV,
                   onlyCharged = PatSimonJetProducer.onlyCharged,
 
                   maxNumPart= PatSimonJetProducer.maxNumPart,
                   minNumPart= PatSimonJetProducer.minNumPart,
+
                   minPt= PatSimonJetProducer.minPt,
                   maxEta= PatSimonJetProducer.maxEta,
+
                   maxMuFrac= PatSimonJetProducer.maxMuFrac,
                   maxChEmFrac= PatSimonJetProducer.maxChEmFrac,
 
-                  minPartPt_GEN=GenSimonJetProducer.HADCHthreshold, 
+                  minPartPt_GEN = GenSimonJetProducer.thresholds.HADCHthresholds, 
+
                   maxEta_GEN=GenSimonJetProducer.maxEta,
                   minPt_GEN=GenSimonJetProducer.minPt,
 
@@ -79,11 +84,6 @@ def setupCustomJets(process, verbose=False, table=False,
         CHSsrc = CHSjets,
         addCHSindex = True,
         verbose = verbose,
-        EM0threshold = EM0threshold,
-        HAD0threshold = HAD0threshold,
-        HADCHthreshold = HADCHthreshold,
-        ELEthreshold = ELEthreshold,
-        MUthreshold = MUthreshold,
         maxNumPart = maxNumPart,
         minNumPart = minNumPart,
         minPt = minPt,
@@ -92,6 +92,14 @@ def setupCustomJets(process, verbose=False, table=False,
         maxChEmFrac = maxChEmFrac,
         onlyFromPV = onlyFromPV,
         onlyCharged = onlyCharged,
+        thresholds = cms.PSet(
+            EM0thresholds = EM0thresholds,
+            HAD0thresholds = HAD0thresholds,
+            HADCHthresholds = HADCHthresholds,
+            ELEthresholds = ELEthresholds,
+            MUthresholds = MUthresholds,
+            etaRegions = etaRegions,
+        )
     )
     process.GenSimonJets = GenSimonJetProducer.clone(
         jetSrc = genJets,
@@ -99,16 +107,19 @@ def setupCustomJets(process, verbose=False, table=False,
         doEventSelection = True,
         addCHSindex = False,
         verbose = verbose,
-        EM0threshold = minPartPt_GEN,
-        HAD0threshold = minPartPt_GEN,
-        HADCHthreshold = minPartPt_GEN,
-        ELEthreshold = minPartPt_GEN,
-        MUthreshold = minPartPt_GEN,
         minPt = minPt_GEN, 
         maxEta = maxEta_GEN,
         maxNumPart = maxNumPart,
         onlyFromPV = False,
         onlyCharged = onlyCharged,
+        #thresholds = cms.PSet(
+        #    EM0thresholds = EM0thresholds,
+        #    HAD0thresholds = HAD0thresholds,
+        #    HADCHthresholds = HADCHthresholds,
+        #    ELEthresholds = ELEthresholds,
+        #    MUthresholds = MUthresholds,
+        #    etaRegions = etaRegions,
+        #)
     )
 
     '''process.GenFullEventJets = FullEventJetProducer.clone(
@@ -119,14 +130,25 @@ def setupCustomJets(process, verbose=False, table=False,
         minPartPt = minPartPt_GEN,
     )'''
 
-    '''process.GenShadowJets = CandidateShadowJetProducer.clone(
+    process.GenShadowJets = CandidateShadowJetProducer.clone(
         jetSrc = "SimonJets",
         partSrc = genParts,
         eventSelection = "ZMuMu",
         doEventSelection = True,
         verbose = verbose,
-        minPartPt = minPartPt_GEN,
-    )'''
+
+        thresholds = cms.PSet(
+            EM0thresholds = EM0thresholds,
+            HAD0thresholds = HAD0thresholds,
+            HADCHthresholds = HADCHthresholds,
+            ELEthresholds = ELEthresholds,
+            MUthresholds = MUthresholds,
+            etaRegions = etaRegions,
+        ),
+
+        onlyFromPV = False,
+        onlyCharged = onlyCharged,
+    )
 
     '''process.FullEventJets = FullEventJetProducer.clone(
         partSrc = parts,
@@ -150,7 +172,7 @@ def setupCustomJets(process, verbose=False, table=False,
                                 #process.FullEventJets,
                                 #process.GenFullEventJets,
                                 #process.ShadowJets,
-                                #process.GenShadowJets
+                                process.GenShadowJets,
                         )
     process.schedule.associate(process.JetsTask)
 
@@ -186,12 +208,12 @@ def setupCustomJets(process, verbose=False, table=False,
             verbose = verbose,
             isGen = False
         )'''
-        '''process.GenShadowJetTable = SimonJetTableProducer.clone(
+        process.GenShadowJetTable = SimonJetTableProducer.clone(
             src = "GenShadowJets",
             name = "GenShadowJets",
             verbose = verbose,
             isGen = True
-        )'''
+        )
 
         process.FullJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             src = cms.InputTag(jets),
@@ -223,7 +245,7 @@ def setupCustomJets(process, verbose=False, table=False,
                                          #process.FullEventJetTable,
                                          #process.GenFullEventJetTable,
                                          #process.ShadowJetTable,
-                                         #process.GenShadowJetTable,
+                                         process.GenShadowJetTable,
                                          process.FullJetTable)
         process.schedule.associate(process.JetsTableTask)
 

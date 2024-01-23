@@ -24,6 +24,7 @@
 
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/util.h"
+#include "SRothman/SimonTools/src/particleThresholds.h"
 
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 
@@ -38,14 +39,17 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
-    double minPartPt_;
+
+    struct particleThresholds thresholds_;
+
     bool onlyFromPV_;
     bool onlyCharged_;
-    double maxEta_;
-    unsigned int maxNumPart_;
-    bool applyPuppi_;
 
-    int verbose_;
+    double maxPartEta_;
+
+    unsigned int maxNumPart_, minNumPart_;
+
+    bool applyPuppi_;
 
     edm::InputTag partSrc_;
     edm::EDGetTokenT<edm::View<reco::Candidate>> partToken_;
@@ -53,32 +57,40 @@ private:
     edm::InputTag evtSelSrc_;
     edm::EDGetTokenT<bool> evtSelToken_;
     bool doEvtSel_;
+
+    int verbose_;
 };
 
 FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
-        : minPartPt_(conf.getParameter<double>("minPartPt")),
+        : thresholds_(conf.getParameter<edm::ParameterSet>("particleThresholds")),
           onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
-          maxEta_(conf.getParameter<double>("maxEta")),
+          maxPartEta_(conf.getParameter<double>("maxPartEta")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           applyPuppi_(conf.getParameter<bool>("applyPuppi")),
-          verbose_(conf.getParameter<int>("verbose")),
           partSrc_(conf.getParameter<edm::InputTag>("partSrc")),
           partToken_(consumes<edm::View<reco::Candidate>>(partSrc_)),
           evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
           evtSelToken_(consumes<bool>(evtSelSrc_)),
-          doEvtSel_(conf.getParameter<bool>("doEventSelection")) {
+          doEvtSel_(conf.getParameter<bool>("doEventSelection")),
+          verbose_(conf.getParameter<int>("verbose")){
     produces<std::vector<jet>>();
 }
 
 void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
+  
+     //desc.add<edm::ParameterSetDescription>(
+      //      "particleThresholds", 
+        //    particleThresholds::makePSetDescription());
 
-    desc.add<double>("minPartPt");
     desc.add<bool>("onlyFromPV");
     desc.add<bool>("onlyCharged");
-    desc.add<double>("maxEta");
+
+    desc.add<double>("maxPartEta");
+
     desc.add<unsigned>("maxNumPart");
+
     desc.add<bool>("applyPuppi");
 
     desc.add<edm::InputTag>("eventSelection");
@@ -132,13 +144,13 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
             addParticle(partptr, ans, 1.0, 
                     applyPuppi_, false, 
                     onlyFromPV_, onlyCharged_,
-                    minPartPt_, maxEta_,
+                    maxPartEta_, thresholds_,
                     maxNumPart_);
         } else if(genptr){
             addParticle(genptr, ans, 1.0,
                     applyPuppi_, false,
                     onlyFromPV_, onlyCharged_,
-                    minPartPt_, maxEta_,
+                    maxPartEta_, thresholds_,
                     maxNumPart_);
         } else {
             throw cms::Exception("FullEventJetProducer::produce()")
@@ -154,10 +166,11 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
         printf("Made fullevent jet with %lu particles\n",ans.particles.size());
     }
 
-    result->push_back(std::move(ans));
-
-    if(verbose_){
-        printf("pushed back\n");
+    if(ans.nPart >= minNumPart_){
+        result->push_back(std::move(ans));
+        if(verbose_){
+            printf("pushed back\n");
+        }
     }
 
     evt.put(std::move(result));

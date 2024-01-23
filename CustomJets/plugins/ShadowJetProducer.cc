@@ -19,9 +19,13 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/util.h"
+#include "SRothman/SimonTools/src/particleThresholds.h"
+#include "SRothman/CustomJets/plugins/AddParticle.h"
 
 #include <iostream>
 #include <memory>
@@ -37,13 +41,16 @@ public:
 private:
     bool anyClose(const T& part, const std::vector<particle>& parts) const;
 
-    double minPartPt_;
+    struct particleThresholds thresholds_;
+
     bool onlyFromPV_;
     bool onlyCharged_;
-    unsigned int maxNumPart_;
-    double dR2window_;
 
-    int verbose_;
+    unsigned int maxNumPart_, minNumPart_;
+    
+    bool applyPuppi_;
+
+    double dR2window_;
 
     edm::InputTag partSrc_;
     edm::EDGetTokenT<edm::View<T>> partToken_;
@@ -54,6 +61,8 @@ private:
     edm::InputTag evtSelSrc_;
     edm::EDGetTokenT<bool> evtSelToken_;
     bool doEvtSel_;
+
+    int verbose_;
 };
 
 template <typename T>
@@ -68,19 +77,21 @@ bool ShadowJetProducerT<T>::anyClose(const T& part, const std::vector<particle>&
 
 template <typename T>
 ShadowJetProducerT<T>::ShadowJetProducerT(const edm::ParameterSet& conf)
-        : minPartPt_(conf.getParameter<double>("minPartPt")),
+        : thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
+          minNumPart_(conf.getParameter<unsigned>("minNumPart")),
+          applyPuppi_(conf.getParameter<bool>("applyPuppi")),
           dR2window_(square(conf.getParameter<double>("dRwindow"))),
-          verbose_(conf.getParameter<int>("verbose")),
           partSrc_(conf.getParameter<edm::InputTag>("partSrc")),
           partToken_(consumes<edm::View<T>>(partSrc_)),
           jetSrc_(conf.getParameter<edm::InputTag>("jetSrc")),
           jetToken_(consumes<edm::View<jet>>(jetSrc_)),
           evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
           evtSelToken_(consumes<bool>(evtSelSrc_)),
-          doEvtSel_(conf.getParameter<bool>("doEventSelection")) {
+          doEvtSel_(conf.getParameter<bool>("doEventSelection")),
+          verbose_(conf.getParameter<int>("verbose")){
     produces<std::vector<jet>>();
 }
 
@@ -88,10 +99,19 @@ template <typename T>
 void ShadowJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
 
-  desc.add<double>("minPartPt");
+  edm::ParameterSetDescription thresholdDesc;
+  particleThresholds::fillPSetDescription(thresholdDesc);
+  desc.add<edm::ParameterSetDescription>(
+            "thresholds", thresholdDesc);
+
   desc.add<bool>("onlyFromPV");
   desc.add<bool>("onlyCharged");
+
   desc.add<unsigned>("maxNumPart");
+  desc.add<unsigned>("minNumPart");
+
+  desc.add<bool>("applyPuppi");
+
   desc.add<double>("dRwindow");
 
   desc.add<edm::InputTag>("eventSelection");
@@ -153,23 +173,35 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
 
     for(size_t iPart=0; iPart < parts->size(); ++iPart){
         const auto& part = parts->at(iPart);
-
-        if (ans.nPart < maxNumPart_ && anyClose(part, j.particles)){
-            ans.sumpt += part.pt();
-            if (part.pt() >= minPartPt_){
-                particle next(part.pt(), part.eta(), part.phi(), 
-                                0.0, 0.0, 0.0,
-                                std::abs(part.pdgId()), part.charge());
-                ans.particles.push_back(next);
-                ans.nPart++;
+        if(anyClose(part, j.particles)){
+            const auto* partptr = dynamic_cast<const pat::PackedCandidate*>(&part);
+            const auto* genptr = dynamic_cast<const pat::PackedGenParticle*>(&part);
+            
+            if(partptr){
+                addParticle(partptr, ans, 1.0, 
+                            applyPuppi_, false, 
+                            onlyFromPV_, onlyCharged_,
+                            9999, thresholds_,
+                            maxNumPart_);
+           } else if(genptr){
+                addParticle(genptr, ans, 1.0, 
+                            applyPuppi_, false,
+                            onlyFromPV_, onlyCharged_,
+                            9999, thresholds_,
+                            maxNumPart_);
+           } else {
+                throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");
             }
-        }
+        } // end for part
     }
 
     std::sort(ans.particles.begin(), ans.particles.end(), [](const particle& a, const particle& b){
         return a.pt > b.pt;
     });
 
+    if(ans.nPart < minNumPart_){
+        continue;
+    }
     result->push_back(std::move(ans));
     if(verbose_){
         printf("pushed back\n");

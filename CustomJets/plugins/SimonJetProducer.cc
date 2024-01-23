@@ -28,6 +28,7 @@
 
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 #include "SRothman/SimonTools/src/isID.h"
+#include "SRothman/SimonTools/src/particleThresholds.h"
 
 #include <iostream>
 #include <memory>
@@ -44,14 +45,15 @@ private:
     bool passPtEtaPhi(const T& jet);
     bool passLepVeto(const T& jet);
     
-    double EM0threshold_, HAD0threshold_;
-    double HADCHthreshold_, ELEthreshold_, MUthreshold_;
+    struct particleThresholds thresholds_;
+
     bool onlyFromPV_;
     bool onlyCharged_;
 
     unsigned int maxNumPart_, minNumPart_;
-
-    int verbose_;
+    
+    bool applyJEC_;
+    bool applyPuppi_;
 
     double minPt_;
     double maxEta_;
@@ -71,22 +73,17 @@ private:
     edm::EDGetTokenT<bool> evtSelToken_;
     bool doEvtSel_;
 
-    bool applyJEC_;
-    bool applyPuppi_;
+
+    int verbose_;
 };
 
 template <typename T>
 SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
-        : EM0threshold_(conf.getParameter<double>("EM0threshold")),
-          HAD0threshold_(conf.getParameter<double>("HAD0threshold")),
-          HADCHthreshold_(conf.getParameter<double>("HADCHthreshold")),
-          ELEthreshold_(conf.getParameter<double>("ELEthreshold")),
-          MUthreshold_(conf.getParameter<double>("MUthreshold")),
+        : thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           minNumPart_(conf.getParameter<unsigned>("minNumPart")),
-          verbose_(conf.getParameter<int>("verbose")),
           minPt_(conf.getParameter<double>("minPt")),
           maxEta_(conf.getParameter<double>("maxEta")),
           maxMuFrac_(conf.getParameter<double>("maxMuFrac")),
@@ -100,8 +97,7 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
           evtSelToken_(consumes<bool>(evtSelSrc_)),
           doEvtSel_(conf.getParameter<bool>("doEventSelection")),
-          applyJEC_(conf.getParameter<bool>("applyJEC")),
-          applyPuppi_(conf.getParameter<bool>("applyPuppi")){
+          verbose_(conf.getParameter<int>("verbose")){
     produces<std::vector<jet>>();
 }
 
@@ -109,11 +105,11 @@ template <typename T>
 void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
 
-  desc.add<double>("EM0threshold");
-  desc.add<double>("HAD0threshold");
-  desc.add<double>("HADCHthreshold");
-  desc.add<double>("MUthreshold");
-  desc.add<double>("ELEthreshold");
+  edm::ParameterSetDescription thresholdPset;
+  particleThresholds::fillPSetDescription(thresholdPset);
+  desc.add<edm::ParameterSetDescription>(
+            "thresholds", thresholdPset);
+
 
   desc.add<bool>("onlyFromPV");
   desc.add<bool>("onlyCharged");
@@ -257,32 +253,17 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             const auto* partptr = dynamic_cast<const pat::PackedCandidate*>(part.get());
             const auto* genptr = dynamic_cast<const pat::PackedGenParticle*>(part.get());
             
-            double minpt;
-            if(isEM0(part)){
-                minpt = EM0threshold_;
-            } else if(isHAD0(part)){
-                minpt = HAD0threshold_;
-            } else if(isHADCH(part)){
-                minpt = HADCHthreshold_;
-            } else if(isELE(part)){
-                minpt = ELEthreshold_;
-            } else if(isMU(part)){
-                minpt = MUthreshold_;
-            } else{
-                throw std::runtime_error("constituent is not EM0, HAD0, HADCH, ELE, or MU");
-            }
-
             if(partptr){
                 addParticle(partptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_, 
                             onlyFromPV_, onlyCharged_,
-                            minpt, 9999,
+                            9999, thresholds_,
                             maxNumPart_);
            } else if(genptr){
                 addParticle(genptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_,
                             onlyFromPV_, onlyCharged_,
-                            minpt, 9999,
+                            9999, thresholds_,
                             maxNumPart_);
            } else {
                 throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");
@@ -296,7 +277,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             printf("jec = %f\n", jecfactor);
         }
 
-        if(ans.nPart >= 2){
+        if(ans.nPart >= minNumPart_){
             result->push_back(std::move(ans));
         }
 

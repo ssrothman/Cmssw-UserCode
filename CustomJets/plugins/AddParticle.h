@@ -3,12 +3,15 @@
 
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/isID.h"
+#include "SRothman/SimonTools/src/etaRegion.h"
+#include "SRothman/SimonTools/src/particleThresholds.h"
 
 template <typename P>
 void addParticle(const P* partptr, jet& ans, double jecfactor,
                  bool applyPuppi, bool applyJEC, 
                  bool onlyFromPV, bool onlyCharged,
-                 double minPartPt, double maxPartEta,
+                 double maxPartEta, 
+                 const struct particleThresholds& thresholds,
                  unsigned maxNumPart){     
     int fromPV;
     double puppiWeight;
@@ -20,6 +23,11 @@ void addParticle(const P* partptr, jet& ans, double jecfactor,
         puppiWeight = 1.0;
     }
 
+    unsigned pdgid = std::abs(partptr->pdgId());
+    if(pdgid == 12 || pdgid == 14 || pdgid == 16){//skip neutrinos
+        return;
+    }
+    
     double nextpt = partptr->pt();
 
     if(applyPuppi){
@@ -30,6 +38,7 @@ void addParticle(const P* partptr, jet& ans, double jecfactor,
         nextpt /= jecfactor;
     }
 
+    double minPartPt = thresholds.getThreshold(partptr);
     if(nextpt < minPartPt || ans.nPart >= maxNumPart || nextpt==0){
         return;
     }
@@ -42,11 +51,6 @@ void addParticle(const P* partptr, jet& ans, double jecfactor,
         return;
     }
 
-    unsigned pdgid = std::abs(partptr->pdgId());
-    if(pdgid == 12 || pdgid == 14 || pdgid == 16){//skip neutrinos
-        return;
-    }
-    
     if(std::abs(partptr->eta()) > maxPartEta){
         return;
     }

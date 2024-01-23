@@ -8,13 +8,13 @@ from SRothman.EECs.EECs_cff import *
 
 def setupEECtest(process, verbose):
     process = setupCustomJets(process, verbose=0, table=True,
-                              EM0threshold = -1.0,
-                              HAD0threshold = -1.0,
-                              HADCHthreshold = -1.0,
-                              ELEthreshold = -1.0,
-                              MUthreshold = -1.0,
+                              #EM0threshold = -1.0,
+                              #HAD0threshold = -1.0,
+                              #HADCHthreshold = -1.0,
+                              #ELEthreshold = -1.0,
+                              #MUthreshold = -1.0,
                               onlyFromPV = True,
-                              onlyCharged = True,
+                              onlyCharged = False,
 
                               minPartPt_GEN = -1.0,
                               )
