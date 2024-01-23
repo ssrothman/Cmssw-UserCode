@@ -7,6 +7,7 @@
 template <typename P>
 void addParticle(const P* partptr, jet& ans, double jecfactor,
                  bool applyPuppi, bool applyJEC, 
+                 bool onlyFromPV_,
                  double minPartPt, double maxPartEta,
                  unsigned maxNumPart){     
     int fromPV;
@@ -15,7 +16,7 @@ void addParticle(const P* partptr, jet& ans, double jecfactor,
         fromPV = partptr->fromPV();
         puppiWeight = partptr->puppiWeight();
     } else {
-        fromPV = (partptr->dxy()==0) && (partptr->dz()==0);
+        fromPV = true;
         puppiWeight = 1.0;
     }
 
@@ -29,6 +30,10 @@ void addParticle(const P* partptr, jet& ans, double jecfactor,
     ans.sumpt += nextpt;
 
     if(nextpt < minPartPt || ans.nPart >= maxNumPart || nextpt==0){
+        return;
+    }
+
+    if(onlyFromPV_ && !fromPV){
         return;
     }
 

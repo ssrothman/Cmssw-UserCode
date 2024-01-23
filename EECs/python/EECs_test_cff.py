@@ -13,6 +13,7 @@ def setupEECtest(process, verbose):
                               HADCHthreshold = -1.0,
                               ELEthreshold = -1.0,
                               MUthreshold = -1.0,
+                              onlyFromPV = True,
 
                               minPartPt_GEN = -1.0,
                               )

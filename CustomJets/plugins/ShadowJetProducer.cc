@@ -38,6 +38,7 @@ private:
     bool anyClose(const T& part, const std::vector<particle>& parts) const;
 
     double minPartPt_;
+    bool onlyFromPV_;
     unsigned int maxNumPart_;
     double dR2window_;
 
@@ -67,6 +68,7 @@ bool ShadowJetProducerT<T>::anyClose(const T& part, const std::vector<particle>&
 template <typename T>
 ShadowJetProducerT<T>::ShadowJetProducerT(const edm::ParameterSet& conf)
         : minPartPt_(conf.getParameter<double>("minPartPt")),
+          onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           dR2window_(square(conf.getParameter<double>("dRwindow"))),
           verbose_(conf.getParameter<int>("verbose")),
@@ -85,6 +87,7 @@ void ShadowJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& des
   edm::ParameterSetDescription desc;
 
   desc.add<double>("minPartPt");
+  desc.add<bool>("onlyFromPV");
   desc.add<unsigned>("maxNumPart");
   desc.add<double>("dRwindow");
 

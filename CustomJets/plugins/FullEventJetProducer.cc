@@ -39,6 +39,7 @@ public:
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     double minPartPt_;
+    bool onlyFromPV_;
     double maxEta_;
     unsigned int maxNumPart_;
     bool applyPuppi_;
@@ -55,6 +56,7 @@ private:
 
 FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
         : minPartPt_(conf.getParameter<double>("minPartPt")),
+          onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
           maxEta_(conf.getParameter<double>("maxEta")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           applyPuppi_(conf.getParameter<bool>("applyPuppi")),
@@ -71,6 +73,7 @@ void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
     edm::ParameterSetDescription desc;
 
     desc.add<double>("minPartPt");
+    desc.add<bool>("onlyFromPV");
     desc.add<double>("maxEta");
     desc.add<unsigned>("maxNumPart");
     desc.add<bool>("applyPuppi");
@@ -125,11 +128,13 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
         if(partptr){
             addParticle(partptr, ans, 1.0, 
                     applyPuppi_, false, 
+                    onlyFromPV_,
                     minPartPt_, maxEta_,
                     maxNumPart_);
         } else if(genptr){
             addParticle(genptr, ans, 1.0,
                     applyPuppi_, false,
+                    onlyFromPV_,
                     minPartPt_, maxEta_,
                     maxNumPart_);
         } else {

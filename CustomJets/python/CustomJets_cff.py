@@ -12,6 +12,8 @@ def setupCustomJets(process, verbose=False, table=False,
                   HADCHthreshold = PatSimonJetProducer.HADCHthreshold,
                   ELEthreshold = PatSimonJetProducer.ELEthreshold,
                   MUthreshold = PatSimonJetProducer.MUthreshold,
+                  onlyFromPV = PatSimonJetProducer.onlyFromPV,
+
                   maxNumPart= PatSimonJetProducer.maxNumPart,
                   minNumPart= PatSimonJetProducer.minNumPart,
                   minPt= PatSimonJetProducer.minPt,
@@ -86,7 +88,8 @@ def setupCustomJets(process, verbose=False, table=False,
         minPt = minPt,
         maxEta = maxEta,
         maxMuFrac = maxMuFrac,
-        maxChEmFrac = maxChEmFrac
+        maxChEmFrac = maxChEmFrac,
+        onlyFromPV = onlyFromPV,
     )
     process.GenSimonJets = GenSimonJetProducer.clone(
         jetSrc = genJets,

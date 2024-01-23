@@ -46,6 +46,7 @@ private:
     
     double EM0threshold_, HAD0threshold_;
     double HADCHthreshold_, ELEthreshold_, MUthreshold_;
+    bool onlyFromPV_;
 
     unsigned int maxNumPart_, minNumPart_;
 
@@ -81,6 +82,7 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           HADCHthreshold_(conf.getParameter<double>("HADCHthreshold")),
           ELEthreshold_(conf.getParameter<double>("ELEthreshold")),
           MUthreshold_(conf.getParameter<double>("MUthreshold")),
+          onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           minNumPart_(conf.getParameter<unsigned>("minNumPart")),
           verbose_(conf.getParameter<int>("verbose")),
@@ -112,6 +114,8 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<double>("HADCHthreshold");
   desc.add<double>("MUthreshold");
   desc.add<double>("ELEthreshold");
+
+  desc.add<bool>("onlyFromPV");
 
   desc.add<unsigned>("maxNumPart");
   desc.add<unsigned>("minNumPart");
@@ -270,12 +274,14 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
 
             if(partptr){
                 addParticle(partptr, ans, jecfactor, 
-                            applyPuppi_, applyJEC_,
+                            applyPuppi_, applyJEC_, 
+                            onlyFromPV_,
                             minpt, 9999,
                             maxNumPart_);
            } else if(genptr){
                 addParticle(genptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_,
+                            onlyFromPV_,
                             minpt, 9999,
                             maxNumPart_);
            } else {

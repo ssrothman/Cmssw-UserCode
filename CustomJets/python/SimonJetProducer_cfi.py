@@ -24,6 +24,7 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
     CHSsrc = cms.InputTag(""),
     addCHSindex = cms.bool(False),
     CHSmatchDR = cms.double(0.2),
+    onlyFromPV = cms.bool(False),
 )
 
 GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
@@ -48,4 +49,5 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     CHSsrc = cms.InputTag(""),
     addCHSindex = cms.bool(False),
     CHSmatchDR = cms.double(0.4),
+    onlyFromPV = cms.bool(False),
 )
