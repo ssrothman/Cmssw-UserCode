@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
-from SRothman.CustomJets.thresholds_cff import *
+from SRothman.CustomJets.cuts_cff import *
 
 FullEventJetProducer = cms.EDProducer("FullEventJetProducer",
     thresholds = recoThresholds.clone(),
+    vtxCuts = recoVtxCuts.clone(),
 
-    onlyFromPV = cms.bool(False),
     onlyCharged = cms.bool(False),
 
     maxNumPart = cms.uint32(2048),

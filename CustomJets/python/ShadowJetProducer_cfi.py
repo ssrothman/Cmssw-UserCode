@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
-from SRothman.CustomJets.thresholds_cff import *
+from SRothman.CustomJets.cuts_cff import *
 
 RecoShadowJetProducer = cms.EDProducer("RecoShadowJetProducer",
     thresholds = recoThresholds.clone(),
+    vtxCuts = recoVtxCuts.clone(),
 
-    onlyFromPV = cms.bool(False),
     onlyCharged = cms.bool(False),
 
     maxNumPart = cms.uint32(512),
@@ -25,15 +25,15 @@ RecoShadowJetProducer = cms.EDProducer("RecoShadowJetProducer",
 
 GenShadowJetProducer = cms.EDProducer("GenShadowJetProducer",
     thresholds = genThresholds.clone(),
+    vtxCuts = genVtxCuts.clone(),
 
     maxNumPart = cms.uint32(512),
-    minNumPart = cms.uint32(0),
+    minNumPart = cms.uint32(2),
 
     dRwindow = cms.double(0.4),
 
     applyPuppi = cms.bool(True),
 
-    onlyFromPV = cms.bool(False),
     onlyCharged = cms.bool(False),
 
     eventSelection = cms.InputTag(""),
@@ -47,6 +47,7 @@ GenShadowJetProducer = cms.EDProducer("GenShadowJetProducer",
 
 CandidateShadowJetProducer = cms.EDProducer("CandidateShadowJetProducer",
     thresholds = recoThresholds.clone(),
+    vtxCuts = recoVtxCuts.clone(),
 
     maxNumPart = cms.uint32(512),
     minNumPart = cms.uint32(2),
@@ -55,7 +56,6 @@ CandidateShadowJetProducer = cms.EDProducer("CandidateShadowJetProducer",
 
     applyPuppi = cms.bool(True),
 
-    onlyFromPV = cms.bool(False),
     onlyCharged = cms.bool(False),
 
     eventSelection = cms.InputTag(""),

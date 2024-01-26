@@ -46,8 +46,8 @@ private:
     bool passLepVeto(const T& jet);
     
     struct particleThresholds thresholds_;
+    struct vtxCuts vtxcuts_;
 
-    bool onlyFromPV_;
     bool onlyCharged_;
 
     unsigned int maxNumPart_, minNumPart_;
@@ -80,7 +80,7 @@ private:
 template <typename T>
 SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
         : thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
-          onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
+          vtxcuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           minNumPart_(conf.getParameter<unsigned>("minNumPart")),
@@ -111,8 +111,12 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
             "thresholds", thresholdPset);
 
 
-  desc.add<bool>("onlyFromPV");
   desc.add<bool>("onlyCharged");
+
+  edm::ParameterSetDescription vtxCutsPset;
+  vtxCuts::fillPSetDescription(vtxCutsPset);
+  desc.add<edm::ParameterSetDescription>(
+            "vtxCuts", vtxCutsPset);
 
   desc.add<unsigned>("maxNumPart");
   desc.add<unsigned>("minNumPart");
@@ -256,14 +260,16 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             if(partptr){
                 addParticle(partptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_, 
-                            onlyFromPV_, onlyCharged_,
+                            onlyCharged_,
                             9999, thresholds_,
+                            vtxcuts_,
                             maxNumPart_);
            } else if(genptr){
                 addParticle(genptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_,
-                            onlyFromPV_, onlyCharged_,
+                            onlyCharged_,
                             9999, thresholds_,
+                            vtxcuts_,
                             maxNumPart_);
            } else {
                 throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");

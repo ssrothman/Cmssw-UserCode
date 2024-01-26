@@ -14,7 +14,6 @@ def setupCustomJets(process, verbose=False, table=False,
                   MUthresholds =    PatSimonJetProducer.thresholds.MUthresholds,
                   etaRegions =      PatSimonJetProducer.thresholds.etaRegions,
 
-                  onlyFromPV = PatSimonJetProducer.onlyFromPV,
                   onlyCharged = PatSimonJetProducer.onlyCharged,
 
                   maxNumPart= PatSimonJetProducer.maxNumPart,
@@ -90,7 +89,6 @@ def setupCustomJets(process, verbose=False, table=False,
         maxEta = maxEta,
         maxMuFrac = maxMuFrac,
         maxChEmFrac = maxChEmFrac,
-        onlyFromPV = onlyFromPV,
         onlyCharged = onlyCharged,
         thresholds = cms.PSet(
             EM0thresholds = EM0thresholds,
@@ -110,7 +108,6 @@ def setupCustomJets(process, verbose=False, table=False,
         minPt = minPt_GEN, 
         maxEta = maxEta_GEN,
         maxNumPart = maxNumPart,
-        onlyFromPV = False,
         onlyCharged = onlyCharged,
         #thresholds = cms.PSet(
         #    EM0thresholds = EM0thresholds,
@@ -146,7 +143,6 @@ def setupCustomJets(process, verbose=False, table=False,
             etaRegions = etaRegions,
         ),
 
-        onlyFromPV = False,
         onlyCharged = onlyCharged,
     )
 

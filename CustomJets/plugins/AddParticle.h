@@ -3,16 +3,17 @@
 
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/isID.h"
-#include "SRothman/SimonTools/src/etaRegion.h"
-#include "SRothman/SimonTools/src/particleThresholds.h"
+#include "SRothman/SimonTools/src/selectionStructs.h"
 
 template <typename P>
-void addParticle(const P* partptr, jet& ans, double jecfactor,
+void addParticle(const P* const partptr, jet& ans, double jecfactor,
                  bool applyPuppi, bool applyJEC, 
-                 bool onlyFromPV, bool onlyCharged,
+                 bool onlyCharged,
                  double maxPartEta, 
                  const struct particleThresholds& thresholds,
+                 const struct vtxCuts& vtxcuts,
                  unsigned maxNumPart){     
+
     int fromPV;
     double puppiWeight;
     if constexpr (std::is_same_v<P, pat::PackedCandidate>){
@@ -39,19 +40,12 @@ void addParticle(const P* partptr, jet& ans, double jecfactor,
     }
 
     double minPartPt = thresholds.getThreshold(partptr);
-    if(nextpt < minPartPt || ans.nPart >= maxNumPart || nextpt==0){
-        return;
-    }
-
-    if(onlyFromPV && !fromPV){
-        return;
-    }
-
-    if(onlyCharged && partptr->charge()==0){
-        return;
-    }
-
-    if(std::abs(partptr->eta()) > maxPartEta){
+    if(nextpt < minPartPt 
+            || ans.nPart >= maxNumPart 
+            || nextpt==0
+            || !vtxcuts.pass(partptr)
+            || (onlyCharged && partptr->charge()==0)
+            || std::abs(partptr->eta()) > maxPartEta){
         return;
     }
 

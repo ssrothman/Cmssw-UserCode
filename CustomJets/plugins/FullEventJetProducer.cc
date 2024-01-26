@@ -24,7 +24,7 @@
 
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/util.h"
-#include "SRothman/SimonTools/src/particleThresholds.h"
+#include "SRothman/SimonTools/src/selectionStructs.h"
 
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 
@@ -41,8 +41,8 @@ public:
 private:
 
     struct particleThresholds thresholds_;
+    struct vtxCuts vtxCuts_;
 
-    bool onlyFromPV_;
     bool onlyCharged_;
 
     double maxPartEta_;
@@ -62,8 +62,8 @@ private:
 };
 
 FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
-        : thresholds_(conf.getParameter<edm::ParameterSet>("particleThresholds")),
-          onlyFromPV_(conf.getParameter<bool>("onlyFromPV")),
+        : thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
+          vtxCuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxPartEta_(conf.getParameter<double>("maxPartEta")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
@@ -80,12 +80,15 @@ FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
 void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
   
-     //desc.add<edm::ParameterSetDescription>(
-      //      "particleThresholds", 
-        //    particleThresholds::makePSetDescription());
+    edm::ParameterSetDescription thresholdPset;
+    particleThresholds::fillPSetDescription(thresholdPset);
+    desc.add<edm::ParameterSetDescription>(
+            "thresholds", thresholdPset);
 
-    desc.add<bool>("onlyFromPV");
     desc.add<bool>("onlyCharged");
+    edm::ParameterSetDescription vtxPset;
+    vtxCuts::fillPSetDescription(vtxPset);
+    desc.add<edm::ParameterSetDescription>("vtxCuts", vtxPset);
 
     desc.add<double>("maxPartEta");
 
@@ -143,14 +146,16 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
         if(partptr){
             addParticle(partptr, ans, 1.0, 
                     applyPuppi_, false, 
-                    onlyFromPV_, onlyCharged_,
+                    onlyCharged_,
                     maxPartEta_, thresholds_,
+                    vtxCuts_,
                     maxNumPart_);
         } else if(genptr){
             addParticle(genptr, ans, 1.0,
                     applyPuppi_, false,
-                    onlyFromPV_, onlyCharged_,
+                    onlyCharged_,
                     maxPartEta_, thresholds_,
+                    vtxCuts_,
                     maxNumPart_);
         } else {
             throw cms::Exception("FullEventJetProducer::produce()")

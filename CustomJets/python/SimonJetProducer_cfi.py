@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from SRothman.CustomJets.thresholds_cff import *
+from SRothman.CustomJets.cuts_cff import *
 
 _maxNumPart = 4096
 
@@ -8,11 +8,11 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
     jetSrc = cms.InputTag("selectedPatJets"),
 
     thresholds = recoThresholds.clone(),
+    vtxCuts = recoVtxCuts.clone(),
 
     maxNumPart = cms.uint32(_maxNumPart),
     minNumPart = cms.uint32(2),
 
-    onlyFromPV = cms.bool(False),
     onlyCharged = cms.bool(False),
 
     applyJEC=cms.bool(False),
@@ -38,11 +38,11 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     jetSrc = cms.InputTag("ak4GenJetsNoNu"),
 
     thresholds = genThresholds.clone(),
+    vtxCuts = genVtxCuts.clone(),
 
     maxNumPart = cms.uint32(_maxNumPart),
-    minNumPart = cms.uint32(0),
+    minNumPart = cms.uint32(2),
 
-    onlyFromPV = cms.bool(False),
     onlyCharged = cms.bool(False),
 
     applyJEC=cms.bool(False),
