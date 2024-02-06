@@ -3,23 +3,16 @@ from SRothman.EECs.EECProducer_cfi import *
 from SRothman.EECs.EECTableProducer_cfi import *
 from SRothman.EECs.EECTransferTableProducer_cfi import *
 
-def addEECs(process, verbose,
-            name, genMatch,
-            genjets, recojets,
-            normToRaw=EECProducer.normToRaw):
+def setupEECs(process, 
+              name, genMatch,
+              genjets, recojets):
 
     setattr(process, name,
         EECProducer.clone(
             reco = recojets,
             gen = genjets,
             match = genMatch,
-            maxOrder = 3,
-            doRes4 = False,
-            doRes3 = False,
-            p1s = [1],
-            p2s = [2],
-            normToRaw = normToRaw,
-            verbose = verbose
+            verbose = False
         )
     )
     setattr(process, "Reco%sTable"%name,

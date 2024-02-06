@@ -23,7 +23,7 @@ RecoShadowJetProducer = cms.EDProducer("RecoShadowJetProducer",
     verbose = cms.int32(0)
 )
 
-GenShadowJetProducer = cms.EDProducer("GenShadowJetProducer",
+GenShadowJetProducer = cms.EDProducer("CandidateShadowJetProducer",
     thresholds = genThresholds.clone(),
     vtxCuts = genVtxCuts.clone(),
 
@@ -45,6 +45,7 @@ GenShadowJetProducer = cms.EDProducer("GenShadowJetProducer",
     verbose = cms.int32(0)
 )
 
+'''
 CandidateShadowJetProducer = cms.EDProducer("CandidateShadowJetProducer",
     thresholds = recoThresholds.clone(),
     vtxCuts = recoVtxCuts.clone(),
@@ -66,3 +67,4 @@ CandidateShadowJetProducer = cms.EDProducer("CandidateShadowJetProducer",
 
     verbose = cms.int32(0)
 )
+'''

@@ -90,8 +90,8 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeMC(process)
 
-from SRothman.EECs.EECs_test_cff import *
-process = setupEECtest(process, 0)
+from SRothman.Analysis.setupAnalysis import *
+process = setupAnalysis(process)
 
 # End of customisation functions
 

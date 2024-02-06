@@ -6,10 +6,11 @@ defaults:
   globaltag: 106X_upgrade2018_realistic_v16_L1v1
   pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC.py
   allowInvalid: False
-  unitsPerJob: 10
-  totalUnits: 1000
+  unitsPerJob: 100
+  totalUnits: 10000000
 
 samples:
   DYJetsToLL: 
     datasets: 
-      DYJetsToLL : /DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM
+      Pythia : /DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM
+      Herwig : /DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM

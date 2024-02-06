@@ -9,5 +9,5 @@ ZMuMuEventSelectionProducer = cms.EDProducer('ZMuMuEventSelectionProducer',
     Iso = cms.string("loose"),
     minZmass = cms.double(50.0),
     maxZmass = cms.double(130.0),
-    verbose = cms.int32(1)
+    verbose = cms.int32(0)
 )

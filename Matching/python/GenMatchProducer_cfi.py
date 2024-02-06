@@ -18,42 +18,48 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
 
     uncertainty = cms.string("Standard"),
 
-    softflavorfilters = cms.vstring("AnyPhoton", "AnyNeutralHadron", 
-                          "AnyChargedHadron", "AnyElectron", "AnyMuon"),
-    hardflavorfilters = cms.vstring("AnyPhoton", "AnyNeutralHadron", 
-                          "AnyChargedHadron", "AnyElectron", "AnyMuon"),
-    filterthresholds = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0),
+    softflavorfilters = cms.vstring(
+        "AnyPhoton", "AnyNeutralHadron", 
+        "AnyCharged", "AnyCharged", "AnyCharged"),
+    hardflavorfilters = cms.vstring(
+        "AnyNeutral", "AnyNeutralHadron", 
+        "AnyCharged", "AnyCharged", "AnyCharged"),
+    filterthresholds = cms.vdouble(3.0, 0.0, 0.0, 0.0, 0.0),
 
-    chargefilters = cms.vstring("Any", 'Any', 'Any', 'Any', 'Any'),
+    chargefilters = cms.vstring(
+        'ChargeSign', 'ChargeSign',
+        'ChargeSign', 'ChargeSign', 'ChargeSign'),
 
-    dRfilters = cms.vstring("Fixed", "Fixed", 
-                            'Fixed', 'Fixed', 'Fixed'),
+    dRfilters = cms.vstring(
+        "Fixed", "Fixed", 
+        'Tracking', 'Tracking', 'Tracking'),
 
-    prefitters = cms.vstring("Float", "Float", 
-                             "Best", "Best", "Best"),
+    prefitters = cms.vstring(
+        "Float", "Float", 
+        "Best", "Best", "Best"),
 
     refiner = cms.string("OneGenOneRecoPerType"),
     dropGenFilter = cms.string("NONE"),
     dropRecoFilter = cms.string("NONE"),
 
-    recoverLostTracks = cms.bool(False),
-    propagateLostTracks = cms.bool(False),
-    HADCHrecoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
-    ELErecoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
+    recoverLostTracks = cms.bool(True),
+    propagateLostTracks = cms.bool(True),
+    HADCHrecoverThresholds = cms.vdouble(5.0, 5.0, 5.0),
+    ELErecoverThresholds = cms.vdouble(5.0, 5.0, 5.0),
 
     recoverLostHAD0 = cms.bool(False),
     HAD0recoverThresholds = cms.vdouble(0.0, 0.0, 0.0),
 
     EMstochastic = cms.vdouble(0.17, 0.18, 0.80),
     EMconstant = cms.vdouble(0.0074, 0.0253, 0.0253),
-    ECALgranularityEta = cms.vdouble(0.01, 0.01, 0.01),
-    ECALgranularityPhi = cms.vdouble(0.01, 0.01, 0.01),
+    ECALgranularityEta = cms.vdouble(0.05, 0.05, 0.07),
+    ECALgranularityPhi = cms.vdouble(0.05, 0.05, 0.07),
     ECALEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
     HADstochastic = cms.vdouble(1.63, 3.90, 6.44),
     HADconstant = cms.vdouble(0.21, 0.14, 0.10),
-    HCALgranularityEta = cms.vdouble(0.01, 0.01, 0.01),
-    HCALgranularityPhi = cms.vdouble(0.01, 0.01, 0.01),
+    HCALgranularityEta = cms.vdouble(0.10, 0.10, 0.15),
+    HCALgranularityPhi = cms.vdouble(0.10, 0.10, 0.15),
     HCALEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
     CHlinear = cms.vdouble(0.000069, 0.000072, 0.000072),
@@ -64,31 +70,31 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     CHangularPhi = cms.vdouble(0.001, 0.001, 0.001),
     trkEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
-    EM0thresholds = cms.vdouble(0.0, 0.0, 0.0),
-    HAD0thresholds = cms.vdouble(0.0, 0.0, 0.0),
+    EM0thresholds =   cms.vdouble(0.0, 0.0, 0.0),
+    HAD0thresholds =  cms.vdouble(0.0, 0.0, 0.0),
     HADCHthresholds = cms.vdouble(0.0, 0.0, 0.0),
-    ELEthresholds = cms.vdouble(0.0, 0.0, 0.0),
-    MUthresholds = cms.vdouble(0.0, 0.0, 0.0),
+    ELEthresholds =   cms.vdouble(0.0, 0.0, 0.0),
+    MUthresholds =    cms.vdouble(0.0, 0.0, 0.0),
 
-    EM0constDR = cms.vdouble(0.01, 0.01, 0.01),
-    EM0floatDR = cms.vdouble(0.0, 0.0, 0.0),
-    EM0capDR = cms.vdouble(0.0, 0.0, 0.0),
+    EM0constDR = cms.vdouble(0.050, 0.050, 0.050),
+    EM0floatDR = cms.vdouble(0.000, 0.000, 0.000),
+    EM0capDR =   cms.vdouble(0.000, 0.000, 0.000),
 
-    HAD0constDR = cms.vdouble(0.01, 0.01, 0.01),
-    HAD0floatDR = cms.vdouble(0.0, 0.0, 0.0),
-    HAD0capDR = cms.vdouble(0.0, 0.0, 0.0),
+    HAD0constDR = cms.vdouble(0.100, 0.100, 0.150),
+    HAD0floatDR = cms.vdouble(0.000, 0.000, 0.000),
+    HAD0capDR =   cms.vdouble(0.000, 0.000, 0.000),
 
-    HADCHconstDR = cms.vdouble(0.01, 0.01, 0.01),
-    HADCHfloatDR = cms.vdouble(0.0, 0.0, 0.0),
-    HADCHcapDR = cms.vdouble(0.0, 0.0, 0.0),
+    HADCHconstDR = cms.vdouble(0.002, 0.002, 0.003),
+    HADCHfloatDR = cms.vdouble(0.010, 0.010, 0.015),
+    HADCHcapDR =   cms.vdouble(0.050, 0.050, 0.070),
 
-    ELEconstDR = cms.vdouble(0.01, 0.01, 0.01),
-    ELEfloatDR = cms.vdouble(0.0, 0.0, 0.0),
-    ELEcapDR = cms.vdouble(0.0, 0.0, 0.0),
+    ELEconstDR = cms.vdouble(0.002, 0.002, 0.003),
+    ELEfloatDR = cms.vdouble(0.010, 0.010, 0.015),
+    ELEcapDR =   cms.vdouble(0.050, 0.050, 0.070),
 
-    MUconstDR = cms.vdouble(0.01, 0.01, 0.01),
-    MUfloatDR = cms.vdouble(0.0, 0.0, 0.0),
-    MUcapDR = cms.vdouble(0.0, 0.0, 0.0),
+    MUconstDR = cms.vdouble(0.002, 0.002, 0.003),
+    MUfloatDR = cms.vdouble(0.010, 0.010, 0.015),
+    MUcapDR =   cms.vdouble(0.050, 0.050, 0.070),
 
     maxReFit = cms.uint32(50),
 

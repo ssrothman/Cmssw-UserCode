@@ -11,7 +11,7 @@ from httplib import HTTPException
 from multiprocessing import Process
 import copy
 
-from CRABClient.UserUtilities import config, ClientException, getUsernameFromCRIC
+from CRABClient.UserUtilities import config, ClientException, getUsername
 from CRABAPI.RawCommand import crabCommand
 from CRABClient.ClientExceptions import ClientException
 
@@ -23,7 +23,7 @@ requestname_base = "srothman"
 #output_site = "T3_US_FNALLPC"
 output_site = "T3_US_FNALLPC"
 output_lfn_base = "/store/group/lpcpfnano/srothman/{production_tag}".format(
-                                                    username=getUsernameFromCRIC(), 
+                                                    username=getUsername(), 
                                                     production_tag=production_tag)
 
 if __name__ == '__main__':
