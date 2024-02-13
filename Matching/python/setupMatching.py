@@ -6,15 +6,25 @@ from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 def setupMatching(process, verbose=0,
                   name='GenMatch',
                   reco = 'SimonJets',
-                  gen = 'GenSimonJets'):
+                  gen = 'GenSimonJets',
+                  naive=False):
                    
-    setattr(process, name, 
-        GenMatchProducer.clone(
-            reco = reco,
-            gen = gen,
-            verbose = False,
+    if naive:
+        setattr(process, name, 
+            NaiveMatchProducer.clone(
+                reco = reco,
+                gen = gen,
+                verbose = False,
+            )
         )
-    )
+    else:
+        setattr(process, name, 
+            GenMatchProducer.clone(
+                reco = reco,
+                gen = gen,
+                verbose = False,
+            )
+        )
 
     setattr(process, name+"Table", 
         GenMatchTableProducer.clone(

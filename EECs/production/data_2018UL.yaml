@@ -1,0 +1,18 @@
+defaults:
+  isMC: True
+  splitting: LumiBased
+  reco_version: UL
+  year: 2018
+  globaltag: 106X_upgrade2018_realistic_v16_L1v1
+  pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC.py
+  allowInvalid: False
+  unitsPerJob: 100
+  totalUnits: 10000000
+
+samples:
+  DYJetsToLL: 
+    datasets: 
+      2018A : /SingleMuon/Run2018A-UL2018_MiniAODv2_GT36-v2/MINIAOD
+      2018B : /SingleMuon/Run2018B-UL2018_MiniAODv2_GT36-v2/MINIAOD
+      2018C : /SingleMuon/Run2018C-UL2018_MiniAODv2_GT36-v2/MINIAOD
+      2018D : /SingleMuon/Run2018D-UL2018_MiniAODv2_GT36-v2/MINIAOD

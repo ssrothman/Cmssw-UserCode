@@ -4,18 +4,19 @@ from SRothman.CustomJets.setupPuppiJets import *
 from SRothman.CustomJets.setupSimonJets import *
 from SRothman.CustomJets.setupShadowJets import *
 
-def setupCustomJets(process, verbose=False, table=False, 
-                    inputJets = 'patJetsReapplyJECPuppi',
-                    inputGenJets = 'slimmedGenJets',
+def setupCustomJets(process, verbose=False, table=False, ak8 = False):
 
-                    jets = 'updatedJetsPuppi',
-                    CHSjets = 'finalJets',
-                    genJets = 'selectedGenJets',
+    parts = 'packedPFCandidates'
+    genParts = 'packedGenParticles'
 
-                    parts = 'packedPFCandidates',
-                    genParts = 'packedGenParticles'):
-
-    process = setupPuppiJets(process, inputJets, inputGenJets)
+    if ak8:
+        jets = 'selectedUpdatedJetsAK8'
+        genJets = 'selectedGenJetsAK8'
+        CHSjets = 'finalJets'
+    else:
+        jets = 'updatedJetsPuppi'
+        genJets = 'selectedGenJets'
+        CHSjets = 'finalJets'
 
     process = setupSimonJets(process, jets, genJets,
                              CHSjets, False, 'ZMuMu',

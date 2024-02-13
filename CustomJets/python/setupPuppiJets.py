@@ -10,7 +10,6 @@ def setupPuppiJets(process,
         filter = cms.bool(False)
     )
 
-
     process.jetIdLepVetoPuppi = cms.EDProducer("PatJetIDValueMapProducer",
         filterParams = cms.PSet(
             quality = cms.string("TIGHTLEPVETO"),
