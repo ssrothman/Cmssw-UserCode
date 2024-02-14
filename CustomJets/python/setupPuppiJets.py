@@ -26,14 +26,6 @@ def setupPuppiJets(process,
         src = cms.InputTag(inputJets)
     )
 
-    process.loosejetidpuppi = cms.EDProducer("PatJetIDValueMapProducer",
-        filterParams = cms.PSet(
-            quality = cms.string("LOOSE"),
-            version = cms.string("RUN2ULPUPPI")
-        ),
-        src = cms.InputTag(inputJets)
-    )
-
     from RecoJets.JetProducers.PileupJetID_cfi import _chsalgos_106X_UL18
     process.pileupJetIdPuppi = process.pileupJetId.clone( 
         jets=cms.InputTag(inputJets),
@@ -49,7 +41,6 @@ def setupPuppiJets(process,
             puID = cms.InputTag("pileupJetIdPuppi:fullId"),
             jetIdLepVeto = cms.InputTag("jetIdLepVetoPuppi"),
             jetIdTight = cms.InputTag("tightjetidpuppi"),
-            jetIdLoose = cms.InputTag("loosejetidpuppi")
         ) 
     )
 
@@ -67,7 +58,6 @@ def setupPuppiJets(process,
             area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=-1),
             jetIdLepVeto = Var("userInt('jetIdLepVeto')", int),
             jetIdTight = Var("userInt('jetIdTight')", int),
-            jetIdLoose = Var("userInt('jetIdLoose')", int),
             puId = Var("userInt('puID')", int,doc="Pileup ID flags with 106X (2018) training"),
             nConstituents = Var("numberOfDaughters()","uint8",doc="Number of particles in the jet"),
             jecFactor = Var("jecFactor('Uncorrected')",float,doc="Factor to get back to raw pT",precision=-1),
@@ -83,7 +73,6 @@ def setupPuppiJets(process,
     process.UpdatedPuppiJetsTask = cms.Task(
         process.jetIdLepVetoPuppi,
         process.tightjetidpuppi,
-        process.loosejetidpuppi,
         process.pileupJetIdPuppi,
         process.updatedJetsPuppi,
         process.selectedGenJets,
