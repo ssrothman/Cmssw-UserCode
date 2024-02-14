@@ -8,7 +8,7 @@ from SRothman.EECs.setupEECs import setupEECs
 from SRothman.Matching.setupMatching import setupMatching
 from SRothman.CustomJets.setupAK8Jets import setupAK8Jets
 
-def setupAnalysis(process, addNaive=True, ak8=True):
+def setupAnalysis(process, addNaive=True, ak8=True, addCharged=True):
     process = setupZMuMu(process)
     process = setupRoccoR(process)
 
@@ -19,32 +19,38 @@ def setupAnalysis(process, addNaive=True, ak8=True):
     process = setupMatching(process, name='GenMatch',
                             reco='SimonJets',
                             gen='GenSimonJets')
-    process = setupMatching(process, name='ChargedGenMatch',
-                            reco='SimonChargedJets',
-                            gen='GenSimonChargedJets')
+    if addCharged:
+        process = setupMatching(process, name='ChargedGenMatch',
+                                reco='SimonChargedJets',
+                                gen='GenSimonChargedJets')
+
     process = setupEECs(process, name='EECs', 
                         genMatch='GenMatch',
                         genjets='GenSimonJets', 
                         recojets='SimonJets')
-    process = setupEECs(process, name='ChargedEECs', 
-                        genMatch='ChargedGenMatch',
-                        genjets='GenSimonChargedJets', 
-                        recojets='SimonChargedJets')
+    if addCharged:
+        process = setupEECs(process, name='ChargedEECs', 
+                            genMatch='ChargedGenMatch',
+                            genjets='GenSimonChargedJets', 
+                            recojets='SimonChargedJets')
     if addNaive:
         process = setupMatching(process, name='NaiveGenMatch',
                                 reco = 'SimonJets',
                                 gen = 'GenSimonJets',
                                 naive=True)
-        process = setupMatching(process, name='NaiveChargedGenMatch',
-                                reco = 'SimonChargedJets',
-                                gen = 'GenSimonChargedJets',
-                                naive=True)
+        if addCharged:
+            process = setupMatching(process, name='NaiveChargedGenMatch',
+                                    reco = 'SimonChargedJets',
+                                    gen = 'GenSimonChargedJets',
+                                    naive=True)
+
         process = setupEECs(process, name='NaiveEECs',
                             genMatch='NaiveGenMatch',
                             genjets = 'GenSimonJets',
                             recojets = 'SimonJets')
-        process = setupEECs(process, name='NaiveChargedEECs', 
-                            genMatch='NaiveChargedGenMatch',
-                            genjets='GenSimonChargedJets', 
-                            recojets='SimonChargedJets')
+        if addCharged:
+            process = setupEECs(process, name='NaiveChargedEECs', 
+                                genMatch='NaiveChargedGenMatch',
+                                genjets='GenSimonChargedJets', 
+                                recojets='SimonChargedJets')
     return process

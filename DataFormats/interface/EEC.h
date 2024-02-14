@@ -6,18 +6,15 @@ struct EECresult{
 
     std::vector<int> orders;
     std::vector<std::vector<double>> wts;
-    std::vector<arma::mat> covs;
 
     std::vector<double> res3wts;
-    arma::mat cov3;
 
     std::vector<double> res4wts;
-    arma::mat cov4;
 
     EECresult() : iJet(0), iReco(0), orders(), 
-                  wts(), covs(), 
-                  res3wts(), cov3(), 
-                  res4wts(), cov4() {}
+                  wts(),
+                  res3wts(), 
+                  res4wts() {}
 };
 
 struct EECtransfer{
