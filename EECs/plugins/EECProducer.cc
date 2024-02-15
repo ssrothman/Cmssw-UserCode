@@ -45,9 +45,8 @@ private:
     int verbose_;
 
     unsigned maxOrder_;
-    std::vector<unsigned> p1s_, p2s_;
     bool doRes3_, doRes4_;
-    bool normToRaw_;
+    std::string ptNorm_;
 
     edm::InputTag recoTag_;
     edm::EDGetTokenT<edm::View<jet>> recoToken_;
@@ -59,6 +58,13 @@ private:
     edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
 
     std::vector<double> dRbinEdges_;
+    std::vector<double> xi3binEdges_;
+    std::vector<double> phi3binEdges_;
+    std::vector<double> RM4binEdges_;
+    std::vector<double> phi4binEdges_;
+    double RMoRL_;
+    double RSoRL_;
+    double tol_;
 
     void addProjected(EECresult& next, const EECCalculator& calc, 
             bool PU);
@@ -119,17 +125,22 @@ void EECProducer::addResolved(EECresult& next,
 EECProducer::EECProducer(const edm::ParameterSet& conf)
         : verbose_(conf.getParameter<int>("verbose")),
           maxOrder_(conf.getParameter<unsigned>("maxOrder")),
-          p1s_(conf.getParameter<std::vector<unsigned>>("p1s")),
-          p2s_(conf.getParameter<std::vector<unsigned>>("p2s")),
           doRes3_(conf.getParameter<bool>("doRes3")),
           doRes4_(conf.getParameter<bool>("doRes4")),
-          normToRaw_(conf.getParameter<bool>("normToRaw")),
+          ptNorm_(conf.getParameter<std::string>("ptNorm")),
           recoTag_(conf.getParameter<edm::InputTag>("reco")),
           recoToken_(consumes<edm::View<jet>>(recoTag_)),
           doGen_(conf.getParameter<bool>("doGen")),
           genTag_(conf.getParameter<edm::InputTag>("gen")),
           matchTag_(conf.getParameter<edm::InputTag>("match")),
-          dRbinEdges_(conf.getParameter<std::vector<double>>("dRbinEdges")){
+          dRbinEdges_(conf.getParameter<std::vector<double>>("dRbinEdges")),
+          xi3binEdges_(conf.getParameter<std::vector<double>>("xi3binEdges")),
+          phi3binEdges_(conf.getParameter<std::vector<double>>("phi3binEdges")),
+          RM4binEdges_(conf.getParameter<std::vector<double>>("RM4binEdges")),
+          phi4binEdges_(conf.getParameter<std::vector<double>>("phi4binEdges")),
+          RMoRL_(conf.getParameter<double>("RMoRL")),
+          RSoRL_(conf.getParameter<double>("RSoRL")),
+          tol_(conf.getParameter<double>("tol")) {
     produces<std::vector<EECresult>>("reco");
     produces<std::vector<EECresult>>("recoPU");
     if(doGen_){
@@ -139,9 +150,6 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
         genToken_ = consumes<edm::View<jet>>(genTag_);
         matchToken_ = consumes<edm::View<jetmatch>>(matchTag_);
     }
-    if (p1s_.size() != p2s_.size()){
-        throw cms::Exception("Passed mis-matched p1 and p2 vectors for nonIRC EEC");
-    }
 }
 
 void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -149,15 +157,26 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<edm::InputTag>("reco");
   desc.add<edm::InputTag>("gen");
   desc.add<edm::InputTag>("match");
-  desc.add<std::vector<unsigned>>("p1s");
-  desc.add<std::vector<unsigned>>("p2s");
+
   desc.add<int>("verbose");
-  desc.add<bool>("doGen");
+
+  desc.add<unsigned>("maxOrder");
   desc.add<bool>("doRes3");
   desc.add<bool>("doRes4");
-  desc.add<bool>("normToRaw");
-  desc.add<unsigned>("maxOrder");
+  desc.add<std::string>("ptNorm");
+
+  desc.add<bool>("doGen");
+
   desc.add<std::vector<double>>("dRbinEdges");
+  desc.add<std::vector<double>>("xi3binEdges");
+  desc.add<std::vector<double>>("phi3binEdges");
+  desc.add<std::vector<double>>("RM4binEdges");
+  desc.add<std::vector<double>>("phi4binEdges");
+
+  desc.add<double>("RMoRL");
+  desc.add<double>("RSoRL");
+  desc.add<double>("tol");
+
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -189,6 +208,23 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   auto resulttrans = std::make_unique<std::vector<EECtransfer>>();
 
   auto RLax = std::make_shared<boost::histogram::axis::variable<double>>(dRbinEdges_);
+  auto xi3ax = std::make_shared<boost::histogram::axis::variable<double>>(xi3binEdges_);
+  auto phi3ax = std::make_shared<boost::histogram::axis::variable<double>>(phi3binEdges_);
+  auto RM4ax = std::make_shared<boost::histogram::axis::variable<double>>(RM4binEdges_);
+  auto phi4ax = std::make_shared<boost::histogram::axis::variable<double>>(phi4binEdges_);
+
+  struct trianglespec tspec(RMoRL_, RSoRL_, tol_);
+
+  EECCalculator::normType norm;
+  if(ptNorm_ == "RAW"){
+      norm = EECCalculator::normType::RAWPT;
+  }else if(ptNorm_ == "CORR"){
+      norm = EECCalculator::normType::CORRPT;
+  }else if(ptNorm_ == "SUM"){
+      norm = EECCalculator::normType::SUMPT;
+  }else{
+      throw cms::Exception("Bad norm type");
+  }
 
   for(unsigned iReco=0; iReco<reco->size(); ++iReco){
       if(verbose_){
@@ -237,13 +273,13 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         printf("iGen %d\n", iGen);
       }
       EECCalculator calculator(verbose_);
-      calculator.setupProjected(reco->at(iReco), maxOrder_, RLax);
+      calculator.setupProjected(reco->at(iReco), maxOrder_, RLax, norm);
       calculator.addPU(PU);
       if(doRes3_){
-          calculator.enableRes3(RLax, RLax);
+          calculator.enableRes3(xi3ax, phi3ax);
       }
       if(doRes4_){
-          calculator.enableRes4(RLax, RLax);
+          calculator.enableRes4(RM4ax, phi4ax, tspec);
       }
 
       calculator.initialize();
@@ -277,14 +313,14 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
       if(iGen >=0 ){
           EECCalculator Tcalc(verbose_);
-          Tcalc.setupProjected(gen->at(iGen), maxOrder_, RLax);
+          Tcalc.setupProjected(gen->at(iGen), maxOrder_, RLax, norm);
           Tcalc.addPU(UNMATCHED);
-          Tcalc.addTransfer(gen->at(iGen), reco->at(iReco), ptrans);
+          Tcalc.addTransfer(reco->at(iReco),ptrans,norm);
           if(doRes3_){
-              Tcalc.enableRes3(RLax, RLax);
+              Tcalc.enableRes3(xi3ax, phi3ax);
           }
           if(doRes4_){
-              Tcalc.enableRes4(RLax, RLax);
+              Tcalc.enableRes4(RM4ax, phi4ax, tspec);
           }
 
           Tcalc.initialize();

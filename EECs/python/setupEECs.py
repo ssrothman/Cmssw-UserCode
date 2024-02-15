@@ -5,49 +5,50 @@ from SRothman.EECs.EECTransferTableProducer_cfi import *
 
 def setupEECs(process, 
               name, genMatch,
-              genjets, recojets):
+              genjets, recojets,
+              verbose=0):
 
     setattr(process, name,
         EECProducer.clone(
             reco = recojets,
             gen = genjets,
             match = genMatch,
-            verbose = False
+            verbose = verbose
         )
     )
     setattr(process, "Reco%sTable"%name,
         EECTableProducer.clone(
             src = "%s:reco"%name,
             name = "Reco%s"%name,
-            verbose = 0,
+            verbose = verbose,
         )
     )
     setattr(process, "Reco%sPUTable"%name,
         EECTableProducer.clone(
             src = "%s:recoPU"%name,
             name = "Reco%sPU"%name,
-            verbose = 0,
+            verbose = verbose,
         )
     )
     setattr(process, 'Gen%sTable'%name,
         EECTableProducer.clone(
             src = "%s:gen"%name,
             name =  "Gen%s"%name,
-            verbose = 0,
+            verbose = verbose,
         )
     )
     setattr(process, 'Gen%sUNMATCHTable'%name,
         EECTableProducer.clone(
             src = "%s:genUNMATCH"%name,
             name =  "Gen%sUNMATCH"%name,
-            verbose = 0,
+            verbose = verbose,
         )
     )
     setattr(process,'Transfer%sTable'%name,
         EECTransferTableProducer.clone(
             src = "%s:transfer"%name,
             name = "%sTransfer"%name,
-            verbose = 0,
+            verbose = verbose,
         )
     )
     setattr(process, '%sTask'%name, 

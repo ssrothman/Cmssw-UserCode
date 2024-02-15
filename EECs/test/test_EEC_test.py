@@ -31,7 +31,7 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL17MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120000/005B6A7C-B0B1-A745-879B-017FE7933B77.root'),
     fileNames = cms.untracked.vstring('/store/mc/RunIISummer20UL18MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/120000/015753DA-CD2E-F546-9A7B-9DD451DEA159.root'),
     secondaryFileNames = cms.untracked.vstring(),
-    #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1, 2339661, 1, 2339661))
+    eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1, 22381277, 1, 22381277))
 )
 
 process.options = cms.untracked.PSet(
@@ -78,8 +78,8 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(4)
-process.options.numberOfStreams=cms.untracked.uint32(4)
+process.options.numberOfThreads=cms.untracked.uint32(1)
+process.options.numberOfStreams=cms.untracked.uint32(1)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 # customisation of the process.
@@ -91,7 +91,7 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 process = nanoAOD_customizeMC(process)
 
 from SRothman.Analysis.setupAnalysis import *
-process = setupAnalysis(process, ak8=True, addCharged=False, addNaive=False)
+process = setupAnalysis(process, ak8=True, addCharged=False, addNaive=False, verbose=0)
 
 # End of customisation functions
 
