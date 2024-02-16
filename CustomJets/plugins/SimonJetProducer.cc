@@ -237,7 +237,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             for(unsigned iCHS=0; iCHS < CHSjets->size(); ++iCHS){
                 const auto& jCHS = CHSjets->at(iCHS);
                 if(deltaR(j, jCHS) < CHSmatchDR_){//if the CHS jet matches the jet
-                    ans.iCHS = iCHS;
+                    ans.iCHS.push_back(iCHS);
                     break;
                 }
             }

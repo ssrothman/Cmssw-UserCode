@@ -39,6 +39,8 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
         nextpt /= jecfactor;
     }
 
+    ans.rawpt += nextpt;
+
     double minPartPt = thresholds.getThreshold(partptr);
     if(nextpt < minPartPt 
             || ans.nPart >= maxNumPart 
