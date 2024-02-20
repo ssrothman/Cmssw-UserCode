@@ -289,6 +289,15 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         printf("ran calc\n");
       }
 
+        printf("Total reco weights\n");
+        for(unsigned order=2; order<=maxOrder_; ++order){
+            std::vector<double> weights = calculator.getproj(order);
+            std::vector<double> weightsPU = calculator.getproj_PU(order);
+            printf("\t%d: %0.3f\n", order, std::accumulate(weights.begin(), weights.end(), 0.));
+            printf("\tPU%d: %0.3f\n", order, std::accumulate(weightsPU.begin(), weightsPU.end(), 0.));
+        }
+
+
       EECresult next;
       next.iJet = iReco;
       next.iReco = iReco;
@@ -337,6 +346,22 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EECresult nextGen;
         nextGen.iJet = iGen;
         nextGen.iReco = iReco;
+        printf("Total gen weights\n");
+        for(unsigned order=2; order<=maxOrder_; ++order){
+            std::vector<double> weights = Tcalc.getproj(order);
+            std::vector<double> weightsPU = Tcalc.getproj_PU(order);
+            printf("\t%d: %0.3f\n", order, std::accumulate(weights.begin(), weights.end(), 0.));
+            printf("\tPU%d: %0.3f\n", order, std::accumulate(weightsPU.begin(), weightsPU.end(), 0.));
+        }
+        std::vector<double> res3 = Tcalc.getres3();
+        std::vector<double> res4 = Tcalc.getres4();
+        std::vector<double> res3PU = Tcalc.getres3_PU();
+        std::vector<double> res4PU = Tcalc.getres4_PU();
+        printf("\tres3: %0.3f\n", std::accumulate(res3.begin(), res3.end(), 0.));
+        printf("\tres3PU: %0.3f\n", std::accumulate(res3PU.begin(), res3PU.end(), 0.));
+        printf("\tres4: %0.3f\n", std::accumulate(res4.begin(), res4.end(), 0.));
+        printf("\tres4PU: %0.3f\n", std::accumulate(res4PU.begin(), res4PU.end(), 0.));
+
         addProjected(nextGen, Tcalc, false);
         addResolved(nextGen, Tcalc, false);
 

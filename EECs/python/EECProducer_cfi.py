@@ -12,11 +12,11 @@ dRedges = [0.0005 ,0.001, 0.005,
            0.30, 0.40, 0.50, 0.60, 
            0.70, 0.80, 0.90, 1.00]
 
-xi3edges = np.linspace(0.0, 1.0, 10)
-phi3edges = np.linspace(0.0, 1.0, 10)
+xi3edges = np.linspace(0.0, 1.0, 5)
+phi3edges = np.linspace(0.0, 1.0, 5)
 
-RM4edges = np.linspace(0.0, 1.0, 10)
-phi4edges = np.linspace(-np.pi, np.pi, 10)
+RM4edges = np.linspace(0.0, 1.0, 5)
+phi4edges = np.linspace(-np.pi, np.pi, 5)
 
 EECProducer = cms.EDProducer("EECProducer",
     reco = cms.InputTag("SimonJets"),
@@ -26,7 +26,7 @@ EECProducer = cms.EDProducer("EECProducer",
     maxOrder = cms.uint32(6),
     doRes3 = cms.bool(True),
     doRes4 = cms.bool(True),
-    ptNorm = cms.string("RAW"),
+    ptNorm = cms.string("CORR"),
 
     doGen = cms.bool(True),
 
