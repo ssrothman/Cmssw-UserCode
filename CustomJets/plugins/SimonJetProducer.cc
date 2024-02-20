@@ -238,8 +238,10 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
                 const auto& jCHS = CHSjets->at(iCHS);
                 if(deltaR(j, jCHS) < CHSmatchDR_){//if the CHS jet matches the jet
                     ans.iCHS.push_back(iCHS);
-                    break;
                 }
+            }
+            if(ans.iCHS.empty()){
+                ans.iCHS.push_back(99999999);
             }
         }
 

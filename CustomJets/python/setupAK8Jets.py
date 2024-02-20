@@ -54,6 +54,8 @@ def setupAK8Jets(process):
             phi = Var("phi", float, doc="azimuthal angle", precision=-1),
             mass = Var("mass", float, doc="mass", precision=-1),
             area = Var("jetArea", float, doc="jet area", precision=-1),
+            jetIdLepVeto = Var("userInt('jetIdLepVeto')", int),
+            jetIdTight = Var("userInt('jetIdTight')", int),
             nConstituents = Var("numberOfDaughters", int, doc="number of jet constituents", precision=-1),
             jecFactor = Var("jecFactor('Uncorrected')", float, doc="jec factor", precision=-1),
             chHEF = Var("chargedHadronEnergyFraction()", float, doc='charged Hadron Energy Fraction', precision=-1),

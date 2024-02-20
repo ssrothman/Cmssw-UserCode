@@ -29,7 +29,7 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
 
     CHSsrc = cms.InputTag(""),
     addCHSindex = cms.bool(False),
-    CHSmatchDR = cms.double(0.2),
+    CHSmatchDR = cms.double(0.4),
 
     verbose = cms.int32(1),
 )

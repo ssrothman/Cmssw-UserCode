@@ -20,8 +20,8 @@ def setupCustomJets(process, verbose=False, table=False, ak8 = False):
 
     process = setupSimonJets(process, jets, genJets,
                              CHSjets, False, 'ZMuMu',
-                             'SimonJets')
+                             'SimonJets', ak8)
     process = setupSimonJets(process, jets, genJets,
                              CHSjets, True, 'ZMuMu',
-                             'SimonChargedJets')
+                             'SimonChargedJets', ak8)
     return process

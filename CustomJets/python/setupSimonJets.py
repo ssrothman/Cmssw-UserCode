@@ -5,7 +5,8 @@ def setupSimonJets(process, jets='updatedJetsPuppi',
                    CHSjets = 'finalJets',
                    chargedOnly=False,
                    eventSelection='ZMuMu',
-                   name='SimonJets'):
+                   name='SimonJets',
+                   ak8=False):
     from SRothman.CustomJets.SimonJetTableProducer_cfi import *
     from SRothman.CustomJets.SimonJetProducer_cfi import *
 
@@ -18,6 +19,7 @@ def setupSimonJets(process, jets='updatedJetsPuppi',
         doEventSelection = doEventSel,
         CHSsrc = CHSjets,
         addCHSindex = doCHS,
+        CHSmatchDR = 0.4 if ak8 else 0.2,
         verbose = False,
         onlyCharged = chargedOnly
     ))
