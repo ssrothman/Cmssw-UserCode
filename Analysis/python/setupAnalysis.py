@@ -8,7 +8,8 @@ from SRothman.EECs.setupEECs import setupEECs
 from SRothman.Matching.setupMatching import setupMatching
 from SRothman.CustomJets.setupAK8Jets import setupAK8Jets
 
-def setupAnalysis(process, addNaive=True, ak8=True, addCharged=True, verbose=0):
+def setupAnalysis(process, doNominal=True, addNaive=True, 
+                  ak8=True, addCharged=True, verbose=0):
     process = setupZMuMu(process)
     process = setupRoccoR(process)
 
@@ -16,19 +17,21 @@ def setupAnalysis(process, addNaive=True, ak8=True, addCharged=True, verbose=0):
     process = setupPuppiJets(process)
     process = setupCustomJets(process, ak8=ak8)
 
-    process = setupMatching(process, name='GenMatch',
-                            reco='SimonJets',
-                            gen='GenSimonJets')
+    if doNominal:
+        process = setupMatching(process, name='GenMatch',
+                                reco='SimonJets',
+                                gen='GenSimonJets')
     if addCharged:
         process = setupMatching(process, name='ChargedGenMatch',
                                 reco='SimonChargedJets',
                                 gen='GenSimonChargedJets')
 
-    process = setupEECs(process, name='EECs', 
-                        genMatch='GenMatch',
-                        genjets='GenSimonJets', 
-                        recojets='SimonJets',
-                        verbose=verbose)
+    if doNominal:
+        process = setupEECs(process, name='EECs', 
+                            genMatch='GenMatch',
+                            genjets='GenSimonJets', 
+                            recojets='SimonJets',
+                            verbose=verbose)
     if addCharged:
         process = setupEECs(process, name='ChargedEECs', 
                             genMatch='ChargedGenMatch',

@@ -26,7 +26,7 @@ EECProducer = cms.EDProducer("EECProducer",
     maxOrder = cms.uint32(6),
     doRes3 = cms.bool(True),
     doRes4 = cms.bool(True),
-    ptNorm = cms.string("CORR"),
+    ptNorm = cms.string("RAW"),
 
     doGen = cms.bool(True),
 
