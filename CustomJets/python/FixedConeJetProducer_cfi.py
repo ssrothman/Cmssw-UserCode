@@ -1,49 +1,49 @@
 import FWCore.ParameterSet.Config as cms
+
 from SRothman.CustomJets.cuts_cff import *
 
 _maxNumPart = 8192
 
-RecoFullEventJetProducer = cms.EDProducer("FullEventJetProducer",
+RecoFixedConeJetProducer = cms.EDProducer("FixedConeJetProducer",
     thresholds = recoThresholds.clone(),
     vtxCuts = recoVtxCuts.clone(),
 
-    onlyCharged = cms.bool(False),
-
     maxNumPart = cms.uint32(_maxNumPart),
     minNumPart = cms.uint32(2),
 
-    maxPartEta = cms.double(2.5),
-
+    onlyCharged = cms.bool(False),
     applyPuppi = cms.bool(True),
+
+    particles = cms.InputTag("packedPFCandidates"),
 
     eventSelection = cms.InputTag(""),
     doEventSelection = cms.bool(False),
 
-    partSrc = cms.InputTag("pupppi"),
+    coords = cms.InputTag("randomConeCoords"),
 
-    skipLeadingMuons = cms.bool(True),
+    conesize = cms.double(0.4),
 
-    verbose = cms.int32(0)
+    verbose = cms.int32(0),
 )
 
-GenFullEventJetProducer = cms.EDProducer("FullEventJetProducer",
+GenFixedConeJetProducer = cms.EDProducer("FixedConeJetProducer",
     thresholds = genThresholds.clone(),
     vtxCuts = genVtxCuts.clone(),
 
-    onlyCharged = cms.bool(False),
-
     maxNumPart = cms.uint32(_maxNumPart),
     minNumPart = cms.uint32(2),
 
-    maxPartEta = cms.double(2.5),
-
+    onlyCharged = cms.bool(False),
     applyPuppi = cms.bool(False),
+
+    particles = cms.InputTag("packedGenParticles"),
 
     eventSelection = cms.InputTag(""),
     doEventSelection = cms.bool(False),
 
-    partSrc = cms.InputTag("packedGenParticles"),
+    coords = cms.InputTag("randomConeCoords"),
 
-    skipLeadingMuons = cms.bool(True),
-    verbose = cms.int32(0)
+    conesize = cms.double(0.4),
+
+    verbose = cms.int32(0),
 )

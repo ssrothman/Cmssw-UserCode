@@ -7,7 +7,7 @@ recoThresholds = cms.PSet(
     ELEthresholds =   cms.vdouble(0.0),
     MUthresholds =    cms.vdouble(0.0),
 
-    etaRegions = cms.vdouble(0.0, 3.0)
+    etaRegions = cms.vdouble(0.0, 9999999)
 )
 
 recoVtxCuts = cms.PSet(

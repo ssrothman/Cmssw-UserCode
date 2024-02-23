@@ -233,6 +233,8 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
         ans.iJet = iJet;
         ans.jecfactor = jecfactor;
 
+        //printf("making jSimonJet et with eta: %f, phi: %f\n", ans.eta, ans.phi);
+
         if(addCHSindex_){
             for(unsigned iCHS=0; iCHS < CHSjets->size(); ++iCHS){
                 const auto& jCHS = CHSjets->at(iCHS);

@@ -3,12 +3,15 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 def setupPuppiJets(process, 
                    inputJets = 'patJetsReapplyJECPuppi',
-                   inputGenJets = 'slimmedGenJets'):
-    process.selectedGenJets = cms.EDFilter("GenJetSelector",
-        src = cms.InputTag(inputGenJets),
-        cut = cms.string("pt > 10.0 && abs(eta) < 5.0"),
-        filter = cms.bool(False)
-    )
+                   inputGenJets = 'slimmedGenJets',
+                   isMC=True):
+
+    if isMC:
+        process.selectedGenJets = cms.EDFilter("GenJetSelector",
+            src = cms.InputTag(inputGenJets),
+            cut = cms.string("pt > 10.0 && abs(eta) < 5.0"),
+            filter = cms.bool(False)
+        )
 
     process.jetIdLepVetoPuppi = cms.EDProducer("PatJetIDValueMapProducer",
         filterParams = cms.PSet(
@@ -75,11 +78,17 @@ def setupPuppiJets(process,
         process.tightjetidpuppi,
         process.pileupJetIdPuppi,
         process.updatedJetsPuppi,
-        process.selectedGenJets,
         process.BigPuppiJetTable
     )
 
-    process.schedule.associate(process.UpdatedPuppiJetsTask)
+    process.schedule.associate(process.UpdatedPuppiJetsTask) 
+
+    if isMC:
+        process.MCUpdatedPuppiJetsTask = cms.Task(
+            process.selectedGenJets,
+        )
+        process.schedule.associate(process.MCUpdatedPuppiJetsTask) 
+
 
     return process
 

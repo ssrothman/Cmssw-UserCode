@@ -171,6 +171,8 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
     ans.iJet = iJet;
     ans.particles.clear();
 
+    //printf("making ShadowJet jet with eta: %f, phi: %f\n", ans.eta, ans.phi);
+
     if (verbose_){
       std::cout << "\tjet: (" << pt << ", " << eta << ", " << phi << ")" << std::endl;
     }

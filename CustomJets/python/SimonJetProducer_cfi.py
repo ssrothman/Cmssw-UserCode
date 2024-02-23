@@ -19,7 +19,7 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
     applyPuppi = cms.bool(True),
 
     minPt = cms.double(20),
-    maxEta = cms.double(2.1),
+    maxEta = cms.double(1.7),
 
     maxMuFrac = cms.double(0.8),
     maxChEmFrac = cms.double(0.8),
@@ -49,7 +49,7 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     applyPuppi = cms.bool(False),
 
     minPt = cms.double(10),
-    maxEta = cms.double(2.5),
+    maxEta = cms.double(1.7),
 
     maxMuFrac = cms.double(999),
     maxChEmFrac = cms.double(999),

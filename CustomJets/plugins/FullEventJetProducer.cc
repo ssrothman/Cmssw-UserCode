@@ -58,6 +58,8 @@ private:
     edm::EDGetTokenT<bool> evtSelToken_;
     bool doEvtSel_;
 
+    bool skipLeadingMuons_;
+
     int verbose_;
 };
 
@@ -67,12 +69,14 @@ FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxPartEta_(conf.getParameter<double>("maxPartEta")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
+          minNumPart_(conf.getParameter<unsigned>("minNumPart")),
           applyPuppi_(conf.getParameter<bool>("applyPuppi")),
           partSrc_(conf.getParameter<edm::InputTag>("partSrc")),
           partToken_(consumes<edm::View<reco::Candidate>>(partSrc_)),
           evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
           evtSelToken_(consumes<bool>(evtSelSrc_)),
           doEvtSel_(conf.getParameter<bool>("doEventSelection")),
+          skipLeadingMuons_(conf.getParameter<bool>("skipLeadingMuons")),
           verbose_(conf.getParameter<int>("verbose")){
     produces<std::vector<jet>>();
 }
@@ -93,6 +97,7 @@ void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
     desc.add<double>("maxPartEta");
 
     desc.add<unsigned>("maxNumPart");
+    desc.add<unsigned>("minNumPart");
 
     desc.add<bool>("applyPuppi");
 
@@ -102,6 +107,8 @@ void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
     desc.add<edm::InputTag>("partSrc");
 
     desc.add<int>("verbose");
+
+    desc.add<bool>("skipLeadingMuons");
 
     descriptions.addWithDefaultLabel(desc);
 }
@@ -138,8 +145,21 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
     ans.sumpt = 0.0;
     ans.particles.clear();
 
+    //printf("making FullEvent jet with eta: %f, phi: %f\n", ans.eta, ans.phi);
+
+    bool doneMu0 = false, doneMu1 = false;
     for(size_t iPart=0; iPart < parts->size(); ++iPart){
         const auto& part = parts->at(iPart);
+
+        if(skipLeadingMuons_ && std::abs(part.pdgId()) == 13){
+            if (!doneMu0){
+                doneMu0 = true;
+                continue;
+            } else if (!doneMu1){
+                doneMu1 = true;
+                continue;
+            }
+        }   
 
         const auto* partptr=dynamic_cast<const pat::PackedCandidate*>(&part);
         const auto* genptr=dynamic_cast<const pat::PackedGenParticle*>(&part);
