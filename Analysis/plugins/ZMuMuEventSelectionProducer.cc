@@ -102,43 +102,35 @@ void ZMuMuEventSelectionProducer::produce(edm::Event& evt, const edm::EventSetup
     if(verbose_){
         printf("Top of ZMuMUEventSelectionProducer::produce()\n");
     }
-  edm::Handle<edm::View<pat::Muon>> muons;
-  evt.getByToken(srcToken_, muons);
+    edm::Handle<edm::View<pat::Muon>> muons;
+    evt.getByToken(srcToken_, muons);
 
-  auto result = std::make_unique<bool>(false);
+    auto result = std::make_unique<bool>(false);
 
-  if(muons->size() >= 2) {
-    std::vector<unsigned> passedMuons;
-    for(unsigned i=0; i<muons->size(); ++i){
-        if(std::abs(muons->at(i).eta()) > maxMuEta_){
-            continue; //failed kinematic cuts
-        }
-        if(!muons->at(i).passed(ID_) || !muons->at(i).passed(Iso_)){
-            continue; //failed ID or isolation
-        }
-        passedMuons.push_back(i);
-    }
-    if(passedMuons.size() >= 2){
-        const auto& mu1 = muons->at(passedMuons[0]);
-        const auto& mu2 = muons->at(passedMuons[1]);
-        if(mu1.pt() > leadMuPt_ && mu2.pt() > subMuPt_){
-            if(mu1.charge() * mu2.charge() < 0){//opposite sign
-                const auto& z = mu1.p4() + mu2.p4();
-                if(verbose_){
-                  printf("Z mass: %f\n", z.mass());
-                }
-                if(z.mass() > minZmass_ && z.mass() < maxZmass_){
-                    *result = true;
-                }
+    if(muons->size() >= 2){
+        const auto& mu1 = muons->at(0);
+        const auto& mu2 = muons->at(1);
+        if(std::abs(mu1.eta()) < maxMuEta_ &&
+                std::abs(mu2.eta()) < maxMuEta_ &&
+                mu1.passed(ID_) && mu2.passed(ID_) &&
+                mu1.passed(Iso_) && mu2.passed(Iso_) &&
+                mu1.pt() > leadMuPt_ && 
+                mu2.pt() > subMuPt_){
+
+            const auto& z = mu1.p4() + mu2.p4();
+            if(verbose_){
+                printf("Z mass: %f\n", z.mass());
+            }
+            if(z.mass() > minZmass_ && z.mass() < maxZmass_){
+                *result = true;
             }
         }
     }
-  }
 
-  evt.put(std::move(result));
-  if(verbose_){
-      printf("put into event\n");
-  }
+    evt.put(std::move(result));
+    if(verbose_){
+        printf("put into event\n");
+    }
 }  // end produce()
 
 DEFINE_FWK_MODULE(ZMuMuEventSelectionProducer);
