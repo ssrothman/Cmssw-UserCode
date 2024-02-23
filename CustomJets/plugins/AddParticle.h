@@ -39,20 +39,21 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
         nextpt /= jecfactor;
     }
 
-    ans.rawpt += nextpt;
 
 
-    if(std::abs(partptr->eta()) > maxPartEta){
+    if(std::abs(partptr->eta()) > maxPartEta 
+            || !vtxcuts.pass(partptr)
+            || nextpt==0){
         return;
     }
+
+    ans.rawpt += nextpt;
 
     //printf("\tadding particle with pt: %f, eta: %f, phi: %f, pdgid: %d\n", partptr->pt(), partptr->eta(), partptr->phi(), partptr->pdgId());
     double minPartPt = thresholds.getThreshold(partptr);
     if(nextpt < minPartPt 
             || ans.nPart >= maxNumPart 
-            || nextpt==0
-            || !vtxcuts.pass(partptr)
-            || (onlyCharged && partptr->charge()==0)){
+            || !vtxcuts.pass(partptr)){
         return;
     }
 
