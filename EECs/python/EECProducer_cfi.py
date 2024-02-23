@@ -24,8 +24,8 @@ EECProducer = cms.EDProducer("EECProducer",
     match = cms.InputTag("GenMatch"),
 
     maxOrder = cms.uint32(6),
-    doRes3 = cms.bool(True),
-    doRes4 = cms.bool(True),
+    doRes3 = cms.bool(False),
+    doRes4 = cms.bool(False),
     ptNorm = cms.string("RAW"),
 
     doGen = cms.bool(True),
