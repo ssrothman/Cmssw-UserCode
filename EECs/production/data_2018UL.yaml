@@ -1,13 +1,13 @@
 defaults:
-  isMC: True
+  isMC: False
   splitting: LumiBased
   reco_version: UL
   year: 2018
-  globaltag: 106X_upgrade2018_realistic_v16_L1v1
-  pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC.py
+  globaltag: 106X_dataRun2_v33 
+  pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC_ak8_data.py
   allowInvalid: False
   unitsPerJob: 100
-  totalUnits: 10000000
+  totalUnits: 10000
 
 samples:
   DYJetsToLL: 
