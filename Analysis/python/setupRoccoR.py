@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 from SRothman.Analysis.RoccoRValueMapProducer_cfi import RoccoRValueMapProducer
 
-def setupRoccoR(process):
+def setupRoccoR(process, isMC=True):
     process.RoccoR = RoccoRValueMapProducer.clone(
         src = cms.InputTag('linkedObjects', 'muons'),
-        genParticles = cms.InputTag('prunedGenParticles'),
-        isMC = cms.bool(True),
+        genParticles = cms.InputTag('packedGenParticles'),
+        isMC = cms.bool(isMC),
         verbose = False
     )
     process.RoccoRTask = cms.Task(process.RoccoR)

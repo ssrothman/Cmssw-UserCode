@@ -9,52 +9,64 @@ from SRothman.Matching.setupMatching import setupMatching
 from SRothman.CustomJets.setupAK8Jets import setupAK8Jets
 
 def setupAnalysis(process, doNominal=True, addNaive=True, 
-                  ak8=True, addCharged=True, verbose=0):
+                  ak8=True, addCharged=True, addFullEvent=True,
+                  addRandomControl=True, addZControl=True,
+                  verbose=0, isMC=True):
     process = setupZMuMu(process)
-    process = setupRoccoR(process)
+    process = setupRoccoR(process, isMC=isMC)
 
-    process = setupAK8Jets(process)
-    process = setupPuppiJets(process)
-    process = setupCustomJets(process, ak8=ak8)
+    process = setupAK8Jets(process, isMC=isMC)
+    process = setupPuppiJets(process, isMC=isMC)
+    process = setupCustomJets(process, ak8=ak8, isMC=isMC)
 
-    if doNominal:
-        process = setupMatching(process, name='GenMatch',
-                                reco='SimonJets',
-                                gen='GenSimonJets')
-    if addCharged:
-        process = setupMatching(process, name='ChargedGenMatch',
-                                reco='SimonChargedJets',
-                                gen='GenSimonChargedJets')
+    names = []
+    matchnames = []
+    EECnames = []
 
     if doNominal:
-        process = setupEECs(process, name='EECs', 
-                            genMatch='GenMatch',
-                            genjets='GenSimonJets', 
-                            recojets='SimonJets',
-                            verbose=verbose)
+        names += ['SimonJets']
+        matchnames += ['GenMatch']
+        EECnames += ['EECs']
+    if addFullEvent:
+        names += ['FullEventJets']
+        matchnames += ['FullEventGenMatch']
+        EECnames += ['FullEventEECs']
+    if addRandomControl:
+        names += ['RandomConeJets']
+        matchnames += ['RandomConeGenMatch']
+        EECnames += ['RandomConeEECs']
+    if addZControl:
+        names += ['ControlConeJets']
+        matchnames += ['ControlConeGenMatch']
+        EECnames += ['ControlConeEECs']
+
     if addCharged:
-        process = setupEECs(process, name='ChargedEECs', 
-                            genMatch='ChargedGenMatch',
-                            genjets='GenSimonChargedJets', 
-                            recojets='SimonChargedJets')
+        extranames = ['Charged'+name for name in names]
+        names += extranames
+        extramatchnames = ['Charged'+name for name in matchnames]
+        matchnames += extramatchnames
+        extraEECnames = ['Charged'+name for name in EECnames]
+        EECnames += extraEECnames
+
     if addNaive:
-        process = setupMatching(process, name='NaiveGenMatch',
-                                reco = 'SimonJets',
-                                gen = 'GenSimonJets',
-                                naive=True)
-        if addCharged:
-            process = setupMatching(process, name='NaiveChargedGenMatch',
-                                    reco = 'SimonChargedJets',
-                                    gen = 'GenSimonChargedJets',
-                                    naive=True)
+        extranames = names[:]
+        names += extranames
+        extramatchnames = ['Naive'+name for name in matchnames]
+        matchnames += extramatchnames
+        extraEECnames = ['Naive'+name for name in EECnames]
+        EECnames += extraEECnames
 
-        process = setupEECs(process, name='NaiveEECs',
-                            genMatch='NaiveGenMatch',
-                            genjets = 'GenSimonJets',
-                            recojets = 'SimonJets')
-        if addCharged:
-            process = setupEECs(process, name='NaiveChargedEECs', 
-                                genMatch='NaiveChargedGenMatch',
-                                genjets='GenSimonChargedJets', 
-                                recojets='SimonChargedJets')
+    for name, matchname, EECname in zip(names, matchnames, EECnames):
+        if isMC:
+            process = setupMatching(process, name=matchname,
+                                    reco=name,
+                                    gen='Gen'+name,
+                                    naive = 'Naive' in matchname)
+
+        process = setupEECs(process, name=EECname,
+                            genMatch = matchname,
+                            genjets = 'Gen' + name,
+                            recojets = name,
+                            verbose=verbose, isMC=isMC)
+
     return process
