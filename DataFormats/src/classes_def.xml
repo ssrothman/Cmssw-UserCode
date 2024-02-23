@@ -21,4 +21,8 @@
     <class name="edm::Wrapper<EECtransfer>"/>
     <class name="std::vector<EECtransfer>"/>
     <class name="edm::Wrapper<std::vector<EECtransfer>>"/>
+<class name="etaPhiCoords"/>
+<class name="edm::Wrapper<etaPhiCoords>"/>
+<class name="std::vector<etaPhiCoords>"/>
+<class name="edm::Wrapper<std::vector<etaPhiCoords>>"/>
 </lcgdict>
