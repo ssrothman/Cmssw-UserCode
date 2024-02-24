@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(20)
 )
 
 # Input source
@@ -93,7 +93,7 @@ process = nanoAOD_customizeMC(process)
 from SRothman.Analysis.setupAnalysis import *
 process = setupAnalysis(process, ak8=True, addCharged=True, addNaive=True, 
                         addFullEvent=True, addRandomControl=True, addZControl=True,
-                        verbose=0)
+                        verbose=1)
 
 # End of customisation functions
 

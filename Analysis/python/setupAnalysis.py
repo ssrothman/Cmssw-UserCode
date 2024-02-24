@@ -61,7 +61,8 @@ def setupAnalysis(process, doNominal=True, addNaive=True,
             process = setupMatching(process, name=matchname,
                                     reco=name,
                                     gen='Gen'+name,
-                                    naive = 'Naive' in matchname)
+                                    naive = 'Naive' in matchname,
+                                    verbose=verbose)
 
         process = setupEECs(process, name=EECname,
                             genMatch = matchname,

@@ -410,7 +410,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             next.ptrans = thismatch->ptrans();
             next.rawmat = thismatch->rawmat();
 
-            if(verbose_){
+            if(verbose_>1){
                 printf("\nMatching complete:\n");
                 std::cout << next.rawmat;
             }

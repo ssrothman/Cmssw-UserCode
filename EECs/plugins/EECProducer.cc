@@ -182,7 +182,7 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
 
 void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   if(verbose_){
-    printf("top of produce\n");
+    printf("top of EECProducer::produce\n");
     fflush(stdout);
   }
 

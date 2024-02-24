@@ -14,7 +14,7 @@ def setupMatching(process, verbose=0,
             NaiveMatchProducer.clone(
                 reco = reco,
                 gen = gen,
-                verbose = False,
+                verbose = verbose,
             )
         )
     else:
@@ -22,7 +22,7 @@ def setupMatching(process, verbose=0,
             GenMatchProducer.clone(
                 reco = reco,
                 gen = gen,
-                verbose = False,
+                verbose = verbose,
             )
         )
 
