@@ -49,6 +49,10 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
 
     ans.rawpt += nextpt;
 
+    if(onlyCharged && partptr->charge() == 0){
+        return;
+    }
+
     //printf("\tadding particle with pt: %f, eta: %f, phi: %f, pdgid: %d\n", partptr->pt(), partptr->eta(), partptr->phi(), partptr->pdgId());
     double minPartPt = thresholds.getThreshold(partptr);
     if(nextpt < minPartPt 
