@@ -28,6 +28,8 @@
 #include "SRothman/SimonTools/src/util.h"
 
 #include "SRothman/EECs/src/eec_oo.h"
+#include "SRothman/EECs/src/fast.h"
+#include "SRothman/EECs/src/fastStructs.h"
 
 #include <iostream>
 #include <memory>
@@ -282,8 +284,44 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           calculator.enableRes4(RM4ax, phi4ax, tspec);
       }
 
-      calculator.initialize();
-      calculator.run();
+      fastEEC::normType norm2;
+      if(norm == EECCalculator::normType::RAWPT){
+          norm2 = fastEEC::normType::RAWPT;
+      } else if(norm == EECCalculator::normType::CORRPT){
+          norm2 = fastEEC::normType::CORRPT;
+      } else if(norm == EECCalculator::normType::SUMPT){
+          norm2 = fastEEC::normType::SUMPT;
+      } else {
+          throw cms::Exception("Bad norm type");
+      }
+      std::vector<bool> fakePU(reco->at(iReco).nPart, false);
+      //printf("RUNNING MAX ORDER %u\n", order);
+      auto start = std::chrono::high_resolution_clock::now();
+      auto ans_flt = fastEEC::fastEEC<double, true, false>(reco->at(iReco), RLax, 
+                                             6, norm2, &fakePU);
+      auto after_flt = std::chrono::high_resolution_clock::now();
+      auto ans_dbl = fastEEC::fastEEC<double, true, true>(reco->at(iReco), RLax, 
+                                              6, norm2, &fakePU);
+      auto after_dbl = std::chrono::high_resolution_clock::now();
+      //calculator.initialize();
+      //calculator.run();
+      //auto after = std::chrono::high_resolution_clock::now();
+      printf("fast float: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(after_flt - start).count() / 1000000.);
+      printf("fast double: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(after_dbl - after_flt).count() / 1000000.);
+      printf("\n");
+          
+      printf("\tsumwt2_flt: %f\n", std::accumulate(ans_flt.wts2.begin(), ans_flt.wts2.end(), 0.));
+      printf("\tsumwt3_flt: %f\n", std::accumulate(ans_flt.wts3.begin(), ans_flt.wts3.end(), 0.));
+      printf("\tsumwt4_flt: %f\n", std::accumulate(ans_flt.wts4.begin(), ans_flt.wts4.end(), 0.));
+      printf("\tsumwt5_flt: %f\n", std::accumulate(ans_flt.wts5.begin(), ans_flt.wts5.end(), 0.));
+      printf("\tsumwt6_flt: %f\n", std::accumulate(ans_flt.wts6.begin(), ans_flt.wts6.end(), 0.));
+      printf("\n");
+      printf("\tsumwt2_dbl: %f\n", std::accumulate(ans_dbl.wts2.begin(), ans_dbl.wts2.end(), 0.));
+      printf("\tsumwt3_dbl: %f\n", std::accumulate(ans_dbl.wts3.begin(), ans_dbl.wts3.end(), 0.));
+      printf("\tsumwt4_dbl: %f\n", std::accumulate(ans_dbl.wts4.begin(), ans_dbl.wts4.end(), 0.));
+      printf("\tsumwt5_dbl: %f\n", std::accumulate(ans_dbl.wts5.begin(), ans_dbl.wts5.end(), 0.));
+      printf("\tsumwt6_dbl: %f\n", std::accumulate(ans_dbl.wts6.begin(), ans_dbl.wts6.end(), 0.));
+      printf("\n");
 
       if(verbose_){
         printf("ran calc\n");
@@ -292,10 +330,10 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       EECresult next;
       next.iJet = iReco;
       next.iReco = iReco;
-      addProjected(next, calculator, false);
-      addResolved(next, calculator, false);
+      //addProjected(next, calculator, false);
+      //addResolved(next, calculator, false);
 
-      result->push_back(std::move(next));
+      //result->push_back(std::move(next));
       if(verbose_){
         printf("pushed back result\n");
       }
@@ -303,8 +341,8 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       EECresult nextPU;
       nextPU.iJet = iReco;
       nextPU.iReco = iReco;
-      addProjected(nextPU, calculator, true);
-      addResolved(nextPU, calculator, true);
+      //addProjected(nextPU, calculator, true);
+      //addResolved(nextPU, calculator, true);
 
       resultPU->push_back(std::move(nextPU));
       if(verbose_){
@@ -312,6 +350,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       }
 
       if(iGen >=0 ){
+          continue;
           EECCalculator Tcalc(verbose_);
           Tcalc.setupProjected(gen->at(iGen), maxOrder_, RLax, norm);
           Tcalc.addPU(UNMATCHED);

@@ -73,6 +73,6 @@ def setupEECs(process,
                 getattr(process, 'Transfer%sTable'%name),
             )
         )
-        process.schedule.associate(getattr(process, '%sMCTableTask'%name))
+        #process.schedule.associate(getattr(process, '%sMCTableTask'%name))
 
     return process
