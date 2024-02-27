@@ -6,8 +6,8 @@ defaults:
   globaltag: 106X_upgrade2018_realistic_v16_L1v1
   pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC_ak8.py
   allowInvalid: False
-  unitsPerJob: 100
-  totalUnits: 10000
+  unitsPerJob: 10
+  totalUnits: 1000
 
 samples:
   DYJetsToLL: 
