@@ -1,0 +1,7 @@
+----- Begin Fatal Exception 26-Feb-2024 13:31:44 EST-----------------------
+An exception of category 'StdException' occurred while
+   [0] Processing the python configuration file named EECs/test/test_EEC_test.py
+Exception Message:
+A std::exception was thrown.
+File "EECs/test/test_EEC_test.py" could not be opened!
+----- End Fatal Exception -------------------------------------------------

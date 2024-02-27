@@ -294,33 +294,24 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       } else {
           throw cms::Exception("Bad norm type");
       }
-      std::vector<bool> fakePU(reco->at(iReco).nPart, false);
-      //printf("RUNNING MAX ORDER %u\n", order);
-      auto start = std::chrono::high_resolution_clock::now();
-      auto ans_flt = fastEEC::fastEEC<double, true, false>(reco->at(iReco), RLax, 
-                                             6, norm2, &fakePU);
-      auto after_flt = std::chrono::high_resolution_clock::now();
-      auto ans_dbl = fastEEC::fastEEC<double, true, true>(reco->at(iReco), RLax, 
-                                              6, norm2, &fakePU);
-      auto after_dbl = std::chrono::high_resolution_clock::now();
-      //calculator.initialize();
-      //calculator.run();
-      //auto after = std::chrono::high_resolution_clock::now();
-      printf("fast float: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(after_flt - start).count() / 1000000.);
-      printf("fast double: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(after_dbl - after_flt).count() / 1000000.);
+      auto startreco = std::chrono::high_resolution_clock::now();
+      auto ans_reco = fastEEC::fastEEC<double, true, false>(reco->at(iReco), RLax,
+                                                            maxOrder_, norm2, &PU);
+      auto endreco = std::chrono::high_resolution_clock::now();
+      printf("fast reco: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
+        
+      printf("RECO\n");
+      printf("\tsumwt2: %f\n", std::accumulate(ans_reco.wts2.begin(), ans_reco.wts2.end(), 0.));
+      printf("\tsumwt3: %f\n", std::accumulate(ans_reco.wts3.begin(), ans_reco.wts3.end(), 0.));
+      printf("\tsumwt4: %f\n", std::accumulate(ans_reco.wts4.begin(), ans_reco.wts4.end(), 0.));
+      printf("\tsumwt5: %f\n", std::accumulate(ans_reco.wts5.begin(), ans_reco.wts5.end(), 0.));
+      printf("\tsumwt6: %f\n", std::accumulate(ans_reco.wts6.begin(), ans_reco.wts6.end(), 0.));
       printf("\n");
-          
-      printf("\tsumwt2_flt: %f\n", std::accumulate(ans_flt.wts2.begin(), ans_flt.wts2.end(), 0.));
-      printf("\tsumwt3_flt: %f\n", std::accumulate(ans_flt.wts3.begin(), ans_flt.wts3.end(), 0.));
-      printf("\tsumwt4_flt: %f\n", std::accumulate(ans_flt.wts4.begin(), ans_flt.wts4.end(), 0.));
-      printf("\tsumwt5_flt: %f\n", std::accumulate(ans_flt.wts5.begin(), ans_flt.wts5.end(), 0.));
-      printf("\tsumwt6_flt: %f\n", std::accumulate(ans_flt.wts6.begin(), ans_flt.wts6.end(), 0.));
-      printf("\n");
-      printf("\tsumwt2_dbl: %f\n", std::accumulate(ans_dbl.wts2.begin(), ans_dbl.wts2.end(), 0.));
-      printf("\tsumwt3_dbl: %f\n", std::accumulate(ans_dbl.wts3.begin(), ans_dbl.wts3.end(), 0.));
-      printf("\tsumwt4_dbl: %f\n", std::accumulate(ans_dbl.wts4.begin(), ans_dbl.wts4.end(), 0.));
-      printf("\tsumwt5_dbl: %f\n", std::accumulate(ans_dbl.wts5.begin(), ans_dbl.wts5.end(), 0.));
-      printf("\tsumwt6_dbl: %f\n", std::accumulate(ans_dbl.wts6.begin(), ans_dbl.wts6.end(), 0.));
+      printf("\tsumwt2_PU: %f\n", std::accumulate(ans_reco.wts2_PU.begin(), ans_reco.wts2_PU.end(), 0.));
+      printf("\tsumwt3_PU: %f\n", std::accumulate(ans_reco.wts3_PU.begin(), ans_reco.wts3_PU.end(), 0.));
+      printf("\tsumwt4_PU: %f\n", std::accumulate(ans_reco.wts4_PU.begin(), ans_reco.wts4_PU.end(), 0.));
+      printf("\tsumwt5_PU: %f\n", std::accumulate(ans_reco.wts5_PU.begin(), ans_reco.wts5_PU.end(), 0.));
+      printf("\tsumwt6_PU: %f\n", std::accumulate(ans_reco.wts6_PU.begin(), ans_reco.wts6_PU.end(), 0.));
       printf("\n");
 
       if(verbose_){
@@ -350,25 +341,65 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       }
 
       if(iGen >=0 ){
-          continue;
-          EECCalculator Tcalc(verbose_);
-          Tcalc.setupProjected(gen->at(iGen), maxOrder_, RLax, norm);
-          Tcalc.addPU(UNMATCHED);
-          Tcalc.addTransfer(reco->at(iReco),ptrans,norm);
-          if(doRes3_){
-              Tcalc.enableRes3(xi3ax, phi3ax);
-          }
-          if(doRes4_){
-              Tcalc.enableRes4(RM4ax, phi4ax, tspec);
+          //continue;
+          
+          auto startgen = std::chrono::high_resolution_clock::now();
+          auto ans_gen = fastEEC::fastEEC<double, true, true>(gen->at(iGen), RLax,
+                                                              maxOrder_, norm2, 
+                                                              &UNMATCHED,
+                                                              &(reco->at(iReco)),
+                                                              &ptrans);
+          auto endgen = std::chrono::high_resolution_clock::now();
+
+          printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
+          printf("\n");
+
+          printf("\tsumwt2: %f\n", std::accumulate(ans_gen.wts2.begin(), ans_gen.wts2.end(), 0.));
+          printf("\tsumwt3: %f\n", std::accumulate(ans_gen.wts3.begin(), ans_gen.wts3.end(), 0.));
+          printf("\tsumwt4: %f\n", std::accumulate(ans_gen.wts4.begin(), ans_gen.wts4.end(), 0.));
+          printf("\tsumwt5: %f\n", std::accumulate(ans_gen.wts5.begin(), ans_gen.wts5.end(), 0.));
+          printf("\tsumwt6: %f\n", std::accumulate(ans_gen.wts6.begin(), ans_gen.wts6.end(), 0.));
+          printf("\n");
+          printf("\tsumwt2_PU: %f\n", std::accumulate(ans_gen.wts2_PU.begin(), ans_gen.wts2_PU.end(), 0.));
+          printf("\tsumwt3_PU: %f\n", std::accumulate(ans_gen.wts3_PU.begin(), ans_gen.wts3_PU.end(), 0.));
+          printf("\tsumwt4_PU: %f\n", std::accumulate(ans_gen.wts4_PU.begin(), ans_gen.wts4_PU.end(), 0.));
+          printf("\tsumwt5_PU: %f\n", std::accumulate(ans_gen.wts5_PU.begin(), ans_gen.wts5_PU.end(), 0.));
+          printf("\tsumwt6_PU: %f\n", std::accumulate(ans_gen.wts6_PU.begin(), ans_gen.wts6_PU.end(), 0.));
+          printf("\n");
+
+          double sumtrans2 = 0, sumtrans3 = 0, sumtrans4 = 0, sumtrans5 = 0, sumtrans6 = 0;
+          for(unsigned iReco=0; iReco<ans_gen.wts2.size(); ++iReco){
+              for(unsigned iGen=0; iGen<ans_gen.wts2.size(); ++iGen){
+                  sumtrans2 += ans_gen.transfer2[iGen][iReco];
+                  sumtrans3 += ans_gen.transfer3[iGen][iReco];
+                  sumtrans4 += ans_gen.transfer4[iGen][iReco];
+                  sumtrans5 += ans_gen.transfer5[iGen][iReco];
+                  sumtrans6 += ans_gen.transfer6[iGen][iReco];
+              }
           }
 
-          Tcalc.initialize();
+
+          printf("\t1-sumtrans2: %f\n", 1-sumtrans2);
+          printf("\t1-sumtrans3: %f\n", 1-sumtrans3);
+          printf("\t1-sumtrans4: %f\n", 1-sumtrans4);
+          printf("\t1-sumtrans5: %f\n", 1-sumtrans5);
+          printf("\t1-sumtrans6: %f\n", 1-sumtrans6);
+          printf("\n");
+
+          if(doRes3_){
+              //Tcalc.enableRes3(xi3ax, phi3ax);
+          }
+          if(doRes4_){
+              //Tcalc.enableRes4(RM4ax, phi4ax, tspec);
+          }
+
+          //Tcalc.initialize();
 
         if(verbose_){
             printf("setup gen calculators with %u (gen) x %u (reco) particles\n", gen->at(iGen).nPart, reco->at(iReco).nPart);
         }
 
-        Tcalc.run();
+        //Tcalc.run();
         if(verbose_){
             printf("ran gen calc\n");
         }
@@ -377,10 +408,10 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         nextGen.iJet = iGen;
         nextGen.iReco = iReco;
 
-        addProjected(nextGen, Tcalc, false);
-        addResolved(nextGen, Tcalc, false);
+        //addProjected(nextGen, Tcalc, false);
+        //addResolved(nextGen, Tcalc, false);
 
-        resultgen->push_back(std::move(nextGen));
+        //resultgen->push_back(std::move(nextGen));
         if(verbose_){
           printf("pushed back gen result\n");
         }
@@ -388,10 +419,10 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EECresult nextGenUNMATCH;
         nextGenUNMATCH.iReco = iReco;
         nextGenUNMATCH.iJet = iGen;
-        addProjected(nextGenUNMATCH, Tcalc, true);
-        addResolved(nextGenUNMATCH, Tcalc, true);
+        //addProjected(nextGenUNMATCH, Tcalc, true);
+        //addResolved(nextGenUNMATCH, Tcalc, true);
 
-        resultUNMATCH->push_back(std::move(nextGenUNMATCH));
+        //resultUNMATCH->push_back(std::move(nextGenUNMATCH));
         if(verbose_){
           printf("pushed back genUNMATCH result\n");
         }
@@ -399,9 +430,9 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EECtransfer nextTransfer;
         nextTransfer.iReco = iReco;
         nextTransfer.iGen = iGen;
-        addTransfer(nextTransfer, Tcalc);
+        //addTransfer(nextTransfer, Tcalc);
 
-        resulttrans->push_back(std::move(nextTransfer));
+        //resulttrans->push_back(std::move(nextTransfer));
         if(verbose_){
           printf("pushed back transfer matrices\n");
         }

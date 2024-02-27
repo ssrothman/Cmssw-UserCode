@@ -23,7 +23,7 @@ EECProducer = cms.EDProducer("EECProducer",
     gen = cms.InputTag("GenSimonJets"),
     match = cms.InputTag("GenMatch"),
 
-    maxOrder = cms.uint32(4),
+    maxOrder = cms.uint32(5),
     doRes3 = cms.bool(False),
     doRes4 = cms.bool(False),
     ptNorm = cms.string("RAW"),
