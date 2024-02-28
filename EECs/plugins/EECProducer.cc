@@ -71,13 +71,22 @@ private:
     edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
 
     std::vector<double> dRbinEdges_;
-    std::vector<double> xi3binEdges_;
-    std::vector<double> phi3binEdges_;
-    std::vector<double> RM4binEdges_;
-    std::vector<double> phi4binEdges_;
-    double RMoRL_;
-    double RSoRL_;
-    double tol_;
+
+    std::vector<double> dRbinEdges_coarse_;
+
+    std::vector<double> xibinEdges_;
+    std::vector<double> phibinEdges_;
+
+    std::vector<double> r_dipole_edges_;
+    std::vector<double> ct_dipole_edges_;
+    
+    std::vector<double> r_tee_edges_;
+    std::vector<double> ct_tee_edges_;
+
+    std::vector<double> r_triangle_edges_;
+    std::vector<double> ct_triangle_edges_;
+
+    double shapetol_;
 
     void addProjected(EECresult& next, const EECCalculator& calc, 
             bool PU);
@@ -147,13 +156,22 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
           genTag_(conf.getParameter<edm::InputTag>("gen")),
           matchTag_(conf.getParameter<edm::InputTag>("match")),
           dRbinEdges_(conf.getParameter<std::vector<double>>("dRbinEdges")),
-          xi3binEdges_(conf.getParameter<std::vector<double>>("xi3binEdges")),
-          phi3binEdges_(conf.getParameter<std::vector<double>>("phi3binEdges")),
-          RM4binEdges_(conf.getParameter<std::vector<double>>("RM4binEdges")),
-          phi4binEdges_(conf.getParameter<std::vector<double>>("phi4binEdges")),
-          RMoRL_(conf.getParameter<double>("RMoRL")),
-          RSoRL_(conf.getParameter<double>("RSoRL")),
-          tol_(conf.getParameter<double>("tol")) {
+
+          dRbinEdges_coarse_(conf.getParameter<std::vector<double>>("dRbinEdges_coarse")),
+
+          xibinEdges_(conf.getParameter<std::vector<double>>("xibinEdges")),
+          phibinEdges_(conf.getParameter<std::vector<double>>("phibinEdges")),
+
+          r_dipole_edges_(conf.getParameter<std::vector<double>>("r_dipole_edges")),
+          ct_dipole_edges_(conf.getParameter<std::vector<double>>("ct_dipole_edges")),
+
+          r_tee_edges_(conf.getParameter<std::vector<double>>("r_tee_edges")),
+          ct_tee_edges_(conf.getParameter<std::vector<double>>("ct_tee_edges")),
+
+          r_triangle_edges_(conf.getParameter<std::vector<double>>("r_triangle_edges")),
+          ct_triangle_edges_(conf.getParameter<std::vector<double>>("ct_triangle_edges")),
+
+          shapetol_(conf.getParameter<double>("shapetol")) {
     produces<std::vector<EECresult>>("reco");
     produces<std::vector<EECresult>>("recoPU");
     if(doGen_){
@@ -181,14 +199,21 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<bool>("doGen");
 
   desc.add<std::vector<double>>("dRbinEdges");
-  desc.add<std::vector<double>>("xi3binEdges");
-  desc.add<std::vector<double>>("phi3binEdges");
-  desc.add<std::vector<double>>("RM4binEdges");
-  desc.add<std::vector<double>>("phi4binEdges");
+  desc.add<std::vector<double>>("dRbinEdges_coarse");
 
-  desc.add<double>("RMoRL");
-  desc.add<double>("RSoRL");
-  desc.add<double>("tol");
+  desc.add<std::vector<double>>("xibinEdges");
+  desc.add<std::vector<double>>("phibinEdges");
+
+  desc.add<std::vector<double>>("r_dipole_edges");
+  desc.add<std::vector<double>>("ct_dipole_edges");
+
+  desc.add<std::vector<double>>("r_tee_edges");
+  desc.add<std::vector<double>>("ct_tee_edges");
+
+  desc.add<std::vector<double>>("r_triangle_edges");
+  desc.add<std::vector<double>>("ct_triangle_edges");
+
+  desc.add<double>("shapetol");
 
   descriptions.addWithDefaultLabel(desc);
 }
@@ -221,12 +246,19 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   auto resulttrans = std::make_unique<std::vector<EECtransfer>>();
 
   auto RLax = std::make_shared<boost::histogram::axis::variable<double>>(dRbinEdges_);
-  auto xi3ax = std::make_shared<boost::histogram::axis::variable<double>>(xi3binEdges_);
-  auto phi3ax = std::make_shared<boost::histogram::axis::variable<double>>(phi3binEdges_);
-  auto RM4ax = std::make_shared<boost::histogram::axis::variable<double>>(RM4binEdges_);
-  auto phi4ax = std::make_shared<boost::histogram::axis::variable<double>>(phi4binEdges_);
+  auto RLax_coarse = std::make_shared<boost::histogram::axis::variable<double>>(dRbinEdges_coarse_);
 
-  struct trianglespec tspec(RMoRL_, RSoRL_, tol_);
+  auto xiax = std::make_shared<boost::histogram::axis::variable<double>>(xibinEdges_);
+  auto phiax = std::make_shared<boost::histogram::axis::variable<double>>(phibinEdges_);
+
+  auto r_dipole_ax = std::make_shared<boost::histogram::axis::variable<double>>(r_dipole_edges_);
+  auto ct_dipole_ax = std::make_shared<boost::histogram::axis::variable<double>>(ct_dipole_edges_);
+
+  auto r_tee_ax = std::make_shared<boost::histogram::axis::variable<double>>(r_tee_edges_);
+  auto ct_tee_ax = std::make_shared<boost::histogram::axis::variable<double>>(ct_tee_edges_);
+
+  auto r_triangle_ax = std::make_shared<boost::histogram::axis::variable<double>>(r_triangle_edges_);
+  auto ct_triangle_ax = std::make_shared<boost::histogram::axis::variable<double>>(ct_triangle_edges_);
 
   fastEEC::normType norm;
   if(ptNorm_ == "RAW"){
@@ -288,7 +320,13 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
       auto startreco = std::chrono::high_resolution_clock::now();
       auto ans_reco = fastEEC::fastEEC<double, true, false>(
-              reco->at(iReco), RLax, maxOrder_, norm, &PU
+              reco->at(iReco), RLax, maxOrder_, norm,
+              RLax_coarse, xiax, phiax, 
+              r_dipole_ax, ct_dipole_ax,
+              r_tee_ax, ct_tee_ax,
+              r_triangle_ax, ct_triangle_ax,
+              shapetol_,
+              &PU
       );
       auto endreco = std::chrono::high_resolution_clock::now();
       printf("fast reco: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
@@ -306,6 +344,61 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       printf("\tsumwt5_PU: %f\n", std::accumulate(ans_reco.wts5_PU.begin(), ans_reco.wts5_PU.end(), 0.));
       printf("\tsumwt6_PU: %f\n", std::accumulate(ans_reco.wts6_PU.begin(), ans_reco.wts6_PU.end(), 0.));
       printf("\n");
+      double sumres3=0, sumres3PU=0;
+      for(unsigned i=0; i<ans_reco.resolved3.shape()[0]; ++i){
+          for(unsigned j=0; j<ans_reco.resolved3.shape()[1]; ++j){
+              for(unsigned k=0; k<ans_reco.resolved3.shape()[2]; ++k){
+                  sumres3 += ans_reco.resolved3[i][j][k];
+                  sumres3PU += ans_reco.resolved3_PU[i][j][k];
+              }
+          }
+      }
+      printf("\tsumres3: %f\n", sumres3);
+      printf("\tsumres3PU: %f\n", sumres3PU);
+      printf("\n");
+
+      double sumshape0=0, sumshape1=0, sumshape2=0, sumshape3=0;
+      double sumtotPU=0;
+      for(unsigned i=0; i<ans_reco.resolved4_shapes.shape()[1]; ++i){
+          for(unsigned j=0; j<ans_reco.resolved4_shapes.shape()[2]; ++j){
+              for(unsigned k=0; k<ans_reco.resolved4_shapes.shape()[3]; ++k){
+                  sumshape0 += ans_reco.resolved4_shapes[0][i][j][k];
+                  sumshape1 += ans_reco.resolved4_shapes[1][i][j][k];
+                  sumshape2 += ans_reco.resolved4_shapes[2][i][j][k];
+                  sumshape3 += ans_reco.resolved4_shapes[3][i][j][k];
+
+                  sumtotPU += ans_reco.resolved4_shapes_PU[0][i][j][k];
+                  sumtotPU += ans_reco.resolved4_shapes_PU[1][i][j][k];
+                  sumtotPU += ans_reco.resolved4_shapes_PU[2][i][j][k];
+                  sumtotPU += ans_reco.resolved4_shapes_PU[3][i][j][k];
+              }
+          }
+      }
+      printf("\tsumshape0: %f\n", sumshape0);
+      printf("\tsumshape1: %f\n", sumshape1);
+      printf("\tsumshape2: %f\n", sumshape2);
+      printf("\tsumshape3: %f\n", sumshape3);
+      printf("\n");
+      printf("\tsumtot: %f\n", sumshape0+sumshape1+sumshape2+sumshape3);
+      printf("\tsumtotPU: %f\n", sumtotPU);
+      printf("\n");
+
+      /*double sumfixed0=0, sumfixed1=0, sumfixed2=0;
+      double sumfixedPU=0;
+      for(unsigned i=0; i<ans_reco.resolved4_fixed.shape()[1]; ++i){
+        sumfixed0 += ans_reco.resolved4_fixed[0][i];
+        sumfixed1 += ans_reco.resolved4_fixed[1][i];
+        sumfixed2 += ans_reco.resolved4_fixed[2][i];
+
+        sumfixedPU += ans_reco.resolved4_fixed_PU[0][i];
+        sumfixedPU += ans_reco.resolved4_fixed_PU[1][i];
+        sumfixedPU += ans_reco.resolved4_fixed_PU[2][i];
+      }
+      printf("sumfixedshape0: %f\n", sumfixed0);
+      printf("sumfixedshape1: %f\n", sumfixed1);
+      printf("sumfixedshape2: %f\n", sumfixed2);
+      printf("sumfixedPU: %f\n", sumfixedPU);
+      printf("\n");*/
 
       if(verbose_){
         printf("ran calc\n");
@@ -362,6 +455,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           auto startgen = std::chrono::high_resolution_clock::now();
           auto ans_gen = fastEEC::fastEEC<double, true, true>(
                     gen->at(iGen), RLax, maxOrder_, norm, 
+                    RLax_coarse, xiax, phiax,
+                    r_dipole_ax, ct_dipole_ax,
+                    r_tee_ax, ct_tee_ax,
+                    r_triangle_ax, ct_triangle_ax,
+                    shapetol_,
                     &UNMATCHED, &(reco->at(iReco)), &ptrans
           );
           auto endgen = std::chrono::high_resolution_clock::now();
@@ -388,8 +486,8 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   sumtrans2 += ans_gen.transfer2[iGen][iReco];
                   sumtrans3 += ans_gen.transfer3[iGen][iReco];
                   sumtrans4 += ans_gen.transfer4[iGen][iReco];
-                  sumtrans5 += ans_gen.transfer5[iGen][iReco];
-                  sumtrans6 += ans_gen.transfer6[iGen][iReco];
+                  //sumtrans5 += ans_gen.transfer5[iGen][iReco];
+                  //sumtrans6 += ans_gen.transfer6[iGen][iReco];
               }
           }
 
@@ -397,9 +495,98 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           printf("\t1-sumtrans2: %f\n", 1-sumtrans2);
           printf("\t1-sumtrans3: %f\n", 1-sumtrans3);
           printf("\t1-sumtrans4: %f\n", 1-sumtrans4);
-          printf("\t1-sumtrans5: %f\n", 1-sumtrans5);
-          printf("\t1-sumtrans6: %f\n", 1-sumtrans6);
+          //printf("\t1-sumtrans5: %f\n", 1-sumtrans5);
+          //printf("\t1-sumtrans6: %f\n", 1-sumtrans6);
           printf("\n");
+
+          double sumres3_gen=0, sumres3PU_gen=0;
+          double sumres3_trans=0;
+          for(unsigned i=0; i<ans_reco.resolved3.shape()[0]; ++i){
+              for(unsigned j=0; j<ans_reco.resolved3.shape()[1]; ++j){
+                  for(unsigned k=0; k<ans_reco.resolved3.shape()[2]; ++k){
+                      sumres3_gen += ans_gen.resolved3[i][j][k];
+                      sumres3PU_gen += ans_gen.resolved3_PU[i][j][k];
+                      for(unsigned a=0; a<ans_gen.resolved3.shape()[0]; ++a){
+                          for(unsigned b=0; b<ans_gen.resolved3.shape()[1]; ++b){
+                              for(unsigned c=0; c<ans_gen.resolved3.shape()[2]; ++c){
+                                  sumres3_trans += ans_gen.transfer_res3[i][j][k][a][b][c];
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+          printf("\tsumres3: %f\n", sumres3_gen);
+          printf("\tsumres3PU: %f\n", sumres3PU_gen);
+          printf("\tsumres3_trans: %f\n", sumres3_trans);
+          printf("\n");
+
+          double sumshape0_gen=0, sumshape1_gen=0, sumshape2_gen=0, sumshape3_gen=0;
+          double sumtotPU_gen=0;
+          double sumtrans_res4=0;
+          for(unsigned i=0; i<ans_reco.resolved4_shapes.shape()[1]; ++i){
+              for(unsigned j=0; j<ans_reco.resolved4_shapes.shape()[2]; ++j){
+                  for(unsigned k=0; k<ans_reco.resolved4_shapes.shape()[3]; ++k){
+                      sumshape0_gen += ans_gen.resolved4_shapes[0][i][j][k];
+                      sumshape1_gen += ans_gen.resolved4_shapes[1][i][j][k];
+                      sumshape2_gen += ans_gen.resolved4_shapes[2][i][j][k];
+                      sumshape3_gen += ans_gen.resolved4_shapes[3][i][j][k];
+
+                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[0][i][j][k];
+                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[1][i][j][k];
+                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[2][i][j][k];
+                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[3][i][j][k];
+                      for(unsigned a=0; a<4; ++a){
+                          for(unsigned b=0; b<ans_gen.resolved4_shapes.shape()[1]; ++b){
+                              for(unsigned c=0; c<ans_gen.resolved4_shapes.shape()[2]; ++c){
+                                  for(unsigned d=0; d<ans_gen.resolved4_shapes.shape()[3]; ++d){
+                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[0][i][j][k][a][b][c][d];
+                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[1][i][j][k][a][b][c][d];
+                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[2][i][j][k][a][b][c][d];
+                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[3][i][j][k][a][b][c][d];
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+          printf("\tsumshape0: %f\n", sumshape0_gen);
+          printf("\tsumshape1: %f\n", sumshape1_gen);
+          printf("\tsumshape2: %f\n", sumshape2_gen);
+          printf("\tsumshape3: %f\n", sumshape3_gen);
+          printf("\n");
+          printf("\tsumtot: %f\n", sumshape0_gen+sumshape1_gen+sumshape2_gen+sumshape3_gen);
+          printf("\tsumtotPU: %f\n", sumtotPU_gen);
+          printf("\tsumtrans_res4: %f\n", sumtrans_res4);
+          printf("\n");
+
+          /*
+          double sumfixed0_gen=0, sumfixed1_gen=0, sumfixed2_gen=0;
+          double sumfixedPU_gen=0;
+          double sumtransferfixed=0;
+          for(unsigned i=0; i<ans_reco.resolved4_fixed.shape()[1]; ++i){
+            sumfixed0_gen += ans_gen.resolved4_fixed[0][i];
+            sumfixed1_gen += ans_gen.resolved4_fixed[1][i];
+            sumfixed2_gen += ans_gen.resolved4_fixed[2][i];
+
+            sumfixedPU_gen += ans_gen.resolved4_fixed_PU[0][i];
+            sumfixedPU_gen += ans_gen.resolved4_fixed_PU[1][i];
+            sumfixedPU_gen += ans_gen.resolved4_fixed_PU[2][i];
+            for(unsigned a=0; a<3; ++a){
+                for(unsigned b=0; b<ans_gen.resolved4_fixed.shape()[1]; ++b){
+                    sumtransferfixed += ans_gen.transfer_res4_fixed[0][i][a][b];
+                    sumtransferfixed += ans_gen.transfer_res4_fixed[1][i][a][b];
+                    sumtransferfixed += ans_gen.transfer_res4_fixed[2][i][a][b];
+                }
+            }
+          }
+          printf("sumfixedshape0: %f\n", sumfixed0);
+          printf("sumfixedshape1: %f\n", sumfixed1);
+          printf("sumfixedshape2: %f\n", sumfixed2);
+          printf("sumfixedPU: %f\n", sumfixedPU);
+          printf("sumtransferfixed: %f\n", sumtransferfixed);
+          printf("\n");*/
 
         if(verbose_){
             printf("ran gen calc with %u (gen) x %u (reco) particles\n", gen->at(iGen).nPart, reco->at(iReco).nPart);

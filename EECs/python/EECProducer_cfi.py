@@ -12,11 +12,21 @@ dRedges = [0.0005 ,0.001, 0.005,
            0.30, 0.40, 0.50, 0.60, 
            0.70, 0.80, 0.90, 1.00]
 
-xi3edges = np.linspace(0.0, 1.0, 5)
-phi3edges = np.linspace(0.0, 1.0, 5)
+dRedges_coarse = [0.001, 0.01, 0.02, 0.03, 0.05,
+                  0.10, 0.15, 0.20, 0.30, 0.40,
+                  0.50, 0.70, 1.00]
 
-RM4edges = np.linspace(0.0, 1.0, 5)
-phi4edges = np.linspace(-np.pi, np.pi, 5)
+xiedges = np.linspace(0.0, 1.0, 5)
+phiedges = np.linspace(0.0, 1.0, 5)
+
+r_dipole_edges = np.linspace(0, 1, 11)
+ct_dipole_edges = np.linspace(-1, 1, 11)
+
+r_tee_edges = np.linspace(0, 1, 11)
+ct_tee_edges = np.linspace(-1, 1, 11)
+
+r_triangle_edges = np.linspace(0, 1, 11)
+ct_triangle_edges = np.linspace(-1, 1, 11)
 
 EECProducer = cms.EDProducer("EECProducer",
     reco = cms.InputTag("SimonJets"),
@@ -33,12 +43,20 @@ EECProducer = cms.EDProducer("EECProducer",
     verbose = cms.int32(1),
 
     dRbinEdges = cms.vdouble(*dRedges), 
-    xi3binEdges = cms.vdouble(*xi3edges),
-    phi3binEdges = cms.vdouble(*phi3edges),
-    RM4binEdges = cms.vdouble(*RM4edges),
-    phi4binEdges = cms.vdouble(*phi4edges),
 
-    RMoRL = cms.double(1),
-    RSoRL = cms.double(1),
-    tol = cms.double(0.1),
+    dRbinEdges_coarse = cms.vdouble(*dRedges_coarse),
+
+    xibinEdges = cms.vdouble(*xiedges),
+    phibinEdges = cms.vdouble(*phiedges),
+
+    r_dipole_edges = cms.vdouble(*r_dipole_edges),
+    ct_dipole_edges = cms.vdouble(*ct_dipole_edges),
+
+    r_tee_edges = cms.vdouble(*r_tee_edges),
+    ct_tee_edges = cms.vdouble(*ct_tee_edges),
+
+    r_triangle_edges = cms.vdouble(*r_triangle_edges),
+    ct_triangle_edges = cms.vdouble(*ct_triangle_edges),
+
+    shapetol = cms.double(0.1),
 )
