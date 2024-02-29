@@ -6,8 +6,8 @@ defaults:
   globaltag: 106X_dataRun2_v33 
   pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC_ak8_data.py
   allowInvalid: False
-  unitsPerJob: 10
-  totalUnits: 1000
+  unitsPerJob: 100
+  totalUnits: 10000
 
 samples:
   DYJetsToLL: 

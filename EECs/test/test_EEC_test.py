@@ -92,7 +92,7 @@ process = nanoAOD_customizeMC(process)
 
 from SRothman.Analysis.setupAnalysis import *
 process = setupAnalysis(process, ak8=True, addCharged=False, addNaive=True, 
-                        addFullEvent=True, addRandomControl=True, addZControl=True,
+                        addFullEvent=False, addRandomControl=True, addZControl=True,
                         verbose=1)
 
 # End of customisation functions

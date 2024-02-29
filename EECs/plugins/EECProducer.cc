@@ -58,7 +58,7 @@ private:
     int verbose_;
 
     unsigned maxOrder_;
-    bool doRes3_, doRes4_;
+    bool doRes3_, doRes4_, doRes4Fixed_;
     std::string ptNorm_;
 
     edm::InputTag recoTag_;
@@ -149,6 +149,7 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
           maxOrder_(conf.getParameter<unsigned>("maxOrder")),
           doRes3_(conf.getParameter<bool>("doRes3")),
           doRes4_(conf.getParameter<bool>("doRes4")),
+          doRes4Fixed_(conf.getParameter<bool>("doRes4Fixed")),
           ptNorm_(conf.getParameter<std::string>("ptNorm")),
           recoTag_(conf.getParameter<edm::InputTag>("reco")),
           recoToken_(consumes<edm::View<jet>>(recoTag_)),
@@ -194,6 +195,7 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<unsigned>("maxOrder");
   desc.add<bool>("doRes3");
   desc.add<bool>("doRes4");
+  desc.add<bool>("doRes4Fixed");
   desc.add<std::string>("ptNorm");
 
   desc.add<bool>("doGen");
@@ -221,7 +223,6 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
 void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   if(verbose_){
     printf("top of EECProducer::produce\n");
-    fflush(stdout);
   }
 
   edm::Handle<edm::View<jet>> reco;
@@ -235,7 +236,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   }
   if(verbose_){
     printf("got from event\n");
-    fflush(stdout);
   }
 
   auto result = std::make_unique<std::vector<EECresult>>();
@@ -245,6 +245,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   auto resultUNMATCH = std::make_unique<std::vector<EECresult>>();
   auto resulttrans = std::make_unique<std::vector<EECtransfer>>();
 
+  
   auto RLax = std::make_shared<boost::histogram::axis::variable<double>>(dRbinEdges_);
   auto RLax_coarse = std::make_shared<boost::histogram::axis::variable<double>>(dRbinEdges_coarse_);
 
@@ -274,7 +275,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   for(unsigned iReco=0; iReco<reco->size(); ++iReco){
       if(verbose_){
         printf("iReco %u\n", iReco);
-        fflush(stdout);
       }
 
       if(reco->at(iReco).nPart < 2){
@@ -290,6 +290,9 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
       PU.resize(reco->at(iReco).nPart, true);
 
+      std::cout << "MATCH NAME " << matchTag_ << std::endl;
+      std::cout << "GEN NAME " << genTag_ << std::endl;
+      std::cout << "RECO NAME " << recoTag_ << std::endl;
       if(doGen_){
           int matchidx=-1;
           for(unsigned iM=0; iM<matches->size(); ++iM){
@@ -318,90 +321,81 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         printf("iGen %d\n", iGen);
       }
 
+      
       auto startreco = std::chrono::high_resolution_clock::now();
-      auto ans_reco = fastEEC::fastEEC<double, true, false>(
-              reco->at(iReco), RLax, maxOrder_, norm,
-              RLax_coarse, xiax, phiax, 
-              r_dipole_ax, ct_dipole_ax,
-              r_tee_ax, ct_tee_ax,
-              r_triangle_ax, ct_triangle_ax,
-              shapetol_,
-              &PU
-      );
+      fastEEC::result<double> ans_reco;
+      if (doRes3_ && doRes4_ && doRes4Fixed_){
+          fastEEC::fastEEC<double, true, false, true, true, true>(
+                  ans_reco,
+                  reco->at(iReco), RLax, maxOrder_, norm,
+                  RLax_coarse, xiax, phiax, 
+                  r_dipole_ax, ct_dipole_ax,
+                  r_tee_ax, ct_tee_ax,
+                  r_triangle_ax, ct_triangle_ax,
+                  shapetol_,
+                  &PU
+          );
+      } else if(doRes3_ && doRes4_){
+          fastEEC::fastEEC<double, true, false, true, true, false>(
+                  ans_reco,
+                  reco->at(iReco), RLax, maxOrder_, norm,
+                  RLax_coarse, xiax, phiax, 
+                  r_dipole_ax, ct_dipole_ax,
+                  r_tee_ax, ct_tee_ax,
+                  r_triangle_ax, ct_triangle_ax,
+                  shapetol_,
+                  &PU
+          );
+      } else if(doRes3_){
+          fastEEC::fastEEC<double, true, false, true, false, false>(
+                  ans_reco,
+                  reco->at(iReco), RLax, maxOrder_, norm,
+                  RLax_coarse, xiax, phiax, 
+                  r_dipole_ax, ct_dipole_ax,
+                  r_tee_ax, ct_tee_ax,
+                  r_triangle_ax, ct_triangle_ax,
+                  shapetol_,
+                  &PU
+          );
+      } else if(doRes4_ && doRes4Fixed_){
+          fastEEC::fastEEC<double, true, false, false, true, true>(
+                  ans_reco,
+                  reco->at(iReco), RLax, maxOrder_, norm,
+                  RLax_coarse, xiax, phiax, 
+                  r_dipole_ax, ct_dipole_ax,
+                  r_tee_ax, ct_tee_ax,
+                  r_triangle_ax, ct_triangle_ax,
+                  shapetol_,
+                  &PU
+          );
+      } else if(doRes4_){
+          fastEEC::fastEEC<double, true, false, false, true, false>(
+                  ans_reco,
+                  reco->at(iReco), RLax, maxOrder_, norm,
+                  RLax_coarse, xiax, phiax, 
+                  r_dipole_ax, ct_dipole_ax,
+                  r_tee_ax, ct_tee_ax,
+                  r_triangle_ax, ct_triangle_ax,
+                  shapetol_,
+                  &PU
+          );
+      } else {
+          fastEEC::fastEEC<double, true, false, false, false, false>(
+                  ans_reco,
+                  reco->at(iReco), RLax, maxOrder_, norm,
+                  RLax_coarse, xiax, phiax, 
+                  r_dipole_ax, ct_dipole_ax,
+                  r_tee_ax, ct_tee_ax,
+                  r_triangle_ax, ct_triangle_ax,
+                  shapetol_,
+                  &PU
+          );
+      }
       auto endreco = std::chrono::high_resolution_clock::now();
-      printf("fast reco: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
-        
-      printf("RECO\n");
-      printf("\tsumwt2: %f\n", std::accumulate(ans_reco.wts2.begin(), ans_reco.wts2.end(), 0.));
-      printf("\tsumwt3: %f\n", std::accumulate(ans_reco.wts3.begin(), ans_reco.wts3.end(), 0.));
-      printf("\tsumwt4: %f\n", std::accumulate(ans_reco.wts4.begin(), ans_reco.wts4.end(), 0.));
-      printf("\tsumwt5: %f\n", std::accumulate(ans_reco.wts5.begin(), ans_reco.wts5.end(), 0.));
-      printf("\tsumwt6: %f\n", std::accumulate(ans_reco.wts6.begin(), ans_reco.wts6.end(), 0.));
-      printf("\n");
-      printf("\tsumwt2_PU: %f\n", std::accumulate(ans_reco.wts2_PU.begin(), ans_reco.wts2_PU.end(), 0.));
-      printf("\tsumwt3_PU: %f\n", std::accumulate(ans_reco.wts3_PU.begin(), ans_reco.wts3_PU.end(), 0.));
-      printf("\tsumwt4_PU: %f\n", std::accumulate(ans_reco.wts4_PU.begin(), ans_reco.wts4_PU.end(), 0.));
-      printf("\tsumwt5_PU: %f\n", std::accumulate(ans_reco.wts5_PU.begin(), ans_reco.wts5_PU.end(), 0.));
-      printf("\tsumwt6_PU: %f\n", std::accumulate(ans_reco.wts6_PU.begin(), ans_reco.wts6_PU.end(), 0.));
-      printf("\n");
-      double sumres3=0, sumres3PU=0;
-      for(unsigned i=0; i<ans_reco.resolved3.shape()[0]; ++i){
-          for(unsigned j=0; j<ans_reco.resolved3.shape()[1]; ++j){
-              for(unsigned k=0; k<ans_reco.resolved3.shape()[2]; ++k){
-                  sumres3 += ans_reco.resolved3[i][j][k];
-                  sumres3PU += ans_reco.resolved3_PU[i][j][k];
-              }
-          }
-      }
-      printf("\tsumres3: %f\n", sumres3);
-      printf("\tsumres3PU: %f\n", sumres3PU);
-      printf("\n");
-
-      double sumshape0=0, sumshape1=0, sumshape2=0, sumshape3=0;
-      double sumtotPU=0;
-      for(unsigned i=0; i<ans_reco.resolved4_shapes.shape()[1]; ++i){
-          for(unsigned j=0; j<ans_reco.resolved4_shapes.shape()[2]; ++j){
-              for(unsigned k=0; k<ans_reco.resolved4_shapes.shape()[3]; ++k){
-                  sumshape0 += ans_reco.resolved4_shapes[0][i][j][k];
-                  sumshape1 += ans_reco.resolved4_shapes[1][i][j][k];
-                  sumshape2 += ans_reco.resolved4_shapes[2][i][j][k];
-                  sumshape3 += ans_reco.resolved4_shapes[3][i][j][k];
-
-                  sumtotPU += ans_reco.resolved4_shapes_PU[0][i][j][k];
-                  sumtotPU += ans_reco.resolved4_shapes_PU[1][i][j][k];
-                  sumtotPU += ans_reco.resolved4_shapes_PU[2][i][j][k];
-                  sumtotPU += ans_reco.resolved4_shapes_PU[3][i][j][k];
-              }
-          }
-      }
-      printf("\tsumshape0: %f\n", sumshape0);
-      printf("\tsumshape1: %f\n", sumshape1);
-      printf("\tsumshape2: %f\n", sumshape2);
-      printf("\tsumshape3: %f\n", sumshape3);
-      printf("\n");
-      printf("\tsumtot: %f\n", sumshape0+sumshape1+sumshape2+sumshape3);
-      printf("\tsumtotPU: %f\n", sumtotPU);
-      printf("\n");
-
-      /*double sumfixed0=0, sumfixed1=0, sumfixed2=0;
-      double sumfixedPU=0;
-      for(unsigned i=0; i<ans_reco.resolved4_fixed.shape()[1]; ++i){
-        sumfixed0 += ans_reco.resolved4_fixed[0][i];
-        sumfixed1 += ans_reco.resolved4_fixed[1][i];
-        sumfixed2 += ans_reco.resolved4_fixed[2][i];
-
-        sumfixedPU += ans_reco.resolved4_fixed_PU[0][i];
-        sumfixedPU += ans_reco.resolved4_fixed_PU[1][i];
-        sumfixedPU += ans_reco.resolved4_fixed_PU[2][i];
-      }
-      printf("sumfixedshape0: %f\n", sumfixed0);
-      printf("sumfixedshape1: %f\n", sumfixed1);
-      printf("sumfixedshape2: %f\n", sumfixed2);
-      printf("sumfixedPU: %f\n", sumfixedPU);
-      printf("\n");*/
-
       if(verbose_){
         printf("ran calc\n");
+          printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
+        
       }
 
       EECresult next;
@@ -441,6 +435,10 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nextPU.wts.push_back(ans_reco.wts6_PU);
       }
 
+      if(doRes3_ && maxOrder_ >= 3){
+
+      }
+
       result->push_back(std::move(next));
       if(verbose_){
         printf("pushed back result\n");
@@ -450,146 +448,85 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       if(verbose_){
         printf("pushed back resultPU\n");
       }
-
+      
       if(iGen >=0 ){
           auto startgen = std::chrono::high_resolution_clock::now();
-          auto ans_gen = fastEEC::fastEEC<double, true, true>(
-                    gen->at(iGen), RLax, maxOrder_, norm, 
-                    RLax_coarse, xiax, phiax,
-                    r_dipole_ax, ct_dipole_ax,
-                    r_tee_ax, ct_tee_ax,
-                    r_triangle_ax, ct_triangle_ax,
-                    shapetol_,
-                    &UNMATCHED, &(reco->at(iReco)), &ptrans
-          );
+
+          fastEEC::result<double> ans_gen;
+          const auto& recojet = reco->at(iReco);
+          const auto& genjet = gen->at(iGen);
+          if (doRes3_ && doRes4_ && doRes4Fixed_){
+              fastEEC::fastEEC<double, true, true, true, true, true>(
+                        ans_gen,
+                        gen->at(iGen), RLax, maxOrder_, norm, 
+                        RLax_coarse, xiax, phiax,
+                        r_dipole_ax, ct_dipole_ax,
+                        r_tee_ax, ct_tee_ax,
+                        r_triangle_ax, ct_triangle_ax,
+                        shapetol_,
+                        &UNMATCHED, &recojet, &ptrans
+              );
+          } else if(doRes3_ && doRes4_){
+              fastEEC::fastEEC<double, true, true, true, true, false>(
+                        ans_gen,
+                        gen->at(iGen), RLax, maxOrder_, norm, 
+                        RLax_coarse, xiax, phiax,
+                        r_dipole_ax, ct_dipole_ax,
+                        r_tee_ax, ct_tee_ax,
+                        r_triangle_ax, ct_triangle_ax,
+                        shapetol_,
+                        &UNMATCHED, &recojet, &ptrans
+              );
+          } else if(doRes3_){
+              fastEEC::fastEEC<double, true, true, true, false, false>(
+                        ans_gen,
+                        gen->at(iGen), RLax, maxOrder_, norm, 
+                        RLax_coarse, xiax, phiax,
+                        r_dipole_ax, ct_dipole_ax,
+                        r_tee_ax, ct_tee_ax,
+                        r_triangle_ax, ct_triangle_ax,
+                        shapetol_,
+                        &UNMATCHED, &recojet, &ptrans
+              );
+          } else if(doRes4_ && doRes4Fixed_){
+              fastEEC::fastEEC<double, true, true, false, true, true>(
+                        ans_gen,
+                        gen->at(iGen), RLax, maxOrder_, norm, 
+                        RLax_coarse, xiax, phiax,
+                        r_dipole_ax, ct_dipole_ax,
+                        r_tee_ax, ct_tee_ax,
+                        r_triangle_ax, ct_triangle_ax,
+                        shapetol_,
+                        &UNMATCHED, &recojet, &ptrans
+              );
+          } else if(doRes4_){
+              fastEEC::fastEEC<double, true, true, false, true, false>(
+                        ans_gen,
+                        gen->at(iGen), RLax, maxOrder_, norm, 
+                        RLax_coarse, xiax, phiax,
+                        r_dipole_ax, ct_dipole_ax,
+                        r_tee_ax, ct_tee_ax,
+                        r_triangle_ax, ct_triangle_ax,
+                        shapetol_,
+                        &UNMATCHED, &recojet, &ptrans
+              );
+          } else {
+              fastEEC::fastEEC<double, true, true, false, false, false>(
+                        ans_gen,
+                        gen->at(iGen), RLax, maxOrder_, norm, 
+                        RLax_coarse, xiax, phiax,
+                        r_dipole_ax, ct_dipole_ax,
+                        r_tee_ax, ct_tee_ax,
+                        r_triangle_ax, ct_triangle_ax,
+                        shapetol_,
+                        &UNMATCHED, &recojet, &ptrans
+              );
+          }
           auto endgen = std::chrono::high_resolution_clock::now();
-
-          printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
-          printf("\n");
-
-          printf("\tsumwt2: %f\n", std::accumulate(ans_gen.wts2.begin(), ans_gen.wts2.end(), 0.));
-          printf("\tsumwt3: %f\n", std::accumulate(ans_gen.wts3.begin(), ans_gen.wts3.end(), 0.));
-          printf("\tsumwt4: %f\n", std::accumulate(ans_gen.wts4.begin(), ans_gen.wts4.end(), 0.));
-          printf("\tsumwt5: %f\n", std::accumulate(ans_gen.wts5.begin(), ans_gen.wts5.end(), 0.));
-          printf("\tsumwt6: %f\n", std::accumulate(ans_gen.wts6.begin(), ans_gen.wts6.end(), 0.));
-          printf("\n");
-          printf("\tsumwt2_PU: %f\n", std::accumulate(ans_gen.wts2_PU.begin(), ans_gen.wts2_PU.end(), 0.));
-          printf("\tsumwt3_PU: %f\n", std::accumulate(ans_gen.wts3_PU.begin(), ans_gen.wts3_PU.end(), 0.));
-          printf("\tsumwt4_PU: %f\n", std::accumulate(ans_gen.wts4_PU.begin(), ans_gen.wts4_PU.end(), 0.));
-          printf("\tsumwt5_PU: %f\n", std::accumulate(ans_gen.wts5_PU.begin(), ans_gen.wts5_PU.end(), 0.));
-          printf("\tsumwt6_PU: %f\n", std::accumulate(ans_gen.wts6_PU.begin(), ans_gen.wts6_PU.end(), 0.));
-          printf("\n");
-
-          double sumtrans2 = 0, sumtrans3 = 0, sumtrans4 = 0, sumtrans5 = 0, sumtrans6 = 0;
-          for(unsigned iReco=0; iReco<ans_gen.wts2.size(); ++iReco){
-              for(unsigned iGen=0; iGen<ans_gen.wts2.size(); ++iGen){
-                  sumtrans2 += ans_gen.transfer2[iGen][iReco];
-                  sumtrans3 += ans_gen.transfer3[iGen][iReco];
-                  sumtrans4 += ans_gen.transfer4[iGen][iReco];
-                  //sumtrans5 += ans_gen.transfer5[iGen][iReco];
-                  //sumtrans6 += ans_gen.transfer6[iGen][iReco];
-              }
-          }
-
-
-          printf("\t1-sumtrans2: %f\n", 1-sumtrans2);
-          printf("\t1-sumtrans3: %f\n", 1-sumtrans3);
-          printf("\t1-sumtrans4: %f\n", 1-sumtrans4);
-          //printf("\t1-sumtrans5: %f\n", 1-sumtrans5);
-          //printf("\t1-sumtrans6: %f\n", 1-sumtrans6);
-          printf("\n");
-
-          double sumres3_gen=0, sumres3PU_gen=0;
-          double sumres3_trans=0;
-          for(unsigned i=0; i<ans_reco.resolved3.shape()[0]; ++i){
-              for(unsigned j=0; j<ans_reco.resolved3.shape()[1]; ++j){
-                  for(unsigned k=0; k<ans_reco.resolved3.shape()[2]; ++k){
-                      sumres3_gen += ans_gen.resolved3[i][j][k];
-                      sumres3PU_gen += ans_gen.resolved3_PU[i][j][k];
-                      for(unsigned a=0; a<ans_gen.resolved3.shape()[0]; ++a){
-                          for(unsigned b=0; b<ans_gen.resolved3.shape()[1]; ++b){
-                              for(unsigned c=0; c<ans_gen.resolved3.shape()[2]; ++c){
-                                  sumres3_trans += ans_gen.transfer_res3[i][j][k][a][b][c];
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-          printf("\tsumres3: %f\n", sumres3_gen);
-          printf("\tsumres3PU: %f\n", sumres3PU_gen);
-          printf("\tsumres3_trans: %f\n", sumres3_trans);
-          printf("\n");
-
-          double sumshape0_gen=0, sumshape1_gen=0, sumshape2_gen=0, sumshape3_gen=0;
-          double sumtotPU_gen=0;
-          double sumtrans_res4=0;
-          for(unsigned i=0; i<ans_reco.resolved4_shapes.shape()[1]; ++i){
-              for(unsigned j=0; j<ans_reco.resolved4_shapes.shape()[2]; ++j){
-                  for(unsigned k=0; k<ans_reco.resolved4_shapes.shape()[3]; ++k){
-                      sumshape0_gen += ans_gen.resolved4_shapes[0][i][j][k];
-                      sumshape1_gen += ans_gen.resolved4_shapes[1][i][j][k];
-                      sumshape2_gen += ans_gen.resolved4_shapes[2][i][j][k];
-                      sumshape3_gen += ans_gen.resolved4_shapes[3][i][j][k];
-
-                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[0][i][j][k];
-                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[1][i][j][k];
-                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[2][i][j][k];
-                      sumtotPU_gen += ans_gen.resolved4_shapes_PU[3][i][j][k];
-                      for(unsigned a=0; a<4; ++a){
-                          for(unsigned b=0; b<ans_gen.resolved4_shapes.shape()[1]; ++b){
-                              for(unsigned c=0; c<ans_gen.resolved4_shapes.shape()[2]; ++c){
-                                  for(unsigned d=0; d<ans_gen.resolved4_shapes.shape()[3]; ++d){
-                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[0][i][j][k][a][b][c][d];
-                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[1][i][j][k][a][b][c][d];
-                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[2][i][j][k][a][b][c][d];
-                                      sumtrans_res4 += ans_gen.transfer_res4_shapes[3][i][j][k][a][b][c][d];
-                                  }
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-          printf("\tsumshape0: %f\n", sumshape0_gen);
-          printf("\tsumshape1: %f\n", sumshape1_gen);
-          printf("\tsumshape2: %f\n", sumshape2_gen);
-          printf("\tsumshape3: %f\n", sumshape3_gen);
-          printf("\n");
-          printf("\tsumtot: %f\n", sumshape0_gen+sumshape1_gen+sumshape2_gen+sumshape3_gen);
-          printf("\tsumtotPU: %f\n", sumtotPU_gen);
-          printf("\tsumtrans_res4: %f\n", sumtrans_res4);
-          printf("\n");
-
-          /*
-          double sumfixed0_gen=0, sumfixed1_gen=0, sumfixed2_gen=0;
-          double sumfixedPU_gen=0;
-          double sumtransferfixed=0;
-          for(unsigned i=0; i<ans_reco.resolved4_fixed.shape()[1]; ++i){
-            sumfixed0_gen += ans_gen.resolved4_fixed[0][i];
-            sumfixed1_gen += ans_gen.resolved4_fixed[1][i];
-            sumfixed2_gen += ans_gen.resolved4_fixed[2][i];
-
-            sumfixedPU_gen += ans_gen.resolved4_fixed_PU[0][i];
-            sumfixedPU_gen += ans_gen.resolved4_fixed_PU[1][i];
-            sumfixedPU_gen += ans_gen.resolved4_fixed_PU[2][i];
-            for(unsigned a=0; a<3; ++a){
-                for(unsigned b=0; b<ans_gen.resolved4_fixed.shape()[1]; ++b){
-                    sumtransferfixed += ans_gen.transfer_res4_fixed[0][i][a][b];
-                    sumtransferfixed += ans_gen.transfer_res4_fixed[1][i][a][b];
-                    sumtransferfixed += ans_gen.transfer_res4_fixed[2][i][a][b];
-                }
-            }
-          }
-          printf("sumfixedshape0: %f\n", sumfixed0);
-          printf("sumfixedshape1: %f\n", sumfixed1);
-          printf("sumfixedshape2: %f\n", sumfixed2);
-          printf("sumfixedPU: %f\n", sumfixedPU);
-          printf("sumtransferfixed: %f\n", sumtransferfixed);
-          printf("\n");*/
 
         if(verbose_){
             printf("ran gen calc with %u (gen) x %u (reco) particles\n", gen->at(iGen).nPart, reco->at(iReco).nPart);
+          printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
         }
 
         EECresult nextGen;
