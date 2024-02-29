@@ -7,6 +7,7 @@ from SRothman.CustomJets.setupPuppiJets import setupPuppiJets
 from SRothman.EECs.setupEECs import setupEECs
 from SRothman.Matching.setupMatching import setupMatching
 from SRothman.CustomJets.setupAK8Jets import setupAK8Jets
+from SRothman.CustomJets.setupCHSJets import setupCHSJets
 
 def setupAnalysis(process, doNominal=True, addNaive=True, 
                   ak8=True, addCharged=True, addFullEvent=True,
@@ -15,6 +16,7 @@ def setupAnalysis(process, doNominal=True, addNaive=True,
     process = setupZMuMu(process)
     process = setupRoccoR(process, isMC=isMC)
 
+    process = setupCHSJets(process)
     process = setupAK8Jets(process, isMC=isMC)
     process = setupPuppiJets(process, isMC=isMC)
     process = setupCustomJets(process, ak8=ak8, isMC=isMC)

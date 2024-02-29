@@ -246,7 +246,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
                 ans.iCHS.push_back(99999999);
             }
         }
-
+  
         if (verbose_){
             printf("\tjet: (%f, %f, %f)\n", pt, eta, phi);
         }
