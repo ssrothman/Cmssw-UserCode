@@ -24,6 +24,7 @@
 #include "SRothman/DataFormats/interface/matching.h"
 #include "SRothman/DataFormats/interface/EEC.h"
 #include "SRothman/SimonTools/src/util.h"
+#include "SRothman/SimonTools/src/flattenMultiArray.h"
 
 #include <iostream>
 #include <memory>
@@ -42,20 +43,17 @@ private:
     edm::EDGetTokenT<edm::View<EECtransfer>> srcToken_;
 
     int verbose_;
-
-    std::vector<int> orders_;
-
 };
 
 EECTransferTableProducer::EECTransferTableProducer(const edm::ParameterSet& conf)
         : name_(conf.getParameter<std::string>("name")),
           src_(conf.getParameter<edm::InputTag>("src")),
           srcToken_(consumes<edm::View<EECtransfer>>(src_)),
-          verbose_(conf.getParameter<int>("verbose")),
-          orders_(conf.getParameter<std::vector<int>>("orders")){
+          verbose_(conf.getParameter<int>("verbose")){
     produces<nanoaod::FlatTable>(name_+"proj");
     produces<nanoaod::FlatTable>(name_+"res3");
-    produces<nanoaod::FlatTable>(name_+"res4");
+    produces<nanoaod::FlatTable>(name_+"res4shapes");
+    produces<nanoaod::FlatTable>(name_+"res4fixed");
     produces<nanoaod::FlatTable>(name_+"BK");
 }
 
@@ -64,7 +62,6 @@ void EECTransferTableProducer::fillDescriptions(edm::ConfigurationDescriptions& 
   desc.add<std::string>("name");
   desc.add<edm::InputTag>("src");
   desc.add<int>("verbose");
-  desc.add<std::vector<int>>("orders");
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -73,59 +70,124 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
   evt.getByToken(srcToken_, Ts);
 
   //proj
-  std::vector<std::vector<float>> transP;
+  std::array<std::vector<float>, 5> transP;
 
   //res3
   std::vector<float> trans3;
 
   //res4
-  std::vector<float> trans4;
+  std::vector<float> trans4shapes;
+
+  std::vector<float> trans4fixed;
 
   //BK
-  std::vector<int> iReco;
-  std::vector<int> iGen;
-  std::vector<int> nproj;
-  std::vector<int> nres3;
-  std::vector<int> nres4;
+  std::vector<int> iReco, iGen;
 
-  transP.resize(orders_.size());
+  std::vector<int> nproj;
+  std::vector<int> nres3_RL, nres3_xi, nres3_phi;
+  std::vector<int> nres4shapes_RL, nres4shapes_shape, nres4shapes_r, nres4shapes_ct;
+  std::vector<int> nres4fixed_RL, nres4fixed_shape;
 
   for(const auto& T : *Ts){
       iReco.push_back(T.iReco);
       iGen.push_back(T.iGen);
 
-      for(unsigned i=0; i<orders_.size(); ++i){
-          transP[i].insert(transP[i].end(), T.proj[i].begin(), T.proj[i].end());
+      unsigned Np = T.proj[0]->num_elements();
+      for(unsigned i=0; i<5; ++i){
+          if(i+2 < T.maxOrder){
+              flattenMultiArray(*(T.proj[i]), transP[i]);
+          } else {
+              transP[i].insert(transP[i].end(), Np, 0);
+          }
       }
-      nproj.push_back(T.proj[0].n_cols);
+      nproj.push_back(T.proj[0]->shape()[0]);
 
-      trans3.insert(trans3.end(), T.res3.begin(), T.res3.end());
-      nres3.push_back(T.res3.n_cols);
+      if (T.doRes3){
+          const auto& res3 = *(T.res3);
 
-      trans4.insert(trans4.end(), T.res4.begin(), T.res4.end());
-      nres4.push_back(T.res4.n_cols);
+          unsigned nRL = res3.shape()[0];
+          unsigned nxi = res3.shape()[1];
+          unsigned nphi = res3.shape()[2];
+
+          flattenMultiArray(res3, trans3);
+
+          nres3_RL.emplace_back(nRL);
+          nres3_xi.emplace_back(nxi);
+          nres3_phi.emplace_back(nphi);
+      } else{
+          nres3_RL.emplace_back(0);
+          nres3_xi.emplace_back(0);
+          nres3_phi.emplace_back(0);
+      }
+
+      if(T.doRes4Shapes){
+          const auto& res4 = *(T.res4shapes);
+          
+          unsigned Nshape = res4.shape()[0];
+          unsigned nRL = res4.shape()[1];
+          unsigned nr = res4.shape()[2];
+          unsigned nct = res4.shape()[3];
+
+          flattenMultiArray(res4, trans4shapes);
+
+          nres4shapes_RL.emplace_back(nRL);
+          nres4shapes_shape.emplace_back(Nshape);
+          nres4shapes_r.emplace_back(nr);
+          nres4shapes_ct.emplace_back(nct);
+      } else {
+          nres4shapes_RL.emplace_back(0);
+          nres4shapes_shape.emplace_back(0);
+          nres4shapes_r.emplace_back(0);
+          nres4shapes_ct.emplace_back(0);
+      }
+
+      if (T.doRes4Fixed){
+          const auto& res4 = *(T.res4fixed);
+
+          unsigned Nshape = res4.shape()[0];
+          unsigned nRL = res4.shape()[1];
+
+          flattenMultiArray(res4, trans4shapes);
+
+          nres4fixed_RL.emplace_back(nRL);
+          nres4fixed_shape.emplace_back(Nshape);
+      } else {
+          nres4fixed_RL.emplace_back(0);
+          nres4fixed_shape.emplace_back(0);
+      }
   }
 
-  auto table = std::make_unique<nanoaod::FlatTable>(transP[0].size(), name_+"proj", false);
-  for(unsigned i=0; i<orders_.size(); ++i){
-    table->addColumn<float>(vformat("value%d",orders_[i]), transP[i], "projected EEC transfer", nanoaod::FlatTable::FloatColumn);
+  auto tableproj = std::make_unique<nanoaod::FlatTable>(transP[0].size(), name_+"proj", false);
+  for(unsigned i=0; i<5; ++i){
+    tableproj->addColumn<float>(vformat("value%d",i+2), transP[i], "projected EEC transfer", nanoaod::FlatTable::FloatColumn);
   }
-  evt.put(std::move(table), name_+"proj");
+  evt.put(std::move(tableproj), name_+"proj");
 
   auto tableRes3 = std::make_unique<nanoaod::FlatTable>(trans3.size(), name_+"res3", false);
   tableRes3->addColumn<float>("value", trans3, "res3 transfer", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableRes3), name_+"res3");
 
-  auto tableRes4 = std::make_unique<nanoaod::FlatTable>(trans4.size(), name_+"res4", false);
-  tableRes4->addColumn<float>("value", trans4, "res4 transfer", nanoaod::FlatTable::FloatColumn);
-  evt.put(std::move(tableRes4), name_+"res4");
+  auto tableRes4shapes = std::make_unique<nanoaod::FlatTable>(trans4shapes.size(), name_+"res4shapes", false);
+  tableRes4shapes->addColumn<float>("value", trans4shapes, "res4 transfer", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(tableRes4shapes), name_+"res4shapes");
+
+  auto tableRes4fixed = std::make_unique<nanoaod::FlatTable>(trans4fixed.size(), name_+"res4fixed", false);
+  tableRes4fixed->addColumn<float>("value", trans4fixed, "res4 transfer", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(tableRes4fixed), name_+"res4fixed");
 
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iReco.size(), name_+"BK", false);
   tableBK->addColumn<int>("iReco", iReco, "index of reco jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("iGen", iGen, "index of gen jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nproj", nproj, "number of projected EEC weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres3", nres3, "number of res3 weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres4", nres4, "number of res4 weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres3_RL", nres3_RL, "number of res3 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres3_xi", nres3_xi, "number of res3 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres3_phi", nres3_phi, "number of res3 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4shapes_RL", nres4shapes_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4shapes_shape", nres4shapes_shape, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4shapes_r", nres4shapes_r, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4shapes_ct", nres4shapes_ct, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4fixed_RL", nres4fixed_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4fixed_shape", nres4fixed_shape, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
 }
 

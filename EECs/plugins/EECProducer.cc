@@ -31,6 +31,8 @@
 #include "SRothman/EECs/src/fast.h"
 #include "SRothman/EECs/src/fastStructs.h"
 
+#include "SRothman/SimonTools/src/copyMultiArray.h"
+
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -38,14 +40,80 @@
 #include <boost/histogram.hpp>
 #include <boost/multi_array.hpp>
 
-static arma::mat matFromArray(const boost::multi_array<double, 2>& arr){
-    arma::mat mat(arr.shape()[1], arr.shape()[0]);
+static void transposeProj(boost::multi_array<double, 2>& ans,
+                          const boost::multi_array<double, 2>& arr){
+    ans.resize(boost::extents[arr.shape()[1]][arr.shape()[0]]);
     for(unsigned i=0; i<arr.shape()[0]; ++i){
         for(unsigned j=0; j<arr.shape()[1]; ++j){
-            mat(j, i) = arr[i][j];//NB we transpose
+            ans[j][i] = arr[i][j];//NB we transpose
         }
     }
-    return mat;
+}
+
+static void transposeRes3(boost::multi_array<double, 6>& ans,
+                          const boost::multi_array<double, 6>& res3){
+    unsigned shape0 = res3.shape()[0];
+    unsigned shape1 = res3.shape()[1];
+    unsigned shape2 = res3.shape()[2];
+    ans.resize(boost::extents[shape0][shape1][shape2][shape0][shape1][shape2]);
+
+    for(unsigned i=0; i<shape0; ++i){
+        for(unsigned j=0; j<shape1; ++j){
+            for(unsigned k=0; k<shape2; ++k){
+                for(unsigned a=0; a<shape0; ++a){
+                    for(unsigned b=0; b<shape1; ++b){
+                        for(unsigned c=0; c<shape2; ++c){
+                            ans[a][b][c][i][j][k] = res3[i][j][k][a][b][c];
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void transposeRes4Shapes(boost::multi_array<double, 8>& ans,
+                                const boost::multi_array<double, 8>& res4){
+    unsigned shape0 = res4.shape()[0];
+    unsigned shape1 = res4.shape()[1];
+    unsigned shape2 = res4.shape()[2];
+    unsigned shape3 = res4.shape()[3];
+    ans.resize(boost::extents[shape0][shape1][shape2][shape3][shape0][shape1][shape2][shape3]);
+
+    for(unsigned i=0; i<shape0; ++i){
+        for(unsigned j=0; j<shape1; ++j){
+            for(unsigned k=0; k<shape2; ++k){
+                for(unsigned l=0; l<shape3; ++l){
+                    for(unsigned a=0; a<shape0; ++a){
+                        for(unsigned b=0; b<shape1; ++b){
+                            for(unsigned c=0; c<shape2; ++c){
+                                for(unsigned d=0; d<shape3; ++d){
+                                    ans[a][b][c][d][i][j][k][l] = res4[i][j][k][l][a][b][c][d];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void transposeRes4Fixed(boost::multi_array<double, 4>& ans,
+                                const boost::multi_array<double, 4>& res4){
+    unsigned shape0 = res4.shape()[0];
+    unsigned shape1 = res4.shape()[1];
+    ans.resize(boost::extents[shape0][shape1][shape0][shape1]);
+
+    for(unsigned i=0; i<shape0; ++i){
+        for(unsigned j=0; j<shape1; ++j){
+            for(unsigned a=0; a<shape0; ++a){
+                for(unsigned b=0; b<shape1; ++b){
+                    ans[a][b][i][j] = res4[i][j][a][b];
+                }
+            }
+        }
+    }
 }
 
 class EECProducer : public edm::stream::EDProducer<> {
@@ -87,62 +155,8 @@ private:
     std::vector<double> ct_triangle_edges_;
 
     double shapetol_;
-
-    void addProjected(EECresult& next, const EECCalculator& calc, 
-            bool PU);
-    void addResolved(EECresult& next, const EECCalculator& calc, 
-            bool PU);
-    void addTransfer(EECtransfer& next, const EECCalculator& calc);
 };
 
-
-void EECProducer::addTransfer(EECtransfer& next, 
-                              const EECCalculator& calc){
-
-    for(unsigned order=2; order<=calc.getMaxOrder(); ++order){
-        next.orders.emplace_back(order);
-        next.proj.emplace_back(calc.getTransferproj(order));
-    }
-
-    if(doRes3_){
-        next.res3 = calc.getTransferres3();
-    }
-    if(doRes4_){
-        next.res4 = calc.getTransferres4();
-    }
-}
-
-void EECProducer::addProjected(EECresult& next, 
-                                const EECCalculator& calc,
-                                bool PU){
-    for(unsigned order=2; order<=calc.getMaxOrder(); ++order){
-        next.orders.emplace_back(order);
-        if(PU){
-            next.wts.emplace_back(calc.getproj_PU(order));
-        } else {
-            next.wts.emplace_back(calc.getproj(order));
-        }
-    }
-}
-
-void EECProducer::addResolved(EECresult& next, 
-                                const EECCalculator& calc,
-                                bool PU){
-    if(doRes3_){
-        if(PU){
-            next.res3wts = calc.getres3_PU();
-        } else {
-            next.res3wts = calc.getres3();
-        }
-    }
-    if(doRes4_){
-        if(PU){
-            next.res4wts = calc.getres4_PU();
-        } else {
-            next.res4wts = calc.getres4();
-        }
-    }
-}
 
 EECProducer::EECProducer(const edm::ParameterSet& conf)
         : verbose_(conf.getParameter<int>("verbose")),
@@ -275,6 +289,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   for(unsigned iReco=0; iReco<reco->size(); ++iReco){
       if(verbose_){
         printf("iReco %u\n", iReco);
+        printf("nRecoPart = %d\n", reco->at(iReco).nPart);
       }
 
       if(reco->at(iReco).nPart < 2){
@@ -294,6 +309,8 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       std::cout << "GEN NAME " << genTag_ << std::endl;
       std::cout << "RECO NAME " << recoTag_ << std::endl;
       if(doGen_){
+          printf("top of get match\n");
+          fflush(stdout);
           int matchidx=-1;
           for(unsigned iM=0; iM<matches->size(); ++iM){
               if(matches->at(iM).iReco == iReco){
@@ -302,6 +319,8 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
               }
           }
           if(matchidx>=0){
+              printf("about to get matchidx\n");
+              fflush(stdout);
               iGen = matches->at(matchidx).iGen;
               UNMATCHED.resize(gen->at(iGen).nPart, true);
               ptrans = matches->at(matchidx).ptrans;
@@ -315,16 +334,19 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   }
               }
           }
+          printf("done\n");
+          fflush(stdout);
       }
 
       if(verbose_){
         printf("iGen %d\n", iGen);
       }
-
       
       auto startreco = std::chrono::high_resolution_clock::now();
       fastEEC::result<double> ans_reco;
       if (doRes3_ && doRes4_ && doRes4Fixed_){
+          printf("before call\n");
+          fflush(stdout);
           fastEEC::fastEEC<double, true, false, true, true, true>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -335,7 +357,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
+          printf("after call\n");
+          fflush(stdout);
       } else if(doRes3_ && doRes4_){
+          printf("before call\n");
+          fflush(stdout);
           fastEEC::fastEEC<double, true, false, true, true, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -346,7 +372,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
+          printf("after call\n");
+          fflush(stdout);
       } else if(doRes3_){
+          printf("before call\n");
+          fflush(stdout);
           fastEEC::fastEEC<double, true, false, true, false, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -357,7 +387,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
+          printf("after call\n");
+          fflush(stdout);
       } else if(doRes4_ && doRes4Fixed_){
+          printf("before call\n");
+          fflush(stdout);
           fastEEC::fastEEC<double, true, false, false, true, true>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -368,7 +402,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
+          printf("after call\n");
+          fflush(stdout);
       } else if(doRes4_){
+          printf("before call\n");
+          fflush(stdout);
           fastEEC::fastEEC<double, true, false, false, true, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -379,7 +417,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
+          printf("after call\n");
+          fflush(stdout);
       } else {
+          printf("before call\n");
+          fflush(stdout);
           fastEEC::fastEEC<double, true, false, false, false, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -390,7 +432,11 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
+          printf("after call\n");
+          fflush(stdout);
       }
+      printf("after fastEEC call in EEC Producer\n");
+      fflush(stdout);
       auto endreco = std::chrono::high_resolution_clock::now();
       if(verbose_){
         printf("ran calc\n");
@@ -398,63 +444,38 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         
       }
 
-      EECresult next;
-      next.iJet = iReco;
-      next.iReco = iReco;
-      EECresult nextPU;
-      nextPU.iJet = iReco;
-      nextPU.iReco = iReco;
-      if(maxOrder_ >= 2){
-          next.orders.push_back(2);
-          nextPU.orders.push_back(2);
-          next.wts.push_back(ans_reco.wts2);
-          nextPU.wts.push_back(ans_reco.wts2_PU);
-      }
-      if(maxOrder_ >= 3){
-          next.orders.push_back(3);
-          nextPU.orders.push_back(3);
-          next.wts.push_back(ans_reco.wts3);
-          nextPU.wts.push_back(ans_reco.wts3_PU);
-      }
-      if(maxOrder_ >= 4){
-          next.orders.push_back(4);
-          nextPU.orders.push_back(4);
-          next.wts.push_back(ans_reco.wts4);
-          nextPU.wts.push_back(ans_reco.wts4_PU);
-      }
-      if(maxOrder_ >= 5){
-          next.orders.push_back(5);
-          nextPU.orders.push_back(5);
-          next.wts.push_back(ans_reco.wts5);
-          nextPU.wts.push_back(ans_reco.wts5_PU);
-      }
-      if(maxOrder_ >= 6){
-          next.orders.push_back(6);
-          nextPU.orders.push_back(6);
-          next.wts.push_back(ans_reco.wts6);
-          nextPU.wts.push_back(ans_reco.wts6_PU);
-      }
-
-      if(doRes3_ && maxOrder_ >= 3){
-
-      }
-
-      result->push_back(std::move(next));
+      result->emplace_back(iReco, iReco, maxOrder_,
+                           doRes3_,
+                           doRes4_, doRes4Fixed_,
+                           ans_reco.wts2, ans_reco.wts3,
+                           ans_reco.wts4, ans_reco.wts5,
+                           ans_reco.wts6,
+                           ans_reco.resolved3,
+                           ans_reco.resolved4_shapes,
+                           ans_reco.resolved4_fixed);
       if(verbose_){
         printf("pushed back result\n");
       }
 
-      resultPU->push_back(std::move(nextPU));
+      resultPU->emplace_back(iReco, iReco, maxOrder_,
+                             doRes3_,
+                             doRes4_, doRes4Fixed_,
+                             ans_reco.wts2_PU, ans_reco.wts3_PU,
+                             ans_reco.wts4_PU, ans_reco.wts5_PU,
+                             ans_reco.wts6_PU,
+                             ans_reco.resolved3_PU,
+                             ans_reco.resolved4_shapes_PU,
+                             ans_reco.resolved4_fixed_PU);
       if(verbose_){
         printf("pushed back resultPU\n");
       }
       
       if(iGen >=0 ){
-          auto startgen = std::chrono::high_resolution_clock::now();
+          continue;
+          /*auto startgen = std::chrono::high_resolution_clock::now();
 
           fastEEC::result<double> ans_gen;
           const auto& recojet = reco->at(iReco);
-          const auto& genjet = gen->at(iGen);
           if (doRes3_ && doRes4_ && doRes4Fixed_){
               fastEEC::fastEEC<double, true, true, true, true, true>(
                         ans_gen,
@@ -532,56 +553,88 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         EECresult nextGen;
         nextGen.iJet = iGen;
         nextGen.iReco = iReco;
+        nextGen.maxOrder = maxOrder_;
 
         EECresult nextGenUNMATCH;
         nextGenUNMATCH.iReco = iReco;
         nextGenUNMATCH.iJet = iGen;
+        nextGenUNMATCH.maxOrder = maxOrder_;
 
         EECtransfer nextTransfer;
         nextTransfer.iReco = iReco;
         nextTransfer.iGen = iGen;
+        nextTransfer.maxOrder = maxOrder_;
         
         if(maxOrder_ >= 2){
-          nextGen.orders.push_back(2);
-          nextGenUNMATCH.orders.push_back(2);
-          nextTransfer.orders.push_back(2);
-          nextGen.wts.push_back(ans_gen.wts2);
-          nextGenUNMATCH.wts.push_back(ans_gen.wts2_PU);
-          nextTransfer.proj.push_back(matFromArray(ans_gen.transfer2));
+          boost::multi_array<double, 2> transfer2;
+          transposeProj(transfer2, ans_gen.transfer2);
+
+            copyMultiArray(ans_gen.wts2,      nextGen.proj[0]);
+            copyMultiArray(ans_gen.wts2_PU, nextGenUNMATCH.proj[0]);
+            copyMultiArray(transfer2, nextTransfer.proj[0]);
         }
         if(maxOrder_ >= 3){
-          nextGen.orders.push_back(3);
-          nextGenUNMATCH.orders.push_back(3);
-          nextTransfer.orders.push_back(3);
-          nextGen.wts.push_back(ans_gen.wts3);
-          nextGenUNMATCH.wts.push_back(ans_gen.wts3_PU);
-          nextTransfer.proj.push_back(matFromArray(ans_gen.transfer3));
+          boost::multi_array<double, 2> transfer3;
+          transposeProj(transfer3, ans_gen.transfer3);
+
+          copyMultiArray(ans_gen.wts3,      nextGen.proj[1]);
+          copyMultiArray(ans_gen.wts3_PU, nextGenUNMATCH.proj[1]);
+          copyMultiArray(transfer3, nextTransfer.proj[1]);
         }
         if(maxOrder_ >= 4){
-          nextGen.orders.push_back(4);
-          nextGenUNMATCH.orders.push_back(4);
-          nextTransfer.orders.push_back(4);
-          nextGen.wts.push_back(ans_gen.wts4);
-          nextGenUNMATCH.wts.push_back(ans_gen.wts4_PU);
-          nextTransfer.proj.push_back(matFromArray(ans_gen.transfer4));
+          boost::multi_array<double, 2> transfer4;
+          transposeProj(transfer4, ans_gen.transfer4);
+
+            copyMultiArray(ans_gen.wts4,      nextGen.proj[2]);
+            copyMultiArray(ans_gen.wts4_PU, nextGenUNMATCH.proj[2]);
+            copyMultiArray(transfer4, nextTransfer.proj[2]);
         }
         if(maxOrder_ >= 5){
-          nextGen.orders.push_back(5);
-          nextGenUNMATCH.orders.push_back(5);
-          nextTransfer.orders.push_back(5);
-          nextGen.wts.push_back(ans_gen.wts5);
-          nextGenUNMATCH.wts.push_back(ans_gen.wts5_PU);
-          nextTransfer.proj.push_back(matFromArray(ans_gen.transfer5));
+          boost::multi_array<double, 2> transfer5;
+          transposeProj(transfer5, ans_gen.transfer5);
+
+            copyMultiArray(ans_gen.wts5,      nextGen.proj[3]);
+            copyMultiArray(ans_gen.wts5_PU, nextGenUNMATCH.proj[3]);
+            copyMultiArray(transfer5, nextTransfer.proj[3]);
         }
         if(maxOrder_ >= 6){
-          nextGen.orders.push_back(6);
-          nextGenUNMATCH.orders.push_back(6);
-          nextTransfer.orders.push_back(6);
-          nextGen.wts.push_back(ans_gen.wts6);
-          nextGenUNMATCH.wts.push_back(ans_gen.wts6_PU);
-          nextTransfer.proj.push_back(matFromArray(ans_gen.transfer6));
+          boost::multi_array<double, 2> transfer6;
+          transposeProj(transfer6, ans_gen.transfer6);
+
+            copyMultiArray(ans_gen.wts6,      nextGen.proj[4]);
+            copyMultiArray(ans_gen.wts6_PU, nextGenUNMATCH.proj[4]);
+            copyMultiArray(transfer6, nextTransfer.proj[4]);
         }
 
+        if(doRes3_ && maxOrder_ >= 3){
+            copyMultiArray(ans_gen.resolved3, nextGen.res3);
+            copyMultiArray(ans_gen.resolved3_PU, nextGenUNMATCH.res3);
+            transposeRes3(nextTransfer.res3, ans_gen.transfer_res3);
+
+            nextGen.doRes3 = true;
+            nextGenUNMATCH.doRes3 = true;
+            nextTransfer.doRes3 = true;
+        }
+
+        if (doRes4_&& maxOrder_ >= 4){
+            copyMultiArray(ans_gen.resolved4_shapes, nextGen.res4shapes);
+            copyMultiArray(ans_gen.resolved4_shapes_PU, nextGenUNMATCH.res4shapes);
+            transposeRes4Shapes(nextTransfer.res4shapes, ans_gen.transfer_res4_shapes);
+
+            nextGen.doRes4Shapes = true;
+            nextGenUNMATCH.doRes4Shapes = true;
+            nextTransfer.doRes4Shapes = true;
+
+            if(doRes4Fixed_){
+                copyMultiArray(ans_gen.resolved4_fixed, nextGen.res4fixed);
+                copyMultiArray(ans_gen.resolved4_fixed_PU, nextGenUNMATCH.res4fixed);
+                transposeRes4Fixed(nextTransfer.res4fixed, ans_gen.transfer_res4_fixed);
+
+                nextGen.doRes4Fixed = true;
+                nextGenUNMATCH.doRes4Fixed = true;
+                nextTransfer.doRes4Fixed = true;
+            }
+        }
 
         resultgen->push_back(std::move(nextGen));
         if(verbose_){
@@ -596,7 +649,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         resulttrans->push_back(std::move(nextTransfer));
         if(verbose_){
           printf("pushed back transfer matrices\n");
-        }
+        }*/
       }
   }
 
