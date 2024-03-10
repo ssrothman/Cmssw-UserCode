@@ -26,6 +26,7 @@
 
 #include "SRothman/SimonTools/src/deltaR.h"
 #include "SRothman/SimonTools/src/util.h"
+#include "SRothman/SimonTools/src/recursive_reduce.h"
 
 #include "SRothman/EECs/src/eec_oo.h"
 #include "SRothman/EECs/src/fast.h"
@@ -39,82 +40,6 @@
 
 #include <boost/histogram.hpp>
 #include <boost/multi_array.hpp>
-
-static void transposeProj(boost::multi_array<double, 2>& ans,
-                          const boost::multi_array<double, 2>& arr){
-    ans.resize(boost::extents[arr.shape()[1]][arr.shape()[0]]);
-    for(unsigned i=0; i<arr.shape()[0]; ++i){
-        for(unsigned j=0; j<arr.shape()[1]; ++j){
-            ans[j][i] = arr[i][j];//NB we transpose
-        }
-    }
-}
-
-static void transposeRes3(boost::multi_array<double, 6>& ans,
-                          const boost::multi_array<double, 6>& res3){
-    unsigned shape0 = res3.shape()[0];
-    unsigned shape1 = res3.shape()[1];
-    unsigned shape2 = res3.shape()[2];
-    ans.resize(boost::extents[shape0][shape1][shape2][shape0][shape1][shape2]);
-
-    for(unsigned i=0; i<shape0; ++i){
-        for(unsigned j=0; j<shape1; ++j){
-            for(unsigned k=0; k<shape2; ++k){
-                for(unsigned a=0; a<shape0; ++a){
-                    for(unsigned b=0; b<shape1; ++b){
-                        for(unsigned c=0; c<shape2; ++c){
-                            ans[a][b][c][i][j][k] = res3[i][j][k][a][b][c];
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-static void transposeRes4Shapes(boost::multi_array<double, 8>& ans,
-                                const boost::multi_array<double, 8>& res4){
-    unsigned shape0 = res4.shape()[0];
-    unsigned shape1 = res4.shape()[1];
-    unsigned shape2 = res4.shape()[2];
-    unsigned shape3 = res4.shape()[3];
-    ans.resize(boost::extents[shape0][shape1][shape2][shape3][shape0][shape1][shape2][shape3]);
-
-    for(unsigned i=0; i<shape0; ++i){
-        for(unsigned j=0; j<shape1; ++j){
-            for(unsigned k=0; k<shape2; ++k){
-                for(unsigned l=0; l<shape3; ++l){
-                    for(unsigned a=0; a<shape0; ++a){
-                        for(unsigned b=0; b<shape1; ++b){
-                            for(unsigned c=0; c<shape2; ++c){
-                                for(unsigned d=0; d<shape3; ++d){
-                                    ans[a][b][c][d][i][j][k][l] = res4[i][j][k][l][a][b][c][d];
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-static void transposeRes4Fixed(boost::multi_array<double, 4>& ans,
-                                const boost::multi_array<double, 4>& res4){
-    unsigned shape0 = res4.shape()[0];
-    unsigned shape1 = res4.shape()[1];
-    ans.resize(boost::extents[shape0][shape1][shape0][shape1]);
-
-    for(unsigned i=0; i<shape0; ++i){
-        for(unsigned j=0; j<shape1; ++j){
-            for(unsigned a=0; a<shape0; ++a){
-                for(unsigned b=0; b<shape1; ++b){
-                    ans[a][b][i][j] = res4[i][j][a][b];
-                }
-            }
-        }
-    }
-}
 
 class EECProducer : public edm::stream::EDProducer<> {
 public:
@@ -440,8 +365,26 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       auto endreco = std::chrono::high_resolution_clock::now();
       if(verbose_){
         printf("ran calc\n");
-          printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
-        
+        printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
+
+        printf("\tsum proj(2): %g", recursive_reduce(*ans_reco.wts2, 0.));
+        printf("\tsum proj(3): %g", recursive_reduce(*ans_reco.wts3, 0.));
+        printf("\tsum proj(4): %g", recursive_reduce(*ans_reco.wts4, 0.));
+        printf("\tsum proj(5): %g", recursive_reduce(*ans_reco.wts5, 0.));
+        printf("\tsum proj(6): %g", recursive_reduce(*ans_reco.wts6, 0.));
+        printf("\tsum res3:    %g", recursive_reduce(*ans_reco.resolved3, 0.));
+        printf("\tsum res4 sh: %g", recursive_reduce(*ans_reco.resolved4_shapes, 0.));
+        printf("\tsum res4 fi: %g", recursive_reduce(*ans_reco.resolved4_fixed, 0.));
+        printf("\n");
+        printf("\tsum proj(2) PU: %g", recursive_reduce(*ans_reco.wts2_PU, 0.));
+        printf("\tsum proj(3) PU: %g", recursive_reduce(*ans_reco.wts3_PU, 0.));
+        printf("\tsum proj(4) PU: %g", recursive_reduce(*ans_reco.wts4_PU, 0.));
+        printf("\tsum proj(5) PU: %g", recursive_reduce(*ans_reco.wts5_PU, 0.));
+        printf("\tsum proj(6) PU: %g", recursive_reduce(*ans_reco.wts6_PU, 0.));
+        printf("\tsum res3 PU:    %g", recursive_reduce(*ans_reco.resolved3_PU, 0.));
+        printf("\tsum res4 sh PU: %g", recursive_reduce(*ans_reco.resolved4_shapes_PU, 0.));
+        printf("\tsum res4 fi PU: %g", recursive_reduce(*ans_reco.resolved4_fixed_PU, 0.));
+        printf("\n");
       }
 
       result->emplace_back(iReco, iReco, maxOrder_,
@@ -546,7 +489,37 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
         if(verbose_){
             printf("ran gen calc with %u (gen) x %u (reco) particles\n", gen->at(iGen).nPart, reco->at(iReco).nPart);
-          printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
+            printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
+
+            printf("ran calc\n");
+            printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
+
+            printf("\tsum proj(2): %g", recursive_reduce(*ans_gen.wts2, 0.));
+            printf("\tsum proj(3): %g", recursive_reduce(*ans_gen.wts3, 0.));
+            printf("\tsum proj(4): %g", recursive_reduce(*ans_gen.wts4, 0.));
+            printf("\tsum proj(5): %g", recursive_reduce(*ans_gen.wts5, 0.));
+            printf("\tsum proj(6): %g", recursive_reduce(*ans_gen.wts6, 0.));
+            printf("\tsum res3:    %g", recursive_reduce(*ans_gen.resolved3, 0.));
+            printf("\tsum res4 sh: %g", recursive_reduce(*ans_gen.resolved4_shapes, 0.));
+            printf("\tsum res4 fi: %g", recursive_reduce(*ans_gen.resolved4_fixed, 0.));
+            printf("\n");
+            printf("\tsum proj(2) UM: %g", recursive_reduce(*ans_gen.wts2_PU, 0.));
+            printf("\tsum proj(3) UM: %g", recursive_reduce(*ans_gen.wts3_PU, 0.));
+            printf("\tsum proj(4) UM: %g", recursive_reduce(*ans_gen.wts4_PU, 0.));
+            printf("\tsum proj(5) UM: %g", recursive_reduce(*ans_gen.wts5_PU, 0.));
+            printf("\tsum proj(6) UM: %g", recursive_reduce(*ans_gen.wts6_PU, 0.));
+            printf("\tsum res3 UM:    %g", recursive_reduce(*ans_gen.resolved3_PU, 0.));
+            printf("\tsum res4 sh UM: %g", recursive_reduce(*ans_gen.resolved4_shapes_PU, 0.));
+            printf("\tsum res4 fi UM: %g", recursive_reduce(*ans_gen.resolved4_fixed_PU, 0.));
+            printf("\n");
+            printf("\tsum proj(2) trans: %g", recursive_reduce(*ans_gen.transfer2, 0.));
+            printf("\tsum proj(3) trans: %g", recursive_reduce(*ans_gen.transfer3, 0.));
+            printf("\tsum proj(4) trans: %g", recursive_reduce(*ans_gen.transfer4, 0.));
+            printf("\tsum proj(5) trans: %g", recursive_reduce(*ans_gen.transfer5, 0.));
+            printf("\tsum proj(6) trans: %g", recursive_reduce(*ans_gen.transfer6, 0.));
+            printf("\tsum res3 trans:    %g", recursive_reduce(*ans_gen.transfer_res3, 0.));
+            printf("\tsum res4 sh trans: %g", recursive_reduce(*ans_gen.transfer_res4_shapes, 0.));
+            printf("\tsum res4 fi trans: %g", recursive_reduce(*ans_gen.transfer_res4_fixed, 0.));
         }
 
         resultgen->emplace_back(iGen, iReco, maxOrder_,
