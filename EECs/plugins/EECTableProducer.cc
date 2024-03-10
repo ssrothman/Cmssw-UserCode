@@ -95,7 +95,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
       unsigned Np = EEC.proj[0]->size();
       for(unsigned i=0; i<5; ++i){
-          if(i+2 < EEC.maxOrder){
+          if(i+2 <= EEC.maxOrder){
               proj[i].insert(proj[i].end(), EEC.proj[i]->begin(), EEC.proj[i]->end());
           } else {
               proj[i].insert(proj[i].end(), Np, 0);

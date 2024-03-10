@@ -94,7 +94,7 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
 
       unsigned Np = T.proj[0]->num_elements();
       for(unsigned i=0; i<5; ++i){
-          if(i+2 < T.maxOrder){
+          if(i+2 <= T.maxOrder){
               flattenMultiArray(*(T.proj[i]), transP[i]);
           } else {
               transP[i].insert(transP[i].end(), Np, 0);

@@ -471,8 +471,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       }
       
       if(iGen >=0 ){
-          continue;
-          /*auto startgen = std::chrono::high_resolution_clock::now();
+          auto startgen = std::chrono::high_resolution_clock::now();
 
           fastEEC::result<double> ans_gen;
           const auto& recojet = reco->at(iReco);
@@ -550,106 +549,48 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
         }
 
-        EECresult nextGen;
-        nextGen.iJet = iGen;
-        nextGen.iReco = iReco;
-        nextGen.maxOrder = maxOrder_;
+        resultgen->emplace_back(iGen, iReco, maxOrder_,
+                                doRes3_,
+                                doRes4_, doRes4Fixed_,
+                                ans_gen.wts2, ans_gen.wts3,
+                                ans_gen.wts4, ans_gen.wts5,
+                                ans_gen.wts6,
+                                ans_gen.resolved3,
+                                ans_gen.resolved4_shapes,
+                                ans_gen.resolved4_fixed);
 
-        EECresult nextGenUNMATCH;
-        nextGenUNMATCH.iReco = iReco;
-        nextGenUNMATCH.iJet = iGen;
-        nextGenUNMATCH.maxOrder = maxOrder_;
-
-        EECtransfer nextTransfer;
-        nextTransfer.iReco = iReco;
-        nextTransfer.iGen = iGen;
-        nextTransfer.maxOrder = maxOrder_;
-        
-        if(maxOrder_ >= 2){
-          boost::multi_array<double, 2> transfer2;
-          transposeProj(transfer2, ans_gen.transfer2);
-
-            copyMultiArray(ans_gen.wts2,      nextGen.proj[0]);
-            copyMultiArray(ans_gen.wts2_PU, nextGenUNMATCH.proj[0]);
-            copyMultiArray(transfer2, nextTransfer.proj[0]);
-        }
-        if(maxOrder_ >= 3){
-          boost::multi_array<double, 2> transfer3;
-          transposeProj(transfer3, ans_gen.transfer3);
-
-          copyMultiArray(ans_gen.wts3,      nextGen.proj[1]);
-          copyMultiArray(ans_gen.wts3_PU, nextGenUNMATCH.proj[1]);
-          copyMultiArray(transfer3, nextTransfer.proj[1]);
-        }
-        if(maxOrder_ >= 4){
-          boost::multi_array<double, 2> transfer4;
-          transposeProj(transfer4, ans_gen.transfer4);
-
-            copyMultiArray(ans_gen.wts4,      nextGen.proj[2]);
-            copyMultiArray(ans_gen.wts4_PU, nextGenUNMATCH.proj[2]);
-            copyMultiArray(transfer4, nextTransfer.proj[2]);
-        }
-        if(maxOrder_ >= 5){
-          boost::multi_array<double, 2> transfer5;
-          transposeProj(transfer5, ans_gen.transfer5);
-
-            copyMultiArray(ans_gen.wts5,      nextGen.proj[3]);
-            copyMultiArray(ans_gen.wts5_PU, nextGenUNMATCH.proj[3]);
-            copyMultiArray(transfer5, nextTransfer.proj[3]);
-        }
-        if(maxOrder_ >= 6){
-          boost::multi_array<double, 2> transfer6;
-          transposeProj(transfer6, ans_gen.transfer6);
-
-            copyMultiArray(ans_gen.wts6,      nextGen.proj[4]);
-            copyMultiArray(ans_gen.wts6_PU, nextGenUNMATCH.proj[4]);
-            copyMultiArray(transfer6, nextTransfer.proj[4]);
-        }
-
-        if(doRes3_ && maxOrder_ >= 3){
-            copyMultiArray(ans_gen.resolved3, nextGen.res3);
-            copyMultiArray(ans_gen.resolved3_PU, nextGenUNMATCH.res3);
-            transposeRes3(nextTransfer.res3, ans_gen.transfer_res3);
-
-            nextGen.doRes3 = true;
-            nextGenUNMATCH.doRes3 = true;
-            nextTransfer.doRes3 = true;
-        }
-
-        if (doRes4_&& maxOrder_ >= 4){
-            copyMultiArray(ans_gen.resolved4_shapes, nextGen.res4shapes);
-            copyMultiArray(ans_gen.resolved4_shapes_PU, nextGenUNMATCH.res4shapes);
-            transposeRes4Shapes(nextTransfer.res4shapes, ans_gen.transfer_res4_shapes);
-
-            nextGen.doRes4Shapes = true;
-            nextGenUNMATCH.doRes4Shapes = true;
-            nextTransfer.doRes4Shapes = true;
-
-            if(doRes4Fixed_){
-                copyMultiArray(ans_gen.resolved4_fixed, nextGen.res4fixed);
-                copyMultiArray(ans_gen.resolved4_fixed_PU, nextGenUNMATCH.res4fixed);
-                transposeRes4Fixed(nextTransfer.res4fixed, ans_gen.transfer_res4_fixed);
-
-                nextGen.doRes4Fixed = true;
-                nextGenUNMATCH.doRes4Fixed = true;
-                nextTransfer.doRes4Fixed = true;
-            }
-        }
-
-        resultgen->push_back(std::move(nextGen));
         if(verbose_){
           printf("pushed back gen result\n");
         }
 
-        resultUNMATCH->push_back(std::move(nextGenUNMATCH));
+        resultUNMATCH->emplace_back(iGen, iReco, maxOrder_,
+                                   doRes3_,
+                                   doRes4_, doRes4Fixed_,
+                                   ans_gen.wts2_PU, ans_gen.wts3_PU,
+                                   ans_gen.wts4_PU, ans_gen.wts5_PU,
+                                   ans_gen.wts6_PU,
+                                   ans_gen.resolved3_PU,
+                                   ans_gen.resolved4_shapes_PU,
+                                   ans_gen.resolved4_fixed_PU);
+
         if(verbose_){
           printf("pushed back genUNMATCH result\n");
         }
 
-        resulttrans->push_back(std::move(nextTransfer));
+        resulttrans->emplace_back(iReco, iGen, maxOrder_,
+                                  doRes3_,
+                                  doRes4_, doRes4Fixed_,
+                                  ans_gen.transfer2,
+                                  ans_gen.transfer3,
+                                  ans_gen.transfer4,
+                                  ans_gen.transfer5,
+                                  ans_gen.transfer6,
+                                  ans_gen.transfer_res3,
+                                  ans_gen.transfer_res4_shapes,
+                                  ans_gen.transfer_res4_fixed);
         if(verbose_){
           printf("pushed back transfer matrices\n");
-        }*/
+        }
       }
   }
 
