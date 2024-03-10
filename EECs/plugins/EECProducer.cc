@@ -1,4 +1,4 @@
-#include "DataFormats/Common/interface/Handle.h"
+t 1include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -28,7 +28,6 @@
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/recursive_reduce.h"
 
-#include "SRothman/EECs/src/eec_oo.h"
 #include "SRothman/EECs/src/fast.h"
 #include "SRothman/EECs/src/fastStructs.h"
 
@@ -455,9 +454,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         if(verbose_){
             printf("ran gen calc with %u (gen) x %u (reco) particles\n", gen->at(iGen).nPart, reco->at(iReco).nPart);
             printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
-
-            printf("ran calc\n");
-            printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
 
             printf("\tsum proj(2): %g\n", recursive_reduce(*ans_gen.wts2, 0.));
             printf("\tsum proj(3): %g\n", recursive_reduce(*ans_gen.wts3, 0.));
