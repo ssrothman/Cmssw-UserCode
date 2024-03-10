@@ -230,12 +230,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
       PU.resize(reco->at(iReco).nPart, true);
 
-      std::cout << "MATCH NAME " << matchTag_ << std::endl;
-      std::cout << "GEN NAME " << genTag_ << std::endl;
-      std::cout << "RECO NAME " << recoTag_ << std::endl;
       if(doGen_){
-          printf("top of get match\n");
-          fflush(stdout);
           int matchidx=-1;
           for(unsigned iM=0; iM<matches->size(); ++iM){
               if(matches->at(iM).iReco == iReco){
@@ -244,8 +239,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
               }
           }
           if(matchidx>=0){
-              printf("about to get matchidx\n");
-              fflush(stdout);
               iGen = matches->at(matchidx).iGen;
               UNMATCHED.resize(gen->at(iGen).nPart, true);
               ptrans = matches->at(matchidx).ptrans;
@@ -259,8 +252,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   }
               }
           }
-          printf("done\n");
-          fflush(stdout);
       }
 
       if(verbose_){
@@ -270,8 +261,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       auto startreco = std::chrono::high_resolution_clock::now();
       fastEEC::result<double> ans_reco;
       if (doRes3_ && doRes4_ && doRes4Fixed_){
-          printf("before call\n");
-          fflush(stdout);
           fastEEC::fastEEC<double, true, false, true, true, true>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -282,11 +271,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
-          printf("after call\n");
-          fflush(stdout);
       } else if(doRes3_ && doRes4_){
-          printf("before call\n");
-          fflush(stdout);
           fastEEC::fastEEC<double, true, false, true, true, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -297,11 +282,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
-          printf("after call\n");
-          fflush(stdout);
       } else if(doRes3_){
-          printf("before call\n");
-          fflush(stdout);
           fastEEC::fastEEC<double, true, false, true, false, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -312,11 +293,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
-          printf("after call\n");
-          fflush(stdout);
       } else if(doRes4_ && doRes4Fixed_){
-          printf("before call\n");
-          fflush(stdout);
           fastEEC::fastEEC<double, true, false, false, true, true>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -327,11 +304,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
-          printf("after call\n");
-          fflush(stdout);
       } else if(doRes4_){
-          printf("before call\n");
-          fflush(stdout);
           fastEEC::fastEEC<double, true, false, false, true, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -342,11 +315,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
-          printf("after call\n");
-          fflush(stdout);
       } else {
-          printf("before call\n");
-          fflush(stdout);
           fastEEC::fastEEC<double, true, false, false, false, false>(
                   ans_reco,
                   reco->at(iReco), RLax, maxOrder_, norm,
@@ -357,11 +326,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   shapetol_,
                   &PU
           );
-          printf("after call\n");
-          fflush(stdout);
       }
-      printf("after fastEEC call in EEC Producer\n");
-      fflush(stdout);
       auto endreco = std::chrono::high_resolution_clock::now();
       if(verbose_){
         printf("ran calc\n");
@@ -512,14 +477,14 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             printf("\tsum res4 sh UM: %g\n", recursive_reduce(*ans_gen.resolved4_shapes_PU, 0.));
             printf("\tsum res4 fi UM: %g\n", recursive_reduce(*ans_gen.resolved4_fixed_PU, 0.));
             printf("\n");
-            printf("\tsum proj(2) trans: %g\n", recursive_reduce(*ans_gen.transfer2, 0.));
-            printf("\tsum proj(3) trans: %g\n", recursive_reduce(*ans_gen.transfer3, 0.));
-            printf("\tsum proj(4) trans: %g\n", recursive_reduce(*ans_gen.transfer4, 0.));
-            printf("\tsum proj(5) trans: %g\n", recursive_reduce(*ans_gen.transfer5, 0.));
-            printf("\tsum proj(6) trans: %g\n", recursive_reduce(*ans_gen.transfer6, 0.));
-            printf("\tsum res3 trans:    %g\n", recursive_reduce(*ans_gen.transfer_res3, 0.));
-            printf("\tsum res4 sh trans: %g\n", recursive_reduce(*ans_gen.transfer_res4_shapes, 0.));
-            printf("\tsum res4 fi trans: %g\n", recursive_reduce(*ans_gen.transfer_res4_fixed, 0.));
+            printf("\tsum proj(2) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer2, 0.));
+            printf("\tsum proj(3) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer3, 0.));
+            printf("\tsum proj(4) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer4, 0.));
+            printf("\tsum proj(5) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer5, 0.));
+            printf("\tsum proj(6) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer6, 0.));
+            printf("\tsum res3 trans:    1-%g\n", 1-recursive_reduce(*ans_gen.transfer_res3, 0.));
+            printf("\tsum res4 sh trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer_res4_shapes, 0.));
+            printf("\tsum res4 fi trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer_res4_fixed, 0.));
         }
 
         resultgen->emplace_back(iGen, iReco, maxOrder_,
