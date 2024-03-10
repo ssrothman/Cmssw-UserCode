@@ -367,23 +367,23 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         printf("ran calc\n");
         printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
 
-        printf("\tsum proj(2): %g", recursive_reduce(*ans_reco.wts2, 0.));
-        printf("\tsum proj(3): %g", recursive_reduce(*ans_reco.wts3, 0.));
-        printf("\tsum proj(4): %g", recursive_reduce(*ans_reco.wts4, 0.));
-        printf("\tsum proj(5): %g", recursive_reduce(*ans_reco.wts5, 0.));
-        printf("\tsum proj(6): %g", recursive_reduce(*ans_reco.wts6, 0.));
-        printf("\tsum res3:    %g", recursive_reduce(*ans_reco.resolved3, 0.));
-        printf("\tsum res4 sh: %g", recursive_reduce(*ans_reco.resolved4_shapes, 0.));
-        printf("\tsum res4 fi: %g", recursive_reduce(*ans_reco.resolved4_fixed, 0.));
+        printf("\tsum proj(2): %g\n", recursive_reduce(*ans_reco.wts2, 0.));
+        printf("\tsum proj(3): %g\n", recursive_reduce(*ans_reco.wts3, 0.));
+        printf("\tsum proj(4): %g\n", recursive_reduce(*ans_reco.wts4, 0.));
+        printf("\tsum proj(5): %g\n", recursive_reduce(*ans_reco.wts5, 0.));
+        printf("\tsum proj(6): %g\n", recursive_reduce(*ans_reco.wts6, 0.));
+        printf("\tsum res3:    %g\n", recursive_reduce(*ans_reco.resolved3, 0.));
+        printf("\tsum res4 sh: %g\n", recursive_reduce(*ans_reco.resolved4_shapes, 0.));
+        printf("\tsum res4 fi: %g\n", recursive_reduce(*ans_reco.resolved4_fixed, 0.));
         printf("\n");
-        printf("\tsum proj(2) PU: %g", recursive_reduce(*ans_reco.wts2_PU, 0.));
-        printf("\tsum proj(3) PU: %g", recursive_reduce(*ans_reco.wts3_PU, 0.));
-        printf("\tsum proj(4) PU: %g", recursive_reduce(*ans_reco.wts4_PU, 0.));
-        printf("\tsum proj(5) PU: %g", recursive_reduce(*ans_reco.wts5_PU, 0.));
-        printf("\tsum proj(6) PU: %g", recursive_reduce(*ans_reco.wts6_PU, 0.));
-        printf("\tsum res3 PU:    %g", recursive_reduce(*ans_reco.resolved3_PU, 0.));
-        printf("\tsum res4 sh PU: %g", recursive_reduce(*ans_reco.resolved4_shapes_PU, 0.));
-        printf("\tsum res4 fi PU: %g", recursive_reduce(*ans_reco.resolved4_fixed_PU, 0.));
+        printf("\tsum proj(2) PU: %g\n", recursive_reduce(*ans_reco.wts2_PU, 0.));
+        printf("\tsum proj(3) PU: %g\n", recursive_reduce(*ans_reco.wts3_PU, 0.));
+        printf("\tsum proj(4) PU: %g\n", recursive_reduce(*ans_reco.wts4_PU, 0.));
+        printf("\tsum proj(5) PU: %g\n", recursive_reduce(*ans_reco.wts5_PU, 0.));
+        printf("\tsum proj(6) PU: %g\n", recursive_reduce(*ans_reco.wts6_PU, 0.));
+        printf("\tsum res3 PU:    %g\n", recursive_reduce(*ans_reco.resolved3_PU, 0.));
+        printf("\tsum res4 sh PU: %g\n", recursive_reduce(*ans_reco.resolved4_shapes_PU, 0.));
+        printf("\tsum res4 fi PU: %g\n", recursive_reduce(*ans_reco.resolved4_fixed_PU, 0.));
         printf("\n");
       }
 
@@ -494,32 +494,32 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             printf("ran calc\n");
             printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
 
-            printf("\tsum proj(2): %g", recursive_reduce(*ans_gen.wts2, 0.));
-            printf("\tsum proj(3): %g", recursive_reduce(*ans_gen.wts3, 0.));
-            printf("\tsum proj(4): %g", recursive_reduce(*ans_gen.wts4, 0.));
-            printf("\tsum proj(5): %g", recursive_reduce(*ans_gen.wts5, 0.));
-            printf("\tsum proj(6): %g", recursive_reduce(*ans_gen.wts6, 0.));
-            printf("\tsum res3:    %g", recursive_reduce(*ans_gen.resolved3, 0.));
-            printf("\tsum res4 sh: %g", recursive_reduce(*ans_gen.resolved4_shapes, 0.));
-            printf("\tsum res4 fi: %g", recursive_reduce(*ans_gen.resolved4_fixed, 0.));
+            printf("\tsum proj(2): %g\n", recursive_reduce(*ans_gen.wts2, 0.));
+            printf("\tsum proj(3): %g\n", recursive_reduce(*ans_gen.wts3, 0.));
+            printf("\tsum proj(4): %g\n", recursive_reduce(*ans_gen.wts4, 0.));
+            printf("\tsum proj(5): %g\n", recursive_reduce(*ans_gen.wts5, 0.));
+            printf("\tsum proj(6): %g\n", recursive_reduce(*ans_gen.wts6, 0.));
+            printf("\tsum res3:    %g\n", recursive_reduce(*ans_gen.resolved3, 0.));
+            printf("\tsum res4 sh: %g\n", recursive_reduce(*ans_gen.resolved4_shapes, 0.));
+            printf("\tsum res4 fi: %g\n", recursive_reduce(*ans_gen.resolved4_fixed, 0.));
             printf("\n");
-            printf("\tsum proj(2) UM: %g", recursive_reduce(*ans_gen.wts2_PU, 0.));
-            printf("\tsum proj(3) UM: %g", recursive_reduce(*ans_gen.wts3_PU, 0.));
-            printf("\tsum proj(4) UM: %g", recursive_reduce(*ans_gen.wts4_PU, 0.));
-            printf("\tsum proj(5) UM: %g", recursive_reduce(*ans_gen.wts5_PU, 0.));
-            printf("\tsum proj(6) UM: %g", recursive_reduce(*ans_gen.wts6_PU, 0.));
-            printf("\tsum res3 UM:    %g", recursive_reduce(*ans_gen.resolved3_PU, 0.));
-            printf("\tsum res4 sh UM: %g", recursive_reduce(*ans_gen.resolved4_shapes_PU, 0.));
-            printf("\tsum res4 fi UM: %g", recursive_reduce(*ans_gen.resolved4_fixed_PU, 0.));
+            printf("\tsum proj(2) UM: %g\n", recursive_reduce(*ans_gen.wts2_PU, 0.));
+            printf("\tsum proj(3) UM: %g\n", recursive_reduce(*ans_gen.wts3_PU, 0.));
+            printf("\tsum proj(4) UM: %g\n", recursive_reduce(*ans_gen.wts4_PU, 0.));
+            printf("\tsum proj(5) UM: %g\n", recursive_reduce(*ans_gen.wts5_PU, 0.));
+            printf("\tsum proj(6) UM: %g\n", recursive_reduce(*ans_gen.wts6_PU, 0.));
+            printf("\tsum res3 UM:    %g\n", recursive_reduce(*ans_gen.resolved3_PU, 0.));
+            printf("\tsum res4 sh UM: %g\n", recursive_reduce(*ans_gen.resolved4_shapes_PU, 0.));
+            printf("\tsum res4 fi UM: %g\n", recursive_reduce(*ans_gen.resolved4_fixed_PU, 0.));
             printf("\n");
-            printf("\tsum proj(2) trans: %g", recursive_reduce(*ans_gen.transfer2, 0.));
-            printf("\tsum proj(3) trans: %g", recursive_reduce(*ans_gen.transfer3, 0.));
-            printf("\tsum proj(4) trans: %g", recursive_reduce(*ans_gen.transfer4, 0.));
-            printf("\tsum proj(5) trans: %g", recursive_reduce(*ans_gen.transfer5, 0.));
-            printf("\tsum proj(6) trans: %g", recursive_reduce(*ans_gen.transfer6, 0.));
-            printf("\tsum res3 trans:    %g", recursive_reduce(*ans_gen.transfer_res3, 0.));
-            printf("\tsum res4 sh trans: %g", recursive_reduce(*ans_gen.transfer_res4_shapes, 0.));
-            printf("\tsum res4 fi trans: %g", recursive_reduce(*ans_gen.transfer_res4_fixed, 0.));
+            printf("\tsum proj(2) trans: %g\n", recursive_reduce(*ans_gen.transfer2, 0.));
+            printf("\tsum proj(3) trans: %g\n", recursive_reduce(*ans_gen.transfer3, 0.));
+            printf("\tsum proj(4) trans: %g\n", recursive_reduce(*ans_gen.transfer4, 0.));
+            printf("\tsum proj(5) trans: %g\n", recursive_reduce(*ans_gen.transfer5, 0.));
+            printf("\tsum proj(6) trans: %g\n", recursive_reduce(*ans_gen.transfer6, 0.));
+            printf("\tsum res3 trans:    %g\n", recursive_reduce(*ans_gen.transfer_res3, 0.));
+            printf("\tsum res4 sh trans: %g\n", recursive_reduce(*ans_gen.transfer_res4_shapes, 0.));
+            printf("\tsum res4 fi trans: %g\n", recursive_reduce(*ans_gen.transfer_res4_fixed, 0.));
         }
 
         resultgen->emplace_back(iGen, iReco, maxOrder_,
