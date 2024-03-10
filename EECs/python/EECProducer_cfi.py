@@ -19,14 +19,14 @@ dRedges_coarse = [0.001, 0.01, 0.02, 0.03, 0.05,
 xiedges = np.linspace(0.0, 1.0, 5)
 phiedges = np.linspace(0.0, 1.0, 5)
 
-r_dipole_edges = np.linspace(0, 1, 11)
-ct_dipole_edges = np.linspace(-1, 1, 11)
+r_dipole_edges = np.linspace(0, 1, 7)
+ct_dipole_edges = np.linspace(-1, 1, 7)
 
-r_tee_edges = np.linspace(0, 1, 11)
-ct_tee_edges = np.linspace(-1, 1, 11)
+r_tee_edges = np.linspace(0, 1, 7)
+ct_tee_edges = np.linspace(-1, 1, 7)
 
-r_triangle_edges = np.linspace(0, 1, 11)
-ct_triangle_edges = np.linspace(-1, 1, 11)
+r_triangle_edges = np.linspace(0, 1, 7)
+ct_triangle_edges = np.linspace(-1, 1, 7)
 
 EECProducer = cms.EDProducer("EECProducer",
     reco = cms.InputTag("SimonJets"),

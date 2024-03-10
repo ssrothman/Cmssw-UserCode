@@ -147,7 +147,7 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
           unsigned Nshape = res4.shape()[0];
           unsigned nRL = res4.shape()[1];
 
-          flattenMultiArray(res4, trans4shapes);
+          flattenMultiArray(res4, trans4fixed);
 
           nres4fixed_RL.emplace_back(nRL);
           nres4fixed_shape.emplace_back(Nshape);
