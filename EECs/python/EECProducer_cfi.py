@@ -12,12 +12,12 @@ dRedges = [0.0005 ,0.001, 0.005,
            0.30, 0.40, 0.50, 0.60, 
            0.70, 0.80, 0.90, 1.00]
 
-dRedges_coarse = [0.001, 0.01, 0.02, 0.03, 0.05,
-                  0.10, 0.15, 0.20, 0.30, 0.40,
-                  0.50, 0.70, 1.00]
+dRedges_coarse = [0.001, 0.10, 0.20]
 
-xiedges = np.linspace(0.0, 1.0, 5)
-phiedges = np.linspace(0.0, 1.0, 5)
+xiedges = np.linspace(1e-3, 1.0, 8)
+phiedges = [1e-3, 0.3, 0.55415927, 
+            0.80831853, 1.0624778, 
+            1.31663706, 1.57079633]
 
 r_dipole_edges = np.linspace(0, 1, 5)
 ct_dipole_edges = np.linspace(0, 1, 5)
