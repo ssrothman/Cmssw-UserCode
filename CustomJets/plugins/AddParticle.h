@@ -4,6 +4,8 @@
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/isID.h"
 #include "SRothman/SimonTools/src/selectionStructs.h"
+#include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/printPart.h"
 
 template <typename P>
 void addParticle(const P* const partptr, jet& ans, double jecfactor,
@@ -12,6 +14,8 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
                  double maxPartEta, 
                  const struct particleThresholds& thresholds,
                  const struct vtxCuts& vtxcuts,
+                 partSyst& systematitics,
+                 partSyst::SYSTEMATIC syst,
                  unsigned maxNumPart){     
 
     int fromPV;
@@ -39,49 +43,57 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
         nextpt /= jecfactor;
     }
 
-
-
     if(std::abs(partptr->eta()) > maxPartEta 
             || !vtxcuts.pass(partptr)
-            || nextpt==0){
+            || nextpt<=0){
         return;
     }
 
-    ans.rawpt += nextpt;
+    particle nextpart(nextpt, partptr->eta(), partptr->phi(),
+                      pdgid, partptr->charge(),
+                      partptr->vertex().x(), 
+                      partptr->vertex().y(), 
+                      partptr->vertex().z(),
+                      partptr->dxy(), partptr->dz(),
+                      fromPV, puppiWeight);
 
-    if(onlyCharged && partptr->charge() == 0){
+    printf("BEFORE SYSTEMATICS\n");
+    printPart(nextpart);
+    if(!systematitics.applySystematic(syst, nextpart, ans.eta, ans.phi)){
+        printf("DROPPED BY SYSTEMATICS\n");
+        return;
+    }
+    printf("AFTER SYSTEMATICS\n");
+    printPart(nextpart);
+
+    ans.rawpt += nextpart.pt;
+
+    if(onlyCharged && nextpart.charge == 0){
         return;
     }
 
     //printf("\tadding particle with pt: %f, eta: %f, phi: %f, pdgid: %d\n", partptr->pt(), partptr->eta(), partptr->phi(), partptr->pdgId());
-    double minPartPt = thresholds.getThreshold(partptr);
-    if(nextpt < minPartPt 
+    double minPartPt = thresholds.getThreshold(nextpart);
+    if(nextpart.pt < minPartPt 
             || ans.nPart >= maxNumPart 
-            || !vtxcuts.pass(partptr)){
+            || !vtxcuts.pass(nextpart)){
         return;
     }
 
-    ans.sumpt += nextpt;
+    ans.sumpt += nextpart.pt;
 
-    ans.particles.emplace_back(
-            nextpt, partptr->eta(), partptr->phi(),
-            pdgid, partptr->charge(),
-            partptr->vertex().x(), 
-            partptr->vertex().y(), 
-            partptr->vertex().z(),
-            partptr->dxy(), partptr->dz(),
-            fromPV, puppiWeight
-    );
+    ans.particles.push_back(nextpart);
+
     ++ans.nPart;
-    if(isELE(partptr)){
+    if(isELE(nextpart)){
         ++ans.nELE;
-    } else if (isMU(partptr)){
+    } else if (isMU(nextpart)){
         ++ans.nMU;
-    } else if (isEM0(partptr)){
+    } else if (isEM0(nextpart)){
         ++ans.nEM0;
-    } else if (isHADCH(partptr)){
+    } else if (isHADCH(nextpart)){
         ++ans.nHADCH;
-    } else if (isHAD0(partptr)){
+    } else if (isHAD0(nextpart)){
         ++ans.nHAD0;
     } else {
         printf("pdgid: %u charge: %d\n", pdgid, partptr->charge());

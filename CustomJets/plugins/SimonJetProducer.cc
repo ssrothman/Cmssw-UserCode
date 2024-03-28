@@ -29,6 +29,7 @@
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 #include "SRothman/SimonTools/src/isID.h"
 #include "SRothman/SimonTools/src/particleThresholds.h"
+#include "SRothman/SimonTools/src/partSyst.h"
 
 #include <iostream>
 #include <memory>
@@ -42,6 +43,10 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
+    
+    partSyst systematics_;
+    partSyst::SYSTEMATIC syst_;
+
     bool passPtEtaPhi(const T& jet);
     bool passLepVeto(const T& jet);
     
@@ -73,13 +78,14 @@ private:
     edm::EDGetTokenT<bool> evtSelToken_;
     bool doEvtSel_;
 
-
     int verbose_;
 };
 
 template <typename T>
 SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
-        : thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
+        : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
+          syst_(partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
+          thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           vtxcuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
@@ -98,12 +104,20 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           evtSelToken_(consumes<bool>(evtSelSrc_)),
           doEvtSel_(conf.getParameter<bool>("doEventSelection")),
           verbose_(conf.getParameter<int>("verbose")){
+    syst_ = partSyst::NOM;
     produces<std::vector<jet>>();
 }
 
 template <typename T>
 void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
+
+  desc.add<std::string>("syst");
+
+  edm::ParameterSetDescription systPset;
+  partSyst::fillPSetDescription(systPset);
+  desc.add<edm::ParameterSetDescription>(
+            "systematics", systPset);
 
   edm::ParameterSetDescription thresholdPset;
   particleThresholds::fillPSetDescription(thresholdPset);
@@ -266,14 +280,14 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
                             applyPuppi_, applyJEC_, 
                             onlyCharged_,
                             9999, thresholds_,
-                            vtxcuts_,
+                            vtxcuts_, systematics_, syst_,
                             maxNumPart_);
            } else if(genptr){
                 addParticle(genptr, ans, jecfactor, 
                             applyPuppi_, applyJEC_,
                             onlyCharged_,
                             9999, thresholds_,
-                            vtxcuts_,
+                            vtxcuts_, systematics_, partSyst::NOM,
                             maxNumPart_);
            } else {
                 throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");

@@ -27,11 +27,6 @@
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/etaPhiCoords.h"
 
-#include "SRothman/CustomJets/plugins/AddParticle.h"
-#include "SRothman/SimonTools/src/isID.h"
-#include "SRothman/SimonTools/src/particleThresholds.h"
-#include "SRothman/SimonTools/src/vtxCuts.h"
-
 #include <iostream>
 #include <memory>
 #include <vector>

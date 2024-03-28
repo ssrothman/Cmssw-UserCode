@@ -26,6 +26,7 @@
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 #include "SRothman/SimonTools/src/selectionStructs.h"
+#include "SRothman/SimonTools/src/partSyst.h"
 
 #include <iostream>
 #include <memory>
@@ -40,6 +41,9 @@ public:
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     bool anyClose(const T& part, const std::vector<particle>& parts) const;
+
+    partSyst systematics_;
+    partSyst::SYSTEMATIC syst_;
 
     struct particleThresholds thresholds_;
     struct vtxCuts vtxCuts_;
@@ -77,7 +81,9 @@ bool ShadowJetProducerT<T>::anyClose(const T& part, const std::vector<particle>&
 
 template <typename T>
 ShadowJetProducerT<T>::ShadowJetProducerT(const edm::ParameterSet& conf)
-        : thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
+        : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
+          syst_(partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
+          thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           vtxCuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
@@ -98,6 +104,13 @@ ShadowJetProducerT<T>::ShadowJetProducerT(const edm::ParameterSet& conf)
 template <typename T>
 void ShadowJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
+
+  desc.add<std::string>("syst");
+
+  edm::ParameterSetDescription systPset;
+  partSyst::fillPSetDescription(systPset);
+  desc.add<edm::ParameterSetDescription>(
+            "systematics", systPset);
 
   edm::ParameterSetDescription thresholdDesc;
   particleThresholds::fillPSetDescription(thresholdDesc);
@@ -188,14 +201,14 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
                             applyPuppi_, false, 
                             onlyCharged_,
                             9999, thresholds_,
-                            vtxCuts_,
+                            vtxCuts_, systematics_, syst_,
                             maxNumPart_);
            } else if(genptr){
                 addParticle(genptr, ans, 1.0, 
                             applyPuppi_, false,
                             onlyCharged_,
                             9999, thresholds_,
-                            vtxCuts_,
+                            vtxCuts_, systematics_, partSyst::NOM,
                             maxNumPart_);
            } else {
                 throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");

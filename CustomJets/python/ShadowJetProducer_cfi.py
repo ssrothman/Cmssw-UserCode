@@ -1,7 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 from SRothman.CustomJets.cuts_cff import *
+from SRothman.CustomJets.systematics import *
 
 RecoShadowJetProducer = cms.EDProducer("RecoShadowJetProducer",
+    systematics = systematics.clone(),
+    syst = syst,
+
     thresholds = recoThresholds.clone(),
     vtxCuts = recoVtxCuts.clone(),
 
@@ -24,6 +28,9 @@ RecoShadowJetProducer = cms.EDProducer("RecoShadowJetProducer",
 )
 
 GenShadowJetProducer = cms.EDProducer("CandidateShadowJetProducer",
+    systematics = systematics.clone(),
+    syst = cms.string("NOM"),
+
     thresholds = genThresholds.clone(),
     vtxCuts = genVtxCuts.clone(),
 

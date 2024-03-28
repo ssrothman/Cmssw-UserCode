@@ -25,6 +25,7 @@
 #include "SRothman/SimonTools/src/jets.h"
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/selectionStructs.h"
+#include "SRothman/SimonTools/src/partSyst.h"
 
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 
@@ -39,6 +40,9 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
+
+    partSyst systematics_;
+    partSyst::SYSTEMATIC syst_;
 
     struct particleThresholds thresholds_;
     struct vtxCuts vtxCuts_;
@@ -64,7 +68,9 @@ private:
 };
 
 FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
-        : thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
+        : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
+          syst_(partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
+          thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           vtxCuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxPartEta_(conf.getParameter<double>("maxPartEta")),
@@ -83,6 +89,14 @@ FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
 
 void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
+
+  desc.add<std::string>("syst");
+
+  edm::ParameterSetDescription systPset;
+  partSyst::fillPSetDescription(systPset);
+  desc.add<edm::ParameterSetDescription>(
+            "systematics", systPset);
+
   
     edm::ParameterSetDescription thresholdPset;
     particleThresholds::fillPSetDescription(thresholdPset);
@@ -168,14 +182,14 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
                     applyPuppi_, false, 
                     onlyCharged_,
                     maxPartEta_, thresholds_,
-                    vtxCuts_,
+                    vtxCuts_, systematics_, syst_,
                     maxNumPart_);
         } else if(genptr){
             addParticle(genptr, ans, 1.0,
                     applyPuppi_, false,
                     onlyCharged_,
                     maxPartEta_, thresholds_,
-                    vtxCuts_,
+                    vtxCuts_, systematics_, partSyst::NOM,
                     maxNumPart_);
         } else {
             throw cms::Exception("FullEventJetProducer::produce()")

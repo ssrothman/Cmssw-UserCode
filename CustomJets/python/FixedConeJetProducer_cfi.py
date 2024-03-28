@@ -1,10 +1,14 @@
 import FWCore.ParameterSet.Config as cms
 
 from SRothman.CustomJets.cuts_cff import *
+from SRothman.CustomJets.systematics import *
 
 _maxNumPart = 8192
 
 RecoFixedConeJetProducer = cms.EDProducer("FixedConeJetProducer",
+    systematics = systematics.clone(),
+    syst = syst,
+
     thresholds = recoThresholds.clone(),
     vtxCuts = recoVtxCuts.clone(),
 
@@ -27,6 +31,9 @@ RecoFixedConeJetProducer = cms.EDProducer("FixedConeJetProducer",
 )
 
 GenFixedConeJetProducer = cms.EDProducer("FixedConeJetProducer",
+    systematics = systematics.clone(),
+    syst = cms.string("NOM"),
+
     thresholds = genThresholds.clone(),
     vtxCuts = genVtxCuts.clone(),
 
