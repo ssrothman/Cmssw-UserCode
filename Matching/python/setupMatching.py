@@ -4,6 +4,7 @@ from SRothman.Matching.GenMatchTableProducer_cfi import *
 from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def setupMatching(process, verbose=0,
+                  ak8=True,
                   name='GenMatch',
                   reco = 'SimonJets',
                   gen = 'GenSimonJets',
@@ -15,6 +16,7 @@ def setupMatching(process, verbose=0,
                 reco = reco,
                 gen = gen,
                 verbose = verbose,
+                jetMatchingDR = 0.4 if ak8 else 0.2
             )
         )
     else:
@@ -23,6 +25,7 @@ def setupMatching(process, verbose=0,
                 reco = reco,
                 gen = gen,
                 verbose = verbose,
+                jetMatchingDR = 0.4 if ak8 else 0.2
             )
         )
 
