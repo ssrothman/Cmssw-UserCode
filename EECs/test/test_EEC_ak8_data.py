@@ -84,7 +84,14 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData
 process = nanoAOD_customizeData(process)
 
 from SRothman.Analysis.setupAnalysis import *
-process = setupAnalysis(process, ak8=True, addCharged=True, addNaive=False, doNominal=True, isMC=False, addFullEvent=True, addRandomControl=True, addZControl=True)
+process = setupAnalysis(process, ak8=True, 
+                        addCharged=True, 
+                        addNaive=False,
+                        doNominal=False, 
+                        isMC=False, 
+                        addFullEvent=False, 
+                        addRandomControl=True, 
+                        addZControl=False)
 
 # End of customisation functions
 

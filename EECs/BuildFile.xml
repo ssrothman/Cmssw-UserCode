@@ -1,4 +1,4 @@
-<Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
+<Flags CXXFLAGS="-g -I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
 <use name="boost"/>
 <use name="CommonTools/Statistics"/>
 <use name="CommonTools/Utils"/>

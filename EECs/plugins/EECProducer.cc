@@ -28,10 +28,9 @@
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/recursive_reduce.h"
 
-#include "SRothman/EECs/src/fast.h"
-#include "SRothman/EECs/src/fastStructs.h"
-
 #include "SRothman/SimonTools/src/copyMultiArray.h"
+
+#include "SRothman/EECs/src/run.h"
 
 #include <iostream>
 #include <memory>
@@ -51,6 +50,7 @@ private:
 
     unsigned maxOrder_;
     bool doRes3_, doRes4_, doRes4Fixed_;
+    bool doTransfer_;
     std::string ptNorm_;
 
     edm::InputTag recoTag_;
@@ -88,6 +88,7 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
           doRes3_(conf.getParameter<bool>("doRes3")),
           doRes4_(conf.getParameter<bool>("doRes4")),
           doRes4Fixed_(conf.getParameter<bool>("doRes4Fixed")),
+          doTransfer_(conf.getParameter<bool>("doTransfer")),
           ptNorm_(conf.getParameter<std::string>("ptNorm")),
           recoTag_(conf.getParameter<edm::InputTag>("reco")),
           recoToken_(consumes<edm::View<jet>>(recoTag_)),
@@ -134,6 +135,7 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<bool>("doRes3");
   desc.add<bool>("doRes4");
   desc.add<bool>("doRes4Fixed");
+  desc.add<bool>("doTransfer");
   desc.add<std::string>("ptNorm");
 
   desc.add<bool>("doGen");
@@ -182,7 +184,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   auto resultgen = std::make_unique<std::vector<EECresult>>();
   auto resultUNMATCH = std::make_unique<std::vector<EECresult>>();
   auto resulttrans = std::make_unique<std::vector<EECtransfer>>();
-
   
   auto RLax = std::make_shared<boost::histogram::axis::variable<double>>(dRbinEdges_);
   auto RLax_coarse = std::make_shared<boost::histogram::axis::variable<double>>(dRbinEdges_coarse_);
@@ -258,108 +259,44 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       }
       
       auto startreco = std::chrono::high_resolution_clock::now();
-      fastEEC::result<double> ans_reco;
-      if (doRes3_ && doRes4_ && doRes4Fixed_){
-          fastEEC::fastEEC<double, true, false, true, true, true>(
-                  ans_reco,
-                  reco->at(iReco), RLax, maxOrder_, norm,
-                  RLax_coarse, xiax, phiax, 
-                  r_dipole_ax, ct_dipole_ax,
-                  r_tee_ax, ct_tee_ax,
-                  r_triangle_ax, ct_triangle_ax,
-                  shapetol_,
-                  &PU
-          );
-      } else if(doRes3_ && doRes4_){
-          fastEEC::fastEEC<double, true, false, true, true, false>(
-                  ans_reco,
-                  reco->at(iReco), RLax, maxOrder_, norm,
-                  RLax_coarse, xiax, phiax, 
-                  r_dipole_ax, ct_dipole_ax,
-                  r_tee_ax, ct_tee_ax,
-                  r_triangle_ax, ct_triangle_ax,
-                  shapetol_,
-                  &PU
-          );
-      } else if(doRes3_){
-          fastEEC::fastEEC<double, true, false, true, false, false>(
-                  ans_reco,
-                  reco->at(iReco), RLax, maxOrder_, norm,
-                  RLax_coarse, xiax, phiax, 
-                  r_dipole_ax, ct_dipole_ax,
-                  r_tee_ax, ct_tee_ax,
-                  r_triangle_ax, ct_triangle_ax,
-                  shapetol_,
-                  &PU
-          );
-      } else if(doRes4_ && doRes4Fixed_){
-          fastEEC::fastEEC<double, true, false, false, true, true>(
-                  ans_reco,
-                  reco->at(iReco), RLax, maxOrder_, norm,
-                  RLax_coarse, xiax, phiax, 
-                  r_dipole_ax, ct_dipole_ax,
-                  r_tee_ax, ct_tee_ax,
-                  r_triangle_ax, ct_triangle_ax,
-                  shapetol_,
-                  &PU
-          );
-      } else if(doRes4_){
-          fastEEC::fastEEC<double, true, false, false, true, false>(
-                  ans_reco,
-                  reco->at(iReco), RLax, maxOrder_, norm,
-                  RLax_coarse, xiax, phiax, 
-                  r_dipole_ax, ct_dipole_ax,
-                  r_tee_ax, ct_tee_ax,
-                  r_triangle_ax, ct_triangle_ax,
-                  shapetol_,
-                  &PU
-          );
-      } else {
-          fastEEC::fastEEC<double, true, false, false, false, false>(
-                  ans_reco,
-                  reco->at(iReco), RLax, maxOrder_, norm,
-                  RLax_coarse, xiax, phiax, 
-                  r_dipole_ax, ct_dipole_ax,
-                  r_tee_ax, ct_tee_ax,
-                  r_triangle_ax, ct_triangle_ax,
-                  shapetol_,
-                  &PU
-          );
+      fastEEC::result_t<double> ans_reco;
+      unsigned flags = 0;
+      flags = flags | fastEEC::DOPU;
+      if(doRes3_){
+          flags = flags | fastEEC::DORES3;
       }
+      if(doRes4_){
+          flags = flags | fastEEC::DORES4;
+      }
+      if (doRes4Fixed_){
+          //flags = flags | fastEEC::DORES4FIXED;
+          throw cms::Exception("Fixed res4 not implemented");
+      }
+      fastEEC::runSuperSpecific(
+          ans_reco,
+          reco->at(iReco), RLax, norm,
+          maxOrder_, flags,
+          RLax_coarse, xiax, phiax,
+          r_dipole_ax, ct_dipole_ax,
+          r_tee_ax, ct_tee_ax,
+          r_triangle_ax, ct_triangle_ax,
+          shapetol_,
+          &PU
+      );
       auto endreco = std::chrono::high_resolution_clock::now();
       if(verbose_){
         printf("ran calc\n");
         printf("fast 1: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endreco - startreco).count() / 1000000.);
-
-        printf("\tsum proj(2): %g\n", recursive_reduce(*ans_reco.wts2, 0.));
-        printf("\tsum proj(3): %g\n", recursive_reduce(*ans_reco.wts3, 0.));
-        printf("\tsum proj(4): %g\n", recursive_reduce(*ans_reco.wts4, 0.));
-        printf("\tsum proj(5): %g\n", recursive_reduce(*ans_reco.wts5, 0.));
-        printf("\tsum proj(6): %g\n", recursive_reduce(*ans_reco.wts6, 0.));
-        printf("\tsum res3:    %g\n", recursive_reduce(*ans_reco.resolved3, 0.));
-        printf("\tsum res4 sh: %g\n", recursive_reduce(*ans_reco.resolved4_shapes, 0.));
-        printf("\tsum res4 fi: %g\n", recursive_reduce(*ans_reco.resolved4_fixed, 0.));
-        printf("\n");
-        printf("\tsum proj(2) PU: %g\n", recursive_reduce(*ans_reco.wts2_PU, 0.));
-        printf("\tsum proj(3) PU: %g\n", recursive_reduce(*ans_reco.wts3_PU, 0.));
-        printf("\tsum proj(4) PU: %g\n", recursive_reduce(*ans_reco.wts4_PU, 0.));
-        printf("\tsum proj(5) PU: %g\n", recursive_reduce(*ans_reco.wts5_PU, 0.));
-        printf("\tsum proj(6) PU: %g\n", recursive_reduce(*ans_reco.wts6_PU, 0.));
-        printf("\tsum res3 PU:    %g\n", recursive_reduce(*ans_reco.resolved3_PU, 0.));
-        printf("\tsum res4 sh PU: %g\n", recursive_reduce(*ans_reco.resolved4_shapes_PU, 0.));
-        printf("\tsum res4 fi PU: %g\n", recursive_reduce(*ans_reco.resolved4_fixed_PU, 0.));
-        printf("\n");
+        ans_reco.summarize();
+        fflush(stdout);
       }
 
       result->emplace_back(iReco, iReco, maxOrder_,
                            doRes3_,
                            doRes4_, doRes4Fixed_,
-                           ans_reco.wts2, ans_reco.wts3,
-                           ans_reco.wts4, ans_reco.wts5,
-                           ans_reco.wts6,
+                           ans_reco.wts,
                            ans_reco.resolved3,
-                           ans_reco.resolved4_shapes,
-                           ans_reco.resolved4_fixed);
+                           ans_reco.resolved4_shapes);
       if(verbose_){
         printf("pushed back result\n");
       }
@@ -367,12 +304,9 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       resultPU->emplace_back(iReco, iReco, maxOrder_,
                              doRes3_,
                              doRes4_, doRes4Fixed_,
-                             ans_reco.wts2_PU, ans_reco.wts3_PU,
-                             ans_reco.wts4_PU, ans_reco.wts5_PU,
-                             ans_reco.wts6_PU,
+                             ans_reco.wts_PU,
                              ans_reco.resolved3_PU,
-                             ans_reco.resolved4_shapes_PU,
-                             ans_reco.resolved4_fixed_PU);
+                             ans_reco.resolved4_shapes_PU);
       if(verbose_){
         printf("pushed back resultPU\n");
       }
@@ -380,118 +314,39 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       if(iGen >=0 ){
           auto startgen = std::chrono::high_resolution_clock::now();
 
-          fastEEC::result<double> ans_gen;
-          const auto& recojet = reco->at(iReco);
-          if (doRes3_ && doRes4_ && doRes4Fixed_){
-              fastEEC::fastEEC<double, true, true, true, true, true>(
-                        ans_gen,
-                        gen->at(iGen), RLax, maxOrder_, norm, 
-                        RLax_coarse, xiax, phiax,
-                        r_dipole_ax, ct_dipole_ax,
-                        r_tee_ax, ct_tee_ax,
-                        r_triangle_ax, ct_triangle_ax,
-                        shapetol_,
-                        &UNMATCHED, &recojet, &ptrans
-              );
-          } else if(doRes3_ && doRes4_){
-              fastEEC::fastEEC<double, true, true, true, true, false>(
-                        ans_gen,
-                        gen->at(iGen), RLax, maxOrder_, norm, 
-                        RLax_coarse, xiax, phiax,
-                        r_dipole_ax, ct_dipole_ax,
-                        r_tee_ax, ct_tee_ax,
-                        r_triangle_ax, ct_triangle_ax,
-                        shapetol_,
-                        &UNMATCHED, &recojet, &ptrans
-              );
-          } else if(doRes3_){
-              fastEEC::fastEEC<double, true, true, true, false, false>(
-                        ans_gen,
-                        gen->at(iGen), RLax, maxOrder_, norm, 
-                        RLax_coarse, xiax, phiax,
-                        r_dipole_ax, ct_dipole_ax,
-                        r_tee_ax, ct_tee_ax,
-                        r_triangle_ax, ct_triangle_ax,
-                        shapetol_,
-                        &UNMATCHED, &recojet, &ptrans
-              );
-          } else if(doRes4_ && doRes4Fixed_){
-              fastEEC::fastEEC<double, true, true, false, true, true>(
-                        ans_gen,
-                        gen->at(iGen), RLax, maxOrder_, norm, 
-                        RLax_coarse, xiax, phiax,
-                        r_dipole_ax, ct_dipole_ax,
-                        r_tee_ax, ct_tee_ax,
-                        r_triangle_ax, ct_triangle_ax,
-                        shapetol_,
-                        &UNMATCHED, &recojet, &ptrans
-              );
-          } else if(doRes4_){
-              fastEEC::fastEEC<double, true, true, false, true, false>(
-                        ans_gen,
-                        gen->at(iGen), RLax, maxOrder_, norm, 
-                        RLax_coarse, xiax, phiax,
-                        r_dipole_ax, ct_dipole_ax,
-                        r_tee_ax, ct_tee_ax,
-                        r_triangle_ax, ct_triangle_ax,
-                        shapetol_,
-                        &UNMATCHED, &recojet, &ptrans
-              );
-          } else {
-              fastEEC::fastEEC<double, true, true, false, false, false>(
-                        ans_gen,
-                        gen->at(iGen), RLax, maxOrder_, norm, 
-                        RLax_coarse, xiax, phiax,
-                        r_dipole_ax, ct_dipole_ax,
-                        r_tee_ax, ct_tee_ax,
-                        r_triangle_ax, ct_triangle_ax,
-                        shapetol_,
-                        &UNMATCHED, &recojet, &ptrans
-              );
+          if (doTransfer_){
+              flags = flags | fastEEC::DOTRANSFER;
           }
+
+          fastEEC::result_t<double> ans_gen;
+          fastEEC::runSuperSpecific(
+              ans_gen,
+              gen->at(iGen), RLax, norm,
+              maxOrder_, flags,
+              RLax_coarse, xiax, phiax,
+              r_dipole_ax, ct_dipole_ax,
+              r_tee_ax, ct_tee_ax,
+              r_triangle_ax, ct_triangle_ax,
+              shapetol_,
+              &UNMATCHED,
+              &(reco->at(iReco)),
+              &ptrans
+          );
           auto endgen = std::chrono::high_resolution_clock::now();
 
         if(verbose_){
             printf("ran gen calc with %u (gen) x %u (reco) particles\n", gen->at(iGen).nPart, reco->at(iReco).nPart);
             printf("fast gen: %f\n", std::chrono::duration_cast<std::chrono::microseconds>(endgen - startgen).count() / 1000000.);
-
-            printf("\tsum proj(2): %g\n", recursive_reduce(*ans_gen.wts2, 0.));
-            printf("\tsum proj(3): %g\n", recursive_reduce(*ans_gen.wts3, 0.));
-            printf("\tsum proj(4): %g\n", recursive_reduce(*ans_gen.wts4, 0.));
-            printf("\tsum proj(5): %g\n", recursive_reduce(*ans_gen.wts5, 0.));
-            printf("\tsum proj(6): %g\n", recursive_reduce(*ans_gen.wts6, 0.));
-            printf("\tsum res3:    %g\n", recursive_reduce(*ans_gen.resolved3, 0.));
-            printf("\tsum res4 sh: %g\n", recursive_reduce(*ans_gen.resolved4_shapes, 0.));
-            printf("\tsum res4 fi: %g\n", recursive_reduce(*ans_gen.resolved4_fixed, 0.));
-            printf("\n");
-            printf("\tsum proj(2) UM: %g\n", recursive_reduce(*ans_gen.wts2_PU, 0.));
-            printf("\tsum proj(3) UM: %g\n", recursive_reduce(*ans_gen.wts3_PU, 0.));
-            printf("\tsum proj(4) UM: %g\n", recursive_reduce(*ans_gen.wts4_PU, 0.));
-            printf("\tsum proj(5) UM: %g\n", recursive_reduce(*ans_gen.wts5_PU, 0.));
-            printf("\tsum proj(6) UM: %g\n", recursive_reduce(*ans_gen.wts6_PU, 0.));
-            printf("\tsum res3 UM:    %g\n", recursive_reduce(*ans_gen.resolved3_PU, 0.));
-            printf("\tsum res4 sh UM: %g\n", recursive_reduce(*ans_gen.resolved4_shapes_PU, 0.));
-            printf("\tsum res4 fi UM: %g\n", recursive_reduce(*ans_gen.resolved4_fixed_PU, 0.));
-            printf("\n");
-            printf("\tsum proj(2) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer2, 0.));
-            printf("\tsum proj(3) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer3, 0.));
-            printf("\tsum proj(4) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer4, 0.));
-            printf("\tsum proj(5) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer5, 0.));
-            printf("\tsum proj(6) trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer6, 0.));
-            printf("\tsum res3 trans:    1-%g\n", 1-recursive_reduce(*ans_gen.transfer_res3, 0.));
-            printf("\tsum res4 sh trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer_res4_shapes, 0.));
-            printf("\tsum res4 fi trans: 1-%g\n", 1-recursive_reduce(*ans_gen.transfer_res4_fixed, 0.));
+            ans_gen.summarize();
+            fflush(stdout);
         }
 
         resultgen->emplace_back(iGen, iReco, maxOrder_,
                                 doRes3_,
                                 doRes4_, doRes4Fixed_,
-                                ans_gen.wts2, ans_gen.wts3,
-                                ans_gen.wts4, ans_gen.wts5,
-                                ans_gen.wts6,
+                                ans_gen.wts,
                                 ans_gen.resolved3,
-                                ans_gen.resolved4_shapes,
-                                ans_gen.resolved4_fixed);
+                                ans_gen.resolved4_shapes);
 
         if(verbose_){
           printf("pushed back gen result\n");
@@ -500,28 +355,23 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         resultUNMATCH->emplace_back(iGen, iReco, maxOrder_,
                                    doRes3_,
                                    doRes4_, doRes4Fixed_,
-                                   ans_gen.wts2_PU, ans_gen.wts3_PU,
-                                   ans_gen.wts4_PU, ans_gen.wts5_PU,
-                                   ans_gen.wts6_PU,
+                                   ans_gen.wts_PU,
                                    ans_gen.resolved3_PU,
-                                   ans_gen.resolved4_shapes_PU,
-                                   ans_gen.resolved4_fixed_PU);
+                                   ans_gen.resolved4_shapes_PU);
 
         if(verbose_){
           printf("pushed back genUNMATCH result\n");
         }
 
-        resulttrans->emplace_back(iReco, iGen, maxOrder_,
-                                  doRes3_,
-                                  doRes4_, doRes4Fixed_,
-                                  ans_gen.transfer2,
-                                  ans_gen.transfer3,
-                                  ans_gen.transfer4,
-                                  ans_gen.transfer5,
-                                  ans_gen.transfer6,
-                                  ans_gen.transfer_res3,
-                                  ans_gen.transfer_res4_shapes,
-                                  ans_gen.transfer_res4_fixed);
+        if (doTransfer_){
+            resulttrans->emplace_back(iReco, iGen, 
+                                      maxOrder_,
+                                      doRes3_,
+                                      doRes4_, doRes4Fixed_,
+                                      ans_gen.transfer_wts,
+                                      ans_gen.transfer_res3,
+                                      ans_gen.transfer_res4_shapes);
+        }
         if(verbose_){
           printf("pushed back transfer matrices\n");
         }
@@ -537,6 +387,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   }
   if(verbose_){
       printf("put into event\n");
+      fflush(stdout);
   }
 }  // end produce()
 

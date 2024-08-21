@@ -52,8 +52,8 @@ EECTransferTableProducer::EECTransferTableProducer(const edm::ParameterSet& conf
           verbose_(conf.getParameter<int>("verbose")){
     produces<nanoaod::FlatTable>(name_+"proj");
     produces<nanoaod::FlatTable>(name_+"res3");
-    produces<nanoaod::FlatTable>(name_+"res4shapes");
-    produces<nanoaod::FlatTable>(name_+"res4fixed");
+    produces<nanoaod::FlatTable>(name_+"res4dipole");
+    produces<nanoaod::FlatTable>(name_+"res4tee");
     produces<nanoaod::FlatTable>(name_+"BK");
 }
 
@@ -76,29 +76,22 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
   std::vector<float> trans3;
 
   //res4
-  std::vector<float> trans4shapes;
-
-  std::vector<float> trans4fixed;
+  std::vector<float> trans4dipole;
+  std::vector<float> trans4tee;
 
   //BK
   std::vector<int> iReco, iGen;
-
   std::vector<int> nproj;
   std::vector<int> nres3_RL, nres3_xi, nres3_phi;
-  std::vector<int> nres4shapes_RL, nres4shapes_shape, nres4shapes_r, nres4shapes_ct;
-  std::vector<int> nres4fixed_RL, nres4fixed_shape;
+  std::vector<int> nres4_dipole_RL, nres4_dipole_r, nres4_dipole_ct;
+  std::vector<int> nres4_tee_RL, nres4_tee_r, nres4_tee_ct;
 
   for(const auto& T : *Ts){
       iReco.push_back(T.iReco);
       iGen.push_back(T.iGen);
 
-      unsigned Np = T.proj[0]->num_elements();
       for(unsigned i=0; i<5; ++i){
-          if(i+2 <= T.maxOrder){
-              flattenMultiArray(*(T.proj[i]), transP[i]);
-          } else {
-              transP[i].insert(transP[i].end(), Np, 0);
-          }
+          flattenMultiArray(*(T.proj[i]), transP[i]);
       }
       nproj.push_back(T.proj[0]->shape()[0]);
 
@@ -121,39 +114,36 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
       }
 
       if(T.doRes4Shapes){
-          const auto& res4 = *(T.res4shapes);
+          const auto& dipole = *(T.res4shapes->dipole);
           
-          unsigned Nshape = res4.shape()[0];
-          unsigned nRL = res4.shape()[1];
-          unsigned nr = res4.shape()[2];
-          unsigned nct = res4.shape()[3];
+          unsigned nRL_dipole = dipole.shape()[0];
+          unsigned nr_dipole = dipole.shape()[1];
+          unsigned nct_dipole = dipole.shape()[2];
 
-          flattenMultiArray(res4, trans4shapes);
+          flattenMultiArray(dipole, trans4dipole);
 
-          nres4shapes_RL.emplace_back(nRL);
-          nres4shapes_shape.emplace_back(Nshape);
-          nres4shapes_r.emplace_back(nr);
-          nres4shapes_ct.emplace_back(nct);
+          nres4_dipole_RL.emplace_back(nRL_dipole);
+          nres4_dipole_r.emplace_back(nr_dipole);
+          nres4_dipole_ct.emplace_back(nct_dipole);
+
+          const auto& tee = *(T.res4shapes->tee);
+
+          unsigned nRL_tee = tee.shape()[0];
+          unsigned nr_tee = tee.shape()[1];
+          unsigned nct_tee = tee.shape()[2];
+
+          flattenMultiArray(tee, trans4tee);
+
+          nres4_tee_RL.emplace_back(nRL_tee);
+          nres4_tee_r.emplace_back(nr_tee);
+          nres4_tee_ct.emplace_back(nct_tee);
       } else {
-          nres4shapes_RL.emplace_back(0);
-          nres4shapes_shape.emplace_back(0);
-          nres4shapes_r.emplace_back(0);
-          nres4shapes_ct.emplace_back(0);
-      }
-
-      if (T.doRes4Fixed){
-          const auto& res4 = *(T.res4fixed);
-
-          unsigned Nshape = res4.shape()[0];
-          unsigned nRL = res4.shape()[1];
-
-          flattenMultiArray(res4, trans4fixed);
-
-          nres4fixed_RL.emplace_back(nRL);
-          nres4fixed_shape.emplace_back(Nshape);
-      } else {
-          nres4fixed_RL.emplace_back(0);
-          nres4fixed_shape.emplace_back(0);
+          nres4_dipole_RL.emplace_back(0);
+          nres4_dipole_r.emplace_back(0);
+          nres4_dipole_ct.emplace_back(0);
+          nres4_tee_RL.emplace_back(0);
+          nres4_tee_r.emplace_back(0);
+          nres4_tee_ct.emplace_back(0);
       }
   }
 
@@ -167,13 +157,13 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
   tableRes3->addColumn<float>("value", trans3, "res3 transfer", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableRes3), name_+"res3");
 
-  auto tableRes4shapes = std::make_unique<nanoaod::FlatTable>(trans4shapes.size(), name_+"res4shapes", false);
-  tableRes4shapes->addColumn<float>("value", trans4shapes, "res4 transfer", nanoaod::FlatTable::FloatColumn);
-  evt.put(std::move(tableRes4shapes), name_+"res4shapes");
+  auto tableRes4dipole = std::make_unique<nanoaod::FlatTable>(trans4dipole.size(), name_+"res4dipole", false);
+  tableRes4dipole->addColumn<float>("value", trans4dipole, "res4dipole transfer", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(tableRes4dipole), name_+"res4dipole");
 
-  auto tableRes4fixed = std::make_unique<nanoaod::FlatTable>(trans4fixed.size(), name_+"res4fixed", false);
-  tableRes4fixed->addColumn<float>("value", trans4fixed, "res4 transfer", nanoaod::FlatTable::FloatColumn);
-  evt.put(std::move(tableRes4fixed), name_+"res4fixed");
+  auto tableRes4tee = std::make_unique<nanoaod::FlatTable>(trans4tee.size(), name_+"res4tee", false);
+  tableRes4tee->addColumn<float>("value", trans4tee, "res4tee transfer", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(tableRes4tee), name_+"res4tee");
 
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iReco.size(), name_+"BK", false);
   tableBK->addColumn<int>("iReco", iReco, "index of reco jet", nanoaod::FlatTable::IntColumn);
@@ -182,12 +172,12 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
   tableBK->addColumn<int>("nres3_RL", nres3_RL, "number of res3 EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres3_xi", nres3_xi, "number of res3 EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres3_phi", nres3_phi, "number of res3 EEC weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres4shapes_RL", nres4shapes_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres4shapes_shape", nres4shapes_shape, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres4shapes_r", nres4shapes_r, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres4shapes_ct", nres4shapes_ct, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres4fixed_RL", nres4fixed_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nres4fixed_shape", nres4fixed_shape, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_dipole_RL", nres4_dipole_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_dipole_r", nres4_dipole_r, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_dipole_ct", nres4_dipole_ct, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_tee_RL", nres4_tee_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_tee_r", nres4_tee_r, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_tee_ct", nres4_tee_ct, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
 }
 

@@ -107,7 +107,7 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     #min pT for charged hadrons to be considered for recovery
     HADCHrecoverThresholds = cms.vdouble(5.0, 5.0, 5.0),
     #min pT for electrons to be considered for recovery
-    ELErecoverThresholds = cms.vdouble(5.0, 5.0, 5.0),
+    ELErecoverThresholds = cms.vdouble(3.0, 3.0, 3.0),
 
     #whether to try to recover missing HAD0s in the ECAL
     recoverLostHAD0 = cms.bool(False),
@@ -117,15 +117,15 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     #parameters for ECAL uncertainty model
     EMstochastic = cms.vdouble(0.17, 0.18, 0.80),
     EMconstant = cms.vdouble(0.0074, 0.0253, 0.0253),
-    ECALgranularityEta = cms.vdouble(0.05, 0.05, 0.07),
-    ECALgranularityPhi = cms.vdouble(0.05, 0.05, 0.07),
+    ECALgranularityEta = cms.vdouble(0.07, 0.07, 0.10),
+    ECALgranularityPhi = cms.vdouble(0.07, 0.07, 0.10),
     ECALEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
     #parameters for HCAL uncertainty model
     HADstochastic = cms.vdouble(1.63, 3.90, 6.44),
     HADconstant = cms.vdouble(0.21, 0.14, 0.10),
-    HCALgranularityEta = cms.vdouble(0.10, 0.10, 0.15),
-    HCALgranularityPhi = cms.vdouble(0.10, 0.10, 0.15),
+    HCALgranularityEta = cms.vdouble(0.12, 0.12, 0.17),
+    HCALgranularityPhi = cms.vdouble(0.12, 0.12, 0.17),
     HCALEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
     #parameters for track uncertainty model
@@ -133,8 +133,8 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     CHconstant = cms.vdouble(0.0076, 0.014, 0.018),
     CHMSeta = cms.vdouble(0.0000, 0.0000, 0.0000),
     CHMSphi = cms.vdouble(0.0000, 0.0000, 0.0000),
-    CHangularEta = cms.vdouble(0.001, 0.001, 0.001),
-    CHangularPhi = cms.vdouble(0.001, 0.001, 0.001),
+    CHangularEta = cms.vdouble(0.002, 0.002, 0.003),
+    CHangularPhi = cms.vdouble(0.002, 0.002, 0.003),
     trkEtaBoundaries = cms.vdouble(0.0, 0.9, 1.4, 3.0),
 
     #min pT thresholds for matching
@@ -151,28 +151,28 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     #      but is capped at capDR, to avoid the divergence at low pT
 
     #photon dR windows
-    EM0constDR = cms.vdouble(0.050, 0.050, 0.050),
+    EM0constDR = cms.vdouble(0.070, 0.070, 0.100),
     EM0floatDR = cms.vdouble(0.000, 0.000, 0.000),
     EM0capDR =   cms.vdouble(0.000, 0.000, 0.000),
 
     #hadron dR windows
-    HAD0constDR = cms.vdouble(0.100, 0.100, 0.150),
+    HAD0constDR = cms.vdouble(0.120, 0.120, 0.150),
     HAD0floatDR = cms.vdouble(0.000, 0.000, 0.000),
     HAD0capDR =   cms.vdouble(0.000, 0.000, 0.000),
 
     #charged hadron dR windows
-    HADCHconstDR = cms.vdouble(0.002, 0.002, 0.003),
-    HADCHfloatDR = cms.vdouble(0.010, 0.010, 0.015),
+    HADCHconstDR = cms.vdouble(0.003, 0.003, 0.005),
+    HADCHfloatDR = cms.vdouble(0.012, 0.012, 0.015),
     HADCHcapDR =   cms.vdouble(0.050, 0.050, 0.070),
 
     #electron dR windows
-    ELEconstDR = cms.vdouble(0.002, 0.002, 0.003),
-    ELEfloatDR = cms.vdouble(0.010, 0.010, 0.015),
+    ELEconstDR = cms.vdouble(0.003, 0.003, 0.005),
+    ELEfloatDR = cms.vdouble(0.012, 0.012, 0.015),
     ELEcapDR =   cms.vdouble(0.050, 0.050, 0.070),
 
     #muon dR windows
-    MUconstDR = cms.vdouble(0.002, 0.002, 0.003),
-    MUfloatDR = cms.vdouble(0.010, 0.010, 0.015),
+    MUconstDR = cms.vdouble(0.003, 0.003, 0.005),
+    MUfloatDR = cms.vdouble(0.012, 0.012, 0.015),
     MUcapDR =   cms.vdouble(0.050, 0.050, 0.070),
 
     #the fitting repeats with the clipping steps (see clipval above)

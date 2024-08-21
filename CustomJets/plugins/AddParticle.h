@@ -19,13 +19,17 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
                  unsigned maxNumPart){     
 
     int fromPV;
-    double puppiWeight;
+    double puppiWeight, dxy, dz;
     if constexpr (std::is_same_v<P, pat::PackedCandidate>){
         fromPV = partptr->fromPV();
         puppiWeight = partptr->puppiWeight();
+        dxy = partptr->dxy();
+        dz = partptr->dz();
     } else {
         fromPV = true;
         puppiWeight = 1.0;
+        dxy = 0;
+        dz = 0;
     }
 
     unsigned pdgid = std::abs(partptr->pdgId());
@@ -54,21 +58,22 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
                       partptr->vertex().x(), 
                       partptr->vertex().y(), 
                       partptr->vertex().z(),
-                      partptr->dxy(), partptr->dz(),
+                      dxy, dz,
                       fromPV, puppiWeight);
 
-    printf("BEFORE SYSTEMATICS\n");
-    printPart(nextpart);
+    //printf("BEFORE SYSTEMATICS\n");
+    //printPart(nextpart);
     if(!systematitics.applySystematic(syst, nextpart, ans.eta, ans.phi)){
-        printf("DROPPED BY SYSTEMATICS\n");
+        //printf("DROPPED BY SYSTEMATICS\n");
         return;
     }
-    printf("AFTER SYSTEMATICS\n");
-    printPart(nextpart);
+    //printf("AFTER SYSTEMATICS\n");
+    //printPart(nextpart);
 
     ans.rawpt += nextpart.pt;
 
     if(onlyCharged && nextpart.charge == 0){
+        //printf("FAILED ONLYCHARGED\n");
         return;
     }
 
@@ -77,8 +82,10 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
     if(nextpart.pt < minPartPt 
             || ans.nPart >= maxNumPart 
             || !vtxcuts.pass(nextpart)){
+        //printf("FAILED THRESHOLD or MAXNUM or VTX\n");
         return;
     }
+    //printf("passed everything\n\n");
 
     ans.sumpt += nextpart.pt;
 

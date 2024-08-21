@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 # Input source
@@ -56,7 +56,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     #fileName = cms.untracked.string('/data/submit/cms/store/user/srothman/NANO_NANO_10k_3.root'),
     #fileName = cms.untracked.string('~/cmsdata/NANO_NANO.root'),
-    fileName = cms.untracked.string('NANO_miniAOD.root'),
+    fileName = cms.untracked.string('NANO_miniAOD_test.root'),
     outputCommands = process.NANOAODSIMEventContent.outputCommands,
     #autoFlush = cms.untracked.int32(1)
 )

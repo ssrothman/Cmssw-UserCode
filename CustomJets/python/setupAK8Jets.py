@@ -66,6 +66,7 @@ def setupAK8Jets(process, isMC=True):
             neEmEF = Var("neutralEmEnergyFraction()", float, doc='neutral EM Energy Fraction', precision=-1),
             muEF = Var("muonEnergyFraction()", float, doc='muon Energy Fraction', precision=-1),
             hadronFlavour = Var("hadronFlavour", int, precision=-1),
+            partonFlavour = Var("partonFlavour", int, precision=-1),
             nBHadrons = Var("jetFlavourInfo().getbHadrons().size()", int, precision=-1),
             nCHadrons = Var("jetFlavourInfo().getcHadrons().size()", int, precision=-1),
         )
@@ -101,7 +102,7 @@ def setupAK8Jets(process, isMC=True):
             bHadrons = cms.InputTag("patJetPartons","bHadrons"),
             cHadrons = cms.InputTag("patJetPartons","cHadrons"),
             ghostRescaling = cms.double(1e-18),
-            hadronFlavourHasPriority = cms.bool(False),
+            hadronFlavourHasPriority = cms.bool(True),
             jetAlgorithm = cms.string('AntiKt'),
             jets = cms.InputTag("selectedGenJetsAK8"),
             leptons = cms.InputTag("patJetPartons","leptons"),

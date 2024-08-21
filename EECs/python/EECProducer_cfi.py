@@ -7,42 +7,44 @@ import numpy as np
 dRedges = [0.0005 ,0.001, 0.005, 
            0.01, 0.015, 0.02, 0.025,
            0.03, 0.035, 0.04, 0.045, 
-           0.05, 0.06, 0.07, 0.08,
-           0.09, 0.10, 0.15, 0.20, 
-           0.30, 0.40, 0.50, 0.60, 
-           0.70, 0.80, 0.90, 1.00]
+           0.05, 0.06,  
+           0.07, 0.08,
+           0.09, 0.10, 
+           0.11, 0.13, 0.15,
+           0.20, 0.25, 0.30, 0.35,
+           0.40, 0.50, 0.60, 
+           0.70, 0.80, 1.00]
 
-dRedges_coarse = [0.001, 0.10, 0.20]
+dRedges_coarse = [0.0, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80]
 
-xiedges = np.linspace(1e-3, 1.0, 8)
-phiedges = [1e-3, 0.3, 0.55415927, 
-            0.80831853, 1.0624778, 
-            1.31663706, 1.57079633]
+xiedges = np.linspace(1e-5, 1.0+1e-5, 15)
+phiedges = np.linspace(1e-5, np.pi/2 + 1e-5, 15)
 
-r_dipole_edges = np.linspace(0, 1, 5)
-ct_dipole_edges = np.linspace(0, 1, 5)
+r_dipole_edges = np.linspace(0, 1, 15)
+ct_dipole_edges = np.linspace(0, np.pi/2, 15)
 
-r_tee_edges = np.linspace(0, 1, 5)
-ct_tee_edges = np.linspace(0, 1, 5)
+r_tee_edges = np.linspace(0, 1, 15)
+ct_tee_edges = np.linspace(0, np.pi/2, 15)
 
-r_triangle_edges = np.linspace(0, 1, 5)
-ct_triangle_edges = np.linspace(0, 1, 5)
+r_triangle_edges = np.linspace(0, 1, 15)
+ct_triangle_edges = np.linspace(0, np.pi/2, 15)
 
 EECProducer = cms.EDProducer("EECProducer",
     reco = cms.InputTag("SimonJets"),
     gen = cms.InputTag("GenSimonJets"),
     match = cms.InputTag("GenMatch"),
 
-    maxOrder = cms.uint32(4),
+    maxOrder = cms.uint32(6),
     doRes3 = cms.bool(True),
     doRes4 = cms.bool(True),
-    doRes4Fixed = cms.bool(True),
+    doRes4Fixed = cms.bool(False),
+    doTransfer= cms.bool(True),
 
     ptNorm = cms.string("RAW"),
 
     doGen = cms.bool(True),
 
-    verbose = cms.int32(1),
+    verbose = cms.int32(0),
 
     dRbinEdges = cms.vdouble(*dRedges), 
 
@@ -60,5 +62,5 @@ EECProducer = cms.EDProducer("EECProducer",
     r_triangle_edges = cms.vdouble(*r_triangle_edges),
     ct_triangle_edges = cms.vdouble(*ct_triangle_edges),
 
-    shapetol = cms.double(0.1),
+    shapetol = cms.double(0.05),
 )
