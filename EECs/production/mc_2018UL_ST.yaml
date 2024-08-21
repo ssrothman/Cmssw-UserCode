@@ -1,0 +1,16 @@
+defaults:
+  isMC: True
+  splitting: LumiBased
+  reco_version: UL
+  year: 2018
+  globaltag: 106X_upgrade2018_realistic_v16_L1v1
+  pset: $CMSSW_BASE/src/SRothman/EECs/test/test_EEC_ak8.py
+  allowInvalid: False
+  unitsPerJob: 50
+  totalUnits: 10000000000
+
+samples:
+  ST:
+    datasets:
+      ST_t_anti_4f: /ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM
+      ST_t_4f: /ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM

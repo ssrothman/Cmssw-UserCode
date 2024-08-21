@@ -1,1 +1,1 @@
-production_tag = "Mar28_2024_binningtest_quick"
+production_tag = "Aug20_2024_charged"
