@@ -7,7 +7,8 @@ def setupSimonJets(process, jets='updatedJetsPuppi',
                    eventSelection='ZMuMu',
                    name='SimonJets',
                    ak8=False,
-                   isMC=True):
+                   isMC=True,
+                   genOnly=False):
 
     from SRothman.CustomJets.SimonJetTableProducer_cfi import *
     from SRothman.CustomJets.SimonJetProducer_cfi import *
@@ -15,16 +16,17 @@ def setupSimonJets(process, jets='updatedJetsPuppi',
     doEventSel = len(eventSelection) > 0
     doCHS = len(CHSjets) > 0
     
-    setattr(process, name, PatSimonJetProducer.clone(
-        jetSrc = jets,
-        eventSelection = eventSelection,
-        doEventSelection = doEventSel,
-        CHSsrc = CHSjets,
-        addCHSindex = doCHS,
-        CHSmatchDR = 0.4 if ak8 else 0.2,
-        verbose = False,
-        onlyCharged = chargedOnly
-    ))
+    if not genOnly:
+        setattr(process, name, PatSimonJetProducer.clone(
+            jetSrc = jets,
+            eventSelection = eventSelection,
+            doEventSelection = doEventSel,
+            CHSsrc = CHSjets,
+            addCHSindex = doCHS,
+            CHSmatchDR = 0.4 if ak8 else 0.2,
+            verbose = False,
+            onlyCharged = chargedOnly
+        ))
     if isMC:
         setattr(process, 'Gen'+name, GenSimonJetProducer.clone(
             jetSrc = genjets,
@@ -34,12 +36,13 @@ def setupSimonJets(process, jets='updatedJetsPuppi',
             verbose = False,
             onlyCharged = chargedOnly
         ))
-    setattr(process, name+'Table', SimonJetTableProducer.clone(
-        src = name,
-        name = name,
-        verbose=False,
-        isGen = False
-    ))
+    if not genOnly:
+        setattr(process, name+'Table', SimonJetTableProducer.clone(
+            src = name,
+            name = name,
+            verbose=False,
+            isGen = False
+        ))
     if isMC:
         setattr(process, 'Gen'+name+'Table', SimonJetTableProducer.clone(
             src = 'Gen'+name,
@@ -47,11 +50,12 @@ def setupSimonJets(process, jets='updatedJetsPuppi',
             verbose=False,
             isGen = True
         ))
-    setattr(process, name+'Task', cms.Task(
-        getattr(process, name),
-        getattr(process, name+'Table'),
-    ))
-    process.schedule.associate(getattr(process, name+'Task'))
+    if not genOnly:
+        setattr(process, name+'Task', cms.Task(
+            getattr(process, name),
+            getattr(process, name+'Table'),
+        ))
+        process.schedule.associate(getattr(process, name+'Task'))
     if isMC:
         setattr(process, name+"MCTask", cms.Task(
             getattr(process, 'Gen'+name),

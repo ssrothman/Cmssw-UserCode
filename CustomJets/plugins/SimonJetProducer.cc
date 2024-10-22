@@ -274,6 +274,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             }
             const auto* partptr = dynamic_cast<const pat::PackedCandidate*>(part.get());
             const auto* genptr = dynamic_cast<const pat::PackedGenParticle*>(part.get());
+            const auto* genptr2 = dynamic_cast<const reco::GenParticle*>(part.get());
             
             if(partptr){
                 addParticle(partptr, ans, jecfactor, 
@@ -289,8 +290,15 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
                             9999, thresholds_,
                             vtxcuts_, systematics_, partSyst::NOM,
                             maxNumPart_);
+           } else if(genptr2){
+               addParticle(genptr2, ans, jecfactor, 
+                            applyPuppi_, applyJEC_,
+                            onlyCharged_,
+                            9999, thresholds_,
+                            vtxcuts_, systematics_, partSyst::NOM,
+                            maxNumPart_);
            } else {
-                throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");
+                throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate or GenParticle");
             }
         } // end for part
 
