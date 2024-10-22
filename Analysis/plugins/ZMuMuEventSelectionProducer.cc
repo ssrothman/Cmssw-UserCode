@@ -67,7 +67,6 @@ private:
     int verbose_;
 };
 
-
 ZMuMuEventSelectionProducer::ZMuMuEventSelectionProducer(const edm::ParameterSet& conf)
         : leadMuPt_(conf.getParameter<double>("leadMuPt")),
           subMuPt_(conf.getParameter<double>("subMuPt")),

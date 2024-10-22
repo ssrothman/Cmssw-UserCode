@@ -19,6 +19,7 @@
 <use name="PhysicsTools/TensorFlow" />
 <use name="boost"/>
 <use name="SRothman/Analysis"/>
+<use name="CommonTools/CandUtils"/>
 <Flags ADD_SUBDIR="1"/>
 <export>
   <lib name="1"/>
