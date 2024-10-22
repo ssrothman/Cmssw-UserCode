@@ -30,7 +30,7 @@
 
 #include "SRothman/SimonTools/src/copyMultiArray.h"
 
-#include "SRothman/EECs/src/run.h"
+#include "SRothman/EECs/src/theOnlyHeader.h"
 
 #include <iostream>
 #include <memory>
@@ -241,7 +241,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           if(matchidx>=0){
               iGen = matches->at(matchidx).iGen;
               UNMATCHED.resize(gen->at(iGen).nPart, true);
-              ptrans = matches->at(matchidx).ptrans;
+              ptrans = matches->at(matchidx).rawmat;
 
               for(unsigned iPReco=0; iPReco<reco->at(iReco).nPart; ++iPReco){
                   for(unsigned iPGen=0; iPGen<gen->at(iGen).nPart; ++iPGen){
@@ -252,8 +252,20 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   }
               }
           }
+            //test ptrans
+            /*arma::vec genpt = gen->at(iGen).ptvec();
+            arma::vec recpt = reco->at(iReco).ptvec();
+            arma::vec fwdpt = ptrans * genpt;
+            printf("gen pt: \n");
+            std::cout << genpt.t() << std::endl;
+            printf("rec pt: \n");
+            std::cout << recpt.t() << std::endl;
+            printf("fwd pt: \n");
+            std::cout << fwdpt.t() << std::endl;
+            printf("\n\n");*/
       }
 
+                
       if(verbose_){
         printf("iGen %d\n", iGen);
       }
@@ -272,7 +284,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           //flags = flags | fastEEC::DORES4FIXED;
           throw cms::Exception("Fixed res4 not implemented");
       }
-      fastEEC::runSuperSpecific(
+      runFastEEC(
           ans_reco,
           reco->at(iReco), RLax, norm,
           maxOrder_, flags,
@@ -319,7 +331,8 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           }
 
           fastEEC::result_t<double> ans_gen;
-          fastEEC::runSuperSpecific(
+
+          runFastEEC(
               ans_gen,
               gen->at(iGen), RLax, norm,
               maxOrder_, flags,
@@ -345,6 +358,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                                 doRes3_,
                                 doRes4_, doRes4Fixed_,
                                 ans_gen.wts,
+
                                 ans_gen.resolved3,
                                 ans_gen.resolved4_shapes);
 

@@ -99,7 +99,8 @@ process = setupAnalysis(process,
                         isMC=True, 
                         addFullEvent=False, 
                         addRandomControl=True,
-                        addZControl=False)
+                        addZControl=False,
+                        verbose=1)
 
 # End of customisation functions
 
