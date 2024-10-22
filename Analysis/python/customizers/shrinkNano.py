@@ -1,0 +1,20 @@
+import FWCore.ParameterSet.Config as cms
+
+def shrink_nanoAOD_MC(process):
+    process.nanoSequenceMC.remove(process.ttbarCategoryTable)
+    process.nanoSequenceMC.remove(process.boostedTauTables)
+    process.nanoSequenceMC.remove(process.boostedTauMC)
+    process.nanoSequenceMC.remove(process.lowPtElectronTables)
+    process.nanoSequenceMC.remove(process.lowPtElectronMC)
+
+    process.particleLevelTables.remove(process.HTXSCategoryTable)
+    process.particleLevelTables.remove(process.rivetPhotonTable)
+    process.particleLevelTables.remove(process.rivetLeptonTable)
+
+    process.jetTables.remove(process.saJetTable)
+    process.jetTables.remove(process.saTable)
+    process.jetTables.remove(process.subJetTable)
+
+    process.jetMC.remove(process.subjetMCTable)
+
+    return process

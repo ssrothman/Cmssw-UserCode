@@ -15,6 +15,7 @@
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
 
 #include "SRothman/SimonTools/src/jets.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
@@ -24,19 +25,18 @@
 #include <memory>
 #include <vector>
 
-
-class ZDecayEventSelectionProducer : public edm::stream::EDFilter<> {
+class ZMuMuEventSelectionFilter : public edm::stream::EDFilter<> {
 public:
-    explicit ZDecayEventSelectionProducer(const edm::ParameterSet&);
-    ~ZDecayEventSelectionProducer() override {}
+    explicit ZMuMuEventSelectionFilter(const edm::ParameterSet&);
+    ~ZMuMuEventSelectionFilter() override {}
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     bool filter(edm::Event&, const edm::EventSetup&) override;
 private:
     bool findGoodPair(const std::vector<reco::LeafCandidate>& matchedId, unsigned&, unsigned&);
     bool pairIsGood(const reco::LeafCandidate& p1, const reco::LeafCandidate& p2);
+
     double leadPt_;
     double subPt_;
-    double maxEta_;
 
     double minZmass_;
     double maxZmass_;
@@ -55,10 +55,9 @@ private:
     bool saveParticles_;
 };
 
-ZDecayEventSelectionProducer::ZDecayEventSelectionProducer(const edm::ParameterSet& conf)
+ZMuMuEventSelectionFilter::ZMuMuEventSelectionFilter(const edm::ParameterSet& conf)
         : leadPt_(conf.getParameter<double>("leadPt")),
           subPt_(conf.getParameter<double>("subPt")),
-          maxEta_(conf.getParameter<double>("maxEta")),
           minZmass_(conf.getParameter<double>("minZmass")),
           maxZmass_(conf.getParameter<double>("maxZmass")),
           pdgIds_(conf.getParameter<std::vector<int>>("pdgIds")),
@@ -75,11 +74,10 @@ ZDecayEventSelectionProducer::ZDecayEventSelectionProducer(const edm::ParameterS
     }
 }
 
-void ZDecayEventSelectionProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void ZMuMuEventSelectionFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<double>("leadPt");
   desc.add<double>("subPt");
-  desc.add<double>("maxEta");
   desc.add<double>("minZmass");
   desc.add<double>("maxZmass");
   desc.add<std::vector<int>>("pdgIds");
@@ -91,13 +89,14 @@ void ZDecayEventSelectionProducer::fillDescriptions(edm::ConfigurationDescriptio
   descriptions.addWithDefaultLabel(desc);
 }
 
-bool ZDecayEventSelectionProducer::pairIsGood(const reco::LeafCandidate& p1, const reco::LeafCandidate& p2){
+bool ZMuMuEventSelectionFilter::pairIsGood(const reco::LeafCandidate& p1, const reco::LeafCandidate& p2){
     if(oppositeSign_ && p1.charge() * p2.charge() > 0){
         return false;
     }
     if(p1.pt() < leadPt_ || p2.pt() < subPt_){
         return false;
     }
+
     if (verbose_){
         printf("passed pt and charge\n");
         printf("leading particle: pt %f, eta %f, phi %f, charge %d\n", p1.pt(), p1.eta(), p1.phi(), p1.charge());
@@ -115,7 +114,7 @@ bool ZDecayEventSelectionProducer::pairIsGood(const reco::LeafCandidate& p1, con
     return false;
 }
 
-bool ZDecayEventSelectionProducer::findGoodPair(const std::vector<reco::LeafCandidate>& matchedId, unsigned& ip1, unsigned& ip2){
+bool ZMuMuEventSelectionFilter::findGoodPair(const std::vector<reco::LeafCandidate>& matchedId, unsigned& ip1, unsigned& ip2){
     if (onlyCheckLeading_){
         ip1 = 0;
         ip2 = 1;
@@ -133,9 +132,9 @@ bool ZDecayEventSelectionProducer::findGoodPair(const std::vector<reco::LeafCand
     return false;
 }
 
-bool ZDecayEventSelectionProducer::filter(edm::Event& evt, const edm::EventSetup& setup){
+bool ZMuMuEventSelectionFilter::filter(edm::Event& evt, const edm::EventSetup& setup){
     if(verbose_){
-        printf("Top of ZDecayEventSelectionProducer::filter()\n");
+        printf("Top of ZMuMuEventSelectionFilter::filter()\n");
         fflush(stdout);
     }
 
@@ -154,9 +153,6 @@ bool ZDecayEventSelectionProducer::filter(edm::Event& evt, const edm::EventSetup
         std::vector<reco::LeafCandidate> matchedId;
         for (const auto& genpart : *genParticles){
             if(std::abs(genpart.pdgId()) != testPdgId){
-                continue;
-            }
-            if(std::abs(genpart.eta()) > maxEta_){
                 continue;
             }
             matchedId.push_back(genpart);
@@ -206,4 +202,4 @@ bool ZDecayEventSelectionProducer::filter(edm::Event& evt, const edm::EventSetup
     return passed;
 }
 
-DEFINE_FWK_MODULE(ZDecayEventSelectionProducer);
+DEFINE_FWK_MODULE(ZMuMuEventSelectionFilter);

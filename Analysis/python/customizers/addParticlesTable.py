@@ -1,9 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-def addParticlesTable(process, eventSelection, name, singleton=False):
+def addParticlesTable(process,
+                      src,
+                      name, 
+                      singleton=False):
     setattr(process, name+"particlesTable", cms.EDProducer("SimpleCandidateFlatTableProducer",
-        src = cms.InputTag(eventSelection),
+        src = cms.InputTag(src),
         cut = cms.string(""),
         name = cms.string(name),
         doc = cms.string("Basic candidate table"),
