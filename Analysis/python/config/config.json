@@ -1,0 +1,211 @@
+{
+    "EventSelection" : {
+        "MuEta" : 2.4,
+        "MuLeadPt" : 26,
+        "MuSubPt" : 15,
+        "MuID" : "CutBasedIdLoose",
+        "MuISO" : "PFIsoLoose",
+        "Zmass" : 91.1876,
+        "ZmassWindow" : 20.0,
+        "RequireOppositeSignMuons" : true,
+        "OnlyCheckLeadingMuons" : false,
+        "MuPdgID" : 13,
+        "CoarsePuppiMETCut" : 75
+    },
+    "Jets" : {
+        "JetPt" : 30,
+        "JetEta" : 2.4,
+        "JetID" : "jetIdLepVeto",
+        "JetNDaughters" : 2,
+        "JetMuonVetoDR" : 0.8
+    },
+    "GenJets" : {
+        "GenJetPt" : 10,
+        "GenJetEta" : 3.0
+    },
+    "EECs" : {
+        "MaxOrder" : 4,
+        "DoRes3" : true,
+        "DoRes4" : true,
+        "DoRes4Fixed" : false,
+        "DoTransfer" : true,
+        "pTNorm" : "RAW",
+        "ShapeTol" : 0.05,
+        "DRedges" : [0.0001,
+           0.01, 0.015, 0.02, 0.025,
+           0.03, 0.035, 0.04, 0.045, 
+           0.05, 0.06,  
+           0.07, 0.08,
+           0.09, 0.10, 
+           0.11, 0.13, 0.15,
+           0.20, 0.25, 0.30, 0.35,
+           0.40, 0.50, 0.60, 
+           0.70, 0.80, 1.00],
+        "DRdges_coarse" : [
+            0.0, 0.10, 0.20, 0.30, 
+            0.40, 0.50, 0.60, 0.70, 0.80],
+        "xiedges" : [
+            1.00000000e-05, 7.14385714e-02, 
+            1.42867143e-01, 2.14295714e-01,
+            2.85724286e-01, 3.57152857e-01, 
+            4.28581429e-01, 5.00010000e-01,
+            5.71438571e-01, 6.42867143e-01, 
+            7.14295714e-01, 7.85724286e-01,
+            8.57152857e-01, 9.28581429e-01, 
+            1.00001000e+00],
+        "phiedges" : [
+            1.00000000e-05, 1.12209738e-01, 
+            2.24409475e-01, 3.36609213e-01,
+            4.48808951e-01, 5.61008688e-01, 
+            6.73208426e-01, 7.85408163e-01,
+            8.97607901e-01, 1.00980764e+00, 
+            1.12200738e+00, 1.23420711e+00,
+            1.34640685e+00, 1.45860659e+00, 
+            1.57080633e+00],
+        "r_dipole_edges" : [
+            0.0       , 0.07142857, 0.14285714, 
+            0.21428571, 0.28571429, 0.35714286, 
+            0.42857143, 0.5       , 0.57142857, 
+            0.64285714, 0.71428571, 0.78571429, 
+            0.85714286, 0.92857143, 1.0        ],
+        "ct_dipole_edges" : [
+            0.0       , 0.11219974, 0.22439948, 
+            0.33659921, 0.44879895, 0.56099869, 
+            0.67319843, 0.78539816, 0.8975979 , 
+            1.00979764, 1.12199738, 1.23419711, 
+            1.34639685, 1.45859659, 1.57079634],
+        "r_tee_edges" : [
+            0.0       , 0.07142857, 0.14285714, 
+            0.21428571, 0.28571429, 0.35714286, 
+            0.42857143, 0.5       , 0.57142857, 
+            0.64285714, 0.71428571, 0.78571429, 
+            0.85714286, 0.92857143, 1.0        ],
+        "ct_tee_edges" : [
+            0.0       , 0.11219974, 0.22439948, 
+            0.33659921, 0.44879895, 0.56099869, 
+            0.67319843, 0.78539816, 0.8975979 , 
+            1.00979764, 1.12199738, 1.23419711, 
+            1.34639685, 1.45859659, 1.57079634],
+        "r_triangle_edges" : [
+            0.0       , 0.07142857, 0.14285714, 
+            0.21428571, 0.28571429, 0.35714286, 
+            0.42857143, 0.5       , 0.57142857, 
+            0.64285714, 0.71428571, 0.78571429, 
+            0.85714286, 0.92857143, 1.0        ],
+        "ct_triangle_edges" : [
+            0.0       , 0.11219974, 0.22439948, 
+            0.33659921, 0.44879895, 0.56099869, 
+            0.67319843, 0.78539816, 0.8975979 , 
+            1.00979764, 1.12199738, 1.23419711, 
+            1.34639685, 1.45859659, 1.57079634]
+    },
+    "ParticleCuts" : {
+        "recoThresholds" : {
+            "EM0" : [0],
+            "HAD0" : [0],
+            "HADCH" : [0],
+            "ELE" : [0],
+            "MU" : [0],
+            "EtaRegions" : [0, 99999999]
+        },
+        "genThresholds" : {
+            "EM0" : [0],
+            "HAD0" : [0],
+            "HADCH" : [0],
+            "ELE" : [0],
+            "MU" : [0],
+            "EtaRegions" : [0, 99999999]
+        },
+        "recoVtxCuts" : {
+            "minFromPV" : 0,
+            "minPuppiWt" : 0.5,
+            "maxDZ" : 0.2,
+            "maxDXY" : 99999999
+        },
+        "genVtxCuts" : {
+            "minFromPV" : 0,
+            "minPuppiWt" : 0.0,
+            "maxDZ" : 9999999,
+            "maxDXY" : 99999999
+        },
+        "Matching" : {
+            "JetMatchDR" : 0.4,
+            "ClipVal" : 0.01,
+            "SpatialLossType" : 0,
+            "PUpt0s" : [1.0, 1.0, 1.0, 1.0, 1.0],
+            "PUexps" : [4.0, 4.0, 4.0, 4.0, 4.0],
+            "PUpenalties": [99999, 99999, 99999, 99999, 99999],
+            "UncertaintyModel" : "Standard",
+            "SoftFlavorFilters" : [
+                "AnyPhoton", "AnyNeutralHadron", 
+                "AnyCharged", "AnyCharged", "AnyCharged"
+            ],
+            "HardFlavorFilters" : [
+                "AnyNeutral", "AnyNeutralHadron",
+                "AnyCharged", "AnyCharged", "AnyCharged"
+            ],
+            "FlavorFilterThresholds" : [
+                3.0, 0.0, 0.0, 0.0, 0.0
+            ],
+            "ChargeFilters" : [
+                "ChargeSign", "ChargeSign",
+                "ChargeSign", "ChargeSign", "ChargeSign"
+            ],
+            "DRfilters" : [
+                "Fixed", "Fixed",
+                "Tracking", "Tracking", "Tracking"
+            ],
+            "Prefitters" : [
+                "Float", "Float",
+                "Best", "Best", "Best"
+            ],
+            "Refiner" : "OneGenOneRecoPerType",
+            "DropGenFilter" : "NONE",
+            "DropRecoFilter" : "NONE",
+            "RecoverLostTracks" : true,
+            "PropagateLostTracks" : true,
+            "HADCHrecoveryThresholds" : [5.0, 5.0, 5.0],
+            "ELErecoveryThresholds" : [3.0, 3.0, 3.0],
+            "RecoverLostHAD0" : false,
+            "HAD0recoveryThresholds" : [5.0, 5.0, 5.0],
+            "EMstochastic" : [0.17, 0.18, 0.80],
+            "EMconstant" : [0.0074, 0.0253, 0.0253],
+            "ECALgranularityEta" : [0.07, 0.07, 0.10],
+            "ECALgranularityPhi" : [0.07, 0.07, 0.10],
+            "ECALEtaBoundaries" : [0.0, 0.9, 1.4, 3.0],
+            "HADstochastic" : [1.63, 3.90, 6.44],
+            "HADconstant" : [0.21, 0.14, 0.10],
+            "HCALgranularityEta" : [0.12, 0.12, 0.17],
+            "HCALgranularityPhi" : [0.12, 0.12, 0.17],
+            "HCALEtaBoundaries" : [0.0, 0.9, 1.4, 3.0],
+            "CHlinear" : [0.000069, 0.000072, 0.000072],
+            "CHconstant" : [0.0076, 0.014, 0.018],
+            "CHMSeta" : [0.0000, 0.0000, 0.0000],
+            "CHMSphi" : [0.0000, 0.0000, 0.0000],
+            "CHangularEta" : [0.002, 0.002, 0.003],
+            "CHangularPhi" : [0.002, 0.002, 0.003],
+            "TrkEtaBoundaries" : [0.0, 0.9, 1.4, 3.0],
+            "EM0Threshlds" : [0.0, 0.0 ,0.0],
+            "HAD0Threshlds" : [0.0, 0.0, 0.0],
+            "HADCHThreshlds" : [0.0, 0.0, 0.0],
+            "ELEThreshlds" : [0.0, 0.0, 0.0],
+            "MUThreshlds" : [0.0, 0.0, 0.0],
+            "EM0constDR" : [0.070, 0.070, 0.100],
+            "EM0floatDR" : [0,0,0],
+            "EM0capDR" : [0,0,0],
+            "HAD0constDR" : [0.12, 0.12, 0.15],
+            "HAD0floatDR" : [0,0,0],
+            "HAD0capDR" : [0,0,0],
+            "HADCHconstDR" : [0.003, 0.003, 0.005],
+            "HADCHfloatDR" : [0.012, 0.012, 0.015],
+            "HADCHcapDR" : [0.05, 0.05, 0.07],
+            "ELEconstDR" : [0.003, 0.003, 0.005],
+            "ELEfloatDR" : [0.012, 0.012, 0.015],
+            "ELEcapDR" : [0.05, 0.05, 0.07],
+            "MUconstDR" : [0.003, 0.003, 0.005],
+            "MUfloatDR" : [0.012, 0.012, 0.015],
+            "MUcapDR" : [0.05, 0.05, 0.07],
+            "MaxReFit" : 50
+        }
+    }
+}

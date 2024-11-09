@@ -25,7 +25,7 @@ RecoFixedConeJetProducer = cms.EDProducer("FixedConeJetProducer",
 
     coords = cms.InputTag("randomConeCoords"),
 
-    conesize = cms.double(0.4),
+    conesize = cms.double(0.8),
 
     verbose = cms.int32(0),
 )
@@ -50,7 +50,7 @@ GenFixedConeJetProducer = cms.EDProducer("FixedConeJetProducer",
 
     coords = cms.InputTag("randomConeCoords"),
 
-    conesize = cms.double(0.4),
+    conesize = cms.double(0.8),
 
     verbose = cms.int32(0),
 )

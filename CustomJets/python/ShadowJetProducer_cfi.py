@@ -14,7 +14,7 @@ RecoShadowJetProducer = cms.EDProducer("RecoShadowJetProducer",
     maxNumPart = cms.uint32(512),
     minNumPart = cms.uint32(2),
 
-    dRwindow = cms.double(0.4),
+    dRwindow = cms.double(0.8),
 
     applyPuppi = cms.bool(True),
 
@@ -37,7 +37,7 @@ GenShadowJetProducer = cms.EDProducer("CandidateShadowJetProducer",
     maxNumPart = cms.uint32(512),
     minNumPart = cms.uint32(2),
 
-    dRwindow = cms.double(0.4),
+    dRwindow = cms.double(0.8),
 
     applyPuppi = cms.bool(True),
 

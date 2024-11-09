@@ -1,27 +1,37 @@
 import FWCore.ParameterSet.Config as cms
+from SRothman.Analysis.config.config import config
+
+Zmass = config['EventSelection']['Zmass']
+ZmassWindow = config['EventSelection']['ZmassWindow']
+ZmassMin = Zmass - ZmassWindow
+ZmassMax = Zmass + ZmassWindow
 
 GENZMuMuFilter = cms.EDFilter('ZMuMuEventSelectionFilter',
+    leadPt = cms.double(config['EventSelection']['MuLeadPt']),
+    subPt = cms.double(config['EventSelection']['MuSubPt']),
+    minZmass = cms.double(ZmassMin),
+    maxZmass = cms.double(ZmassMax),
+    oppositeSign = cms.bool(config['EventSelection']['RequireOppositeSignMuons']),
+    pdgIds = cms.vint32([config['EventSelection']['MuPdgID']]),
+    onlyCheckLeading = cms.bool(config['EventSelection']['OnlyCheckLeadingMuons']),
+
     src = cms.InputTag('genParticles'),
-    leadPt = cms.double(20.0),
-    subPt = cms.double(10.0),
-    minZmass = cms.double(65.0),
-    maxZmass = cms.double(115.0),
-    oppositeSign = cms.bool(True),
-    pdgIds = cms.vint32([13]),
+
     verbose = cms.int32(0),
-    onlyCheckLeading = cms.bool(False),
     saveParticles = cms.bool(True),
 )
 
 RECOZMuMuFilter = cms.EDFilter('ZMuMuEventSelectionFilter',
+    leadPt = cms.double(config['EventSelection']['MuLeadPt']),
+    subPt = cms.double(config['EventSelection']['MuSubPt']),
+    minZmass = cms.double(ZmassMin),
+    maxZmass = cms.double(ZmassMax),
+    oppositeSign = cms.bool(config['EventSelection']['RequireOppositeSignMuons']),
+    pdgIds = cms.vint32([config['EventSelection']['MuPdgID']]),
+    onlyCheckLeading = cms.bool(config['EventSelection']['OnlyCheckLeadingMuons']),
+
     src = cms.InputTag('linkedObjects','muons'),
-    leadPt = cms.double(20.0),
-    subPt = cms.double(10.0),
-    minZmass = cms.double(65.0),
-    maxZmass = cms.double(115.0),
-    oppositeSign = cms.bool(True),
-    pdgIds = cms.vint32([13]),
+
     verbose = cms.int32(0),
-    onlyCheckLeading = cms.bool(False),
     saveParticles = cms.bool(True),
 )

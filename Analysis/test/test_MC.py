@@ -86,7 +86,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '106X_upgrade2018_realistic_v16_L1v1', '')
 
 # Shrink NANOAOD
-from SRothman.Analysis.customizers.shrinkNano import shrink_nanoAOD_MC
+from SRothman.Analysis.shrinkNano import shrink_nanoAOD_MC
 process = shrink_nanoAOD_MC(process)
 
 # Path and EndPath definitions
@@ -95,7 +95,8 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 process.DroppedEventsOutput_step = cms.EndPath(process.DroppedEventsOutput)
 
-process.load("SRothman.Analysis.EventSelections_cff")
+from SRothman.Analysis.EventSelections_cff import setupEventSelections
+process = setupEventSelections(process, isMC=True)
 # Schedule definition
 process.schedule = cms.Schedule(process.selections_path,
                                 process.nanoAOD_step,
@@ -118,7 +119,7 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeMC(process)
 
-from SRothman.Analysis.customizers.addParticlesTable import addParticlesTable
+from SRothman.Analysis.addParticlesTable import addParticlesTable
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
     "ZMuMuMuons",
@@ -128,13 +129,13 @@ process = addParticlesTable(process,
     "ZMuMuZ", 
     singleton=True)
 
-from SRothman.Analysis.customizers.setupAK8Jets import setupAK8Jets
+from SRothman.Analysis.setupAK8Jets import setupAK8Jets
 process = setupAK8Jets(process,
    isMC = True,
    skipJTB = False,
    genOnly = False)
 
-from SRothman.CustomJets.customizers.setupSimonJets import setupSimonJets
+from SRothman.CustomJets.setupSimonJets import setupSimonJets
 process = setupSimonJets(process,
     jets = 'finalSelectedJetsAK8',
     genjets = 'selectedGenJetsAK8', 
@@ -147,7 +148,7 @@ process = setupSimonJets(process,
     genOnly = False
 )
 
-from SRothman.Matching.customizers.setupMatching import setupMatching
+from SRothman.Matching.setupMatching import setupMatching
 process = setupMatching(process,
     verbose = 0,
     ak8 = True,
@@ -157,7 +158,7 @@ process = setupMatching(process,
     naive = False
 )
 
-from SRothman.EECs.customizers.setupEECs import setupEECs
+from SRothman.EECs.setupEECs import setupEECs
 process = setupEECs(process,
     name = 'EECs',
     genMatch = 'GenMatch',

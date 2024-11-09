@@ -2,10 +2,13 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 from SRothman.JetToolbox.jetToolbox_cff import jetToolbox
 
+from SRothman.Analysis.config.config import config
+
 def setupAK8GenJets(process, genParticles, partonMode):
     process.selectedGenJetsAK8 = cms.EDFilter("GenJetSelector",
         src = cms.InputTag("ak8GenJetsNoNu"),
-        cut = cms.string(""),
+        cut = cms.string("pt > %f &&"%config['GenJets']['GenJetPt'] +
+                         "abs(eta) < %f"%config['GenJets']['GenJetEta']),
         filter = cms.bool(False)
     )
 
@@ -101,18 +104,17 @@ def setupAK8RecoJets(process):
 
     process.actuallySelectedJetsAK8 = cms.EDFilter("PATJetSelector",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
-        cut = cms.string("pt > 30 &&"
-                         "abs(eta) < 2.4 &&" 
-                         "userInt('jetIdLepVeto') &&"
-                         "userInt('jetIdTight') &&"
-                         "numberOfDaughters > 1"),
+        cut = cms.string("pt > %f &&"%config['Jets']['JetPt'] +
+                         "abs(eta) < %f &&"%config['Jets']['JetEta'] +
+                         "userInt('%s') &&"%config['Jets']['JetID'] +
+                         "numberOfDaughters >= %d"%config['Jets']['JetNDaughters']),
         filter = cms.bool(False)
     )
 
     process.finalSelectedJetsAK8 = cms.EDFilter("PATJetOverlapCandidateVetoSelector",
         src = cms.InputTag("actuallySelectedJetsAK8"),
         vetoer = cms.InputTag("ZMuMu:daughters"),
-        minDeltaR = cms.double(0.8),
+        minDeltaR = cms.double(config['Jets']['JetMuonVetoDR']),
         filter = cms.bool(False),
         verbose = cms.int32(0)
     )
@@ -171,7 +173,7 @@ def setupAK8Jets(process,
                    JETCorrPayload = 'AK8PFPuppi',
                    JETCorrLevels = ['L1FastJet', 'L2Relative', 'L3Absolute'],
                    GetJetMCFlavour = True,
-                   Cut = "pt > 20 && abs(eta) < 3.0", 
+                   Cut = "pt > %f && abs(eta) < %f"%(config['GenJets']['GenJetPt'], config['GenJets']['GenJetEta']), 
                    runOnMC=isMC)
     
     if isMC:
