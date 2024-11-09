@@ -4,13 +4,40 @@ from SRothman.JetToolbox.jetToolbox_cff import jetToolbox
 
 from SRothman.Analysis.config.config import config
 
-def setupAK8GenJets(process, genParticles, partonMode):
-    process.selectedGenJetsAK8 = cms.EDFilter("GenJetSelector",
+def setupAK8GenJets(process, genParticles, partonMode,
+                    applyExtraGenSelections):
+
+    cutstring = "pt > %f &&"%config['GenJets']['GenJetPt'] + \
+                "abs(eta) < %f"%config['GenJets']['GenJetEta']
+
+    if applyExtraGenSelections: #fakes the tight jet ID + lepton veto
+        cutstring += " && muonEnergy/(pt*cosh(eta)) < 0.8"
+        cutstring += " && chargedEmEnergy/(pt*cosh(eta)) < 0.8"
+        cutstring += " && neutralEmEnergy/(pt*cosh(eta)) < 0.9"
+        cutstring += " && neutralHadronEnergy/(pt*cosh(eta)) < 0.9"
+        cutstring += ' && numberOfDaughters > 1'
+
+    process.cutGenJetsAK8 = cms.EDFilter("GenJetSelector",
         src = cms.InputTag("ak8GenJetsNoNu"),
-        cut = cms.string("pt > %f &&"%config['GenJets']['GenJetPt'] +
-                         "abs(eta) < %f"%config['GenJets']['GenJetEta']),
+        cut = cms.string(cutstring),
         filter = cms.bool(False)
     )
+
+    if not applyExtraGenSelections:
+        process.selectedGenJetsAK8 = cms.EDFilter("GenJetSelector",
+            src = cms.InputTag("cutGenJetsAK8"),
+            cut = cms.string(""),
+            filter = cms.bool(False)
+        )
+    else:
+        process.selectedGenJetsAK8 = cms.EDFilter("GENJetOverlapCandidateVetoSelector",
+            src = cms.InputTag("cutGenJetsAK8"),
+            vetoer = cms.InputTag("ZMuMu:daughters"),
+            minDeltaR = cms.double(config['Jets']['JetMuonVetoDR']),
+            filter = cms.bool(False),
+            verbose = cms.int32(0)
+        )
+
 
     process.BigAK8GenJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         src = cms.InputTag("selectedGenJetsAK8"),
@@ -67,6 +94,7 @@ def setupAK8GenJets(process, genParticles, partonMode):
     )
 
     process.MCak8jetstask = cms.Task(
+        process.cutGenJetsAK8,
         process.selectedGenJetsAK8,
         process.BigAK8GenJetTable,
         process.genPartonsForFlavour,
@@ -106,7 +134,6 @@ def setupAK8RecoJets(process):
              "abs(eta) < %f &&"%config['Jets']['JetEta'] + \
              "userInt('%s') &&"%config['Jets']['JetID'] + \
              "numberOfDaughters >= %d"%config['Jets']['JetNDaughters']
-    jetcut = jetcut.encode('utf-8')
 
     process.actuallySelectedJetsAK8 = cms.EDFilter("PATJetSelector",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
@@ -168,7 +195,8 @@ def setupAK8Jets(process,
                  skipJTB,
                  genOnly,
                  genParticles='prunedGenParticles',
-                 partonMode='Auto'):
+                 partonMode='Auto',
+                 applyExtraGenSelections=False):
     if not skipJTB:
         jetToolbox(process, 'ak8', 'dummy', 'noOutput',
                    PUMethod='Puppi', dataTier='miniAOD',
@@ -180,7 +208,8 @@ def setupAK8Jets(process,
                    runOnMC=isMC)
     
     if isMC:
-        setupAK8GenJets(process, genParticles, partonMode)
+        setupAK8GenJets(process, genParticles, partonMode,
+                        applyExtraGenSelections)
 
     if not genOnly:
         setupAK8RecoJets(process)

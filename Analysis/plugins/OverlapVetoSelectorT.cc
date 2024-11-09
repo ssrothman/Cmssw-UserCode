@@ -97,7 +97,9 @@ bool OverlapVetoSelectorT<MainT, VetoerT>::filter(edm::Event& iEvent, const edm:
 }
 
 using JetOverlapCandidateVetoSelector = OverlapVetoSelectorT<reco::Jet, reco::Candidate>;
+using GENJetOverlapCandidateVetoSelector = OverlapVetoSelectorT<reco::GenJet, reco::Candidate>;
 using PATJetOverlapCandidateVetoSelector = OverlapVetoSelectorT<pat::Jet, reco::Candidate>;
 
 DEFINE_FWK_MODULE(JetOverlapCandidateVetoSelector);
+DEFINE_FWK_MODULE(GENJetOverlapCandidateVetoSelector);
 DEFINE_FWK_MODULE(PATJetOverlapCandidateVetoSelector);

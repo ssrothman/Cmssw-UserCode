@@ -9,7 +9,6 @@
         "ZmassWindow" : 20.0,
         "RequireOppositeSignMuons" : true,
         "OnlyCheckLeadingMuons" : false,
-        "MuPdgID" : 13,
         "CoarsePuppiMETCut" : 75
     },
     "Jets" : {
