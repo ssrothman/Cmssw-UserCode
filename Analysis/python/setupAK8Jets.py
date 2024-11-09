@@ -102,12 +102,15 @@ def setupAK8RecoJets(process):
         )
     )
 
+    jetcut = "pt > %f &&"%config['Jets']['JetPt'] + \
+             "abs(eta) < %f &&"%config['Jets']['JetEta'] + \
+             "userInt('%s') &&"%config['Jets']['JetID'] + \
+             "numberOfDaughters >= %d"%config['Jets']['JetNDaughters']
+    jetcut = jetcut.encode('utf-8')
+
     process.actuallySelectedJetsAK8 = cms.EDFilter("PATJetSelector",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
-        cut = cms.string("pt > %f &&"%config['Jets']['JetPt'] +
-                         "abs(eta) < %f &&"%config['Jets']['JetEta'] +
-                         "userInt('%s') &&"%config['Jets']['JetID'] +
-                         "numberOfDaughters >= %d"%config['Jets']['JetNDaughters']),
+        cut = cms.string(jetcut),
         filter = cms.bool(False)
     )
 

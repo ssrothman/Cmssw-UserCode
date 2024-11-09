@@ -124,14 +124,14 @@ GenMatchProducer = cms.EDProducer("GenMatchProducer",
     CHMSphi = cms.vdouble(*config['Matching']['CHMSphi']),
     CHangularEta = cms.vdouble(*config['Matching']['CHangularEta']),
     CHangularPhi = cms.vdouble(*config['Matching']['CHangularPhi']),
-    trkEtaBoundaries = cms.vdouble(*config['Matching']['trkEtaBoundaries']),
+    trkEtaBoundaries = cms.vdouble(*config['Matching']['TrkEtaBoundaries']),
 
     #min pT thresholds for matching
-    EM0thresholds =   cms.vdouble(*config['Matching']['EM0thresholds']),
-    HAD0thresholds =  cms.vdouble(*config['Matching']['HAD0thresholds']),
-    HADCHthresholds = cms.vdouble(*config['Matching']['HADCHthresholds']),
-    ELEthresholds =   cms.vdouble(*config['Matching']['ELEthresholds']),
-    MUthresholds =    cms.vdouble(*config['Matching']['MUthresholds']),
+    EM0thresholds =   cms.vdouble(*config['Matching']['EM0Thresholds']),
+    HAD0thresholds =  cms.vdouble(*config['Matching']['HAD0Thresholds']),
+    HADCHthresholds = cms.vdouble(*config['Matching']['HADCHThresholds']),
+    ELEthresholds =   cms.vdouble(*config['Matching']['ELEThresholds']),
+    MUthresholds =    cms.vdouble(*config['Matching']['MUThresholds']),
 
     #parameters for dR filters
     #for "fixed" filter, the threshold is constDR

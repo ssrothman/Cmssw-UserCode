@@ -16,13 +16,16 @@ def setupEventSelections(process, isMC):
         verbose = 0
     )
 
+    muoncut = "abs(eta) < %0.2f && "%config['EventSelection']['MuEta'] + \
+              "pt > %0.2f && "%config['EventSelection']['MuSubPt'] + \
+              "passed('%s') && "%config['EventSelection']['MuID'] + \
+              "passed('%s')" % config['EventSelection']['MuISO']
+    muoncut = muoncut.encode('utf-8')
+
     process.SelectedMuons = cms.EDFilter(
         "MuonRefSelector",
         src = cms.InputTag("CorrectedMuons"),
-        cut = cms.string("abs(eta) < %0.2f && "%config['EventSelection']['MuEta'] +
-                         "pt > %0.2f && "%config['EventSelection']['MuSubPt'] +
-                         "passed('%s') && "%config['EventSelection']['MuID'] +
-                         "passed('%s')" % config['EventSelection']['MuISO'])
+        cut = cms.string(muoncut)
     )
     process.DiMuonFilter = cms.EDFilter(
         "CandViewCountFilter",
