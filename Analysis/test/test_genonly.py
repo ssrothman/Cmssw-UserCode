@@ -45,26 +45,84 @@ process = setupAK8Jets(process,
     applyExtraGenSelections=True)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
+#process = setupSimonJets(process,
+#    jets = '',
+#    genjets = 'selectedGenJetsAK8',
+#    CHSjets = '',
+#    chargedOnly = True,
+#    eventSelection = '',
+#    name = 'ChargedSimonJets',
+#    ak8 = True,
+#    isMC = True,
+#    genOnly = True
+#)
 process = setupSimonJets(process,
     jets = '',
     genjets = 'selectedGenJetsAK8',
     CHSjets = '',
-    chargedOnly = True,
+    chargedOnly = False,
     eventSelection = '',
-    name = 'ChargedSimonJets',
+    name = 'SimonJets',
+    ak8 = True,
+    isMC = True,
+    genOnly = True
+)
+
+from SRothman.CustomJets.setupUniformGaussianJets import setupUniformGaussianJets
+#process = setupUniformGaussianJets(process,
+#    jets = '',
+#    genjets = 'selectedGenJetsAK8',
+#    CHSjets = '',
+#    chargedOnly = True,
+#    eventSelection = '',
+#    name = 'ChargedUniformGaussianJets',
+#    ak8 = True,
+#    isMC = True,
+#    genOnly = True
+#)
+process = setupUniformGaussianJets(process,
+    jets = '',
+    genjets = 'selectedGenJetsAK8',
+    CHSjets = '',
+    chargedOnly = False,
+    eventSelection = '',
+    name = 'UniformGaussianJets',
     ak8 = True,
     isMC = True,
     genOnly = True
 )
 
 from SRothman.EECs.setupEECs import setupEECs
+#process = setupEECs(process,
+#    name = 'ChargedEECs',
+#    genMatch = '',
+#    genjets = '',
+#    recojets = 'GenChargedSimonJets',
+#    verbose = 0,
+#    isMC = False
+#)
 process = setupEECs(process,
     name = 'EECs',
     genMatch = '',
     genjets = '',
-    recojets = 'GenChargedSimonJets',
+    recojets = 'GenSimonJets',
     verbose = 0,
     isMC = False
 )
-
+#process = setupEECs(process,
+#    name = 'ChargedUGEECs',
+#    genMatch = '',
+#    genjets = '',
+#    recojets = 'GenChargedUniformGaussianJets',
+#    verbose = 0,
+#    isMC = False
+#)
+process = setupEECs(process,
+    name = 'UGEECs',
+    genMatch = '',
+    genjets = '',
+    recojets = 'GenUniformGaussianJets',
+    verbose = 0,
+    isMC = False
+)
 # End of customisation functions
