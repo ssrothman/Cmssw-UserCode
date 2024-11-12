@@ -13,7 +13,7 @@
     },
     "Jets" : {
         "JetPt" : 30,
-        "JetEta" : 2.4,
+        "JetEta" : 1.7,
         "JetID" : "jetIdLepVeto",
         "JetNDaughters" : 2,
         "JetMuonVetoDR" : 0.8
