@@ -1,0 +1,21 @@
+{
+    "gateway" : "eoscms.cern.ch",
+    "base_dirs" : {
+        "pythia" : "/store/cmst3/group/exovv/precision/dyjets_pythia",
+        "pythia_nospin" : "/store/cmst3/group/exovv/precision/dyjets_pythia_nospin",
+        "pythia_nobdecay" : "/store/cmst3/group/exovv/precision/dyjets_pythia_nobdecay",
+        "pythia_1jet" : "/store/cmst3/group/exovv/precision/dy1jet_pythia",
+        "pythia_1jet_nobdecay" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nobdecay",
+        "pythia_1jet_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nohad",
+        "pythia_1jet_nospin" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nospin",
+        "pythia_1jet_nospin_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nospin_nohad",
+        "herwig" : "/store/cmst3/group/exovv/precision/dyjets_herwig",
+        "herwig_nospin" : "/store/cmst3/group/exovv/precision/dyjets_herwig_nospin",
+        "herwig_nobdecay" : "/store/cmst3/group/exovv/precision/dyjets_herwig_nobdecay",
+        "herwig_1jet" : "/store/cmst3/group/exovv/precision/dy1jet_herwig",
+        "herwig_1jet_nobdecay" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nobdecay",
+        "herwig_1jet_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nohad",
+        "herwig_1jet_nospin" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin",
+        "herwig_1jet_nospin_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_nohad"
+    }
+}

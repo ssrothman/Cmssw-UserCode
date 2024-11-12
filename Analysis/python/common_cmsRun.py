@@ -8,6 +8,48 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 from Configuration.Eras.Modifier_run2_nanoAOD_106Xv2_cff import run2_nanoAOD_106Xv2
 
+from FWCore.ParameterSet.VarParsing import VarParsing
+
+options = VarParsing ('analysis')
+options.register('index',
+              -1,
+              VarParsing.multiplicity.singleton,
+              VarParsing.varType.int,
+              "Input file index")
+options.register('filelist',
+                 '',
+                 VarParsing.multiplicity.singleton,
+                 VarParsing.varType.string,
+                 "Input file list")
+options.register('N',
+                 100,
+                 VarParsing.multiplicity.singleton,
+                 VarParsing.varType.int,
+                 'Number of events to process')
+options.register('Threads',
+                 1,
+                 VarParsing.multiplicity.singleton,
+                 VarParsing.varType.int,
+                 'Number of threads to use')
+options.parseArguments()
+
+if options.index >= 0:
+    selected_fname = 'NANO_selected_%d.root' % options.index
+    dropped_fname = 'NANO_dropped_%d.root' % options.index
+
+    if len(options.filelist) == 0:
+        raise ValueError('filelist option is required when index is specified')
+
+    with open(options.filelist, 'r') as f:
+        fnames = f.readlines()
+        if options.index >= len(fnames):
+            raise ValueError('filelist does not have enough entries for index')
+        input_fname = fnames[options.index].strip()
+else:
+    input_fname = None
+    selected_fname = 'NANO_selected.root'
+    dropped_fname = 'NANO_dropped.root'
+
 process = cms.Process('NANO',Run2_2018,run2_nanoAOD_106Xv2)
 
 # import of standard configurations
@@ -23,7 +65,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(options.N)
 )
 
 
@@ -39,7 +81,6 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 # Output definition
-
 process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     compressionAlgorithm = cms.untracked.string('LZMA'),
     compressionLevel = cms.untracked.int32(9),
@@ -50,7 +91,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     SelectEvents = cms.untracked.PSet( 
         SelectEvents = cms.vstring('selections_path')
     ),
-    fileName = cms.untracked.string('NANO_selected.root'),
+    fileName = cms.untracked.string(selected_fname),
     outputCommands = process.NANOAODSIMEventContent.outputCommands,
 )
 
@@ -61,7 +102,7 @@ process.DroppedEventsOutput = cms.OutputModule("NanoAODOutputModule",
         dataTier = cms.untracked.string('NANOAODSIM'),
         filterName = cms.untracked.string('')
     ),
-    fileName = cms.untracked.string('NANO_dropped.root'),
+    fileName = cms.untracked.string(dropped_fname),
     outputCommands = cms.untracked.vstring(
         'drop *',
         'keep nanoaodFlatTable_genTable_*_*',
@@ -74,8 +115,8 @@ process.DroppedEventsOutput = cms.OutputModule("NanoAODOutputModule",
 )
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(1)
-process.options.numberOfStreams=cms.untracked.uint32(1)
+process.options.numberOfThreads=cms.untracked.uint32(options.Threads)
+process.options.numberOfStreams=cms.untracked.uint32(options.Threads)
 process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 process.MessageLogger.cerr.FwkReport.reportEvery=1

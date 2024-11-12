@@ -1,8 +1,10 @@
 from SRothman.Analysis.common_cmsRun import *
 
+if input_fname is None:
+    input_fname = "root://eoscms.cern.ch//store/cmst3/group/exovv/precision/dyjets_herwig/dyjets_herwig_1000.root"
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("root://eoscms.cern.ch//store/cmst3/group/exovv/precision/dyjets_herwig/dyjets_herwig_1000.root"),
+    fileNames = cms.untracked.vstring(input_fname),
     secondaryFileNames = cms.untracked.vstring(),
     #eventsToProcess = cms.untracked.VEventRange(cms.EventRange(1, 2339661, 1, 2339661))
 )
