@@ -77,11 +77,11 @@ void GenMatchTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   for(const auto& m : *matches){
       iReco.push_back(m.iReco);
       iGen.push_back(m.iGen);
-      n_rows.push_back(m.ptrans.n_rows);
-      n_cols.push_back(m.ptrans.n_cols);
+      n_rows.push_back(m.ptrans.rows());
+      n_cols.push_back(m.ptrans.cols());
 
-      for(unsigned i=0; i<m.ptrans.n_rows; ++i){
-          for(unsigned j=0; j<m.ptrans.n_cols; ++j){
+      for(unsigned i=0; i<m.ptrans.rows(); ++i){
+          for(unsigned j=0; j<m.ptrans.cols(); ++j){
               ptrans.push_back(m.ptrans(i,j));
           }
       }

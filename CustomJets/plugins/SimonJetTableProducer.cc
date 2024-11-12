@@ -28,6 +28,8 @@
 #include <memory>
 #include <vector>
 
+#include <Eigen/Dense>
+
 class SimonJetTableProducer : public edm::stream::EDProducer<> {
 public:
     explicit SimonJetTableProducer(const edm::ParameterSet&);
@@ -176,8 +178,8 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
           }
           if(matchidx >=0 ){//if found match
               const auto& match = matches->at(matchidx);
-              for(unsigned i=0; i<match.rawmat.n_rows; ++i){//for i
-                  for(unsigned j=0; j<match.rawmat.n_cols; ++j){// for j
+              for(unsigned i=0; i<match.rawmat.rows(); ++i){//for i
+                  for(unsigned j=0; j<match.rawmat.cols(); ++j){// for j
                       if(match.rawmat(i, j) > 0){//if matched
                           unsigned idx = isGen_ ? j : i;
                           nextMatches.at(idx) += 1;
@@ -202,16 +204,16 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
               if(!isGen_){
                   const auto& genj= genJets->at(match.iGen);
                   
-                  arma::vec genpt = genj.ptvec();
-                  arma::vec recopt = j.ptvec();
+                  Eigen::VectorXd genpt = genj.ptvec();
+                  Eigen::VectorXd recopt = j.ptvec();
 
-                  arma::vec predpt = (match.rawmat*genpt);
+                  Eigen::VectorXd predpt = match.rawmat * genpt;
 
-                  arma::vec wgeneta = genpt % genj.etavec();
-                  arma::vec wgenphi = genpt % genj.phivec();
+                  Eigen::VectorXd wgeneta = genpt.cwiseProduct(genj.etavec());
+                  Eigen::VectorXd wgenphi = genpt.cwiseProduct(genj.phivec());
 
-                  arma::vec predeta = (match.rawmat*wgeneta)/predpt;
-                  arma::vec predphi = (match.rawmat*wgenphi)/predpt;
+                  Eigen::VectorXd predeta = (match.rawmat * wgeneta).array()/predpt.array();
+                  Eigen::VectorXd predphi = (match.rawmat * wgenphi).array()/predpt.array();
 
                   for(unsigned i=0; i<j.nPart; ++i){
                       nextPt.at(i) = predpt(i);

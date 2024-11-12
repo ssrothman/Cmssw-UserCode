@@ -1,5 +1,4 @@
 <library file="*.cc" name="SRothmanEECPlugins">
-  <Flags CXXFLAGS="-g -I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
   <flags EDM_PLUGIN="1"/>
   <use name="boost"/>
   <use name="RecoJets/JetProducers"/>

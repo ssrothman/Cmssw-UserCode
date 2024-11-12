@@ -1,5 +1,4 @@
 <library file="*.cc" name="SRothmanMatcherPlugins">
-  <Flags CXXFLAGS="-I$(CMSSW_BASE)/src/SRothman/armadillo-12.2.0/include"/>
   <flags EDM_PLUGIN="1"/>
   <use name="RecoJets/JetProducers"/>
   <use name="RecoJets/JetAlgorithms"/>

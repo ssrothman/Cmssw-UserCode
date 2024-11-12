@@ -1,12 +1,12 @@
 #ifndef SROTHMAN_DATAFORMATS_MATCHING_H
 #define SROTHMAN_DATAFORMATS_MATCHING_H
 
-#include "SRothman/armadillo-12.2.0/include/armadillo"
+#include <Eigen/Dense>
 
 struct jetmatch { 
     unsigned iReco, iGen;
-    arma::mat ptrans;
-    arma::mat rawmat;
+    Eigen::MatrixXd ptrans;
+    Eigen::MatrixXd rawmat;
 };
 
 #endif

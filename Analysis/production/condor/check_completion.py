@@ -14,9 +14,9 @@ import sys
 import fsspec_xrootd
 import numpy as np
 
-with open("working/%s/condor.sub"%taskid, 'r') as f:
+with open("working/%s/filelist.txt"%taskid, 'r') as f:
     lines = f.readlines()
-    N = int(lines[-1].split()[-1])
+    N = len(lines)
 
 fs = fsspec_xrootd.XRootDFileSystem(hostid=args.gateway)
 destination = osp.join(args.destination_base, taskid)

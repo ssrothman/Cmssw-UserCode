@@ -225,7 +225,7 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
       }
 
       int iGen=-1;
-      arma::mat ptrans;
+      Eigen::MatrixXd ptrans;
       std::vector<bool> PU, UNMATCHED;
 
       PU.resize(reco->at(iReco).nPart, true);
@@ -252,17 +252,6 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
                   }
               }
           }
-            //test ptrans
-            /*arma::vec genpt = gen->at(iGen).ptvec();
-            arma::vec recpt = reco->at(iReco).ptvec();
-            arma::vec fwdpt = ptrans * genpt;
-            printf("gen pt: \n");
-            std::cout << genpt.t() << std::endl;
-            printf("rec pt: \n");
-            std::cout << recpt.t() << std::endl;
-            printf("fwd pt: \n");
-            std::cout << fwdpt.t() << std::endl;
-            printf("\n\n");*/
       }
 
                 

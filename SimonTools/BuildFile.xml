@@ -1,5 +1,6 @@
 <Flags ADD_SUBDIR="1"/>
 <use name="boost"/>
+<use name="Eigen"/>
 <export>
   <lib name="1"/>
 </export>
