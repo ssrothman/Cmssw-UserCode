@@ -13,8 +13,8 @@ def setupAK8GenJets(process, genParticles, partonMode,
     if applyExtraGenSelections: #fakes the tight jet ID + lepton veto
         cutstring += " && muonEnergy/(pt*cosh(eta)) < 0.8"
         cutstring += " && chargedEmEnergy/(pt*cosh(eta)) < 0.8"
-        cutstring += " && neutralEmEnergy/(pt*cosh(eta)) < 0.9"
-        cutstring += " && neutralHadronEnergy/(pt*cosh(eta)) < 0.9"
+        #cutstring += " && neutralEmEnergy/(pt*cosh(eta)) < 0.9"
+        #cutstring += " && neutralHadronEnergy/(pt*cosh(eta)) < 0.9"
         cutstring += ' && numberOfDaughters > 1'
 
     process.cutGenJetsAK8 = cms.EDFilter("GenJetSelector",
