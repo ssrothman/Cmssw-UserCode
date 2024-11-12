@@ -1,0 +1,1 @@
+hadd -fk -j test.root root://cmseos.fnal.gov//store/group/lpcpfnano/srothman/pythia_1jet_Nov_11_2024/NANO_selected_0.root root://cmseos.fnal.gov//store/group/lpcpfnano/srothman/pythia_1jet_Nov_11_2024/NANO_selected_1.root root://cmseos.fnal.gov//store/group/lpcpfnano/srothman/pythia_1jet_Nov_11_2024/NANO_selected_10.root

@@ -55,6 +55,15 @@ for file in files:
     elif basename.startswith("NANO_dropped"):
         index = int(basename.split('_')[-1].split('.')[0])
         done_dropped[index] = True
+    else:
+        print("WARNING: UNKNOWN FILE", file['name'])
+        print("Delete? (y/n)")
+        response = input()
+        if response == 'y':
+            fs.rm(file['name'])
+            print("Deleted")
+        else:
+            print("Not deleted")
 
 for i in range(N):
     if done_selected[i] and not done_dropped[i]:
