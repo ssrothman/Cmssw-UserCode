@@ -45,17 +45,6 @@ process = setupAK8Jets(process,
     applyExtraGenSelections=True)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
-#process = setupSimonJets(process,
-#    jets = '',
-#    genjets = 'selectedGenJetsAK8',
-#    CHSjets = '',
-#    chargedOnly = True,
-#    eventSelection = '',
-#    name = 'ChargedSimonJets',
-#    ak8 = True,
-#    isMC = True,
-#    genOnly = True
-#)
 process = setupSimonJets(process,
     jets = '',
     genjets = 'selectedGenJetsAK8',
@@ -69,17 +58,6 @@ process = setupSimonJets(process,
 )
 
 from SRothman.CustomJets.setupUniformGaussianJets import setupUniformGaussianJets
-#process = setupUniformGaussianJets(process,
-#    jets = '',
-#    genjets = 'selectedGenJetsAK8',
-#    CHSjets = '',
-#    chargedOnly = True,
-#    eventSelection = '',
-#    name = 'ChargedUniformGaussianJets',
-#    ak8 = True,
-#    isMC = True,
-#    genOnly = True
-#)
 process = setupUniformGaussianJets(process,
     jets = '',
     genjets = 'selectedGenJetsAK8',
@@ -92,15 +70,23 @@ process = setupUniformGaussianJets(process,
     genOnly = True
 )
 
+from SRothman.CustomJets.setupFakeJets import setupFakeJets
+process = setupFakeJets(process,
+                        jets='',
+                        genjets='selectedGenJetsAK8',
+                        name='UniformFakeJets',
+                        isMC=True,
+                        genOnly=True,
+                        phimodulation=False)
+process = setupFakeJets(process,
+                        jets='',
+                        genjets='selectedGenJetsAK8',
+                        name='Cos2PhiFakeJets',
+                        isMC=True,
+                        genOnly=True,
+                        phimodulation=True)
+
 from SRothman.EECs.setupEECs import setupEECs
-#process = setupEECs(process,
-#    name = 'ChargedEECs',
-#    genMatch = '',
-#    genjets = '',
-#    recojets = 'GenChargedSimonJets',
-#    verbose = 0,
-#    isMC = False
-#)
 process = setupEECs(process,
     name = 'EECs',
     genMatch = '',
@@ -109,14 +95,7 @@ process = setupEECs(process,
     verbose = 0,
     isMC = False
 )
-#process = setupEECs(process,
-#    name = 'ChargedUGEECs',
-#    genMatch = '',
-#    genjets = '',
-#    recojets = 'GenChargedUniformGaussianJets',
-#    verbose = 0,
-#    isMC = False
-#)
+
 process = setupEECs(process,
     name = 'UGEECs',
     genMatch = '',
@@ -124,5 +103,23 @@ process = setupEECs(process,
     recojets = 'GenUniformGaussianJets',
     verbose = 0,
     isMC = False
+)
+
+process = setupEECs(process,
+    name='UFakeEECs',
+    genMatch='',
+    genjets='',
+    recojets='GenUniformFakeJets',
+    verbose=0,
+    isMC=False
+)
+
+process = setupEECs(process,
+    name='C2PFakeEECs',
+    genMatch='',
+    genjets='',
+    recojets='GenCos2PhiFakeJets',
+    verbose=0,
+    isMC=False
 )
 # End of customisation functions
