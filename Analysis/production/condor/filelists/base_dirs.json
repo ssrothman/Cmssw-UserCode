@@ -9,6 +9,13 @@
         "pythia_1jet_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nohad",
         "pythia_1jet_nospin" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nospin",
         "pythia_1jet_nospin_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nospin_nohad",
+        "pythia_1jet_v2" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_v2",
+        "pythia_1jet_nobdecay_v2" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nobdecay_v2",
+        "pythia_1jet_nodeadcone_v2" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nodeadcone_v2",
+        "pythia_1jet_nobdecay_nodeadcone_v2" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nobdecay_nodeadcone_v2",
+        "pythia_1jet_nohad_v2" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nohad_v2",
+        "pythia_1jet_nospin_v2" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nospin_v2",
+        "pythia_1jet_nospin_nohad_v2" : "/store/cmst3/group/exovv/precision/dy1jet_pythia_nospin_nohad_v2",
         "herwig" : "/store/cmst3/group/exovv/precision/dyjets_herwig",
         "herwig_nospin" : "/store/cmst3/group/exovv/precision/dyjets_herwig_nospin",
         "herwig_nobdecay" : "/store/cmst3/group/exovv/precision/dyjets_herwig_nobdecay",
@@ -16,6 +23,11 @@
         "herwig_1jet_nobdecay" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nobdecay",
         "herwig_1jet_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nohad",
         "herwig_1jet_nospin" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin",
-        "herwig_1jet_nospin_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_nohad"
+        "herwig_1jet_nospin_nohad" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_nohad",
+        "herwig_1jet_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_v2",
+        "herwig_1jet_nobdecay_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nobdecay_v2",
+        "herwig_1jet_nohad_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nohad_v2",
+        "herwig_1jet_nospin_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_v2",
+        "herwig_1jet_nospin_nohad_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_nohad_v2"
     }
 }
