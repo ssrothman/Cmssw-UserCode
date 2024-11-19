@@ -88,6 +88,9 @@ FakeShowerJetProducerT<T>::FakeShowerJetProducerT(const edm::ParameterSet& conf)
           theta_max_(conf.getParameter<double>("theta_max")),
           showerer_(phi_mode_, z_mode_, theta_mode_, 
                     zcut_, theta_min_, theta_max_){
+
+    std::string moduleName = conf.getParameter<std::string>("@module_label");
+    showerer_.enable_logging(moduleName + ".log");
     produces<std::vector<jet>>();
 }
 
