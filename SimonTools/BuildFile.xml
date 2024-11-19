@@ -1,6 +1,10 @@
 <Flags ADD_SUBDIR="1"/>
 <use name="boost"/>
 <use name="Eigen"/>
+<use name="root"/>
+<use name="rootmath"/>
+<use name="rootcore"/>
+<use name="rootgeom"/>
 <export>
   <lib name="1"/>
 </export>

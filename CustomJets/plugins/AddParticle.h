@@ -103,9 +103,11 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
     } else if (isHAD0(nextpart)){
         ++ans.nHAD0;
     } else {
+        printf("WARNING: Unknown pdgid\n");
         printf("pdgid: %u charge: %d\n", pdgid, partptr->charge());
         printf("pt: %f eta: %f phi: %f\n", partptr->pt(), partptr->eta(), partptr->phi());
-        throw std::logic_error("SimonJetProducer: unknown pdgid");
+        printf("\n");
+        //throw std::logic_error("SimonJetProducer: unknown pdgid");
     }
 }
 
