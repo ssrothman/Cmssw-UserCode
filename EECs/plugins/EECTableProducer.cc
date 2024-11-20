@@ -54,6 +54,7 @@ EECTableProducer::EECTableProducer(const edm::ParameterSet& conf)
     produces<nanoaod::FlatTable>(name_+"res3");
     produces<nanoaod::FlatTable>(name_+"res4dipole");
     produces<nanoaod::FlatTable>(name_+"res4tee");
+    produces<nanoaod::FlatTable>(name_+"res4triangle");
     produces<nanoaod::FlatTable>(name_+"BK");
 }
 
@@ -75,13 +76,14 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
   std::array<std::vector<float>, 5> proj;
   std::vector<float> res3;
-  std::vector<float> res4_dipole, res4_tee;
+  std::vector<float> res4_dipole, res4_tee, res4_triangle;
 
   std::vector<int> iJet, iReco;
   std::vector<int> nproj;
   std::vector<int> nres3_RL, nres3_xi, nres3_phi;
   std::vector<int> nres4_dipole_RL, nres4_dipole_r, nres4_dipole_ct;
   std::vector<int> nres4_tee_RL, nres4_tee_r, nres4_tee_ct;
+  std::vector<int> nres4_triangle_RL, nres4_triangle_r, nres4_triangle_ct;
 
   for(const auto& EEC : *EECs){
       iJet.push_back(EEC.iJet);
@@ -123,6 +125,13 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nres4_tee_ct.emplace_back(tee.shape()[2]);
 
           flattenMultiArray(tee, res4_tee);
+
+          const auto& triangle = *(EEC.res4shapes->triangle);
+          nres4_triangle_RL.emplace_back(triangle.shape()[0]);
+          nres4_triangle_r.emplace_back(triangle.shape()[1]);
+          nres4_triangle_ct.emplace_back(triangle.shape()[2]);
+
+          flattenMultiArray(triangle, res4_triangle);
       } else {
           nres4_dipole_RL.emplace_back(0);
           nres4_dipole_r.emplace_back(0);
@@ -131,6 +140,10 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nres4_tee_RL.emplace_back(0);
           nres4_tee_r.emplace_back(0);
           nres4_tee_ct.emplace_back(0);
+
+          nres4_triangle_RL.emplace_back(0);
+          nres4_triangle_r.emplace_back(0);
+          nres4_triangle_ct.emplace_back(0);
       }
   }
 
@@ -152,6 +165,10 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   tableRes4tee->addColumn<float>("value", res4_tee, "res4 tee weights", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableRes4tee), name_+"res4tee");
 
+  auto tableRes4triangle = std::make_unique<nanoaod::FlatTable>(res4_triangle.size(), name_+"res4triangle", false);
+  tableRes4triangle->addColumn<float>("value", res4_triangle, "res4 triangle weights", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(tableRes4triangle), name_+"res4triangle");
+
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iJet.size(), name_+"BK", false);
   tableBK->addColumn<int>("iJet", iJet, "index of jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("iReco", iReco, "index of jet", nanoaod::FlatTable::IntColumn);
@@ -165,6 +182,9 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   tableBK->addColumn<int>("nres4_tee_RL", nres4_tee_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres4_tee_r", nres4_tee_r, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres4_tee_ct", nres4_tee_ct, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_triangle_RL", nres4_triangle_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_triangle_r", nres4_triangle_r, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_triangle_ct", nres4_triangle_ct, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
   evt.put(std::move(tableBK), name_+"BK");
 
 }
