@@ -74,17 +74,39 @@ from SRothman.CustomJets.setupFakeJets import setupFakeJets
 process = setupFakeJets(process,
                         jets='',
                         genjets='selectedGenJetsAK8',
-                        name='UniformFakeJets',
+                        name='UUUFakeJets',
                         isMC=True,
                         genOnly=True,
-                        phimodulation=False)
+                        zmode='UNIFORM',
+                        thetamode="UNIFORM",
+                        phimode="UNIFORM")
 process = setupFakeJets(process,
                         jets='',
                         genjets='selectedGenJetsAK8',
-                        name='Cos2PhiFakeJets',
+                        name='GUUFakeJets',
                         isMC=True,
                         genOnly=True,
-                        phimodulation=True)
+                        zmode='GLUON',
+                        thetamode="UNIFORM",
+                        phimode="UNIFORM")
+process = setupFakeJets(process,
+                        jets='',
+                        genjets='selectedGenJetsAK8',
+                        name='GLUFakeJets',
+                        isMC=True,
+                        genOnly=True,
+                        zmode='GLUON',
+                        thetamode="LNX",
+                        phimode="UNIFORM")
+process = setupFakeJets(process,
+                        jets='',
+                        genjets='selectedGenJetsAK8',
+                        name='GLCFakeJets',
+                        isMC=True,
+                        genOnly=True,
+                        zmode='GLUON',
+                        thetamode="LNX",
+                        phimode="COS2PHI")
 
 from SRothman.EECs.setupEECs import setupEECs
 process = setupEECs(process,
@@ -106,20 +128,38 @@ process = setupEECs(process,
 )
 
 process = setupEECs(process,
-    name='UFakeEECs',
+    name='UUUFakeEECs',
     genMatch='',
     genjets='',
-    recojets='GenUniformFakeJets',
+    recojets='GenUUUFakeJets',
     verbose=0,
     isMC=False
 )
 
 process = setupEECs(process,
-    name='C2PFakeEECs',
+    name='GUUFakeEECs',
     genMatch='',
     genjets='',
-    recojets='GenCos2PhiFakeJets',
+    recojets='GenGUUFakeJets',
     verbose=0,
     isMC=False
 )
-# End of customisation functions
+
+process = setupEECs(process,
+    name='GLUFakeEECs',
+    genMatch='',
+    genjets='',
+    recojets='GenGLUFakeJets',
+    verbose=0,
+    isMC=False
+)
+
+process = setupEECs(process,
+    name= 'GLCFakeEECs',
+    genMatch='',
+    genjets='',
+    recojets='GenGLCFakeJets',
+    verbose=0,
+    isMC=False
+)
+

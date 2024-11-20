@@ -30,6 +30,7 @@
 #include "SRothman/SimonTools/src/isID.h"
 #include "SRothman/SimonTools/src/particleThresholds.h"
 #include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/computeJetMass.h"
 
 #include <iostream>
 #include <memory>
@@ -322,6 +323,8 @@ void UniformGaussianJetProducerT<T>::produce(edm::Event& evt,
             part.eta = ans.eta + distribution_(generator_);
             part.phi = ans.phi + distribution_(generator_);
         }
+
+        computeJetMass(ans);
 
         if(ans.nPart >= minNumPart_){
             result->push_back(std::move(ans));

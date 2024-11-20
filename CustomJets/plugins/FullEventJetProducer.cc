@@ -26,6 +26,7 @@
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/selectionStructs.h"
 #include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/computeJetMass.h"
 
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 
@@ -204,6 +205,8 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
     if(verbose_){
         printf("Made fullevent jet with %lu particles\n",ans.particles.size());
     }
+
+    computeJetMass(ans);
 
     if(ans.nPart >= minNumPart_){
         result->push_back(std::move(ans));

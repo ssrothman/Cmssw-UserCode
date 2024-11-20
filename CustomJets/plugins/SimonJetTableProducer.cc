@@ -123,6 +123,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   std::vector<float> eta;
   std::vector<float> phi;
   std::vector<int> iJet;
+  std::vector<float> mass;
   std::vector<int> nPart;
   std::vector<float> jecfactor;
   //extras
@@ -143,6 +144,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
       eta.push_back(j.eta);
       phi.push_back(j.phi);
       iJet.push_back(j.iJet);
+      mass.push_back(j.mass);
       nPart.push_back(j.nPart);
       nEM0.push_back(j.nEM0);
       nHAD0.push_back(j.nHAD0);
@@ -316,6 +318,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   tableBK->addColumn<int>("nHAD0", nHAD0, "num neutral had", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nEM0", nEM0, "num photons", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("iJet", iJet, "index in primary jet array", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<float>("jetMass", mass, "jet mass", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<int>("nPart", nPart, "number of particles in jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nCHS", nCHS, "number of matched CHS jets", nanoaod::FlatTable::IntColumn);
   if(addMatch_ && !isGen_){

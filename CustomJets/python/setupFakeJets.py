@@ -5,12 +5,16 @@ from SRothman.CustomJets.FakeShowerJetProducer_cfi import *
 def setupGenFakeShowerJets(process,
                      genjets,
                      name,
-                     phimodulation):
+                     zmode,
+                     thetamode,
+                     phimode):
 
     setattr(process, 'Gen'+name, GenFakeShowerJetProducer.clone(
         jetSrc = genjets,
         verbose = False,
-        phi_mode = "COS2PHI" if phimodulation else "UNIFORM",
+        phi_mode = phimode,
+        z_mode = zmode,
+        theta_mode = thetamode,
     ))
 
     setattr(process, 'Gen'+name+'Table', SimonJetTableProducer.clone(
@@ -31,11 +35,15 @@ def setupGenFakeShowerJets(process,
 def setupRecoFakeShowerJets(process,
                        jets,
                        name,
-                       phimodulation):
+                       zmode,
+                       thetamode,
+                       phimode):
     setattr(process, name, PatFakeShowerJetProducer.clone(
         jetSrc = jets,
         verbose = False,
-        phi_mode = "COS2PHI" if phimodulation else "UNIFORM",
+        phi_mode = phimode,
+        z_mode = zmode,
+        theta_mode = thetamode,
     ))
 
     setattr(process, name+'Table', SimonJetTableProducer.clone(
@@ -59,18 +67,23 @@ def setupFakeJets(process,
                    name,
                    isMC,
                    genOnly,
-                   phimodulation):
+                   zmode,
+                   thetamode,
+                   phimode):
     if isMC:
         process = setupGenFakeShowerJets(process,
                                    genjets,
                                    name,
-                                   phimodulation)
+                                   zmode,
+                                   thetamode,
+                                   phimode)
     if not genOnly:
         process = setupRecoFakeShowerJets(process,
                                     jets,
                                     name,
-                                    ak8,
-                                    phimodulation)
+                                    zmode,
+                                    thetamode,
+                                    phimode)
     return process
 
 

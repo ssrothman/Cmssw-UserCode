@@ -245,6 +245,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
         ans.eta = eta;
         ans.phi = phi;
         ans.iJet = iJet;
+        ans.mass = j.mass();
         ans.jecfactor = jecfactor;
 
         //printf("making jSimonJet et with eta: %f, phi: %f\n", ans.eta, ans.phi);

@@ -27,6 +27,7 @@
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 #include "SRothman/SimonTools/src/selectionStructs.h"
 #include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/computeJetMass.h"
 
 #include <iostream>
 #include <memory>
@@ -223,6 +224,7 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
     if(ans.nPart < minNumPart_){
         continue;
     }
+    computeJetMass(ans);
     result->push_back(std::move(ans));
     if(verbose_){
         printf("pushed back\n");

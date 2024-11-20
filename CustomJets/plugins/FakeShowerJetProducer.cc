@@ -31,6 +31,7 @@
 #include "SRothman/SimonTools/src/particleThresholds.h"
 #include "SRothman/SimonTools/src/partSyst.h"
 #include "SRothman/SimonTools/src/ToyShowerer.h"
+#include "SRothman/SimonTools/src/computeJetMass.h"
 
 #include <iostream>
 #include <memory>
@@ -180,6 +181,8 @@ void FakeShowerJetProducerT<T>::produce(edm::Event& evt,
 
         showerer_.shower(j.pt(), j.eta(), j.phi(), j.mass(),
                 constituents.size(), ans);
+
+        computeJetMass(ans);
 
         if (verbose_){
             printf("\tjet: (%f, %f, %f)\n", ans.pt, ans.eta, ans.phi);

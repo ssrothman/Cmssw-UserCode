@@ -32,6 +32,7 @@
 #include "SRothman/SimonTools/src/particleThresholds.h"
 #include "SRothman/SimonTools/src/vtxCuts.h"
 #include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/computeJetMass.h"
 
 #include <iostream>
 #include <memory>
@@ -215,6 +216,7 @@ void FixedConeJetProducer::produce(edm::Event& evt,
     } // end for part
 
     ans.pt = ans.rawpt;
+    computeJetMass(ans);
 
     if(ans.nPart >= minNumPart_){
         result->push_back(std::move(ans));
