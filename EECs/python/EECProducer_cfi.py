@@ -16,6 +16,8 @@ r_tee_edges = config['EECs']['r_tee_edges']
 ct_tee_edges = config['EECs']['ct_tee_edges']
 r_triangle_edges = config['EECs']['r_triangle_edges']
 ct_triangle_edges = config['EECs']['ct_triangle_edges']
+r_minR_edges = config['EECs']['r_minR_edges']
+phi_minR_edges = config['EECs']['phi_minR_edges']
 
 EECProducer = cms.EDProducer("EECProducer",
     reco = cms.InputTag("SimonJets"),
@@ -49,6 +51,9 @@ EECProducer = cms.EDProducer("EECProducer",
 
     r_triangle_edges = cms.vdouble(*r_triangle_edges),
     ct_triangle_edges = cms.vdouble(*ct_triangle_edges),
+
+    r_minR_edges = cms.vdouble(*r_minR_edges),
+    phi_minR_edges = cms.vdouble(*phi_minR_edges),
 
     shapetol = cms.double(config['EECs']['ShapeTol']),
 )

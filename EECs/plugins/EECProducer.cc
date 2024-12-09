@@ -78,6 +78,9 @@ private:
     std::vector<double> r_triangle_edges_;
     std::vector<double> ct_triangle_edges_;
 
+    std::vector<double> r_minR_edges_;
+    std::vector<double> phi_minR_edges_;
+
     double shapetol_;
 };
 
@@ -110,6 +113,9 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
 
           r_triangle_edges_(conf.getParameter<std::vector<double>>("r_triangle_edges")),
           ct_triangle_edges_(conf.getParameter<std::vector<double>>("ct_triangle_edges")),
+
+          r_minR_edges_(conf.getParameter<std::vector<double>>("r_minR_edges")),
+          phi_minR_edges_(conf.getParameter<std::vector<double>>("phi_minR_edges")),
 
           shapetol_(conf.getParameter<double>("shapetol")) {
     produces<std::vector<EECresult>>("reco");
@@ -155,6 +161,9 @@ void EECProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<std::vector<double>>("r_triangle_edges");
   desc.add<std::vector<double>>("ct_triangle_edges");
 
+  desc.add<std::vector<double>>("r_minR_edges");
+  desc.add<std::vector<double>>("phi_minR_edges");
+
   desc.add<double>("shapetol");
 
   descriptions.addWithDefaultLabel(desc);
@@ -199,6 +208,9 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
   auto r_triangle_ax = std::make_shared<boost::histogram::axis::variable<double>>(r_triangle_edges_);
   auto ct_triangle_ax = std::make_shared<boost::histogram::axis::variable<double>>(ct_triangle_edges_);
+
+  auto r_minR_ax = std::make_shared<boost::histogram::axis::variable<double>>(r_minR_edges_);
+  auto phi_minR_ax = std::make_shared<boost::histogram::axis::variable<double>>(phi_minR_edges_);
 
   fastEEC::normType norm;
   if(ptNorm_ == "RAW"){
@@ -281,6 +293,8 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           r_dipole_ax, ct_dipole_ax,
           r_tee_ax, ct_tee_ax,
           r_triangle_ax, ct_triangle_ax,
+          r_minR_ax, phi_minR_ax,
+          r_minR_ax, phi_minR_ax,
           shapetol_,
           &PU
       );
@@ -329,6 +343,8 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
               r_dipole_ax, ct_dipole_ax,
               r_tee_ax, ct_tee_ax,
               r_triangle_ax, ct_triangle_ax,
+              r_minR_ax, phi_minR_ax,
+              r_minR_ax, phi_minR_ax,
               shapetol_,
               &UNMATCHED,
               &(reco->at(iReco)),

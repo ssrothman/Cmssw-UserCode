@@ -55,6 +55,7 @@ EECTableProducer::EECTableProducer(const edm::ParameterSet& conf)
     produces<nanoaod::FlatTable>(name_+"res4dipole");
     produces<nanoaod::FlatTable>(name_+"res4tee");
     produces<nanoaod::FlatTable>(name_+"res4triangle");
+    //produces<nanoaod::FlatTable>(name_+"res4minR");
     produces<nanoaod::FlatTable>(name_+"BK");
 }
 
@@ -76,7 +77,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
   std::array<std::vector<float>, 5> proj;
   std::vector<float> res3;
-  std::vector<float> res4_dipole, res4_tee, res4_triangle;
+  std::vector<float> res4_dipole, res4_tee, res4_triangle; //res4_minR;
 
   std::vector<int> iJet, iReco;
   std::vector<int> nproj;
@@ -84,6 +85,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   std::vector<int> nres4_dipole_RL, nres4_dipole_r, nres4_dipole_ct;
   std::vector<int> nres4_tee_RL, nres4_tee_r, nres4_tee_ct;
   std::vector<int> nres4_triangle_RL, nres4_triangle_r, nres4_triangle_ct;
+  //std::vector<int> nres4_minR_RL, nres4_minR_r1, nres4_minR_r2, nres4_minR_phi;
 
   for(const auto& EEC : *EECs){
       iJet.push_back(EEC.iJet);
@@ -132,6 +134,17 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nres4_triangle_ct.emplace_back(triangle.shape()[2]);
 
           flattenMultiArray(triangle, res4_triangle);
+    
+          /*
+          const auto& minR = *(EEC.res4shapes->minR);
+          nres4_minR_RL.emplace_back(minR.shape()[0]);
+          nres4_minR_r1.emplace_back(minR.shape()[1]);
+          nres4_minR_r2.emplace_back(minR.shape()[2]);
+          nres4_minR_phi.emplace_back(minR.shape()[3]);
+
+          flattenMultiArray(minR, res4_minR);
+          */
+
       } else {
           nres4_dipole_RL.emplace_back(0);
           nres4_dipole_r.emplace_back(0);
@@ -144,6 +157,13 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nres4_triangle_RL.emplace_back(0);
           nres4_triangle_r.emplace_back(0);
           nres4_triangle_ct.emplace_back(0);
+
+          /*
+          nres4_minR_RL.emplace_back(0);
+          nres4_minR_r1.emplace_back(0);
+          nres4_minR_r2.emplace_back(0);
+          nres4_minR_phi.emplace_back(0);
+          */
       }
   }
 
@@ -169,6 +189,12 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   tableRes4triangle->addColumn<float>("value", res4_triangle, "res4 triangle weights", nanoaod::FlatTable::FloatColumn);
   evt.put(std::move(tableRes4triangle), name_+"res4triangle");
 
+  /*
+  auto tableRes4minR = std::make_unique<nanoaod::FlatTable>(res4_minR.size(), name_+"res4minR", false);
+  tableRes4minR->addColumn<float>("value", res4_minR, "res4 minR weights", nanoaod::FlatTable::FloatColumn);
+  evt.put(std::move(tableRes4minR), name_+"res4minR");
+  */
+
   auto tableBK = std::make_unique<nanoaod::FlatTable>(iJet.size(), name_+"BK", false);
   tableBK->addColumn<int>("iJet", iJet, "index of jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("iReco", iReco, "index of jet", nanoaod::FlatTable::IntColumn);
@@ -185,6 +211,12 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
   tableBK->addColumn<int>("nres4_triangle_RL", nres4_triangle_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres4_triangle_r", nres4_triangle_r, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nres4_triangle_ct", nres4_triangle_ct, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  /*
+  tableBK->addColumn<int>("nres4_minR_RL", nres4_minR_RL, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_minR_r1", nres4_minR_r1, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_minR_r2", nres4_minR_r2, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  tableBK->addColumn<int>("nres4_minR_phi", nres4_minR_phi, "number of res4 EEC weights", nanoaod::FlatTable::IntColumn);
+  */
   evt.put(std::move(tableBK), name_+"BK");
 
 }
