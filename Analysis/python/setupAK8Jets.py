@@ -7,8 +7,12 @@ from SRothman.Analysis.config.config import config
 def setupAK8GenJets(process, genParticles, partonMode,
                     applyExtraGenSelections):
 
-    cutstring = "pt > %f &&"%config['GenJets']['GenJetPt'] + \
-                "abs(eta) < %f"%config['GenJets']['GenJetEta']
+    print("")
+    print(" --------- SETTING UP GEN JETS --------- ")
+    print("")
+
+    cutstring = "pt > %g &&"%config['GenJets']['GenJetPt'] + \
+                " abs(eta) < %g"%config['GenJets']['GenJetEta']
 
     if applyExtraGenSelections: #fakes the tight jet ID + lepton veto
         cutstring += " && muonEnergy/(pt*cosh(eta)) < 0.8"
@@ -16,6 +20,8 @@ def setupAK8GenJets(process, genParticles, partonMode,
         #cutstring += " && neutralEmEnergy/(pt*cosh(eta)) < 0.9"
         #cutstring += " && neutralHadronEnergy/(pt*cosh(eta)) < 0.9"
         cutstring += ' && numberOfDaughters > 1'
+
+    print("Cutstring: %s"%cutstring)
 
     process.cutGenJetsAK8 = cms.EDFilter("GenJetSelector",
         src = cms.InputTag("ak8GenJetsNoNu"),
@@ -29,6 +35,7 @@ def setupAK8GenJets(process, genParticles, partonMode,
             cut = cms.string(""),
             filter = cms.bool(False)
         )
+        print("NO overlap veto")
     else:
         process.selectedGenJetsAK8 = cms.EDFilter("GENJetOverlapCandidateVetoSelector",
             src = cms.InputTag("cutGenJetsAK8"),
@@ -37,6 +44,7 @@ def setupAK8GenJets(process, genParticles, partonMode,
             filter = cms.bool(False),
             verbose = cms.int32(0)
         )
+        print("YES overlap veto")
 
     if applyExtraGenSelections:
         arbitration = config['Jets']['Arbitration']
@@ -46,14 +54,23 @@ def setupAK8GenJets(process, genParticles, partonMode,
                 maxNumber = cms.uint32(int(arbitration[7:])),
                 filter = cms.bool(False)
             )
+            print("Applying %s arbitration"%arbitration)
         elif arbitration == 'None':
             process.arbitratedGenJetsAK8 = cms.EDFilter("GenJetSelector",
                 src = cms.InputTag("selectedGenJetsAK8"),
                 cut = cms.string(""),
                 filter = cms.bool(False)
             )
+            print("No jet arbitration")
         else:
             raise ValueError("Invalid jet arbitration %s"%arbitration)
+    else:
+        process.arbitratedGenJetsAK8 = cms.EDFilter("GenJetSelector",
+            src = cms.InputTag("selectedGenJetsAK8"),
+            cut = cms.string(""),
+            filter = cms.bool(False)
+        )
+        print("No jet arbitration")
 
     process.BigAK8GenJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         src = cms.InputTag("arbitratedGenJetsAK8"),
@@ -120,9 +137,17 @@ def setupAK8GenJets(process, genParticles, partonMode,
     )
     process.schedule.associate(process.MCak8jetstask)
 
+    print("")
+    print(" --------- FINISHED SETTING UP GEN JETS --------- ")
+    print("")
+
     return process
 
 def setupAK8RecoJets(process):
+    print("")
+    print(" --------- SETTING UP RECO JETS --------- ")
+    print("")
+
     process.jetIdLepVetoAK8 = cms.EDProducer("PatJetIDValueMapProducer",
         filterParams = cms.PSet(
             quality = cms.string("TIGHTLEPVETO"),
@@ -148,9 +173,10 @@ def setupAK8RecoJets(process):
     )
 
     jetcut = "pt > %f &&"%config['Jets']['JetPt'] + \
-             "abs(eta) < %f &&"%config['Jets']['JetEta'] + \
-             "userInt('%s') &&"%config['Jets']['JetID'] + \
-             "numberOfDaughters >= %d"%config['Jets']['JetNDaughters']
+             " abs(eta) < %f &&"%config['Jets']['JetEta'] + \
+             " userInt('%s') &&"%config['Jets']['JetID'] + \
+             " numberOfDaughters >= %d"%config['Jets']['JetNDaughters']
+    print("custring: %s"%jetcut)
 
     process.actuallySelectedJetsAK8 = cms.EDFilter("PATJetSelector",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
@@ -165,6 +191,9 @@ def setupAK8RecoJets(process):
         filter = cms.bool(False),
         verbose = cms.int32(0)
     )
+    print("YES overlap veto")
+
+    print("NO jet arbitration")
 
     process.BigAK8JetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         src = cms.InputTag("finalSelectedJetsAK8"),
@@ -204,6 +233,10 @@ def setupAK8RecoJets(process):
         process.BigAK8JetTable,
     )
     process.schedule.associate(process.ak8jetstask)
+
+    print("")
+    print(" --------- FINISHED SETTING UP RECO JETS --------- ")
+    print("")
 
     return process
 

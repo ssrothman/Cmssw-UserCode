@@ -62,7 +62,7 @@ process = setupAK8Jets(process,
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
 process = setupSimonJets(process,
     jets = 'finalSelectedJetsAK8',
-    genjets = 'selectedGenJetsAK8', 
+    genjets = 'arbitratedGenJetsAK8', 
     CHSjets = 'finalJets',
     chargedOnly = True,
     eventSelection = '',
@@ -72,22 +72,52 @@ process = setupSimonJets(process,
     genOnly = False
 )
 
+process = setupSimonJets(process,
+    jets = 'finalSelectedJetsAK8',
+    genjets = 'arbitratedGenJetsAK8', 
+    CHSjets = 'finalJets',
+    chargedOnly = False,
+    eventSelection = '',
+    name = 'SimonJets',
+    ak8 = True,
+    isMC = True,
+    genOnly = False
+)
+
 from SRothman.Matching.setupMatching import setupMatching
 process = setupMatching(process,
     verbose = 0,
     ak8 = True,
-    name = 'GenMatch',
+    name = 'ChargedGenMatch',
     reco = 'ChargedSimonJets',
     gen = 'GenChargedSimonJets',
+    naive = False
+)
+
+process = setupMatching(process,
+    verbose = 0,
+    ak8 = True,
+    name = 'GenMatch',
+    reco = 'SimonJets',
+    gen = 'GenSimonJets',
     naive = False
 )
 
 from SRothman.EECs.setupEECs import setupEECs
 process = setupEECs(process,
     name = 'EECs',
-    genMatch = 'GenMatch',
+    genMatch = 'ChargedGenMatch',
     genjets = 'GenChargedSimonJets',
     recojets = 'ChargedSimonJets',
+    verbose = 0,
+    isMC = True
+)
+
+process = setupEECs(process,
+    name = 'EECs',
+    genMatch = 'GenMatch',
+    genjets = 'GenSimonJets',
+    recojets = 'SimonJets',
     verbose = 0,
     isMC = True
 )

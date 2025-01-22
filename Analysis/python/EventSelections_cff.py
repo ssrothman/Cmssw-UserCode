@@ -8,7 +8,12 @@ from SRothman.Analysis.config.config import config
 def setupEventSelections(process, isMC, 
                          genmuons=False,
                          skipMET=False):
+    print("")
+    print(" ------------ SETUP EVENT SELECTIONS ------------ ")
+    print("")
+
     if not genmuons:
+        print("RECO Muons")
         process.RoccoR = RoccoRValueMapProducer.clone(
             src = cms.InputTag('linkedObjects', 'muons'),
             isMC = isMC
@@ -18,11 +23,14 @@ def setupEventSelections(process, isMC,
             RoccoR = cms.InputTag('RoccoR'),
             verbose = 0
         )
+        print("YES ROCCOR")
 
         muoncut = "abs(eta) < %0.2f && "%config['EventSelection']['MuEta'] + \
-                  "pt > %0.2f && "%config['EventSelection']['MuSubPt'] + \
-                  "passed('%s') && "%config['EventSelection']['MuID'] + \
-                  "passed('%s')" % config['EventSelection']['MuISO']
+                  " pt > %0.2f && "%config['EventSelection']['MuSubPt'] + \
+                  " passed('%s') && "%config['EventSelection']['MuID'] + \
+                  " passed('%s')" % config['EventSelection']['MuISO']
+
+        print("Muon cut: %s" % muoncut)
 
         process.SelectedMuons = cms.EDFilter(
             "MuonRefSelector",
@@ -32,10 +40,15 @@ def setupEventSelections(process, isMC,
         muoncut = muoncut.encode('utf-8')
 
     else:
+        print("GEN Muons")
+        print("NO ROCCOR")
+
         muoncut = 'abs(eta) < %0.2f && '%config['EventSelection']['MuEta'] + \
-                  'pt > %0.2f &&'%config['EventSelection']['MuSubPt'] + \
-                  'abs(pdgId) == 13 &&' + \
-                  'status == 1'
+                  ' pt > %0.2f &&'%config['EventSelection']['MuSubPt'] + \
+                  ' abs(pdgId) == 13 &&' + \
+                  ' status == 1'
+
+        print("Muon cut: %s" % muoncut)
 
         process.SelectedMuons = cms.EDFilter(
             'GenParticleSelector',
@@ -48,10 +61,13 @@ def setupEventSelections(process, isMC,
         src = cms.InputTag("SelectedMuons"),
         minNumber = cms.uint32(2)
     )
+    print("Selecting events with >= 2 muons")
+
     process.ZMuMu = RECOZMuMuFilter.clone(
         src = cms.InputTag("SelectedMuons"),
         verbose = 0
     )
+    print("Running ZMuMu filter")
 
     if not skipMET:
         process.METselector = cms.EDFilter(
@@ -59,11 +75,14 @@ def setupEventSelections(process, isMC,
             src = cms.InputTag('slimmedMETsPuppi'),
             cut = cms.string('pt < %f' % config['EventSelection']['CoarsePuppiMETCut'])
         )
+        print("Selecting events with MET < %f" % config['EventSelection']['CoarsePuppiMETCut'])
         process.METfilter = cms.EDFilter(
             'CandViewCountFilter',
             src = cms.InputTag('METselector'),
             minNumber = cms.uint32(1)
         )
+    else:
+        print("NO MET cut")
 
     if not genmuons and not skipMET:
         process.selections_path = cms.Path(
@@ -97,5 +116,9 @@ def setupEventSelections(process, isMC,
             process.DiMuonFilter +
             process.ZMuMu
         )
+
+    print("")
+    print(" ------------ END SETUP EVENT SELECTIONS ------------ ")
+    print("")
 
     return process

@@ -12,7 +12,7 @@
         "CoarsePuppiMETCut" : 75
     },
     "Jets" : {
-        "JetPt" : 30,
+        "JetPt" : 20,
         "JetEta" : 1.7,
         "JetID" : "jetIdLepVeto",
         "JetNDaughters" : 2,

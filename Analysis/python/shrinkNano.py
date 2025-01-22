@@ -6,6 +6,9 @@ def shrink_nanoAOD_MC(process):
     process.nanoSequenceMC.remove(process.boostedTauMC)
     process.nanoSequenceMC.remove(process.lowPtElectronTables)
     process.nanoSequenceMC.remove(process.lowPtElectronMC)
+    process.nanoSequenceMC.remove(process.isoTrackTables)
+    process.nanoSequenceMC.remove(process.isoTrackSequence)
+    #process.nanoSequenceMC.remove(process.tauTables)
 
     process.particleLevelTables.remove(process.HTXSCategoryTable)
     process.particleLevelTables.remove(process.rivetPhotonTable)
@@ -16,5 +19,10 @@ def shrink_nanoAOD_MC(process):
     process.jetTables.remove(process.subJetTable)
 
     process.jetMC.remove(process.subjetMCTable)
+    process.jetMC.remove(process.genSubJetAK8Table)
+
+    process.tauMC.remove(process.tauMCTable)
+    process.tauMC.remove(process.tausMCMatchHadTauForTable)
+    process.tauMC.remove(process.tausMCMatchLepTauForTable)
 
     return process
