@@ -4,10 +4,13 @@ parser = argparse.ArgumentParser(description='Setup production environment')
 parser.add_argument('cmsRun', type=str, help='Path to cmsRun config')
 parser.add_argument('dataset', type=str, help='Dataset name')
 parser.add_argument('--destination_base', type=str, default='root://cmseos.fnal.gov//store/group/lpcpfnano/srothman')
+parser.add_argument("--name-extra', type=str, default='', help='Extra name to append to the output directory'", dest='name_extra')
 args = parser.parse_args()
 
 print(f'cmsRun: {args.cmsRun}')
 print(f'dataset: {args.dataset}')
+print(f'destination_base: {args.destination_base}')
+print(f'name_extra: {args.name_extra}')
 
 import os
 import os.path as osp
@@ -17,7 +20,10 @@ import datetime
 now = datetime.datetime.now()
 nowstr = now.strftime("%b_%d_%Y")
 
-configname = args.dataset + '_' + nowstr
+if args.name_extra:
+    configname = args.dataset + '_' + args.name_extra + '_' + nowstr
+else:
+    configname = args.dataset + '_' + nowstr
 
 thedestination = osp.join(args.destination_base, configname)
 print(f'destination: {thedestination}')
@@ -42,3 +48,9 @@ os.chdir('working/%s' % configname)
 os.system('tar -czf %s.tar.gz *' % configname)
 print("Copying tarball to EOS")
 os.system('xrdcp -f %s.tar.gz root://cmseos.fnal.gov//store/user/srothman/' % configname)
+
+print("Submit jobs?")
+submit = input("y/n: ")
+if submit == 'y':
+    os.system('condor_submit condor.sub')
+    print("Jobs submitted")
