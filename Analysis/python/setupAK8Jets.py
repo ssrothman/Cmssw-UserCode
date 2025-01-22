@@ -38,11 +38,27 @@ def setupAK8GenJets(process, genParticles, partonMode,
             verbose = cms.int32(0)
         )
 
+    if applyExtraGenSelections:
+        arbitration = config['Jets']['Arbitration']
+        if arbitration.startswith("Leading"):
+            process.arbitratedGenJetsAK8 = cms.EDFilter("LeadingGenJetSelector",
+                src = cms.InputTag("selectedGenJetsAK8"),
+                maxNumber = cms.uint32(int(arbitration[7:])),
+                filter = cms.bool(False)
+            )
+        elif arbitration == 'None':
+            process.arbitratedGenJetsAK8 = cms.EDFilter("GenJetSelector",
+                src = cms.InputTag("selectedGenJetsAK8"),
+                cut = cms.string(""),
+                filter = cms.bool(False)
+            )
+        else:
+            raise ValueError("Invalid jet arbitration %s"%arbitration)
 
     process.BigAK8GenJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-        src = cms.InputTag("selectedGenJetsAK8"),
+        src = cms.InputTag("arbitratedGenJetsAK8"),
         cut = cms.string(""),
-        name = cms.string('selectedGenJetsAK8'),
+        name = cms.string('arbitratedGenJetsAK8'),
         singleton = cms.bool(False),
         extension = cms.bool(False),
         externalVariables = cms.PSet(),
@@ -79,7 +95,7 @@ def setupAK8GenJets(process, genParticles, partonMode,
         ghostRescaling = cms.double(1e-18),
         hadronFlavourHasPriority = cms.bool(True),
         jetAlgorithm = cms.string('AntiKt'),
-        jets = cms.InputTag("selectedGenJetsAK8"),
+        jets = cms.InputTag("arbitratedGenJetsAK8"),
         leptons = cms.InputTag("genPartonsForFlavour","leptons"),
         partons = cms.InputTag("genPartonsForFlavour","physicsPartons"),
         rParam = cms.double(0.8)
@@ -89,12 +105,13 @@ def setupAK8GenJets(process, genParticles, partonMode,
         cut = cms.string(""),
         deltaR = cms.double(0.1),
         jetFlavourInfos = cms.InputTag("selectedGenJetAK8FlavourAssociation"),
-        name = cms.string("selectedGenJetsAK8"),
-        src = cms.InputTag("selectedGenJetsAK8"),
+        name = cms.string("arbitratedGenJetsAK8"),
+        src = cms.InputTag("arbitratedGenJetsAK8"),
     )
 
     process.MCak8jetstask = cms.Task(
         process.cutGenJetsAK8,
+        process.arbitratedGenJetsAK8,
         process.selectedGenJetsAK8,
         process.BigAK8GenJetTable,
         process.genPartonsForFlavour,
