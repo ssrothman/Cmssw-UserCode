@@ -38,6 +38,6 @@ EECs/production/crab/*
 EECs/production/crab.log
 EECs/condor/output/*
 EECs/condor2/output/*
-*/production/crab/*
-*/production/crab.log
+*/production/crab/crab/*
+*/production/crab/crab.log
 Analysis/production/condor/working/*
