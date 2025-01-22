@@ -95,7 +95,21 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     outputCommands = process.NANOAODSIMEventContent.outputCommands,
 )
 
-process.DroppedEventsOutput = cms.OutputModule("NanoAODOutputModule",
+process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
+    compressionAlgorithm = cms.untracked.string('LZMA'),
+    compressionLevel = cms.untracked.int32(9),
+    dataset = cms.untracked.PSet(
+        dataTier = cms.untracked.string('NANOAOD'),
+        filterName = cms.untracked.string('')
+    ),
+    SelectEvents = cms.untracked.PSet( 
+        SelectEvents = cms.vstring('selections_path')
+    ),
+    fileName = cms.untracked.string(selected_fname),
+    outputCommands = process.NANOAODEventContent.outputCommands,
+)
+
+process.DroppedEventsSimOutput = cms.OutputModule("NanoAODOutputModule",
     compressionAlgorithm = cms.untracked.string('LZMA'),
     compressionLevel = cms.untracked.int32(9),
     dataset = cms.untracked.PSet(

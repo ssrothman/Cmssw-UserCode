@@ -11,7 +11,7 @@ process.source = cms.Source("PoolSource",
 
 # Path and EndPath definitions
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
-process.DroppedEventsOutput_step = cms.EndPath(process.DroppedEventsOutput)
+process.DroppedEventsSimOutput_step = cms.EndPath(process.DroppedEventsSimOutput)
 
 from SRothman.Analysis.EventSelections_cff import setupEventSelections
 process = setupEventSelections(process, isMC=True,
@@ -20,7 +20,7 @@ process = setupEventSelections(process, isMC=True,
 # Schedule definition
 process.schedule = cms.Schedule(process.selections_path,
                                 process.NANOAODSIMoutput_step,
-                                process.DroppedEventsOutput_step)
+                                    process.DroppedEventsSimOutput_step)
 
 # customisation of the process.
 from SRothman.Analysis.setupGenTables import setupGenTables

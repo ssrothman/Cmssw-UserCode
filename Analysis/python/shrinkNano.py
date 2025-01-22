@@ -26,3 +26,17 @@ def shrink_nanoAOD_MC(process):
     process.tauMC.remove(process.tausMCMatchLepTauForTable)
 
     return process
+
+def shrink_nanoAOD_data(process):
+    process.nanoSequenceCommon.remove(process.boostedTauTables)
+    process.nanoSequenceCommon.remove(process.boostedTauSequence)
+    process.nanoSequenceCommon.remove(process.isoTrackSequence)
+    process.nanoSequenceCommon.remove(process.isoTrackTables)
+
+    process.nanoSequenceOnlyData.remove(process.protonTables)
+
+    process.jetTables.remove(process.saJetTable)
+    process.jetTables.remove(process.saTable)
+    process.jetTables.remove(process.subJetTable)
+
+    return process
