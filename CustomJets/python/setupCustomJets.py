@@ -14,11 +14,11 @@ def setupCustomJets(process, verbose=False, ak8 = False,
 
     if ak8:
         jets = 'selectedUpdatedJetsAK8'
-        genJets = 'selectedGenJetsAK8'
+        genJets = 'arbitratedGenJetsAK8'
         CHSjets = 'finalJets'
     else:
         jets = 'updatedJetsPuppi'
-        genJets = 'selectedGenJets'
+        genJets = 'arbitratedGenJets'
         CHSjets = 'finalJets'
 
     process = setupSimonJets(process, jets, genJets,
