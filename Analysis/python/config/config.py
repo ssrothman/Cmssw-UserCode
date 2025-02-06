@@ -1,7 +1,11 @@
 import json
 import io
+import os
 
-with io.open("Analysis/python/config/config.json", 'r') as f:
+CMSSW_BASE = os.environ['CMSSW_BASE']
+print("CMSSW_BASE: %s" % CMSSW_BASE)
+
+with io.open("%s/src/SRothman/Analysis/python/config/config.json"%CMSSW_BASE, 'r') as f:
     config = json.load(f)
 
 def encode_level(config):
