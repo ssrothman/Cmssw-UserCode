@@ -8,30 +8,42 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 from Configuration.Eras.Modifier_run2_nanoAOD_106Xv2_cff import run2_nanoAOD_106Xv2
 
-from FWCore.ParameterSet.VarParsing import VarParsing
+RUNNING_CRAB = True
 
-options = VarParsing ('analysis')
-options.register('index',
-              -1,
-              VarParsing.multiplicity.singleton,
-              VarParsing.varType.int,
-              "Input file index")
-options.register('filelist',
-                 '',
-                 VarParsing.multiplicity.singleton,
-                 VarParsing.varType.string,
-                 "Input file list")
-options.register('N',
-                 100,
-                 VarParsing.multiplicity.singleton,
-                 VarParsing.varType.int,
-                 'Number of events to process')
-options.register('Threads',
-                 1,
-                 VarParsing.multiplicity.singleton,
-                 VarParsing.varType.int,
-                 'Number of threads to use')
-options.parseArguments()
+if not RUNNING_CRAB:
+    from FWCore.ParameterSet.VarParsing import VarParsing
+
+    options = VarParsing ('analysis')
+    options.register('index',
+                  -1,
+                  VarParsing.multiplicity.singleton,
+                  VarParsing.varType.int,
+                  "Input file index")
+    options.register('filelist',
+                     '',
+                     VarParsing.multiplicity.singleton,
+                     VarParsing.varType.string,
+                     "Input file list")
+    options.register('N',
+                     100,
+                     VarParsing.multiplicity.singleton,
+                     VarParsing.varType.int,
+                     'Number of events to process')
+    options.register('Threads',
+                     1,
+                     VarParsing.multiplicity.singleton,
+                     VarParsing.varType.int,
+                     'Number of threads to use')
+    options.parseArguments()
+else:
+    options = {
+        'index': -1,
+        'filelist': '',
+        'N': -1,
+        'Threads': 4
+    }
+    from argparse import Namespace
+    options = Namespace(**options)
 
 if options.index >= 0:
     selected_fname = 'NANO_selected_%d.root' % options.index
