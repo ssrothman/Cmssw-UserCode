@@ -41,6 +41,9 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData
 #call to customisation function nanoAOD_customizeData imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeData(process)
 
+from SRothman.Analysis.setupRoccoR import setupRoccoR
+process = setupRoccoR(isMC=False)
+
 from SRothman.Analysis.addParticlesTable import addParticlesTable
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
