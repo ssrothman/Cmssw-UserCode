@@ -28,7 +28,7 @@
         "DoRes3" : true,
         "DoRes4" : true,
         "DoRes4Fixed" : false,
-        "DoTransfer" : true,
+        "DoTransfer" : false,
         "pTNorm" : "RAW",
         "ShapeTol" : 0.05,
         "DRedges" : [0.0001,

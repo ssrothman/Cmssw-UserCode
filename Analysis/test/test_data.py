@@ -41,8 +41,8 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData
 #call to customisation function nanoAOD_customizeData imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeData(process)
 
-from SRothman.Analysis.setupRoccoR import setupRoccoR
-process = setupRoccoR(isMC=False)
+#from SRothman.Analysis.setupRoccoR import setupRoccoR
+#process = setupRoccoR(process, isMC=False)
 
 from SRothman.Analysis.addParticlesTable import addParticlesTable
 process = addParticlesTable(process, 
@@ -105,3 +105,7 @@ process = setupEECs(process,
 )
 
 # End of customisation functions
+
+#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
+#    ignoreTotal = cms.untracked.int32(1)
+#)

@@ -18,6 +18,16 @@ def setupEventSelections(process, isMC,
             src = cms.InputTag('linkedObjects', 'muons'),
             isMC = isMC
         )
+
+        process.muonTable.externalVariables.RoccoR = cms.PSet(
+            compression = cms.string('none'),
+            doc = cms.string("Rochester correction factor"),
+            mcOnly = cms.bool(False),
+            precision = cms.int32(-1),
+            src = cms.InputTag("RoccoR"),
+            type = cms.string('float')
+        )
+
         process.CorrectedMuons = CorrectedMuonProducer.clone(
             src = cms.InputTag('linkedObjects', 'muons'),
             RoccoR = cms.InputTag('RoccoR'),
