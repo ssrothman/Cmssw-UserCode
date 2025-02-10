@@ -91,7 +91,7 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
       iGen.push_back(T.iGen);
 
       for(unsigned i=0; i<5; ++i){
-          flattenMultiArray(*(T.proj[i]), transP[i]);
+          simon::flattenMultiArray(*(T.proj[i]), transP[i]);
       }
       nproj.push_back(T.proj[0]->shape()[0]);
 
@@ -102,7 +102,7 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
           unsigned nxi = res3.shape()[1];
           unsigned nphi = res3.shape()[2];
 
-          flattenMultiArray(res3, trans3);
+          simon::flattenMultiArray(res3, trans3);
 
           nres3_RL.emplace_back(nRL);
           nres3_xi.emplace_back(nxi);
@@ -120,7 +120,7 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
           unsigned nr_dipole = dipole.shape()[1];
           unsigned nct_dipole = dipole.shape()[2];
 
-          flattenMultiArray(dipole, trans4dipole);
+          simon::flattenMultiArray(dipole, trans4dipole);
 
           nres4_dipole_RL.emplace_back(nRL_dipole);
           nres4_dipole_r.emplace_back(nr_dipole);
@@ -132,7 +132,7 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
           unsigned nr_tee = tee.shape()[1];
           unsigned nct_tee = tee.shape()[2];
 
-          flattenMultiArray(tee, trans4tee);
+          simon::flattenMultiArray(tee, trans4tee);
 
           nres4_tee_RL.emplace_back(nRL_tee);
           nres4_tee_r.emplace_back(nr_tee);
@@ -149,7 +149,7 @@ void EECTransferTableProducer::produce(edm::Event& evt, const edm::EventSetup& s
 
   auto tableproj = std::make_unique<nanoaod::FlatTable>(transP[0].size(), name_+"proj", false);
   for(unsigned i=0; i<5; ++i){
-    tableproj->addColumn<float>(vformat("value%d",i+2), transP[i], "projected EEC transfer", nanoaod::FlatTable::FloatColumn);
+    tableproj->addColumn<float>(simon::vformat("value%d",i+2), transP[i], "projected EEC transfer", nanoaod::FlatTable::FloatColumn);
   }
   evt.put(std::move(tableproj), name_+"proj");
 

@@ -1,21 +1,21 @@
 #ifndef SROTHMAN_CUSTOMJETS_ADDPARTICLE_H
 #define SROTHMAN_CUSTOMJETS_ADDPARTICLE_H
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/isID.h"
 #include "SRothman/SimonTools/src/selectionStructs.h"
 #include "SRothman/SimonTools/src/partSyst.h"
 #include "SRothman/SimonTools/src/printPart.h"
 
 template <typename P>
-void addParticle(const P* const partptr, jet& ans, double jecfactor,
+void addParticle(const P* const partptr, simon::jet& ans, double jecfactor,
                  bool applyPuppi, bool applyJEC, 
                  bool onlyCharged,
                  double maxPartEta, 
-                 const struct particleThresholds& thresholds,
-                 const struct vtxCuts& vtxcuts,
-                 partSyst& systematitics,
-                 partSyst::SYSTEMATIC syst,
+                 const struct simon::particleThresholds& thresholds,
+                 const struct simon::vtxCuts& vtxcuts,
+                 simon::partSyst& systematitics,
+                 simon::partSyst::SYSTEMATIC syst,
                  unsigned maxNumPart){     
 
     int fromPV;
@@ -53,7 +53,7 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
         return;
     }
 
-    particle nextpart(nextpt, partptr->eta(), partptr->phi(),
+    simon::particle nextpart(nextpt, partptr->eta(), partptr->phi(),
                       pdgid, partptr->charge(),
                       partptr->vertex().x(), 
                       partptr->vertex().y(), 
@@ -92,15 +92,15 @@ void addParticle(const P* const partptr, jet& ans, double jecfactor,
     ans.particles.push_back(nextpart);
 
     ++ans.nPart;
-    if(isELE(nextpart)){
+    if(simon::isELE(nextpart)){
         ++ans.nELE;
-    } else if (isMU(nextpart)){
+    } else if (simon::isMU(nextpart)){
         ++ans.nMU;
-    } else if (isEM0(nextpart)){
+    } else if (simon::isEM0(nextpart)){
         ++ans.nEM0;
-    } else if (isHADCH(nextpart)){
+    } else if (simon::isHADCH(nextpart)){
         ++ans.nHADCH;
-    } else if (isHAD0(nextpart)){
+    } else if (simon::isHAD0(nextpart)){
         ++ans.nHAD0;
     } else {
         printf("WARNING: Unknown pdgid\n");

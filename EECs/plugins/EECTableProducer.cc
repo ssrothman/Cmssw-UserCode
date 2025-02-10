@@ -102,7 +102,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           unsigned nxi = EECres3.shape()[1];
           unsigned nphi = EECres3.shape()[2];
 
-          flattenMultiArray(EECres3, res3);
+          simon::flattenMultiArray(EECres3, res3);
 
           nres3_RL.emplace_back(nRL);
           nres3_xi.emplace_back(nxi);
@@ -119,21 +119,21 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nres4_dipole_r.emplace_back(dipole.shape()[1]);
           nres4_dipole_ct.emplace_back(dipole.shape()[2]);
 
-          flattenMultiArray(dipole, res4_dipole);
+          simon::flattenMultiArray(dipole, res4_dipole);
 
           const auto& tee = *(EEC.res4shapes->tee);
           nres4_tee_RL.emplace_back(tee.shape()[0]);
           nres4_tee_r.emplace_back(tee.shape()[1]);
           nres4_tee_ct.emplace_back(tee.shape()[2]);
 
-          flattenMultiArray(tee, res4_tee);
+          simon::flattenMultiArray(tee, res4_tee);
 
           const auto& triangle = *(EEC.res4shapes->triangle);
           nres4_triangle_RL.emplace_back(triangle.shape()[0]);
           nres4_triangle_r.emplace_back(triangle.shape()[1]);
           nres4_triangle_ct.emplace_back(triangle.shape()[2]);
 
-          flattenMultiArray(triangle, res4_triangle);
+          simon::flattenMultiArray(triangle, res4_triangle);
     
           /*
           const auto& minR = *(EEC.res4shapes->minR);
@@ -142,7 +142,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
           nres4_minR_r2.emplace_back(minR.shape()[2]);
           nres4_minR_phi.emplace_back(minR.shape()[3]);
 
-          flattenMultiArray(minR, res4_minR);
+          simon::flattenMultiArray(minR, res4_minR);
           */
 
       } else {
@@ -169,7 +169,7 @@ void EECTableProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
 
   auto tableproj = std::make_unique<nanoaod::FlatTable>(proj[0].size(), name_+"proj", false);
   for(unsigned i=0; i<5; ++i){
-    tableproj->addColumn<float>(vformat("value%d", i+2), proj[i], "projected EEC weights", nanoaod::FlatTable::FloatColumn);
+    tableproj->addColumn<float>(simon::vformat("value%d", i+2), proj[i], "projected EEC weights", nanoaod::FlatTable::FloatColumn);
   }
   evt.put(std::move(tableproj), name_+"proj");
 

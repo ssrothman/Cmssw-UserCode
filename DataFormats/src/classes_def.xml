@@ -1,12 +1,12 @@
 <lcgdict>
-    <class name="particle"/>
-    <class name="edm::Wrapper<particle>"/>
-    <class name="std::vector<particle>"/>
-    <class name="edm::Wrapper<std::vector<particle>>"/>
+    <class name="simon::particle"/>
+    <class name="edm::Wrapper<simon::particle>"/>
+    <class name="std::vector<simon::particle>"/>
+    <class name="edm::Wrapper<std::vector<simon::particle>>"/>
     <class name="jet"/>
-    <class name="edm::Wrapper<jet>"/>
-    <class name="std::vector<jet>"/>
-    <class name="edm::Wrapper<std::vector<jet>>"/>
+    <class name="edm::Wrapper<simon::jet>"/>
+    <class name="std::vector<simon::jet>"/>
+    <class name="edm::Wrapper<std::vector<simon::jet>>"/>
     <class name="jetmatch"/>
     <class name="edm::Wrapper<jetmatch>"/>
     <class name="std::vector<jetmatch>"/>
@@ -19,8 +19,8 @@
     <class name="edm::Wrapper<EECtransfer>"/>
     <class name="std::vector<EECtransfer>"/>
     <class name="edm::Wrapper<std::vector<EECtransfer>>"/>
-<class name="etaPhiCoords"/>
-<class name="edm::Wrapper<etaPhiCoords>"/>
-<class name="std::vector<etaPhiCoords>"/>
-<class name="edm::Wrapper<std::vector<etaPhiCoords>>"/>
+<class name="simon::etaPhiCoords"/>
+<class name="edm::Wrapper<simon::etaPhiCoords>"/>
+<class name="std::vector<simon::etaPhiCoords>"/>
+<class name="edm::Wrapper<std::vector<simon::etaPhiCoords>>"/>
 </lcgdict>

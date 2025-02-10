@@ -23,7 +23,7 @@
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/etaPhiCoords.h"
 
@@ -47,7 +47,7 @@ RandomConeCoordsProducer::RandomConeCoordsProducer(const edm::ParameterSet& iCon
     maxEta_(iConfig.getParameter<double>("maxEta")),
     verbose_(iConfig.getParameter<int>("verbose"))
 {
-    produces<etaPhiCoords>();
+    produces<simon::etaPhiCoords>();
 }
 
 void RandomConeCoordsProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -58,7 +58,7 @@ void RandomConeCoordsProducer::fillDescriptions(edm::ConfigurationDescriptions& 
 }
 
 void RandomConeCoordsProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    std::unique_ptr<etaPhiCoords> output(new etaPhiCoords());
+    std::unique_ptr<simon::etaPhiCoords> output(new simon::etaPhiCoords());
 
     double eta = 2.0 * maxEta_ * (rand() / (double)RAND_MAX) - maxEta_;
     double phi = 2.0 * M_PI * (rand() / (double)RAND_MAX) - M_PI;

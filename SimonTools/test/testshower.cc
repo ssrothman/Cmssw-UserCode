@@ -1,5 +1,7 @@
 #include "SRothman/SimonTools/src/ToyShowerer.h"
 
+using namespace simon;
+
 int main(){
     ToyShowerer showerer("UNIFORM", 
                          "GLUON",
@@ -17,7 +19,7 @@ int main(){
 
     for (unsigned i=0; i<100; ++i){
         jet result;
-        showerer.shower(100, 0, 0, 0, 100, result);
+        showerer.shower(100, 0, 0, 100, result);
     }
 
     //for (const auto& particle : result.particles){

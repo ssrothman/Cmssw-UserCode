@@ -54,11 +54,11 @@ private:
     std::string ptNorm_;
 
     edm::InputTag recoTag_;
-    edm::EDGetTokenT<edm::View<jet>> recoToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> recoToken_;
 
     bool doGen_;
     edm::InputTag genTag_;
-    edm::EDGetTokenT<edm::View<jet>> genToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> genToken_;
     edm::InputTag matchTag_;
     edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
 
@@ -94,7 +94,7 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
           doTransfer_(conf.getParameter<bool>("doTransfer")),
           ptNorm_(conf.getParameter<std::string>("ptNorm")),
           recoTag_(conf.getParameter<edm::InputTag>("reco")),
-          recoToken_(consumes<edm::View<jet>>(recoTag_)),
+          recoToken_(consumes<edm::View<simon::jet>>(recoTag_)),
           doGen_(conf.getParameter<bool>("doGen")),
           genTag_(conf.getParameter<edm::InputTag>("gen")),
           matchTag_(conf.getParameter<edm::InputTag>("match")),
@@ -124,7 +124,7 @@ EECProducer::EECProducer(const edm::ParameterSet& conf)
         produces<std::vector<EECresult>>("gen");
         produces<std::vector<EECresult>>("genUNMATCH");
         produces<std::vector<EECtransfer>>("transfer");
-        genToken_ = consumes<edm::View<jet>>(genTag_);
+        genToken_ = consumes<edm::View<simon::jet>>(genTag_);
         matchToken_ = consumes<edm::View<jetmatch>>(matchTag_);
     }
 }
@@ -174,10 +174,10 @@ void EECProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
     printf("top of EECProducer::produce\n");
   }
 
-  edm::Handle<edm::View<jet>> reco;
+  edm::Handle<edm::View<simon::jet>> reco;
   evt.getByToken(recoToken_, reco);
 
-  edm::Handle<edm::View<jet>> gen;
+  edm::Handle<edm::View<simon::jet>> gen;
   edm::Handle<edm::View<jetmatch>> matches;
   if(doGen_){
       evt.getByToken(genToken_, gen);

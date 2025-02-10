@@ -17,7 +17,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
 

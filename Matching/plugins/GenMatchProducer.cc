@@ -101,14 +101,14 @@ private:
     unsigned maxReFit_;
 
     edm::InputTag recoTag_;
-    edm::EDGetTokenT<edm::View<jet>> recoToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> recoToken_;
     edm::InputTag genTag_;
-    edm::EDGetTokenT<edm::View<jet>> genToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> genToken_;
 };
 
 GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 : verbose_(conf.getParameter<int>("verbose")),
-                jetMatchingDR2_(square(conf.getParameter<double>("jetMatchingDR"))),
+                jetMatchingDR2_(simon::square(conf.getParameter<double>("jetMatchingDR"))),
 
                 clipval_(conf.getParameter<double>("clipval")),
 
@@ -186,9 +186,9 @@ GenMatchProducer::GenMatchProducer(const edm::ParameterSet& conf)
                 maxReFit_(conf.getParameter<unsigned>("maxReFit")),
 
                 recoTag_(conf.getParameter<edm::InputTag>("reco")),
-                recoToken_(consumes<edm::View<jet>>(recoTag_)),
+                recoToken_(consumes<edm::View<simon::jet>>(recoTag_)),
                 genTag_(conf.getParameter<edm::InputTag>("gen")),
-                genToken_(consumes<edm::View<jet>>(genTag_)){
+                genToken_(consumes<edm::View<simon::jet>>(genTag_)){
 
     produces<std::vector<jetmatch>>();
 }
@@ -293,11 +293,11 @@ void GenMatchProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     descriptions.addWithDefaultLabel(desc);
 }
 
-void printParticle(const particle& part){
+void printParticle(const simon::particle& part){
     printf("pt: %f, eta: %f, phi: %f, pdgId: %d, charge: %d\n",
              part.pt, part.eta, part.phi, part.pdgid, part.charge);
 }
-void printJet(const jet& jet){
+void printJet(const simon::jet& jet){
     for(const auto& part : jet.particles){
         printParticle(part);
     }
@@ -307,10 +307,10 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
     if(verbose_){
         printf("Top of GenMatchProducer::produce()\n");
     }
-    edm::Handle<edm::View<jet>> reco;
+    edm::Handle<edm::View<simon::jet>> reco;
     evt.getByToken(recoToken_, reco);
 
-    edm::Handle<edm::View<jet>> gen;
+    edm::Handle<edm::View<simon::jet>> gen;
     evt.getByToken(genToken_, gen);
 
     auto result = std::make_unique<std::vector<jetmatch>>();
@@ -322,15 +322,15 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
         if(verbose_){
             printf("doing jet %u\n", iReco);
         }
-        const jet& jreco = reco->at(iReco);
+        const simon::jet& jreco = reco->at(iReco);
         int matchedgen = -1;
         for(unsigned iGen=0; iGen<gen->size(); ++iGen){//for each gen jet
             if(taken[iGen]){
                 continue;
             }
-            const jet& jgen = gen->at(iGen);
+            const simon::jet& jgen = gen->at(iGen);
         
-            double dist = dR2(jreco.eta, jreco.phi, 
+            double dist = simon::deltaR2(jreco.eta, jreco.phi, 
                             jgen.eta, jgen.phi);
             if(dist > jetMatchingDR2_ && jgen.eta != 9999){
                 continue;
@@ -349,7 +349,7 @@ void GenMatchProducer::produce(edm::Event& evt, const edm::EventSetup& setup) {
             next.iReco = iReco;
             next.iGen = matchedgen;
 
-            const jet& jgen = gen->at(matchedgen);
+            const simon::jet& jgen = gen->at(matchedgen);
 
             if(verbose_){
                 printf("fit is between %lu and %lu particles\n", 

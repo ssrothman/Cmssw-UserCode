@@ -22,7 +22,7 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/CustomJets/plugins/AddParticle.h"
 #include "SRothman/SimonTools/src/selectionStructs.h"
@@ -41,13 +41,13 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
-    bool anyClose(const T& part, const std::vector<particle>& parts) const;
+    bool anyClose(const T& part, const std::vector<simon::particle>& parts) const;
 
-    partSyst systematics_;
-    partSyst::SYSTEMATIC syst_;
+    simon::partSyst systematics_;
+    simon::partSyst::SYSTEMATIC syst_;
 
-    struct particleThresholds thresholds_;
-    struct vtxCuts vtxCuts_;
+    struct simon::particleThresholds thresholds_;
+    struct simon::vtxCuts vtxCuts_;
 
     bool onlyCharged_;
 
@@ -61,7 +61,7 @@ private:
     edm::EDGetTokenT<edm::View<T>> partToken_;
 
     edm::InputTag jetSrc_;
-    edm::EDGetTokenT<edm::View<jet>> jetToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> jetToken_;
 
     edm::InputTag evtSelSrc_;
     edm::EDGetTokenT<bool> evtSelToken_;
@@ -71,7 +71,7 @@ private:
 };
 
 template <typename T>
-bool ShadowJetProducerT<T>::anyClose(const T& part, const std::vector<particle>& parts) const {
+bool ShadowJetProducerT<T>::anyClose(const T& part, const std::vector<simon::particle>& parts) const {
     for(const auto& p : parts){
         if(reco::deltaR2(part.eta(), part.phi(), p.eta, p.phi) < dR2window_){
             return true;
@@ -83,23 +83,23 @@ bool ShadowJetProducerT<T>::anyClose(const T& part, const std::vector<particle>&
 template <typename T>
 ShadowJetProducerT<T>::ShadowJetProducerT(const edm::ParameterSet& conf)
         : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
-          syst_(partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
+          syst_(simon::partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
           thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           vtxCuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           minNumPart_(conf.getParameter<unsigned>("minNumPart")),
           applyPuppi_(conf.getParameter<bool>("applyPuppi")),
-          dR2window_(square(conf.getParameter<double>("dRwindow"))),
+          dR2window_(simon::square(conf.getParameter<double>("dRwindow"))),
           partSrc_(conf.getParameter<edm::InputTag>("partSrc")),
           partToken_(consumes<edm::View<T>>(partSrc_)),
           jetSrc_(conf.getParameter<edm::InputTag>("jetSrc")),
-          jetToken_(consumes<edm::View<jet>>(jetSrc_)),
+          jetToken_(consumes<edm::View<simon::jet>>(jetSrc_)),
           evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
           evtSelToken_(consumes<bool>(evtSelSrc_)),
           doEvtSel_(conf.getParameter<bool>("doEventSelection")),
           verbose_(conf.getParameter<int>("verbose")){
-    produces<std::vector<jet>>();
+    produces<std::vector<simon::jet>>();
 }
 
 template <typename T>
@@ -109,19 +109,19 @@ void ShadowJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& des
   desc.add<std::string>("syst");
 
   edm::ParameterSetDescription systPset;
-  partSyst::fillPSetDescription(systPset);
+  simon::partSyst::fillPSetDescription(systPset);
   desc.add<edm::ParameterSetDescription>(
             "systematics", systPset);
 
   edm::ParameterSetDescription thresholdDesc;
-  particleThresholds::fillPSetDescription(thresholdDesc);
+  simon::particleThresholds::fillPSetDescription(thresholdDesc);
   desc.add<edm::ParameterSetDescription>(
             "thresholds", thresholdDesc);
 
   desc.add<bool>("onlyCharged");
 
   edm::ParameterSetDescription vtxDesc;
-  vtxCuts::fillPSetDescription(vtxDesc);
+  simon::vtxCuts::fillPSetDescription(vtxDesc);
   desc.add<edm::ParameterSetDescription>(
             "vtxCuts", vtxDesc);
 
@@ -151,10 +151,10 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
   edm::Handle<edm::View<T>> parts;
   evt.getByToken(partToken_, parts);
 
-  edm::Handle<edm::View<jet>> jets;
+  edm::Handle<edm::View<simon::jet>> jets;
   evt.getByToken(jetToken_, jets);
 
-  auto result = std::make_unique<std::vector<jet>>();
+  auto result = std::make_unique<std::vector<simon::jet>>();
 
   if(doEvtSel_){
     edm::Handle<bool> evtSel;
@@ -176,7 +176,7 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
     double eta = j.eta;
     double phi = j.phi;
 
-    jet ans;
+    simon::jet ans;
     ans.pt = pt;
     ans.eta = eta;
     ans.phi = phi;
@@ -209,7 +209,7 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
                             applyPuppi_, false,
                             onlyCharged_,
                             9999, thresholds_,
-                            vtxCuts_, systematics_, partSyst::NOM,
+                            vtxCuts_, systematics_, simon::partSyst::NOM,
                             maxNumPart_);
            } else {
                 throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");
@@ -217,7 +217,7 @@ void ShadowJetProducerT<T>::produce(edm::Event& evt, const edm::EventSetup& setu
         } // end for part
     }
 
-    std::sort(ans.particles.begin(), ans.particles.end(), [](const particle& a, const particle& b){
+    std::sort(ans.particles.begin(), ans.particles.end(), [](const simon::particle& a, const simon::particle& b){
         return a.pt > b.pt;
     });
 

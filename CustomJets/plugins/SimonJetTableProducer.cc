@@ -45,10 +45,10 @@ private:
     edm::InputTag matchSrc_;
     edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
     edm::InputTag genJetSrc_;
-    edm::EDGetTokenT<edm::View<jet>> genJetToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> genJetToken_;
 
     edm::InputTag src_;
-    edm::EDGetTokenT<edm::View<jet>> srcToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> srcToken_;
 
     int verbose_;
 };
@@ -60,13 +60,13 @@ SimonJetTableProducer::SimonJetTableProducer(const edm::ParameterSet& conf)
           matchSrc_(conf.getParameter<edm::InputTag>("matchSrc")),
           genJetSrc_(conf.getParameter<edm::InputTag>("genJets")),
           src_(conf.getParameter<edm::InputTag>("src")),
-          srcToken_(consumes<edm::View<jet>>(src_)),
+          srcToken_(consumes<edm::View<simon::jet>>(src_)),
           verbose_(conf.getParameter<int>("verbose")){
     if(addMatch_){
       matchToken_ = consumes<edm::View<jetmatch>>(matchSrc_);
     }
     if(addMatch_ && !isGen_){
-        genJetToken_ = consumes<edm::View<jet>>(genJetSrc_);
+        genJetToken_ = consumes<edm::View<simon::jet>>(genJetSrc_);
     }
     produces<nanoaod::FlatTable>(name_);
     produces<nanoaod::FlatTable>(name_+"CHS");
@@ -90,7 +90,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
         printf("top of SimonJetTableProducer::produce()\n");
     }
     //std::cout << "The name is " << name_ << std::endl;
-  edm::Handle<edm::View<jet>> jets;
+  edm::Handle<edm::View<simon::jet>> jets;
   evt.getByToken(srcToken_, jets);
 
   edm::Handle<edm::View<jetmatch>> matches;
@@ -98,7 +98,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
       evt.getByToken(matchToken_, matches);
   }
 
-  edm::Handle<edm::View<jet>> genJets;
+  edm::Handle<edm::View<simon::jet>> genJets;
   if(addMatch_ && !isGen_){
       evt.getByToken(genJetToken_, genJets);
   }
@@ -187,13 +187,13 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
                           nextMatches.at(idx) += 1;
                           if (!isGen_){
                               const auto& part = genJets->at(match.iGen).particles.at(j);
-                              if(isMU(part)){
+                              if(simon::isMU(part)){
                                   nextMatchMuon.at(idx) += 1;
-                              } else if(isELE(part)){
+                              } else if(simon::isELE(part)){
                                   nextMatchEle.at(idx) += 1;
-                              } else if(isEM0(part)){
+                              } else if(simon::isEM0(part)){
                                   nextMatchEM0.at(idx) += 1;
-                              } else if(isHAD0(part)){
+                              } else if(simon::isHAD0(part)){
                                   nextMatchHAD0.at(idx) += 1;
                               } else {
                                   nextMatchHADCH.at(idx) += 1;

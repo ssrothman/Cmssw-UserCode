@@ -23,7 +23,7 @@
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
 
 #include "SRothman/CustomJets/plugins/AddParticle.h"
@@ -45,14 +45,14 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
-    partSyst systematics_;
-    partSyst::SYSTEMATIC syst_;
+    simon::partSyst systematics_;
+    simon::partSyst::SYSTEMATIC syst_;
 
     bool passPtEtaPhi(const T& jet);
     bool passLepVeto(const T& jet);
     
-    struct particleThresholds thresholds_;
-    struct vtxCuts vtxcuts_;
+    struct simon::particleThresholds thresholds_;
+    struct simon::vtxCuts vtxcuts_;
 
     bool onlyCharged_;
 
@@ -89,7 +89,7 @@ private:
 template <typename T>
 UniformGaussianJetProducerT<T>::UniformGaussianJetProducerT(const edm::ParameterSet& conf)
         : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
-          syst_(partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
+          syst_(simon::partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
           thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           vtxcuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
@@ -112,8 +112,7 @@ UniformGaussianJetProducerT<T>::UniformGaussianJetProducerT(const edm::Parameter
           radius_(conf.getParameter<double>("radius")),
           generator_(std::random_device()()),
           distribution_(0.0, radius_){
-    syst_ = partSyst::NOM;
-    produces<std::vector<jet>>();
+    produces<std::vector<simon::jet>>();
 }
 
 template <typename T>
@@ -123,12 +122,12 @@ void UniformGaussianJetProducerT<T>::fillDescriptions(edm::ConfigurationDescript
   desc.add<std::string>("syst");
 
   edm::ParameterSetDescription systPset;
-  partSyst::fillPSetDescription(systPset);
+  simon::partSyst::fillPSetDescription(systPset);
   desc.add<edm::ParameterSetDescription>(
             "systematics", systPset);
 
   edm::ParameterSetDescription thresholdPset;
-  particleThresholds::fillPSetDescription(thresholdPset);
+  simon::particleThresholds::fillPSetDescription(thresholdPset);
   desc.add<edm::ParameterSetDescription>(
             "thresholds", thresholdPset);
 
@@ -136,7 +135,7 @@ void UniformGaussianJetProducerT<T>::fillDescriptions(edm::ConfigurationDescript
   desc.add<bool>("onlyCharged");
 
   edm::ParameterSetDescription vtxCutsPset;
-  vtxCuts::fillPSetDescription(vtxCutsPset);
+  simon::vtxCuts::fillPSetDescription(vtxCutsPset);
   desc.add<edm::ParameterSetDescription>(
             "vtxCuts", vtxCutsPset);
 
@@ -203,7 +202,7 @@ void UniformGaussianJetProducerT<T>::produce(edm::Event& evt,
         evt.getByToken(CHSsrcToken_, CHSjets);
     }
 
-    auto result = std::make_unique<std::vector<jet>>();
+    auto result = std::make_unique<std::vector<simon::jet>>();
 
     if(doEvtSel_){
         edm::Handle<bool> evtSel;
@@ -250,7 +249,7 @@ void UniformGaussianJetProducerT<T>::produce(edm::Event& evt,
             throw std::logic_error("UniformGaussianJetProducer: unknown jet type");
         }
 
-        jet ans;
+        simon::jet ans;
         ans.pt = pt;
         ans.eta = eta;
         ans.phi = phi;
@@ -298,14 +297,14 @@ void UniformGaussianJetProducerT<T>::produce(edm::Event& evt,
                             applyPuppi_, applyJEC_,
                             onlyCharged_,
                             9999, thresholds_,
-                            vtxcuts_, systematics_, partSyst::NOM,
+                            vtxcuts_, systematics_, simon::partSyst::NOM,
                             maxNumPart_);
            } else if(genptr2){
                addParticle(genptr2, ans, jecfactor, 
                             applyPuppi_, applyJEC_,
                             onlyCharged_,
                             9999, thresholds_,
-                            vtxcuts_, systematics_, partSyst::NOM,
+                            vtxcuts_, systematics_, simon::partSyst::NOM,
                             maxNumPart_);
            } else {
                 throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate or GenParticle");

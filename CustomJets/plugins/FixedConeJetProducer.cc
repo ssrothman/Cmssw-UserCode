@@ -23,7 +23,7 @@
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/etaPhiCoords.h"
 
@@ -46,11 +46,11 @@ public:
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
     
-    partSyst systematics_;
-    partSyst::SYSTEMATIC syst_;
+    simon::partSyst systematics_;
+    simon::partSyst::SYSTEMATIC syst_;
 
-    struct particleThresholds thresholds_;
-    struct vtxCuts vtxcuts_;
+    struct simon::particleThresholds thresholds_;
+    struct simon::vtxCuts vtxcuts_;
 
     bool onlyCharged_;
 
@@ -63,7 +63,7 @@ private:
     bool doEvtSel_;
 
     edm::InputTag coordSrc_;
-    edm::EDGetTokenT<etaPhiCoords> coordToken_;
+    edm::EDGetTokenT<simon::etaPhiCoords> coordToken_;
 
     edm::InputTag partSrc_;
     edm::EDGetTokenT<edm::View<reco::Candidate>> partToken_;
@@ -75,7 +75,7 @@ private:
 
 FixedConeJetProducer::FixedConeJetProducer(const edm::ParameterSet& conf)
         : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
-          syst_(partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
+          syst_(simon::partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
           thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
           vtxcuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
@@ -85,12 +85,12 @@ FixedConeJetProducer::FixedConeJetProducer(const edm::ParameterSet& conf)
           evtSelToken_(consumes<bool>(evtSelSrc_)),
           doEvtSel_(conf.getParameter<bool>("doEventSelection")),
           coordSrc_(conf.getParameter<edm::InputTag>("coords")),
-          coordToken_(consumes<etaPhiCoords>(coordSrc_)),
+          coordToken_(consumes<simon::etaPhiCoords>(coordSrc_)),
           partSrc_(conf.getParameter<edm::InputTag>("particles")),
           partToken_(consumes<edm::View<reco::Candidate>>(partSrc_)),
           conesize_(conf.getParameter<double>("conesize")),
           verbose_(conf.getParameter<int>("verbose")){
-    produces<std::vector<jet>>();
+    produces<std::vector<simon::jet>>();
 }
 
 void FixedConeJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -99,19 +99,19 @@ void FixedConeJetProducer::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.add<std::string>("syst");
 
   edm::ParameterSetDescription systPset;
-  partSyst::fillPSetDescription(systPset);
+  simon::partSyst::fillPSetDescription(systPset);
   desc.add<edm::ParameterSetDescription>(
             "systematics", systPset);
 
   edm::ParameterSetDescription thresholdPset;
-  particleThresholds::fillPSetDescription(thresholdPset);
+  simon::particleThresholds::fillPSetDescription(thresholdPset);
   desc.add<edm::ParameterSetDescription>(
             "thresholds", thresholdPset);
 
   desc.add<bool>("onlyCharged");
 
   edm::ParameterSetDescription vtxCutsPset;
-  vtxCuts::fillPSetDescription(vtxCutsPset);
+  simon::vtxCuts::fillPSetDescription(vtxCutsPset);
   desc.add<edm::ParameterSetDescription>(
             "vtxCuts", vtxCutsPset);
 
@@ -140,7 +140,7 @@ void FixedConeJetProducer::produce(edm::Event& evt,
         printf("top of FixedConeJetProducer::produce()\n");
     }
 
-    edm::Handle<etaPhiCoords> coords;
+    edm::Handle<simon::etaPhiCoords> coords;
     evt.getByToken(coordToken_, coords);
 
     if(verbose_){
@@ -154,7 +154,7 @@ void FixedConeJetProducer::produce(edm::Event& evt,
         printf("got particles\n");
     }
 
-    auto result = std::make_unique<std::vector<jet>>();
+    auto result = std::make_unique<std::vector<simon::jet>>();
 
     if(doEvtSel_){
         edm::Handle<bool> evtSel;
@@ -169,7 +169,7 @@ void FixedConeJetProducer::produce(edm::Event& evt,
         printf("passed event selection\n");
     }
 
-    jet ans;
+    simon::jet ans;
     ans.eta = coords->eta;
     ans.phi = coords->phi;
     ans.iJet = 9999;
@@ -208,7 +208,7 @@ void FixedConeJetProducer::produce(edm::Event& evt,
                         onlyCharged_,
                         9999, thresholds_, 
                         vtxcuts_, systematics_,
-                        partSyst::NOM,
+                        simon::partSyst::NOM,
                         maxNumPart_);
        } else {
             throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");

@@ -23,7 +23,7 @@
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/etaPhiCoords.h"
 
@@ -52,7 +52,7 @@ ControlRegionCoordsProducer::ControlRegionCoordsProducer(const edm::ParameterSet
     maxEta_(iConfig.getParameter<double>("maxEta")),
     verbose_(iConfig.getParameter<int>("verbose"))
 {
-    produces<etaPhiCoords>();
+    produces<simon::etaPhiCoords>();
 }
 
 void ControlRegionCoordsProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -67,7 +67,7 @@ void ControlRegionCoordsProducer::produce(edm::Event& iEvent, const edm::EventSe
     edm::Handle<edm::View<pat::Muon>> muons;
     iEvent.getByToken(muonToken_, muons);
 
-    std::unique_ptr<etaPhiCoords> output(new etaPhiCoords());
+    std::unique_ptr<simon::etaPhiCoords> output(new simon::etaPhiCoords());
 
     double eta, phi;
 

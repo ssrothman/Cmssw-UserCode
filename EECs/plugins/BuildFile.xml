@@ -24,5 +24,6 @@
   <use name="DataFormats/NanoAOD"/>
   <use name="SRothman/DataFormats"/>
   <use name="SRothman/EECs"/>
+  <use name="SRothman/SimonTools"/>
   <use name="rootminuit2"/>
 </library>

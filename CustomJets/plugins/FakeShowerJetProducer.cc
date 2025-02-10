@@ -23,7 +23,7 @@
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "SRothman/SimonTools/src/jets.h"
+#include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
 
 #include "SRothman/CustomJets/plugins/AddParticle.h"
@@ -67,7 +67,7 @@ private:
     std::string theta_mode_;
     double zcut_;
     double theta_min_, theta_max_;
-    ToyShowerer showerer_;
+    simon::ToyShowerer showerer_;
 };
 
 template <typename T>
@@ -92,7 +92,7 @@ FakeShowerJetProducerT<T>::FakeShowerJetProducerT(const edm::ParameterSet& conf)
 
     //std::string moduleName = conf.getParameter<std::string>("@module_label");
     //showerer_.enable_logging(moduleName + ".log");
-    produces<std::vector<jet>>();
+    produces<std::vector<simon::jet>>();
 }
 
 template <typename T>
@@ -153,7 +153,7 @@ void FakeShowerJetProducerT<T>::produce(edm::Event& evt,
     edm::Handle<edm::View<T>> jets;
     evt.getByToken(jetSrcToken_, jets);
 
-    auto result = std::make_unique<std::vector<jet>>();
+    auto result = std::make_unique<std::vector<simon::jet>>();
 
     if(verbose_){
         printf("passed event selection\n");
@@ -176,13 +176,13 @@ void FakeShowerJetProducerT<T>::produce(edm::Event& evt,
             printf("jet %d passed jet selection\n", iJet);
         }
 
-        jet ans;
+        simon::jet ans;
         ans.iJet = iJet;
 
-        showerer_.shower(j.pt(), j.eta(), j.phi(), j.mass(),
+        showerer_.shower(j.pt(), j.eta(), j.phi(),
                 constituents.size(), ans);
 
-        computeJetMass(ans);
+        simon::computeJetMass(ans);
 
         if (verbose_){
             printf("\tjet: (%f, %f, %f)\n", ans.pt, ans.eta, ans.phi);
