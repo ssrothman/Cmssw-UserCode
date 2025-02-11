@@ -55,14 +55,14 @@ void TrackMatchProducer::produce(edm::Event& event, const edm::EventSetup& setup
     auto result = std::make_unique<std::vector<matching::jetmatch>>();
 
     matching::matchvec matches;
-    matcher_.matchJets(*genjets, *recojets, matches);
+    matcher_.matchJets(*recojets, *genjets, matches);
 
     for(const auto& jetpair : matches){
         matching::jetmatch match;
         match.iReco = jetpair.iReco;
         match.iGen = jetpair.iGen;
 
-        matcher_.matchParticles(genjets->at(match.iGen), recojets->at(match.iReco), match.tmat);
+        matcher_.matchParticles(recojets->at(match.iReco), genjets->at(match.iGen), match.tmat);
 
         result->push_back(match);
     }
