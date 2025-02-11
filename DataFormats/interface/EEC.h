@@ -1,84 +1,42 @@
 #ifndef SROTHMAN_DATAFORMATS_EEC_H
 #define SROTHMAN_DATAFORMATS_EEC_H
 
-#include <boost/multi_array.hpp>
-#include "SRothman/EECs/src/fastStructs.h"
+#include "SRothman/EECs/src/Res4Result.h"
+#include "SRothman/EECs/src/Res4TransferResult.h"
+#include "SRothman/EECs/src/Res4Calculator.h"
 
-struct EECresult{
-    unsigned iJet, iReco; 
+namespace EEC{
+    struct CMSSW_Res4Result{
+        unsigned iJet, iReco;
+        Res4Result_MultiArray result;
 
-    unsigned maxOrder;
-    bool doRes3;
-    bool doRes4Shapes;
-    bool doRes4Fixed;
-    
-    std::array<std::shared_ptr<std::vector<double>>, 5> proj;
-    std::shared_ptr<boost::multi_array<double, 3>> res3;
-    std::shared_ptr<fastEEC::res4shapes<double>> res4shapes;
+        CMSSW_Res4Result() : iJet(0), iReco(0), result() {}
 
-    EECresult() :
-        iJet(9999), iReco(9999),
-        maxOrder(0),
-        doRes3(false), 
-        doRes4Shapes(false), 
-        doRes4Fixed(false), 
-        proj({{nullptr, nullptr, nullptr, nullptr, nullptr}}),
-        res3(nullptr), 
-        res4shapes(nullptr) {}
+        CMSSW_Res4Result(unsigned iJet, unsigned iReco,
+                const Res4Calculator& calc) :
+            iJet(iJet), 
+            iReco(iReco),
+            result(calc) {}
 
-    EECresult(unsigned iJet, unsigned iReco, 
-              unsigned maxOrder,
-              bool doRes3, 
-              bool doRes4Shapes, bool doRes4Fixed,
-              std::array<std::shared_ptr<std::vector<double>>, 5> p,
-              std::shared_ptr<boost::multi_array<double, 3>> r3,
-              std::shared_ptr<fastEEC::res4shapes<double>> r4s) :
-        iJet(iJet), iReco(iReco),
-        maxOrder(maxOrder),
-        doRes3(doRes3),
-        doRes4Shapes(doRes4Shapes), 
-        doRes4Fixed(doRes4Fixed),
-        proj(p),
-        res3(r3),
-        res4shapes(r4s) {}
-};
+        CMSSW_Res4Result(unsigned iJet, unsigned iReco,
+                const Res4TransferCalculator& calc) :
+            iJet(iJet),
+            iReco(iReco),
+            result(calc) {}
+    };
 
-struct EECtransfer{
-    unsigned iReco, iGen;
-    unsigned maxOrder;
-    bool doRes3;
-    bool doRes4Shapes;
-    bool doRes4Fixed;
+    struct CMSSW_Res4TransferResult{
+        unsigned iReco, iGen;
+        Res4TransferResult_Vector_MultiArray result;
 
-    std::array<std::shared_ptr<boost::multi_array<double, 2>>, 5> proj;
-    std::shared_ptr<boost::multi_array<double, 6>> res3;
-    std::shared_ptr<fastEEC::res4shapes_transfer<double>> res4shapes;
+        CMSSW_Res4TransferResult() : iReco(0), iGen(0), result() {}
 
-    EECtransfer() :
-        iReco(9999), iGen(9999),
-        maxOrder(0),
-        doRes3(false),
-        doRes4Shapes(false),
-        doRes4Fixed(false),
-        proj({{nullptr, nullptr, nullptr, nullptr, nullptr}}),
-        res3(nullptr),
-        res4shapes(nullptr) {}
-
-    EECtransfer(unsigned iReco, unsigned iGen, 
-                unsigned maxOrder,
-                bool doRes3,
-                bool doRes4Shapes, bool doRes4Fixed,
-                std::array<std::shared_ptr<boost::multi_array<double, 2>>, 5> p2,
-                std::shared_ptr<boost::multi_array<double, 6>> r3,
-                std::shared_ptr<fastEEC::res4shapes_transfer<double>> r4s) :
-        iReco(iReco), iGen(iGen),
-        maxOrder(maxOrder),
-        doRes3(doRes3), 
-        doRes4Shapes(doRes4Shapes),
-        doRes4Fixed(doRes4Fixed), 
-        proj(p2),
-        res3(r3),
-        res4shapes(r4s) {}
+        CMSSW_Res4TransferResult(unsigned iReco, unsigned iGen,
+                const Res4TransferCalculator& calc) :
+            iReco(iReco),
+            iGen(iGen),
+            result(calc) {}
+    };
 };
 
 #endif

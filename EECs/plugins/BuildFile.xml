@@ -26,4 +26,5 @@
   <use name="SRothman/EECs"/>
   <use name="SRothman/SimonTools"/>
   <use name="rootminuit2"/>
+<Flags ADD_SUBDIR="1"/>
 </library>
