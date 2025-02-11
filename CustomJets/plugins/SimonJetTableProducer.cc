@@ -43,7 +43,7 @@ private:
     bool addMatch_;
     bool isGen_;
     edm::InputTag matchSrc_;
-    edm::EDGetTokenT<edm::View<jetmatch>> matchToken_;
+    edm::EDGetTokenT<edm::View<matching::jetmatch>> matchToken_;
     edm::InputTag genJetSrc_;
     edm::EDGetTokenT<edm::View<simon::jet>> genJetToken_;
 
@@ -63,7 +63,7 @@ SimonJetTableProducer::SimonJetTableProducer(const edm::ParameterSet& conf)
           srcToken_(consumes<edm::View<simon::jet>>(src_)),
           verbose_(conf.getParameter<int>("verbose")){
     if(addMatch_){
-      matchToken_ = consumes<edm::View<jetmatch>>(matchSrc_);
+      matchToken_ = consumes<edm::View<matching::jetmatch>>(matchSrc_);
     }
     if(addMatch_ && !isGen_){
         genJetToken_ = consumes<edm::View<simon::jet>>(genJetSrc_);
@@ -93,7 +93,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   edm::Handle<edm::View<simon::jet>> jets;
   evt.getByToken(srcToken_, jets);
 
-  edm::Handle<edm::View<jetmatch>> matches;
+  edm::Handle<edm::View<matching::jetmatch>> matches;
   if(addMatch_){
       evt.getByToken(matchToken_, matches);
   }
@@ -180,9 +180,9 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
           }
           if(matchidx >=0 ){//if found match
               const auto& match = matches->at(matchidx);
-              for(unsigned i=0; i<match.rawmat.rows(); ++i){//for i
-                  for(unsigned j=0; j<match.rawmat.cols(); ++j){// for j
-                      if(match.rawmat(i, j) > 0){//if matched
+              for(unsigned i=0; i<match.tmat.rows(); ++i){//for i
+                  for(unsigned j=0; j<match.tmat.cols(); ++j){// for j
+                      if(match.tmat(i, j) > 0){//if matched
                           unsigned idx = isGen_ ? j : i;
                           nextMatches.at(idx) += 1;
                           if (!isGen_){
@@ -209,13 +209,13 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
                   Eigen::VectorXd genpt = genj.ptvec();
                   Eigen::VectorXd recopt = j.ptvec();
 
-                  Eigen::VectorXd predpt = match.rawmat * genpt;
+                  Eigen::VectorXd predpt = match.tmat * genpt;
 
                   Eigen::VectorXd wgeneta = genpt.cwiseProduct(genj.etavec());
                   Eigen::VectorXd wgenphi = genpt.cwiseProduct(genj.phivec());
 
-                  Eigen::VectorXd predeta = (match.rawmat * wgeneta).array()/predpt.array();
-                  Eigen::VectorXd predphi = (match.rawmat * wgenphi).array()/predpt.array();
+                  Eigen::VectorXd predeta = (match.tmat * wgeneta).array()/predpt.array();
+                  Eigen::VectorXd predphi = (match.tmat * wgenphi).array()/predpt.array();
 
                   for(unsigned i=0; i<j.nPart; ++i){
                       nextPt.at(i) = predpt(i);

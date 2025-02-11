@@ -10,61 +10,50 @@ def setupMatching(process, verbose=0,
                   gen = 'GenSimonJets',
                   naive=False):
                    
-    if naive:
-        setattr(process, name, 
-            NaiveMatchProducer.clone(
-                reco = reco,
-                gen = gen,
-                verbose = verbose,
-                jetMatchingDR = 0.4 if ak8 else 0.2
+    setattr(process, name, 
+        cms.EDProducer("TrackMatchProducer",
+            recoJets = cms.InputTag(reco),
+            genJets = cms.InputTag(gen),
+            matcher = cms.PSet(
+                jet_dr_mode = cms.string("Const"),
+                jet_dr_param1 = cms.double(0.4),
+                jet_dr_param2 = cms.double(0.0),
+                jet_dr_param3 = cms.double(0.0),
+                jet_ptres_mode = cms.string("Const"),
+                jet_ptres_param1 = cms.double(10.0),
+                jet_ptres_param2 = cms.double(0.0),
+                jet_angres_mode = cms.string("Const"),
+                jet_angres_param1 = cms.double(0.4),
+                jet_angres_param2 = cms.double(0.0),
+                particle_dr_mode = cms.string("Const"),
+                particle_dr_param1 = cms.double(0.4),
+                particle_dr_param2 = cms.double(0.0),
+                particle_dr_param3 = cms.double(0.0),
+                particle_ptres_mode = cms.string("Const"),
+                particle_ptres_param1 = cms.double(10.0),
+                particle_ptres_param2 = cms.double(0.0),
+                particle_angres_mode = cms.string("Const"),
+                particle_angres_param1 = cms.double(0.4),
+                particle_angres_param2 = cms.double(0.0),
+                opp_charge_penalty = cms.double(0.0),
+                no_charge_penalty = cms.double(0.0),
             )
         )
-    else:
-        setattr(process, name, 
-            GenMatchProducer.clone(
-                reco = reco,
-                gen = gen,
-                verbose = verbose,
-                jetMatchingDR = 0.4 if ak8 else 0.2
-            )
-        )
+    )
 
     setattr(process, name+"Table", 
-        GenMatchTableProducer.clone(
-            src = name,
-            name = name,
-            verbose = verbose
-        )
-    )
-
-    setattr(process, name+"ParticleTable", 
-        SimonJetTableProducer.clone(
-            src = reco,
-            name = name+"Particles",
-            verbose = verbose,
-            isGen = False,
-            addMatch = True,
-            matchSrc = name,
-            genJets = gen
-        )
-    )
-
-    setattr(process, name+"GenParticleTable",
-        SimonJetTableProducer.clone(
-            src = gen,
-            name = name+"GenParticles",
-            verbose = verbose,
-            isGen = True,
-            addMatch = True,
-            matchSrc = name,
+        cms.EDProducer("TrackMatchTableProducer",
+            genname = cms.string(gen),
+            reconame = cms.string(reco),
+            recoJets = cms.InputTag(reco),
+            genJets = cms.InputTag(gen),
+            matches = cms.InputTag(name),
         )
     )
 
     setattr(process, name+"Task", cms.Task(
         getattr(process, name),
         getattr(process, name+"Table"),
-        getattr(process, name+"ParticleTable"),
-        getattr(process, name+"GenParticleTable")
     ))
     process.schedule.associate(getattr(process, name+"Task"))
 

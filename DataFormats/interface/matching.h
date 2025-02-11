@@ -3,10 +3,11 @@
 
 #include <Eigen/Dense>
 
-struct jetmatch { 
-    unsigned iReco, iGen;
-    Eigen::MatrixXd ptrans;
-    Eigen::MatrixXd rawmat;
+namespace matching {
+    struct jetmatch { 
+        unsigned iReco, iGen;
+        Eigen::MatrixXd tmat;
+    };
 };
 
 #endif
