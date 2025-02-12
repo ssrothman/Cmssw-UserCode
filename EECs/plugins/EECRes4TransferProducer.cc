@@ -21,6 +21,7 @@
 #include <string>
 
 class EECRes4TransferProducer : public edm::stream::EDProducer<> {
+public:
     explicit EECRes4TransferProducer(const edm::ParameterSet&);
     ~EECRes4TransferProducer() override = default;
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
@@ -40,8 +41,8 @@ EECRes4TransferProducer::EECRes4TransferProducer(const edm::ParameterSet& conf) 
         matchesToken_(consumes<std::vector<matching::jetmatch>>(conf.getParameter<edm::InputTag>("matches")))
 {
 
-    produces<std::vector<EEC::CMSSW_Res4TransferResult>>();
-    produces<std::vector<EEC::CMSSW_Res4Result>>();
+    produces<std::vector<EEC::CMSSWRes4TransferResult>>();
+    produces<std::vector<EEC::CMSSWRes4Result>>();
 }
 
 void EECRes4TransferProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -67,8 +68,8 @@ void EECRes4TransferProducer::produce(edm::Event& event, const edm::EventSetup& 
     edm::Handle<std::vector<matching::jetmatch>> matches;
     event.getByToken(matchesToken_, matches);
 
-    auto transfer_result = std::make_unique<std::vector<EEC::CMSSW_Res4TransferResult>>();
-    auto result = std::make_unique<std::vector<EEC::CMSSW_Res4Result>>();
+    auto transfer_result = std::make_unique<std::vector<EEC::CMSSWRes4TransferResult>>();
+    auto result = std::make_unique<std::vector<EEC::CMSSWRes4Result>>();
     result->reserve(matches->size());
     transfer_result->reserve(matches->size());
 
@@ -88,3 +89,5 @@ void EECRes4TransferProducer::produce(edm::Event& event, const edm::EventSetup& 
     event.put(std::move(result));
     event.put(std::move(transfer_result));
 }
+
+DEFINE_FWK_MODULE(EECRes4TransferProducer);

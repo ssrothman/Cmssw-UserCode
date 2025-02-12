@@ -20,6 +20,7 @@
 #include <string>
 
 class EECRes4Producer : public edm::stream::EDProducer<> {
+public:
     explicit EECRes4Producer(const edm::ParameterSet&);
     ~EECRes4Producer() override = default;
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
@@ -34,7 +35,7 @@ EECRes4Producer::EECRes4Producer(const edm::ParameterSet& conf) :
         res4calc_(conf.getParameter<edm::ParameterSet>("calculator")),
         jetsToken_(consumes<std::vector<simon::jet>>(conf.getParameter<edm::InputTag>("jets"))) {
 
-    produces<std::vector<EEC::CMSSW_Res4Result>>();
+    produces<std::vector<EEC::CMSSWRes4Result>>();
 }
 
 void EECRes4Producer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -52,7 +53,7 @@ void EECRes4Producer::produce(edm::Event& event, const edm::EventSetup& setup) {
     edm::Handle<std::vector<simon::jet>> jets;
     event.getByToken(jetsToken_, jets);
 
-    auto result = std::make_unique<std::vector<EEC::CMSSW_Res4Result>>();
+    auto result = std::make_unique<std::vector<EEC::CMSSWRes4Result>>();
     result->reserve(jets->size());
 
     for (unsigned iJet = 0; iJet < jets->size(); ++iJet){
@@ -62,3 +63,5 @@ void EECRes4Producer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
     event.put(std::move(result));
 }
+
+DEFINE_FWK_MODULE(EECRes4Producer);
