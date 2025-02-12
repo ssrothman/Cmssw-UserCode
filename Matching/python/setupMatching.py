@@ -1,7 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-from SRothman.Matching.GenMatchProducer_cfi import *
-from SRothman.Matching.GenMatchTableProducer_cfi import *
-from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 
 def setupMatching(process, verbose=0,
                   ak8=True,
