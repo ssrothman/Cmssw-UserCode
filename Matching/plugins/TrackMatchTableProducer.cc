@@ -80,6 +80,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
     std::vector<float> matchPt;
     std::vector<float> matchEta;
     std::vector<float> matchPhi;
+    std::vector<int> matchCharge;
     std::vector<int> nMatches;
     std::vector<int> matchTypes;
 
@@ -101,6 +102,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
             std::vector<float> matchPt_(recojet.nPart, 0);
             std::vector<float> matchEta_(recojet.nPart, 0);
             std::vector<float> matchPhi_(recojet.nPart, 0);
+            std::vector<int> matchCharge_(recojet.nPart, 0);
             std::vector<int> nMatches_(recojet.nPart, 0);
             std::vector<int> matchTypes_(recojet.nPart, 0);
 
@@ -112,6 +114,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
                         matchPt_[iRecoPart] += genPart.pt * tmatval;
                         matchEta_[iRecoPart] += genPart.pt * genPart.eta * tmatval;
                         matchPhi_[iRecoPart] += genPart.pt * genPart.phi * tmatval;
+                        matchCharge_[iRecoPart] += genPart.charge;
                         ++nMatches_[iRecoPart];
 
                         if(genPart.pdgid == 13){
@@ -138,6 +141,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
             matchPt.insert(matchPt.end(), matchPt_.begin(), matchPt_.end());
             matchEta.insert(matchEta.end(), matchEta_.begin(), matchEta_.end());
             matchPhi.insert(matchPhi.end(), matchPhi_.begin(), matchPhi_.end());
+            matchCharge.insert(matchCharge.end(), matchCharge_.begin(), matchCharge_.end());
             nMatches.insert(nMatches.end(), nMatches_.begin(), nMatches_.end());
             matchTypes.insert(matchTypes.end(), matchTypes_.begin(), matchTypes_.end());
 
@@ -146,6 +150,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
                 matchPt.push_back(0);
                 matchEta.push_back(0);
                 matchPhi.push_back(0);
+                matchCharge.push_back(0);
                 nMatches.push_back(-1); //negative 1 = no matched jet
                                         //whereas  0 = no matched particle
                 matchTypes.push_back(0);
@@ -157,6 +162,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
     result->addColumn<float>("matchPt", matchPt, "matched pT", nanoaod::FlatTable::FloatColumn);
     result->addColumn<float>("matchEta", matchEta, "matched eta", nanoaod::FlatTable::FloatColumn);
     result->addColumn<float>("matchPhi", matchPhi, "matched phi", nanoaod::FlatTable::FloatColumn);
+    result->addColumn<int>("matchCharge", matchCharge, "matched charge", nanoaod::FlatTable::IntColumn);
     result->addColumn<int>("nMatches", nMatches, "number of matched particles", nanoaod::FlatTable::IntColumn);
     result->addColumn<int>("matchTypes", matchTypes, "matched particle types", nanoaod::FlatTable::IntColumn);
     event.put(std::move(result), "recojet");

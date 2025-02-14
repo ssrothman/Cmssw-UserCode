@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+from SRothman.Matching.TrackMatchProducer_cfi import TrackMatchProducer
+
 def setupMatching(process, verbose=0,
                   ak8=True,
                   name='GenMatch',
@@ -8,33 +10,9 @@ def setupMatching(process, verbose=0,
                   naive=False):
                    
     setattr(process, name, 
-        cms.EDProducer("TrackMatchProducer",
+        TrackMatchProducer.clone(
             recoJets = cms.InputTag(reco),
             genJets = cms.InputTag(gen),
-            matcher = cms.PSet(
-                jet_dr_mode = cms.string("Const"),
-                jet_dr_param1 = cms.double(0.4),
-                jet_dr_param2 = cms.double(0.0),
-                jet_dr_param3 = cms.double(0.0),
-                jet_ptres_mode = cms.string("Const"),
-                jet_ptres_param1 = cms.double(10.0),
-                jet_ptres_param2 = cms.double(0.0),
-                jet_angres_mode = cms.string("Const"),
-                jet_angres_param1 = cms.double(0.4),
-                jet_angres_param2 = cms.double(0.0),
-                particle_dr_mode = cms.string("Const"),
-                particle_dr_param1 = cms.double(0.4),
-                particle_dr_param2 = cms.double(0.0),
-                particle_dr_param3 = cms.double(0.0),
-                particle_ptres_mode = cms.string("Const"),
-                particle_ptres_param1 = cms.double(10.0),
-                particle_ptres_param2 = cms.double(0.0),
-                particle_angres_mode = cms.string("Const"),
-                particle_angres_param1 = cms.double(0.4),
-                particle_angres_param2 = cms.double(0.0),
-                opp_charge_penalty = cms.double(0.0),
-                no_charge_penalty = cms.double(0.0),
-            )
         )
     )
 

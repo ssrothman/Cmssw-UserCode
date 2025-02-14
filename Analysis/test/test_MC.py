@@ -75,17 +75,17 @@ process = setupSimonJets(process,
     genOnly = False
 )
 
-process = setupSimonJets(process,
-    jets = 'finalSelectedJetsAK8',
-    genjets = 'arbitratedGenJetsAK8', 
-    CHSjets = 'finalJets',
-    chargedOnly = False,
-    eventSelection = '',
-    name = 'SimonJets',
-    ak8 = True,
-    isMC = True,
-    genOnly = False
-)
+#process = setupSimonJets(process,
+#    jets = 'finalSelectedJetsAK8',
+#    genjets = 'arbitratedGenJetsAK8', 
+#    CHSjets = 'finalJets',
+#    chargedOnly = False,
+#    eventSelection = '',
+#    name = 'SimonJets',
+#    ak8 = True,
+#    isMC = True,
+#    genOnly = False
+#)
 
 from SRothman.Matching.setupMatching import setupMatching
 process = setupMatching(process,
@@ -97,14 +97,14 @@ process = setupMatching(process,
     naive = False
 )
 
-process = setupMatching(process,
-    verbose = 0,
-    ak8 = True,
-    name = 'GenMatch',
-    reco = 'SimonJets',
-    gen = 'GenSimonJets',
-    naive = False
-)
+#process = setupMatching(process,
+#    verbose = 0,
+#    ak8 = True,
+#    name = 'GenMatch',
+#    reco = 'SimonJets',
+#    gen = 'GenSimonJets',
+#    naive = False
+#)
 
 from SRothman.EECs.setupEECRes4 import setupEECRes4
 process = setupEECRes4(process,
@@ -116,14 +116,14 @@ process = setupEECRes4(process,
     isMC = True
 )
 
-process = setupEECRes4(process,
-    name = 'EECs',
-    genMatch = 'GenMatch',
-    genjets = 'GenSimonJets',
-    recojets = 'SimonJets',
-    verbose = 0,
-    isMC = True
-)
+#process = setupEECRes4(process,
+#    name = 'EECs',
+#    genMatch = 'GenMatch',
+#    genjets = 'GenSimonJets',
+#    recojets = 'SimonJets',
+#    verbose = 0,
+#    isMC = True
+#)
 
 # End of customisation functions
 
