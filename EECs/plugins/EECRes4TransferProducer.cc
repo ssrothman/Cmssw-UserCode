@@ -41,8 +41,10 @@ EECRes4TransferProducer::EECRes4TransferProducer(const edm::ParameterSet& conf) 
         matchesToken_(consumes<std::vector<matching::jetmatch>>(conf.getParameter<edm::InputTag>("matches")))
 {
 
-    produces<std::vector<EEC::CMSSWRes4TransferResult>>();
-    produces<std::vector<EEC::CMSSWRes4Result>>();
+    produces<std::vector<EEC::CMSSWRes4TransferResult>>("transfer");
+    produces<std::vector<EEC::CMSSWRes4Result>>("gen");
+    produces<std::vector<EEC::CMSSWRes4Result>>("untransferedGen");
+    produces<std::vector<EEC::CMSSWRes4Result>>("untransferedReco");
 }
 
 void EECRes4TransferProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -69,9 +71,14 @@ void EECRes4TransferProducer::produce(edm::Event& event, const edm::EventSetup& 
     event.getByToken(matchesToken_, matches);
 
     auto transfer_result = std::make_unique<std::vector<EEC::CMSSWRes4TransferResult>>();
-    auto result = std::make_unique<std::vector<EEC::CMSSWRes4Result>>();
-    result->reserve(matches->size());
+    auto gen_result = std::make_unique<std::vector<EEC::CMSSWRes4Result>>();
+    auto untransfered_gen_result = std::make_unique<std::vector<EEC::CMSSWRes4Result>>();
+    auto untransfered_reco_result = std::make_unique<std::vector<EEC::CMSSWRes4Result>>();
+
+    gen_result->reserve(matches->size());
     transfer_result->reserve(matches->size());
+    untransfered_gen_result->reserve(matches->size());
+    untransfered_reco_result->reserve(matches->size());
 
     for (const auto& match : *matches){
         const auto& genjet = genJets->at(match.iGen);
@@ -79,15 +86,21 @@ void EECRes4TransferProducer::produce(edm::Event& event, const edm::EventSetup& 
         const auto& tmat = match.tmat;
 
         transfer_result->emplace_back(match.iReco, match.iGen, res4calc_);
-        result->emplace_back(match.iGen, match.iReco, res4calc_);
+        gen_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_gen());
+        untransfered_reco_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_reco());
+        untransfered_gen_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_gen());
 
         res4calc_.compute_precomputed(
                 recojet, genjet, tmat, 
-                result->back().result, 
-                transfer_result->back().result);
+                gen_result->back().result, 
+                transfer_result->back().result,
+                untransfered_reco_result->back().result,
+                untransfered_gen_result->back().result);
     }
-    event.put(std::move(result));
-    event.put(std::move(transfer_result));
+    event.put(std::move(gen_result), "gen");
+    event.put(std::move(transfer_result), "transfer");
+    event.put(std::move(untransfered_reco_result), "untransferedReco");
+    event.put(std::move(untransfered_gen_result), "untransferedGen");
 }
 
 DEFINE_FWK_MODULE(EECRes4TransferProducer);

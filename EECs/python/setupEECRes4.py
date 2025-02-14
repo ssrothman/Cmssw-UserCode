@@ -40,14 +40,26 @@ def setupEECRes4(process,
         )
         setattr(process, 'Gen%sTable'%name,
             EECRes4TableProducer.clone(
-                EECs = "Gen%s"%name,
+                EECs = "Gen%s:gen"%name,
                 name =  "Gen%s"%name,
             )
         )
         setattr(process,'Transfer%sTable'%name,
             EECRes4TransferTableProducer.clone(
-                EECTransfer = "Gen%s"%name,
+                EECTransfer = "Gen%s:transfer"%name,
                 name = "%sTransfer"%name,
+            )
+        )
+        setattr(process, 'UntransferedGen%sTable'%name,
+            EECRes4TableProducer.clone(
+                EECs = "Gen%s:untransferedGen"%name,
+                name =  "UntransferedGen%s"%name,
+            )
+        )
+        setattr(process, 'UntransferedReco%sTable'%name,
+            EECRes4TableProducer.clone(
+                EECs = "Gen%s:untransferedReco"%name,
+                name =  "UntransferedReco%s"%name,
             )
         )
 
@@ -56,6 +68,8 @@ def setupEECRes4(process,
                 getattr(process, 'Gen%s'%name),
                 getattr(process, 'Gen%sTable'%name),
                 getattr(process, 'Transfer%sTable'%name),
+                getattr(process, 'UntransferedGen%sTable'%name),
+                getattr(process, 'UntransferedReco%sTable'%name),
             )
         )
         process.schedule.associate(getattr(process, '%sMCTask'%name))

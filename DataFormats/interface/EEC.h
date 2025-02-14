@@ -18,16 +18,17 @@ namespace EEC{
             iReco(iReco),
             result(calc) {}
 
+        template <typename T>
         CMSSWRes4Result(unsigned iJet, unsigned iReco,
-                const Res4TransferCalculator& calc) :
+                const T& arg) :
             iJet(iJet),
             iReco(iReco),
-            result(calc) {}
+            result(arg) {}
     };
 
     struct CMSSWRes4TransferResult{
         unsigned iReco, iGen;
-        Res4TransferResult_Vector_MultiArray result;
+        Res4TransferResult_Vector result;
 
         CMSSWRes4TransferResult() : iReco(0), iGen(0), result() {}
 
