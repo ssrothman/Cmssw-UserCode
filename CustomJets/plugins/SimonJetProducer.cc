@@ -90,6 +90,8 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf)
           onlyCharged_(conf.getParameter<bool>("onlyCharged")),
           maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
           minNumPart_(conf.getParameter<unsigned>("minNumPart")),
+          applyJEC_(conf.getParameter<bool>("applyJEC")),
+          applyPuppi_(conf.getParameter<bool>("applyPuppi")),
           minPt_(conf.getParameter<double>("minPt")),
           maxEta_(conf.getParameter<double>("maxEta")),
           maxMuFrac_(conf.getParameter<double>("maxMuFrac")),
