@@ -23,7 +23,6 @@ def setupGenSimonJets(process,
         src = 'Gen'+name,
         name = 'Gen'+name,
         verbose=False,
-        isGen = True
     ))
 
     setattr(process, name+"MCTask", cms.Task(
@@ -59,7 +58,6 @@ def setupRecoSimonJets(process,
         src = name,
         name = name,
         verbose=False,
-        isGen = False
     ))
 
     setattr(process, name+'Task', cms.Task(

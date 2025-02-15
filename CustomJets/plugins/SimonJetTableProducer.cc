@@ -40,13 +40,6 @@ public:
 private:
     std::string name_;
     
-    bool addMatch_;
-    bool isGen_;
-    edm::InputTag matchSrc_;
-    edm::EDGetTokenT<edm::View<matching::jetmatch>> matchToken_;
-    edm::InputTag genJetSrc_;
-    edm::EDGetTokenT<edm::View<simon::jet>> genJetToken_;
-
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<simon::jet>> srcToken_;
 
@@ -55,19 +48,10 @@ private:
 
 SimonJetTableProducer::SimonJetTableProducer(const edm::ParameterSet& conf)
         : name_(conf.getParameter<std::string>("name")),
-          addMatch_(conf.getParameter<bool>("addMatch")),
-          isGen_(conf.getParameter<bool>("isGen")),
-          matchSrc_(conf.getParameter<edm::InputTag>("matchSrc")),
-          genJetSrc_(conf.getParameter<edm::InputTag>("genJets")),
           src_(conf.getParameter<edm::InputTag>("src")),
           srcToken_(consumes<edm::View<simon::jet>>(src_)),
           verbose_(conf.getParameter<int>("verbose")){
-    if(addMatch_){
-      matchToken_ = consumes<edm::View<matching::jetmatch>>(matchSrc_);
-    }
-    if(addMatch_ && !isGen_){
-        genJetToken_ = consumes<edm::View<simon::jet>>(genJetSrc_);
-    }
+
     produces<nanoaod::FlatTable>(name_);
     produces<nanoaod::FlatTable>(name_+"CHS");
     produces<nanoaod::FlatTable>(name_+"BK");
@@ -76,12 +60,8 @@ SimonJetTableProducer::SimonJetTableProducer(const edm::ParameterSet& conf)
 void SimonJetTableProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<std::string>("name");
-  desc.add<bool>("addMatch");
-  desc.add<bool>("isGen");
   desc.add<int>("verbose");
   desc.add<edm::InputTag>("src");
-  desc.add<edm::InputTag>("matchSrc");
-  desc.add<edm::InputTag>("genJets");
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -89,19 +69,8 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
     if(verbose_){
         printf("top of SimonJetTableProducer::produce()\n");
     }
-    //std::cout << "The name is " << name_ << std::endl;
   edm::Handle<edm::View<simon::jet>> jets;
   evt.getByToken(srcToken_, jets);
-
-  edm::Handle<edm::View<matching::jetmatch>> matches;
-  if(addMatch_){
-      evt.getByToken(matchToken_, matches);
-  }
-
-  edm::Handle<edm::View<simon::jet>> genJets;
-  if(addMatch_ && !isGen_){
-      evt.getByToken(genJetToken_, genJets);
-  }
 
   std::vector<float>  partPt;
   std::vector<float> partEta;
@@ -114,10 +83,6 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   std::vector<int> fromPV;
   std::vector<float> puppiWeight;
 
-  std::vector<int> nmatch;
-  std::vector<float> matchPt, matchEta, matchPhi;
-  std::vector<int> nmatchMuon, nmatchEle, nmatchEM0, nmatchHAD0, nmatchHADCH;
-
   std::vector<float> pt;
   std::vector<float> rawPt;
   std::vector<float> eta;
@@ -126,12 +91,6 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   std::vector<float> mass;
   std::vector<int> nPart;
   std::vector<float> jecfactor;
-  //extras
-  std::vector<int> nELE, nMU, nHADCH, nEM0, nHAD0;
-
-  std::vector<float> genPt;
-  std::vector<float> genEta;
-  std::vector<float> genPhi;
 
   std::vector<int> iCHS;
   std::vector<int> nCHS;
@@ -146,110 +105,9 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
       iJet.push_back(j.iJet);
       mass.push_back(j.mass);
       nPart.push_back(j.nPart);
-      nEM0.push_back(j.nEM0);
-      nHAD0.push_back(j.nHAD0);
-      nHADCH.push_back(j.nHADCH);
-      nELE.push_back(j.nELE);
-      nMU.push_back(j.nMU);
 
       iCHS.insert(iCHS.end(), j.iCHS.begin(), j.iCHS.end());
       nCHS.push_back(j.iCHS.size());
-
-      if(addMatch_){//if doing matches
-          std::vector<int> nextMatches, nextMatchMuon, nextMatchEle, nextMatchEM0, nextMatchHAD0, nextMatchHADCH;
-          std::vector<float> nextPt, nextEta, nextPhi;
-          nextMatches.resize(j.particles.size(), 0);
-          nextMatchMuon.resize(j.particles.size(), 0);
-          nextMatchEle.resize(j.particles.size(), 0);
-          nextMatchEM0.resize(j.particles.size(), 0);
-          nextMatchHAD0.resize(j.particles.size(), 0);
-          nextMatchHADCH.resize(j.particles.size(), 0);
-          nextPt.resize(j.particles.size(), 0);
-          nextEta.resize(j.particles.size(), 0);
-          nextPhi.resize(j.particles.size(), 0);
-
-          int matchidx = -1;
-          for(unsigned iMatch=0; iMatch<matches->size(); ++iMatch){
-              if(isGen_ && matches->at(iMatch).iGen == iJ){
-                  matchidx = iMatch;
-                  break;
-              } else if(!isGen_ && matches->at(iMatch).iReco == iJ){
-                  matchidx = iMatch;
-                  break;
-              }
-          }
-          if(matchidx >=0 ){//if found match
-              const auto& match = matches->at(matchidx);
-              for(unsigned i=0; i<match.tmat.rows(); ++i){//for i
-                  for(unsigned j=0; j<match.tmat.cols(); ++j){// for j
-                      if(match.tmat(i, j) > 0){//if matched
-                          unsigned idx = isGen_ ? j : i;
-                          nextMatches.at(idx) += 1;
-                          if (!isGen_){
-                              const auto& part = genJets->at(match.iGen).particles.at(j);
-                              if(simon::isMU(part)){
-                                  nextMatchMuon.at(idx) += 1;
-                              } else if(simon::isELE(part)){
-                                  nextMatchEle.at(idx) += 1;
-                              } else if(simon::isEM0(part)){
-                                  nextMatchEM0.at(idx) += 1;
-                              } else if(simon::isHAD0(part)){
-                                  nextMatchHAD0.at(idx) += 1;
-                              } else {
-                                  nextMatchHADCH.at(idx) += 1;
-                              }
-                          }
-                      }//end if matched
-                  }//end for j
-              }//end for i
-
-              if(!isGen_){
-                  const auto& genj= genJets->at(match.iGen);
-                  
-                  Eigen::VectorXd genpt = genj.ptvec();
-                  Eigen::VectorXd recopt = j.ptvec();
-
-                  Eigen::VectorXd predpt = match.tmat * genpt;
-
-                  Eigen::VectorXd wgeneta = genpt.cwiseProduct(genj.etavec());
-                  Eigen::VectorXd wgenphi = genpt.cwiseProduct(genj.phivec());
-
-                  Eigen::VectorXd predeta = (match.tmat * wgeneta).array()/predpt.array();
-                  Eigen::VectorXd predphi = (match.tmat * wgenphi).array()/predpt.array();
-
-                  for(unsigned i=0; i<j.nPart; ++i){
-                      nextPt.at(i) = predpt(i);
-                      nextEta.at(i) = predeta(i);
-                      nextPhi.at(i) = predphi(i);
-                  }
-
-                  genPt.push_back(genj.pt);
-                  genEta.push_back(genj.eta);
-                  genPhi.push_back(genj.phi);
-              }
-          } else if(!isGen_){
-              genPt.push_back(-1);
-              genEta.push_back(-1);
-              genPhi.push_back(-1);
-          }// end if found match
-          
-          nmatch.insert(nmatch.end(), nextMatches.begin(), 
-                                      nextMatches.end());
-          nmatchMuon.insert(nmatchMuon.end(), nextMatchMuon.begin(),
-                                              nextMatchMuon.end());
-          nmatchEle.insert(nmatchEle.end(), nextMatchEle.begin(),
-                                            nextMatchEle.end());
-          nmatchEM0.insert(nmatchEM0.end(), nextMatchEM0.begin(),
-                                            nextMatchEM0.end());
-          nmatchHAD0.insert(nmatchHAD0.end(), nextMatchHAD0.begin(),
-                                              nextMatchHAD0.end());
-          nmatchHADCH.insert(nmatchHADCH.end(), nextMatchHADCH.begin(),
-                                                nextMatchHADCH.end());
-          matchPt.insert(matchPt.end(), nextPt.begin(), nextPt.end());
-          matchEta.insert(matchEta.end(), nextEta.begin(), nextEta.end());
-          matchPhi.insert(matchPhi.end(), nextPhi.begin(), nextPhi.end());
-          
-      }//end if doing matches
 
       for(const auto& p : j.particles){
           partPt.push_back(p.pt);
@@ -284,19 +142,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   table->addColumn<float>("dz", dz, "dz", nanoaod::FlatTable::FloatColumn);
   table->addColumn<int>("fromPV", fromPV, "from PV enum", nanoaod::FlatTable::IntColumn);
   table->addColumn<float>("puppiWeight", puppiWeight, "Puppi weight", nanoaod::FlatTable::FloatColumn);
-  if(addMatch_){
-    table->addColumn<int>("nmatch", nmatch, "number of particle matches", nanoaod::FlatTable::IntColumn);
-  }
-  if(addMatch_ && !isGen_){
-      table->addColumn<float>("matchPt", matchPt, "predicted particle pt", nanoaod::FlatTable::FloatColumn);
-      table->addColumn<float>("matchEta", matchEta, "predicted particle eta", nanoaod::FlatTable::FloatColumn);
-      table->addColumn<float>("matchPhi", matchPhi, "predicted particle phi", nanoaod::FlatTable::FloatColumn);
-      table->addColumn<int>("nmatchMuon", nmatchMuon, "number of muon matches", nanoaod::FlatTable::IntColumn);
-      table->addColumn<int>("nmatchEle", nmatchEle, "number of electron matches", nanoaod::FlatTable::IntColumn);
-      table->addColumn<int>("nmatchEM0", nmatchEM0, "number of photon matches", nanoaod::FlatTable::IntColumn);
-      table->addColumn<int>("nmatchHAD0", nmatchHAD0, "number of neutral hadron matches", nanoaod::FlatTable::IntColumn);
-      table->addColumn<int>("nmatchHADCH", nmatchHADCH, "number of charged hadron matches", nanoaod::FlatTable::IntColumn);
-  }
+
   evt.put(std::move(table), name_);
   if(verbose_){
     printf("made table with %lu elements\n", partPt.size());
@@ -312,20 +158,10 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   tableBK->addColumn<float>("jecfactor", jecfactor, "JEC factor", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<float>("jetEta", eta, "jet eta", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<float>("jetPhi", phi, "jet phi", nanoaod::FlatTable::FloatColumn);
-  tableBK->addColumn<int>("nELE", nELE, "num electrons", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nMU", nMU, "num muons", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nHADCH", nHADCH, "num charged had", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nHAD0", nHAD0, "num neutral had", nanoaod::FlatTable::IntColumn);
-  tableBK->addColumn<int>("nEM0", nEM0, "num photons", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("iJet", iJet, "index in primary jet array", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<float>("jetMass", mass, "jet mass", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<int>("nPart", nPart, "number of particles in jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nCHS", nCHS, "number of matched CHS jets", nanoaod::FlatTable::IntColumn);
-  if(addMatch_ && !isGen_){
-      tableBK->addColumn<float>("genPt", genPt, "gen jet pt", nanoaod::FlatTable::FloatColumn);
-      tableBK->addColumn<float>("genEta", genEta, "gen jet eta", nanoaod::FlatTable::FloatColumn);
-      tableBK->addColumn<float>("genPhi", genPhi, "gen jet phi", nanoaod::FlatTable::FloatColumn);
-  }
   evt.put(std::move(tableBK), name_+"BK");
   if(verbose_){
     printf("made tableBK with %lu elements\n", pt.size());
