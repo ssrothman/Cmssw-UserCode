@@ -106,14 +106,13 @@ process = setupMatching(process,
 #    naive = False
 #)
 
-from SRothman.EECs.setupEECRes4 import setupEECRes4
-process = setupEECRes4(process,
+from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
+process = setupEECRes4_MC(process,
     name = 'ChargedEECs',
     genMatch = 'ChargedGenMatch',
     genjets = 'GenChargedSimonJets',
     recojets = 'ChargedSimonJets',
     verbose = 0,
-    isMC = True
 )
 
 #process = setupEECRes4(process,

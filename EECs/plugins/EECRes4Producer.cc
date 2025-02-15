@@ -35,7 +35,7 @@ EECRes4Producer::EECRes4Producer(const edm::ParameterSet& conf) :
         res4calc_(conf.getParameter<edm::ParameterSet>("calculator")),
         jetsToken_(consumes<std::vector<simon::jet>>(conf.getParameter<edm::InputTag>("jets"))) {
 
-    produces<std::vector<EEC::CMSSWRes4Result>>();
+    produces<std::vector<EEC::CMSSWRes4Result>>("reco");
 }
 
 void EECRes4Producer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -61,7 +61,7 @@ void EECRes4Producer::produce(edm::Event& event, const edm::EventSetup& setup) {
         result->emplace_back(iJet, iJet, res4calc_);
         res4calc_.compute_precomputed(jet, result->back().result);
     }
-    event.put(std::move(result));
+    event.put(std::move(result), "reco");
 }
 
 DEFINE_FWK_MODULE(EECRes4Producer);
