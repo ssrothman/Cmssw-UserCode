@@ -38,12 +38,13 @@ def setupEventSelections(process, isMC,
         muoncut = "abs(eta) < %0.2f && "%config['EventSelection']['MuEta'] + \
                   " pt > %0.2f && "%config['EventSelection']['MuSubPt'] + \
                   " passed('%s') && "%config['EventSelection']['MuID'] + \
-                  " passed('%s')" % config['EventSelection']['MuISO']
+                  " passed('%s') && " % config['EventSelection']['MuISO'] + \
+                  " abs(dB('PVDZ')) < 0.5 && abs(dB('PV2D')) < 0.2" 
 
         print("Muon cut: %s" % muoncut)
 
         process.SelectedMuons = cms.EDFilter(
-            "MuonRefSelector",
+            "PATMuonRefSelector",
             src = cms.InputTag("CorrectedMuons"),
             cut = cms.string(muoncut)
         )

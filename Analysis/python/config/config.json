@@ -3,7 +3,7 @@
         "MuEta" : 2.4,
         "MuLeadPt" : 26,
         "MuSubPt" : 15,
-        "MuID" : "CutBasedIdLoose",
+        "MuID" : "CutBasedIdMedium",
         "MuISO" : "PFIsoLoose",
         "Zmass" : 91.1876,
         "ZmassWindow" : 20.0,
@@ -17,7 +17,7 @@
         "JetID" : "jetIdLepVeto",
         "JetNDaughters" : 2,
         "JetMuonVetoDR" : 0.8,
-        "Arbitration" : "Leading1"
+        "Arbitration" : "None"
     },
     "GenJets" : {
         "GenJetPt" : 10,
