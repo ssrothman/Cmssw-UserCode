@@ -91,7 +91,7 @@ void EECRes4TransferProducer::produce(edm::Event& event, const edm::EventSetup& 
         transfer_result->emplace_back(match.iReco, match.iGen, res4calc_);
         gen_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_gen());
         unmatched_gen_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_gen());
-        untransfered_reco_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_reco());
+        untransfered_reco_result->emplace_back(match.iReco, match.iReco, res4calc_.get_axes_reco());
         untransfered_gen_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_gen());
 
         res4calc_.compute_precomputed(
