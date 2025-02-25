@@ -28,7 +28,7 @@ private:
     bool isMC_;
 
     edm::InputTag muonTag_;
-    edm::EDGetTokenT<edm::View<reco::Muon> > muonToken_;
+    edm::EDGetTokenT<edm::View<pat::Muon> > muonToken_;
 
     edm::InputTag genPartTag_;
     edm::EDGetTokenT<edm::View<reco::Candidate> > genPartToken_;
@@ -41,7 +41,7 @@ private:
 RoccoRValueMapProducer::RoccoRValueMapProducer(const edm::ParameterSet& iConfig):
     isMC_(iConfig.getParameter<bool>("isMC")),
     muonTag_(iConfig.getParameter<edm::InputTag>("src")),
-    muonToken_(consumes<edm::View<reco::Muon> >(muonTag_)),
+    muonToken_(consumes<edm::View<pat::Muon> >(muonTag_)),
     genPartTag_(iConfig.getParameter<edm::InputTag>("genParticles")),
     rc_(iConfig.getParameter<edm::FileInPath>("dataFile").fullPath()),
     verbose_(iConfig.getParameter<int>("verbose"))
@@ -53,7 +53,7 @@ RoccoRValueMapProducer::RoccoRValueMapProducer(const edm::ParameterSet& iConfig)
 }
 
 void RoccoRValueMapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
-    edm::Handle<edm::View<reco::Muon> > muons;
+    edm::Handle<edm::View<pat::Muon> > muons;
     iEvent.getByToken(muonToken_, muons);
 
 

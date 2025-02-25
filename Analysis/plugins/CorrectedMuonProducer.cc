@@ -27,7 +27,7 @@ public:
 
 private:
     edm::InputTag muonTag_;
-    edm::EDGetTokenT<edm::View<reco::Muon> > muonToken_;
+    edm::EDGetTokenT<edm::View<pat::Muon> > muonToken_;
 
     edm::InputTag RoccoRTag_;
     edm::EDGetTokenT<edm::ValueMap<float> > RoccoRToken_;
@@ -37,12 +37,12 @@ private:
 
 CorrectedMuonProducer::CorrectedMuonProducer(const edm::ParameterSet& iConfig):
     muonTag_(iConfig.getParameter<edm::InputTag>("src")),
-    muonToken_(consumes<edm::View<reco::Muon> >(muonTag_)),
+    muonToken_(consumes<edm::View<pat::Muon> >(muonTag_)),
     RoccoRTag_(iConfig.getParameter<edm::InputTag>("RoccoR")),
     RoccoRToken_(consumes<edm::ValueMap<float> >(RoccoRTag_)),
     verbose_(iConfig.getParameter<int>("verbose"))
 {
-    produces<std::vector<reco::Muon>>();
+    produces<std::vector<pat::Muon>>();
 }
 
 void CorrectedMuonProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions){
@@ -54,16 +54,16 @@ void CorrectedMuonProducer::fillDescriptions(edm::ConfigurationDescriptions& des
 }
 
 void CorrectedMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
-    edm::Handle<edm::View<reco::Muon> > muons;
+    edm::Handle<edm::View<pat::Muon> > muons;
     iEvent.getByToken(muonToken_, muons);
 
     edm::Handle<edm::ValueMap<float> > RoccoR;
     iEvent.getByToken(RoccoRToken_, RoccoR);
 
-    auto result = std::make_unique<std::vector<reco::Muon>>();
+    auto result = std::make_unique<std::vector<pat::Muon>>();
 
     for(size_t i = 0; i < muons->size(); i++){
-        reco::Muon muon = muons->at(i);
+        pat::Muon muon = muons->at(i);
         float rc = (*RoccoR)[muons->refAt(i)];
         if(verbose_ > 0){
             printf("Muon %lu: pT = %f, eta = %f, phi = %f, q = %d, rc = %f\n", i, muon.pt(), muon.eta(), muon.phi(), muon.charge(), rc);
