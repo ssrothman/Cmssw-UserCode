@@ -22,7 +22,7 @@ from production_tag import production_tag # Get from a text file
 requestname_base = "srothman"
 #output_site = "T3_US_FNALLPC"
 output_site = "T3_US_FNALLPC"
-output_lfn_base = "/store/group/lpcpfnano/srothman/{production_tag}".format(
+output_lfn_base = "/store/group/lpcpfnano/srothman/crab/{production_tag}".format(
                                                     username=getUsername(), 
                                                     production_tag=production_tag)
 

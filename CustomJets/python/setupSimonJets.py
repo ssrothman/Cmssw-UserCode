@@ -54,6 +54,20 @@ def setupRecoSimonJets(process,
         onlyCharged = chargedOnly
     ))
 
+    setattr(process, name+"Preselection", cms.EDProducer("JetSelectionFlagTranslator",
+        src = cms.InputTag(jets),
+        target = cms.InputTag(name),
+        map = cms.InputTag("preselectJetsAK8"),
+        verbose = cms.int32(0)
+    ))
+
+    setattr(process, name+"OverlapVeto", cms.EDProducer("JetSelectionFlagTranslator",
+        src = cms.InputTag(jets),
+        target = cms.InputTag(name),
+        map = cms.InputTag("overlapVetoJetsAK8"),
+        verbose = cms.int32(0)
+    ))
+
     setattr(process, name+'Table', SimonJetTableProducer.clone(
         src = name,
         name = name,
@@ -62,6 +76,8 @@ def setupRecoSimonJets(process,
 
     setattr(process, name+'Task', cms.Task(
         getattr(process, name),
+        getattr(process, name+'Preselection'),
+        getattr(process, name+'OverlapVeto'),
         getattr(process, name+'Table'),
     ))
     process.schedule.associate(getattr(process, name+'Task'))

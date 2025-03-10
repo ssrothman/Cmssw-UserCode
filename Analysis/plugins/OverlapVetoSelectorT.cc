@@ -15,6 +15,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 template <typename MainT, typename VetoerT>
 class OverlapVetoSelectorT : public edm::stream::EDFilter<> {
@@ -34,6 +35,7 @@ private:
     double minDeltaR_;
 
     bool filter_;
+    bool makeValueMap_;
 
     int verbose_;
 };
@@ -46,9 +48,14 @@ OverlapVetoSelectorT<MainT, VetoerT>::OverlapVetoSelectorT(const edm::ParameterS
           vetoerToken_(consumes<edm::View<VetoerT>>(vetoer_)),
           minDeltaR_(conf.getParameter<double>("minDeltaR")),
           filter_(conf.getParameter<bool>("filter")),
+          makeValueMap_(conf.getParameter<bool>("makeValueMap")),
           verbose_(conf.getParameter<int>("verbose"))
 {
-    produces<std::vector<MainT>>();
+    if (makeValueMap_){
+        produces<edm::ValueMap<bool>>();
+    } else {
+        produces<std::vector<MainT>>();
+    }
 }
 
 template <typename MainT, typename VetoerT>
@@ -58,6 +65,7 @@ void OverlapVetoSelectorT<MainT, VetoerT>::fillDescriptions(edm::ConfigurationDe
     desc.add<edm::InputTag>("vetoer");
     desc.add<double>("minDeltaR");
     desc.add<bool>("filter");
+    desc.add<bool>("makeValueMap");
     desc.add<int>("verbose");
     descriptions.addWithDefaultLabel(desc);
 }
@@ -70,7 +78,8 @@ bool OverlapVetoSelectorT<MainT, VetoerT>::filter(edm::Event& iEvent, const edm:
     edm::Handle<edm::View<VetoerT>> vetoer;
     iEvent.getByToken(vetoerToken_, vetoer);
 
-    auto result = std::make_unique<std::vector<MainT>>();
+    auto result_MainT = std::make_unique<std::vector<MainT>>();
+    std::vector<bool> result_bool;
     int n = 0;
 
     for (const auto& s : *src){
@@ -82,12 +91,28 @@ bool OverlapVetoSelectorT<MainT, VetoerT>::filter(edm::Event& iEvent, const edm:
             }
         }
         if (keep){
-            result->push_back(s);
+            if (makeValueMap_){
+                result_bool.push_back(true);
+            } else {
+                result_MainT->push_back(s);
+            }
             ++n;
+        } else {
+            if (makeValueMap_){
+                result_bool.push_back(false);
+            }
         }
     }
 
-    iEvent.put(std::move(result));
+    if (makeValueMap_){
+        auto result = std::make_unique<edm::ValueMap<bool>>();
+        edm::ValueMap<bool>::Filler filler(*result);
+        filler.insert(src, result_bool.begin(), result_bool.end());
+        filler.fill();
+        iEvent.put(std::move(result));
+    } else {
+        iEvent.put(std::move(result_MainT));
+    }
 
     if (filter_){
         return n > 0;

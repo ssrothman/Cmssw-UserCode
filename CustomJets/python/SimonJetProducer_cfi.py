@@ -17,18 +17,18 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
     vtxCuts = recoVtxCuts.clone(),
 
     maxNumPart = cms.uint32(_maxNumPart),
-    minNumPart = cms.uint32(2),
+    minNumPart = cms.uint32(0),
 
     onlyCharged = cms.bool(False),
 
     applyJEC=cms.bool(False),
     applyPuppi = cms.bool(True),
 
-    minPt = cms.double(config['Jets']['JetPt']),
-    maxEta = cms.double(config['Jets']['JetEta']),
+    minPt = cms.double(0),
+    maxEta = cms.double(999),
 
-    maxMuFrac = cms.double(0.8),
-    maxChEmFrac = cms.double(0.8),
+    maxMuFrac = cms.double(999),
+    maxChEmFrac = cms.double(999),
 
     eventSelection = cms.InputTag(""),
     doEventSelection = cms.bool(False),
@@ -50,15 +50,15 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     vtxCuts = genVtxCuts.clone(),
 
     maxNumPart = cms.uint32(_maxNumPart),
-    minNumPart = cms.uint32(2),
+    minNumPart = cms.uint32(0),
 
     onlyCharged = cms.bool(False),
 
     applyJEC=cms.bool(False),
     applyPuppi = cms.bool(False),
 
-    minPt = cms.double(config['GenJets']['GenJetPt']),
-    maxEta = cms.double(config['GenJets']['GenJetEta']),
+    minPt = cms.double(0),
+    maxEta = cms.double(999),
 
     maxMuFrac = cms.double(999),
     maxChEmFrac = cms.double(999),

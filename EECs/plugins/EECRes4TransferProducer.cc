@@ -9,6 +9,9 @@
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "DataFormats/Common/interface/ValueMap.h"
+#include "DataFormats/Common/interface/View.h"
+
 #include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/DataFormats/interface/matching.h"
 #include "SRothman/EECs/src/Res4Calculator.h"
@@ -29,17 +32,25 @@ public:
 private:
     EEC::Res4TransferCalculator res4calc_;
 
-    edm::EDGetTokenT<std::vector<simon::jet>> recoJetsToken_;
-    edm::EDGetTokenT<std::vector<simon::jet>> genJetsToken_;
-    edm::EDGetTokenT<std::vector<matching::jetmatch>> matchesToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> recoJetsToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> genJetsToken_;
+    edm::EDGetTokenT<edm::View<matching::jetmatch>> matchesToken_;
+
+    std::vector<edm::EDGetTokenT<edm::ValueMap<bool>>> flagsTokens_;
 };
 
 EECRes4TransferProducer::EECRes4TransferProducer(const edm::ParameterSet& conf) :
         res4calc_(conf.getParameter<edm::ParameterSet>("calculator")),
-        recoJetsToken_(consumes<std::vector<simon::jet>>(conf.getParameter<edm::InputTag>("recoJets"))),
-        genJetsToken_(consumes<std::vector<simon::jet>>(conf.getParameter<edm::InputTag>("genJets"))),
-        matchesToken_(consumes<std::vector<matching::jetmatch>>(conf.getParameter<edm::InputTag>("matches")))
+        recoJetsToken_(consumes<edm::View<simon::jet>>(conf.getParameter<edm::InputTag>("recoJets"))),
+        genJetsToken_(consumes<edm::View<simon::jet>>(conf.getParameter<edm::InputTag>("genJets"))),
+        matchesToken_(consumes<edm::View<matching::jetmatch>>(conf.getParameter<edm::InputTag>("matches")))
 {
+
+    std::vector<edm::InputTag> flagsTags = conf.getParameter<std::vector<edm::InputTag>>("flags");
+    flagsTokens_.reserve(flagsTags.size());
+    for(const auto& tag : flagsTags){
+        flagsTokens_.push_back(consumes<edm::ValueMap<bool>>(tag));
+    }
 
     produces<std::vector<EEC::CMSSWRes4TransferResult>>("transfer");
     produces<std::vector<EEC::CMSSWRes4Result>>("gen");
@@ -58,18 +69,31 @@ void EECRes4TransferProducer::fillDescriptions(edm::ConfigurationDescriptions& d
     desc.add<edm::InputTag>("genJets");
     desc.add<edm::InputTag>("recoJets");
     desc.add<edm::InputTag>("matches");
+
+    desc.add<std::vector<edm::InputTag>>("flags");
+
     descriptions.add("EECRes4TransferProducer", desc);
 }
 
 void EECRes4TransferProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-    edm::Handle<std::vector<simon::jet>> recoJets;
+    edm::Handle<edm::View<simon::jet>> recoJets;
     event.getByToken(recoJetsToken_, recoJets);
 
-    edm::Handle<std::vector<simon::jet>> genJets;
+    edm::Handle<edm::View<simon::jet>> genJets;
     event.getByToken(genJetsToken_, genJets);
 
-    edm::Handle<std::vector<matching::jetmatch>> matches;
+    edm::Handle<edm::View<matching::jetmatch>> matches;
     event.getByToken(matchesToken_, matches);
+
+    std::vector<bool> passAllFlags(recoJets->size(), true);
+    for(const auto& token : flagsTokens_){
+        edm::Handle<edm::ValueMap<bool>> flags;
+        event.getByToken(token, flags);
+
+        for(unsigned iJet=0; iJet<recoJets->size(); ++iJet){
+            passAllFlags[iJet] = passAllFlags[iJet] && (*flags)[recoJets->refAt(iJet)];
+        }
+    }
 
     auto transfer_result = std::make_unique<std::vector<EEC::CMSSWRes4TransferResult>>();
     auto gen_result = std::make_unique<std::vector<EEC::CMSSWRes4Result>>();
@@ -84,9 +108,12 @@ void EECRes4TransferProducer::produce(edm::Event& event, const edm::EventSetup& 
     untransfered_reco_result->reserve(matches->size());
 
     for (const auto& match : *matches){
+        if(!passAllFlags[match.iReco]) continue;
+
         const auto& genjet = genJets->at(match.iGen);
         const auto& recojet = recoJets->at(match.iReco);
         const auto& tmat = match.tmat;
+
 
         transfer_result->emplace_back(match.iReco, match.iGen, res4calc_);
         gen_result->emplace_back(match.iGen, match.iReco, res4calc_.get_axes_gen());

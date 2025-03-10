@@ -64,7 +64,7 @@ process = setupAK8Jets(process,
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
 process = setupSimonJets(process,
-    jets = 'finalSelectedJetsAK8',
+    jets = 'selectedUpdatedJetsAK8',
     genjets = 'arbitratedGenJetsAK8', 
     CHSjets = 'finalJets',
     chargedOnly = True,
@@ -76,7 +76,7 @@ process = setupSimonJets(process,
 )
 
 #process = setupSimonJets(process,
-#    jets = 'finalSelectedJetsAK8',
+#    jets = 'selectedUpdatedJetsAK8',
 #    genjets = 'arbitratedGenJetsAK8', 
 #    CHSjets = 'finalJets',
 #    chargedOnly = False,

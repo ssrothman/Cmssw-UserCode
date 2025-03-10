@@ -38,9 +38,9 @@ EECRes4TransferTableProducer::EECRes4TransferTableProducer(const edm::ParameterS
         name_(conf.getParameter<std::string>("name")),
         EECTransferToken_(consumes<std::vector<EEC::CMSSWRes4TransferResult>>(conf.getParameter<edm::InputTag>("EECTransfer"))) {
 
-    produces<nanoaod::FlatTable>(name_+"TRANSFERdipoletransfered");
-    produces<nanoaod::FlatTable>(name_+"TRANSFERteetransfered");
-    produces<nanoaod::FlatTable>(name_+"TRANSFERtriangletransfered");
+    produces<nanoaod::FlatTable>(name_+"dipole");
+    produces<nanoaod::FlatTable>(name_+"tee");
+    produces<nanoaod::FlatTable>(name_+"triangle");
 
     produces<nanoaod::FlatTable>(name_+"BK");
 }
@@ -76,6 +76,8 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
     std::vector<int> nR_dipole_gen, nr_dipole_gen, nc_dipole_gen;
     std::vector<int> nR_tee_gen, nr_tee_gen, nc_tee_gen;
     std::vector<int> nR_triangle_gen, nr_triangle_gen, nc_triangle_gen;
+
+    std::vector<int> nEntries_dipole, nEntries_tee, nEntries_triangle;
 
     std::vector<int> iReco, iGen;
     std::vector<float> pt_denom_reco, pt_denom_gen;
@@ -119,6 +121,10 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
         const auto& tee_transfered = tee.get_data();
         const auto& triangle_transfered = triangle.get_data();
 
+        nEntries_dipole.push_back(dipole_transfered.size());
+        nEntries_tee.push_back(tee_transfered.size());
+        nEntries_triangle.push_back(triangle_transfered.size());
+            
         for (const auto& entry : dipole_transfered){
             transfered_R_dipole_reco.push_back(entry.iR_reco);
             transfered_r_dipole_reco.push_back(entry.ir_reco);
@@ -153,7 +159,7 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
         }
     }
 
-    auto dipoleTransferTable = std::make_unique<nanoaod::FlatTable>(transfered_dipole_wt_reco.size(), name_+"TRANSFERdipoletransfered", false);
+    auto dipoleTransferTable = std::make_unique<nanoaod::FlatTable>(transfered_dipole_wt_reco.size(), name_+"dipole", false);
     dipoleTransferTable->addColumn<int>("R_reco", transfered_R_dipole_reco, "reco R index", nanoaod::FlatTable::IntColumn);
     dipoleTransferTable->addColumn<int>("r_reco", transfered_r_dipole_reco, "reco r index", nanoaod::FlatTable::IntColumn);
     dipoleTransferTable->addColumn<int>("c_reco", transfered_c_dipole_reco, "reco c index", nanoaod::FlatTable::IntColumn);
@@ -162,9 +168,9 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
     dipoleTransferTable->addColumn<int>("c_gen", transfered_c_dipole_gen, "gen c index", nanoaod::FlatTable::IntColumn);
     dipoleTransferTable->addColumn<float>("wt_reco", transfered_dipole_wt_reco, "weight", nanoaod::FlatTable::FloatColumn);
     dipoleTransferTable->addColumn<float>("wt_gen", transfered_dipole_wt_gen, "weight", nanoaod::FlatTable::FloatColumn);
-    event.put(std::move(dipoleTransferTable), name_+"TRANSFERdipoletransfered");
+    event.put(std::move(dipoleTransferTable), name_+"dipole");
 
-    auto teeTransferTable = std::make_unique<nanoaod::FlatTable>(transfered_tee_wt_reco.size(), name_+"TRANSFERteetransfered", false);
+    auto teeTransferTable = std::make_unique<nanoaod::FlatTable>(transfered_tee_wt_reco.size(), name_+"tee", false);
     teeTransferTable->addColumn<int>("R_reco", transfered_R_tee_reco, "reco R index", nanoaod::FlatTable::IntColumn);
     teeTransferTable->addColumn<int>("r_reco", transfered_r_tee_reco, "reco r index", nanoaod::FlatTable::IntColumn);
     teeTransferTable->addColumn<int>("c_reco", transfered_c_tee_reco, "reco c index", nanoaod::FlatTable::IntColumn);
@@ -173,9 +179,9 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
     teeTransferTable->addColumn<int>("c_gen", transfered_c_tee_gen, "gen c index", nanoaod::FlatTable::IntColumn);
     teeTransferTable->addColumn<float>("wt_reco", transfered_tee_wt_reco, "weight", nanoaod::FlatTable::FloatColumn);
     teeTransferTable->addColumn<float>("wt_gen", transfered_tee_wt_gen, "weight", nanoaod::FlatTable::FloatColumn);
-    event.put(std::move(teeTransferTable), name_+"TRANSFERteetransfered");
+    event.put(std::move(teeTransferTable), name_+"tee");
 
-    auto triangleTransferTable = std::make_unique<nanoaod::FlatTable>(transfered_triangle_wt_reco.size(), name_+"TRANSFERtriangletransfered", false);
+    auto triangleTransferTable = std::make_unique<nanoaod::FlatTable>(transfered_triangle_wt_reco.size(), name_+"triangle", false);
     triangleTransferTable->addColumn<int>("R_reco", transfered_R_triangle_reco, "reco R index", nanoaod::FlatTable::IntColumn);
     triangleTransferTable->addColumn<int>("r_reco", transfered_r_triangle_reco, "reco r index", nanoaod::FlatTable::IntColumn);
     triangleTransferTable->addColumn<int>("c_reco", transfered_c_triangle_reco, "reco c index", nanoaod::FlatTable::IntColumn);
@@ -184,7 +190,7 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
     triangleTransferTable->addColumn<int>("c_gen", transfered_c_triangle_gen, "gen c index", nanoaod::FlatTable::IntColumn);
     triangleTransferTable->addColumn<float>("wt_reco", transfered_triangle_wt_reco, "wt_reco", nanoaod::FlatTable::FloatColumn);
     triangleTransferTable->addColumn<float>("wt_gen", transfered_triangle_wt_gen, "wt_gen", nanoaod::FlatTable::FloatColumn);
-    event.put(std::move(triangleTransferTable), name_+"TRANSFERtriangletransfered");
+    event.put(std::move(triangleTransferTable), name_+"triangle");
 
     auto BKTable = std::make_unique<nanoaod::FlatTable>(EECTransfer_vec->size(), name_+"BK", false);
     BKTable->addColumn<int>("nR_dipole_reco", nR_dipole_reco, "nR dipole reco", nanoaod::FlatTable::IntColumn);
@@ -205,6 +211,9 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
     BKTable->addColumn<int>("nR_triangle_gen", nR_triangle_gen, "nR triangle gen", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<int>("nr_triangle_gen", nr_triangle_gen, "nr triangle gen", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<int>("nc_triangle_gen", nc_triangle_gen, "nc triangle gen", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nEntries_dipole", nEntries_dipole, "nEntries dipole", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nEntries_tee", nEntries_tee, "nEntries tee", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nEntries_triangle", nEntries_triangle, "nEntries triangle", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<int>("iReco", iReco, "reco jet index", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<int>("iGen", iGen, "gen jet index", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<float>("pt_denom_reco", pt_denom_reco, "reco jet pt denominator", nanoaod::FlatTable::FloatColumn);

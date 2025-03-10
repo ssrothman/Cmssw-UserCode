@@ -178,25 +178,24 @@ def setupAK8RecoJets(process):
              " numberOfDaughters >= %d"%config['Jets']['JetNDaughters']
     print("custring: %s"%jetcut)
 
-    process.actuallySelectedJetsAK8 = cms.EDFilter("PATJetSelector",
+    process.preselectJetsAK8 = cms.EDProducer("PATJetSelectionFlagProducer",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
         cut = cms.string(jetcut),
-        filter = cms.bool(False)
-    )
+        verbose = cms.int32(0)
+    )      
 
-    process.finalSelectedJetsAK8 = cms.EDFilter("PATJetOverlapCandidateVetoSelector",
-        src = cms.InputTag("actuallySelectedJetsAK8"),
+    process.overlapVetoJetsAK8 = cms.EDFilter("PATJetOverlapCandidateVetoSelector",
+        src = cms.InputTag("selectedUpdatedJetsAK8"),
         vetoer = cms.InputTag("ZMuMu:daughters"),
         minDeltaR = cms.double(config['Jets']['JetMuonVetoDR']),
         filter = cms.bool(False),
+        makeValueMap = cms.bool(True),
         verbose = cms.int32(0)
     )
     print("YES overlap veto")
 
-    print("NO jet arbitration")
-
     process.BigAK8JetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-        src = cms.InputTag("finalSelectedJetsAK8"),
+        src = cms.InputTag("selectedUpdatedJetsAK8"),
         cut = cms.string(""),
         name = cms.string('finalSelectedJetsAK8'),
         singleton = cms.bool(False),
@@ -223,13 +222,29 @@ def setupAK8RecoJets(process):
             nCHadrons = Var("jetFlavourInfo().getcHadrons().size()", int, precision=-1),
         )
     )
+    process.BigAK8JetTable.externalVariables.overlapVeto = cms.PSet(
+        compression = cms.string('none'),
+        doc = cms.string("Jet/Z->mumu overlap veto"),
+        mcOnly = cms.bool(False),
+        precision = cms.int32(-1),
+        src = cms.InputTag("overlapVetoJetsAK8"),
+        type = cms.string('bool')
+    )
+    process.BigAK8JetTable.externalVariables.preselection = cms.PSet(
+        compression = cms.string('none'),
+        doc = cms.string("Jet preselection"),
+        mcOnly = cms.bool(False),
+        precision = cms.int32(-1),
+        src = cms.InputTag("preselectJetsAK8"),
+        type = cms.string('bool')
+    )
 
     process.ak8jetstask = cms.Task(
         process.jetIdLepVetoAK8,
         process.tightjetIdAK8,
         process.selectedUpdatedJetsAK8,
-        process.actuallySelectedJetsAK8,
-        process.finalSelectedJetsAK8,
+        process.preselectJetsAK8,
+        process.overlapVetoJetsAK8,
         process.BigAK8JetTable,
     )
     process.schedule.associate(process.ak8jetstask)

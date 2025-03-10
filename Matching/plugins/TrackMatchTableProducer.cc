@@ -89,6 +89,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
     std::vector<float> jetMatchPt;
     std::vector<float> jetMatchEta;
     std::vector<float> jetMatchPhi;
+    std::vector<int> iGen;
     std::vector<int> jetMatched;
 
     for(unsigned iReco=0; iReco<recojets->size(); ++iReco){
@@ -110,6 +111,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
             jetMatchEta.push_back(genjet.eta);
             jetMatchPhi.push_back(genjet.phi);
             jetMatched.push_back(1);
+            iGen.push_back(thematch->iGen);
 
             std::vector<float> matchPt_(recojet.nPart, 0);
             std::vector<float> matchEta_(recojet.nPart, 0);
@@ -163,6 +165,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
             jetMatchEta.push_back(0);
             jetMatchPhi.push_back(0);
             jetMatched.push_back(0);
+            iGen.push_back(-1);
                 
             for(unsigned i=0; i<recojet.nPart; ++i){
                 matchPt.push_back(0);
@@ -190,12 +193,14 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
     resultBK->addColumn<float>("jetMatchEta", jetMatchEta, "matched jet eta", nanoaod::FlatTable::FloatColumn);
     resultBK->addColumn<float>("jetMatchPhi", jetMatchPhi, "matched jet phi", nanoaod::FlatTable::FloatColumn);
     resultBK->addColumn<int>("jetMatched", jetMatched, "match boolean", nanoaod::FlatTable::IntColumn);
+    resultBK->addColumn<int>("iGen", iGen, "index of matched gen jet", nanoaod::FlatTable::IntColumn);
     event.put(std::move(resultBK), "recojetBK");
 
     std::vector<int> gen_nMatches;
     std::vector<int> gen_matchTypes;
 
     std::vector<int> genJetMatched;
+    std::vector<int> iReco;
 
     for(unsigned iGen=0; iGen<genjets->size(); ++iGen){
         const matching::jetmatch * thematch=nullptr;
@@ -210,6 +215,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
 
         if(thematch){
             genJetMatched.push_back(1);
+            iReco.push_back(thematch->iReco);
 
             const auto& recojet = recojets->at(thematch->iReco);
             
@@ -243,6 +249,8 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
             gen_matchTypes.insert(gen_matchTypes.end(), gen_matchTypes_.begin(), gen_matchTypes_.end());
         } else {
             genJetMatched.push_back(0);
+            iReco.push_back(-1);
+
             for(unsigned i=0; i<genjet.nPart; ++i){
                 gen_nMatches.push_back(-1);
                 gen_matchTypes.push_back(0);
@@ -257,6 +265,7 @@ void TrackMatchTableProducer::produce(edm::Event& event, const edm::EventSetup& 
 
     auto genresultBK = std::make_unique<nanoaod::FlatTable>(genJetMatched.size(), genname_+"BK", false, true); //extension table
     genresultBK->addColumn<int>("genJetMatched", genJetMatched, "match boolean", nanoaod::FlatTable::IntColumn);
+    genresultBK->addColumn<int>("iReco", iReco, "index of matched reco jet", nanoaod::FlatTable::IntColumn);
     event.put(std::move(genresultBK), "genjetBK");
 }
 

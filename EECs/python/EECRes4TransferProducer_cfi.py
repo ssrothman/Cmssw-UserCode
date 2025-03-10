@@ -6,5 +6,7 @@ EECRes4TransferProducer = cms.EDProducer("EECRes4TransferProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = res4transfercalculator
+    calculator = res4transfercalculator,
+    flags = cms.VInputTag("ChargedSimonJetsPreselection",
+                          "ChargedSimonJetsOverlapVeto"),
 )
