@@ -8,7 +8,7 @@
 namespace EEC{
     struct CMSSWRes4Result{
         unsigned iJet, iReco;
-        Res4Result_MultiArray result;
+        Res4Result_Vector result;
 
         CMSSWRes4Result() : iJet(0), iReco(0), result() {}
 

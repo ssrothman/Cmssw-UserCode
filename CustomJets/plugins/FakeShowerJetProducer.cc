@@ -26,10 +26,8 @@
 #include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
 
-#include "SRothman/CustomJets/plugins/AddParticle.h"
 #include "SRothman/SimonTools/src/isID.h"
-#include "SRothman/SimonTools/src/particleThresholds.h"
-#include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/particleSelector.h"
 #include "SRothman/SimonTools/src/ToyShowerer.h"
 #include "SRothman/SimonTools/src/computeJetMass.h"
 
@@ -46,16 +44,7 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
-    bool passPtEtaPhi(const T& jet);
-    bool passLepVeto(const T& jet);
-    
-    unsigned int maxNumPart_, minNumPart_;
-    
-    double minPt_;
-    double maxEta_;
-
-    double maxMuFrac_;
-    double maxChEmFrac_;
+    simon::particleSelector selector_;
 
     edm::InputTag jetSrc_;
     edm::EDGetTokenT<edm::View<T>> jetSrcToken_;
@@ -72,12 +61,8 @@ private:
 
 template <typename T>
 FakeShowerJetProducerT<T>::FakeShowerJetProducerT(const edm::ParameterSet& conf)
-        : maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
-          minNumPart_(conf.getParameter<unsigned>("minNumPart")),
-          minPt_(conf.getParameter<double>("minPt")),
-          maxEta_(conf.getParameter<double>("maxEta")),
-          maxMuFrac_(conf.getParameter<double>("maxMuFrac")),
-          maxChEmFrac_(conf.getParameter<double>("maxChEmFrac")),
+        : 
+          selector_(conf.getParameter<edm::ParameterSet>("selector")),
           jetSrc_(conf.getParameter<edm::InputTag>("jetSrc")),
           jetSrcToken_(consumes<edm::View<T>>(jetSrc_)),
           verbose_(conf.getParameter<int>("verbose")),
@@ -99,13 +84,8 @@ template <typename T>
 void FakeShowerJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
 
-  desc.add<unsigned>("maxNumPart");
-  desc.add<unsigned>("minNumPart");
-
-  desc.add<double>("minPt");
-  desc.add<double>("maxEta");
-  desc.add<double>("maxMuFrac");
-  desc.add<double>("maxChEmFrac");
+  edm::ParameterSetDescription selectorDesc;
+  simon::particleSelector::fillPSetDescription(selectorDesc);
 
   desc.add<int>("verbose");
 
@@ -119,29 +99,6 @@ void FakeShowerJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions&
   desc.add<double>("theta_max");
 
   descriptions.addWithDefaultLabel(desc);
-}
-
-template <typename T>
-bool FakeShowerJetProducerT<T>::passPtEtaPhi(const T& jet){
-    return jet.pt() > minPt_ && std::fabs(jet.eta()) < maxEta_;
-}
-
-template <typename T>
-bool FakeShowerJetProducerT<T>::passLepVeto(const T& jet){
-    double chEmFrac=0;
-    double muFrac=0;
-
-    if constexpr(std::is_same<T, pat::Jet>::value){
-        chEmFrac = jet.chargedEmEnergyFraction();
-        muFrac = jet.muonEnergyFraction();
-    } else if constexpr(std::is_same<T, reco::GenJet>::value){
-        chEmFrac = jet.chargedEmEnergy() / jet.energy();
-        muFrac = jet.muonEnergy() / jet.energy();
-    } else {
-        throw std::logic_error("FakeShowerJetProducer: unknown jet type");
-    }
-
-    return (chEmFrac < maxChEmFrac_) && (muFrac < maxMuFrac_);
 }
 
 template <typename T>
@@ -162,19 +119,7 @@ void FakeShowerJetProducerT<T>::produce(edm::Event& evt,
     for(unsigned iJet=0; iJet < jets->size(); ++iJet){//for each jet
         const auto& j = jets->at(iJet);
 
-        if(!passPtEtaPhi(j) || !passLepVeto(j)){
-            continue;
-        }
-        
         const auto& constituents = j.getJetConstituents();
-
-        if(constituents.size() < minNumPart_){
-            continue;
-        }
-
-        if(verbose_){
-            printf("jet %d passed jet selection\n", iJet);
-        }
 
         simon::jet ans;
         ans.iJet = iJet;
@@ -195,9 +140,7 @@ void FakeShowerJetProducerT<T>::produce(edm::Event& evt,
             printf("jec = %f\n", ans.jecfactor);
         }
 
-        if(ans.nPart >= minNumPart_){
-            result->push_back(std::move(ans));
-        }
+        result->push_back(std::move(ans));
 
         if(verbose_){
             printf("pushed back\n");

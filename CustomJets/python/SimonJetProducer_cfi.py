@@ -8,8 +8,10 @@ _maxNumPart = 4096
 from SRothman.Analysis.config.config import config
 
 PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
-    systematics = systematics.clone(),
-    syst = syst,
+    selector = cms.PSet(
+        parameters = systematics_parameters,
+        settings = NOM,
+    ),
 
     jetSrc = cms.InputTag("selectedPatJets"),
 
@@ -41,8 +43,10 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
 )
 
 GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
-    systematics = systematics.clone(),
-    syst = cms.string("NOM"),
+    selector = cms.PSet(
+        parameters = systematics_parameters,
+        settings = NOM,
+    ),
 
     jetSrc = cms.InputTag("ak4GenJetsNoNu"),
 

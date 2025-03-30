@@ -24,11 +24,8 @@
 
 #include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/util.h"
-#include "SRothman/SimonTools/src/selectionStructs.h"
-#include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/particleSelector.h"
 #include "SRothman/SimonTools/src/computeJetMass.h"
-
-#include "SRothman/CustomJets/plugins/AddParticle.h"
 
 #include <iostream>
 #include <memory>
@@ -41,49 +38,19 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
-
-    simon::partSyst systematics_;
-    simon::partSyst::SYSTEMATIC syst_;
-
-    struct simon::particleThresholds thresholds_;
-    struct simon::vtxCuts vtxCuts_;
-
-    bool onlyCharged_;
-
-    double maxPartEta_;
-
-    unsigned int maxNumPart_, minNumPart_;
-
-    bool applyPuppi_;
+    simon::particleSelector selector_;
 
     edm::InputTag partSrc_;
     edm::EDGetTokenT<edm::View<reco::Candidate>> partToken_;
-
-    edm::InputTag evtSelSrc_;
-    edm::EDGetTokenT<bool> evtSelToken_;
-    bool doEvtSel_;
-
-    bool skipLeadingMuons_;
 
     int verbose_;
 };
 
 FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
-        : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
-          syst_(simon::partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
-          thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
-          vtxCuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
-          onlyCharged_(conf.getParameter<bool>("onlyCharged")),
-          maxPartEta_(conf.getParameter<double>("maxPartEta")),
-          maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
-          minNumPart_(conf.getParameter<unsigned>("minNumPart")),
-          applyPuppi_(conf.getParameter<bool>("applyPuppi")),
+        : 
+          selector_(conf.getParameter<edm::ParameterSet>("selector")),
           partSrc_(conf.getParameter<edm::InputTag>("partSrc")),
           partToken_(consumes<edm::View<reco::Candidate>>(partSrc_)),
-          evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
-          evtSelToken_(consumes<bool>(evtSelSrc_)),
-          doEvtSel_(conf.getParameter<bool>("doEventSelection")),
-          skipLeadingMuons_(conf.getParameter<bool>("skipLeadingMuons")),
           verbose_(conf.getParameter<int>("verbose")){
     produces<std::vector<simon::jet>>();
 }
@@ -91,39 +58,13 @@ FullEventJetProducer::FullEventJetProducer(const edm::ParameterSet& conf)
 void FullEventJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
 
-  desc.add<std::string>("syst");
-
-  edm::ParameterSetDescription systPset;
-  simon::partSyst::fillPSetDescription(systPset);
-  desc.add<edm::ParameterSetDescription>(
-            "systematics", systPset);
-
-  
-    edm::ParameterSetDescription thresholdPset;
-    simon::particleThresholds::fillPSetDescription(thresholdPset);
-    desc.add<edm::ParameterSetDescription>(
-            "thresholds", thresholdPset);
-
-    desc.add<bool>("onlyCharged");
-    edm::ParameterSetDescription vtxPset;
-    simon::vtxCuts::fillPSetDescription(vtxPset);
-    desc.add<edm::ParameterSetDescription>("vtxCuts", vtxPset);
-
-    desc.add<double>("maxPartEta");
-
-    desc.add<unsigned>("maxNumPart");
-    desc.add<unsigned>("minNumPart");
-
-    desc.add<bool>("applyPuppi");
-
-    desc.add<edm::InputTag>("eventSelection");
-    desc.add<bool>("doEventSelection");
+  edm::ParameterSetDescription selectorDesc;
+  simon::particleSelector::fillPSetDescription(selectorDesc);
+  desc.add<edm::ParameterSetDescription>("selector", selectorDesc);
 
     desc.add<edm::InputTag>("partSrc");
 
     desc.add<int>("verbose");
-
-    desc.add<bool>("skipLeadingMuons");
 
     descriptions.addWithDefaultLabel(desc);
 }
@@ -137,18 +78,6 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
 
     auto result = std::make_unique<std::vector<simon::jet>>();
 
-    if(doEvtSel_){
-        edm::Handle<bool> evtSel;
-        evt.getByToken(evtSelToken_, evtSel);
-        if(!*evtSel){
-            evt.put(std::move(result));
-            return;
-        }
-        if(verbose_){
-            printf("passed event selection\n");
-        }
-    }
-
     simon::jet ans;
     ans.pt = -9999;
     ans.eta = 9999;
@@ -160,47 +89,7 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
     ans.sumpt = 0.0;
     ans.particles.clear();
 
-    //printf("making FullEvent jet with eta: %f, phi: %f\n", ans.eta, ans.phi);
-
-    bool doneMu0 = false, doneMu1 = false;
-    for(size_t iPart=0; iPart < parts->size(); ++iPart){
-        const auto& part = parts->at(iPart);
-
-        if(skipLeadingMuons_ && std::abs(part.pdgId()) == 13){
-            if (!doneMu0){
-                doneMu0 = true;
-                continue;
-            } else if (!doneMu1){
-                doneMu1 = true;
-                continue;
-            }
-        }   
-
-        const auto* partptr=dynamic_cast<const pat::PackedCandidate*>(&part);
-        const auto* genptr=dynamic_cast<const pat::PackedGenParticle*>(&part);
-        if(partptr){
-            addParticle(partptr, ans, 1.0, 
-                    applyPuppi_, false, 
-                    onlyCharged_,
-                    maxPartEta_, thresholds_,
-                    vtxCuts_, systematics_, syst_,
-                    maxNumPart_);
-        } else if(genptr){
-            addParticle(genptr, ans, 1.0,
-                    applyPuppi_, false,
-                    onlyCharged_,
-                    maxPartEta_, thresholds_,
-                    vtxCuts_, systematics_, simon::partSyst::NOM,
-                    maxNumPart_);
-        } else {
-            throw cms::Exception("FullEventJetProducer::produce()")
-                << "particle is neither pat::PackedCandidate nor pat::PackedGenParticle\n";
-        }
-    }
-
-    std::sort(ans.particles.begin(), ans.particles.end(), [](const simon::particle& a, const simon::particle& b){
-        return a.pt > b.pt;
-    });
+    selector_.buildJet(parts->ptrs(), ans);
 
     if(verbose_){
         printf("Made fullevent jet with %lu particles\n",ans.particles.size());
@@ -208,11 +97,9 @@ void FullEventJetProducer::produce(edm::Event& evt, const edm::EventSetup& setup
 
     simon::computeJetMass(ans);
 
-    if(ans.nPart >= minNumPart_){
-        result->push_back(std::move(ans));
-        if(verbose_){
-            printf("pushed back\n");
-        }
+    result->push_back(std::move(ans));
+    if(verbose_){
+        printf("pushed back\n");
     }
 
     evt.put(std::move(result));

@@ -27,11 +27,7 @@
 #include "SRothman/SimonTools/src/util.h"
 #include "SRothman/SimonTools/src/etaPhiCoords.h"
 
-#include "SRothman/CustomJets/plugins/AddParticle.h"
-#include "SRothman/SimonTools/src/isID.h"
-#include "SRothman/SimonTools/src/particleThresholds.h"
-#include "SRothman/SimonTools/src/vtxCuts.h"
-#include "SRothman/SimonTools/src/partSyst.h"
+#include "SRothman/SimonTools/src/particleSelector.h"
 #include "SRothman/SimonTools/src/computeJetMass.h"
 
 #include <iostream>
@@ -45,22 +41,7 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
-    
-    simon::partSyst systematics_;
-    simon::partSyst::SYSTEMATIC syst_;
-
-    struct simon::particleThresholds thresholds_;
-    struct simon::vtxCuts vtxcuts_;
-
-    bool onlyCharged_;
-
-    unsigned int maxNumPart_, minNumPart_;
-    
-    bool applyPuppi_;
-
-    edm::InputTag evtSelSrc_;
-    edm::EDGetTokenT<bool> evtSelToken_;
-    bool doEvtSel_;
+    simon::particleSelector selector_;
 
     edm::InputTag coordSrc_;
     edm::EDGetTokenT<simon::etaPhiCoords> coordToken_;
@@ -74,16 +55,8 @@ private:
 };
 
 FixedConeJetProducer::FixedConeJetProducer(const edm::ParameterSet& conf)
-        : systematics_(conf.getParameter<edm::ParameterSet>("systematics")),
-          syst_(simon::partSyst::getSystEnum(conf.getParameter<std::string>("syst"))),
-          thresholds_(conf.getParameter<edm::ParameterSet>("thresholds")),
-          vtxcuts_(conf.getParameter<edm::ParameterSet>("vtxCuts")),
-          onlyCharged_(conf.getParameter<bool>("onlyCharged")),
-          maxNumPart_(conf.getParameter<unsigned>("maxNumPart")),
-          minNumPart_(conf.getParameter<unsigned>("minNumPart")),
-          evtSelSrc_(conf.getParameter<edm::InputTag>("eventSelection")),
-          evtSelToken_(consumes<bool>(evtSelSrc_)),
-          doEvtSel_(conf.getParameter<bool>("doEventSelection")),
+        : 
+          selector_(conf.getParameter<edm::ParameterSet>("selector")),
           coordSrc_(conf.getParameter<edm::InputTag>("coords")),
           coordToken_(consumes<simon::etaPhiCoords>(coordSrc_)),
           partSrc_(conf.getParameter<edm::InputTag>("particles")),
@@ -96,38 +69,15 @@ FixedConeJetProducer::FixedConeJetProducer(const edm::ParameterSet& conf)
 void FixedConeJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
 
-  desc.add<std::string>("syst");
-
-  edm::ParameterSetDescription systPset;
-  simon::partSyst::fillPSetDescription(systPset);
-  desc.add<edm::ParameterSetDescription>(
-            "systematics", systPset);
-
-  edm::ParameterSetDescription thresholdPset;
-  simon::particleThresholds::fillPSetDescription(thresholdPset);
-  desc.add<edm::ParameterSetDescription>(
-            "thresholds", thresholdPset);
-
-  desc.add<bool>("onlyCharged");
-
-  edm::ParameterSetDescription vtxCutsPset;
-  simon::vtxCuts::fillPSetDescription(vtxCutsPset);
-  desc.add<edm::ParameterSetDescription>(
-            "vtxCuts", vtxCutsPset);
-
-  desc.add<unsigned>("maxNumPart");
-  desc.add<unsigned>("minNumPart");
-
-  desc.add<edm::InputTag>("eventSelection");
-  desc.add<bool>("doEventSelection");
+  edm::ParameterSetDescription selectorDesc;
+  simon::particleSelector::fillPSetDescription(selectorDesc);
+  desc.add<edm::ParameterSetDescription>("selector", selectorDesc);
 
   desc.add<edm::InputTag>("coords");
 
   desc.add<edm::InputTag>("particles");
 
   desc.add<int>("verbose");
-
-  desc.add<bool>("applyPuppi");
 
   desc.add<double>("conesize");
 
@@ -156,19 +106,6 @@ void FixedConeJetProducer::produce(edm::Event& evt,
 
     auto result = std::make_unique<std::vector<simon::jet>>();
 
-    if(doEvtSel_){
-        edm::Handle<bool> evtSel;
-        evt.getByToken(evtSelToken_, evtSel);
-        if(!*evtSel){
-            evt.put(std::move(result));
-            return;
-        }
-    }
-
-    if(verbose_){
-        printf("passed event selection\n");
-    }
-
     simon::jet ans;
     ans.eta = coords->eta;
     ans.phi = coords->phi;
@@ -176,51 +113,17 @@ void FixedConeJetProducer::produce(edm::Event& evt,
     ans.jecfactor = 9999;
     ans.pt = 0;
 
-    //printf("making FixedCone jet with eta: %f, phi: %f\n", ans.eta, ans.phi);
-    for(unsigned iPart = 0; iPart < parts->size(); iPart++){
-        auto part = parts->ptrAt(iPart);
+    auto thefilter = [coords, &conesize_=conesize_](const edm::Ptr<reco::Candidate>& part){
+        return reco::deltaR(part->eta(), part->phi(),
+                            coords->eta, coords->phi) < conesize_;
+    };
 
-        if(verbose_>1){
-            printf("part: (%f, %f, %f, %f)\n", part->pt(),
-                                           part->eta(), 
-                                           part->phi(),
-                                           part->mass());
-        }
-        const auto* partptr = dynamic_cast<const pat::PackedCandidate*>(part.get());
-        const auto* genptr = dynamic_cast<const pat::PackedGenParticle*>(part.get());
-        
-        if(reco::deltaR(part->eta(), part->phi(), 
-                    coords->eta, coords->phi) > conesize_){
-            continue;
-        }
-
-        if(partptr){
-            addParticle(partptr, ans, 9999,
-                        applyPuppi_, false, 
-                        onlyCharged_,
-                        9999, thresholds_,
-                        vtxcuts_, systematics_,
-                        syst_,
-                        maxNumPart_);
-       } else if(genptr){
-            addParticle(genptr, ans, 9999, 
-                        applyPuppi_, false,
-                        onlyCharged_,
-                        9999, thresholds_, 
-                        vtxcuts_, systematics_,
-                        simon::partSyst::NOM,
-                        maxNumPart_);
-       } else {
-            throw std::runtime_error("constituent is not a PackedCandidate or PackedGenCandidate");
-        }
-    } // end for part
+    selector_.buildJet(parts->ptrs(), ans, &thefilter);
 
     ans.pt = ans.rawpt;
     computeJetMass(ans);
 
-    if(ans.nPart >= minNumPart_){
-        result->push_back(std::move(ans));
-    }
+    result->push_back(std::move(ans));
 
     if(verbose_){
         printf("pushed back\n");

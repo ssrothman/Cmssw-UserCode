@@ -56,13 +56,19 @@ void EECRes4TableProducer::produce(edm::Event& event, const edm::EventSetup& set
     edm::Handle<std::vector<EEC::CMSSWRes4Result>> EECs;
     event.getByToken(EECToken_, EECs);
 
-    std::vector<float> dipole_flat;
-    std::vector<float> tee_flat;
-    std::vector<float> triangle_flat;
+    std::vector<int> dipole_R, dipole_r, dipole_c;
+    std::vector<float> dipole_wt;
+
+    std::vector<int> tee_R, tee_r, tee_c;
+    std::vector<float> tee_wt;
+
+    std::vector<int> triangle_R, triangle_r, triangle_c;
+    std::vector<float> triangle_wt;
 
     std::vector<int> nR_dipole, nr_dipole, nc_dipole;
     std::vector<int> nR_tee, nr_tee, nc_tee;
     std::vector<int> nR_triangle, nr_triangle, nc_triangle;
+    std::vector<int> nEntry_dipole, nEntry_tee, nEntry_triangle;
 
     std::vector<int> iJet, iReco;
     std::vector<float> pt_denom;
@@ -88,32 +94,74 @@ void EECRes4TableProducer::produce(edm::Event& event, const edm::EventSetup& set
         iReco.push_back(EEC.iReco);
         pt_denom.push_back(EEC.result.get_pt_denom());
 
-        dipole_flat.insert(
-                dipole_flat.end(), 
-                dipole.get_data().data(),
-                dipole.get_data().data() + dipole.get_data().num_elements());
+        if (dipole.get_data().empty()){
+            nEntry_dipole.push_back(1);
+            dipole_R.push_back(-1);  
+            dipole_r.push_back(-1);
+            dipole_c.push_back(-1);
+            dipole_wt.push_back(-1);
+        } else {
+            nEntry_dipole.push_back(dipole.get_data().size());
+            for (const auto& [R, r, c, wt] : dipole.get_data()){
+                dipole_R.push_back(R);
+                dipole_r.push_back(r);
+                dipole_c.push_back(c);
+                dipole_wt.push_back(wt);
+            }
+        }
 
-        tee_flat.insert(
-                tee_flat.end(), 
-                tee.get_data().data(),
-                tee.get_data().data() + tee.get_data().num_elements());
+        if (tee.get_data().empty()){
+            nEntry_tee.push_back(1);
+            tee_R.push_back(-1);
+            tee_r.push_back(-1);
+            tee_c.push_back(-1);
+            tee_wt.push_back(-1);
+        } else {
+            nEntry_tee.push_back(tee.get_data().size());
+            for (const auto& [R, r, c, wt] : tee.get_data()){
+                tee_R.push_back(R);
+                tee_r.push_back(r);
+                tee_c.push_back(c);
+                tee_wt.push_back(wt);
+            }
+        }
 
-        triangle_flat.insert(
-                triangle_flat.end(), 
-                triangle.get_data().data(),
-                triangle.get_data().data() + triangle.get_data().num_elements());
+        if (triangle.get_data().empty()){
+            nEntry_triangle.push_back(1);
+            triangle_R.push_back(-1);
+            triangle_r.push_back(-1);
+            triangle_c.push_back(-1);
+            triangle_wt.push_back(-1);
+        } else {
+            nEntry_triangle.push_back(triangle.get_data().size());
+            for (const auto& [R, r, c, wt] : triangle.get_data()){
+                triangle_R.push_back(R);
+                triangle_r.push_back(r);
+                triangle_c.push_back(c);
+                triangle_wt.push_back(wt);
+            }
+        }
     }
 
-    auto dipoleTable = std::make_unique<nanoaod::FlatTable>(dipole_flat.size(), name_ + "dipole", false);
-    dipoleTable->addColumn<float>("value", dipole_flat, "dipole values", nanoaod::FlatTable::FloatColumn);
+    auto dipoleTable = std::make_unique<nanoaod::FlatTable>(dipole_R.size(), name_ + "dipole", false);
+    dipoleTable->addColumn<int>("R", dipole_R, "R values", nanoaod::FlatTable::IntColumn);
+    dipoleTable->addColumn<int>("r", dipole_r, "r values", nanoaod::FlatTable::IntColumn);
+    dipoleTable->addColumn<int>("c", dipole_c, "c values", nanoaod::FlatTable::IntColumn);
+    dipoleTable->addColumn<float>("wt", dipole_wt, "wt values", nanoaod::FlatTable::FloatColumn);
     event.put(std::move(dipoleTable), name_ + "dipole");
 
-    auto teeTable = std::make_unique<nanoaod::FlatTable>(tee_flat.size(), name_ + "tee", false);
-    teeTable->addColumn<float>("value", tee_flat, "tee values", nanoaod::FlatTable::FloatColumn);
+    auto teeTable = std::make_unique<nanoaod::FlatTable>(tee_R.size(), name_ + "tee", false);
+    teeTable->addColumn<int>("R", tee_R, "R values", nanoaod::FlatTable::IntColumn);
+    teeTable->addColumn<int>("r", tee_r, "r values", nanoaod::FlatTable::IntColumn);
+    teeTable->addColumn<int>("c", tee_c, "c values", nanoaod::FlatTable::IntColumn);
+    teeTable->addColumn<float>("wt", tee_wt, "wt values", nanoaod::FlatTable::FloatColumn);
     event.put(std::move(teeTable), name_ + "tee");
 
-    auto triangleTable = std::make_unique<nanoaod::FlatTable>(triangle_flat.size(), name_ + "triangle", false);    
-    triangleTable->addColumn<float>("value", triangle_flat, "triangle values", nanoaod::FlatTable::FloatColumn);
+    auto triangleTable = std::make_unique<nanoaod::FlatTable>(triangle_R.size(), name_ + "triangle", false);    
+    triangleTable->addColumn<int>("R", triangle_R, "R values", nanoaod::FlatTable::IntColumn);
+    triangleTable->addColumn<int>("r", triangle_r, "r values", nanoaod::FlatTable::IntColumn);
+    triangleTable->addColumn<int>("c", triangle_c, "c values", nanoaod::FlatTable::IntColumn);
+    triangleTable->addColumn<float>("wt", triangle_wt, "wt values", nanoaod::FlatTable::FloatColumn);
     event.put(std::move(triangleTable), name_ + "triangle");
 
     auto BKTable = std::make_unique<nanoaod::FlatTable>(EECs->size(), name_ + "BK", false);
@@ -129,6 +177,9 @@ void EECRes4TableProducer::produce(edm::Event& event, const edm::EventSetup& set
     BKTable->addColumn<int>("iJet", iJet, "iJet", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<int>("iReco", iReco, "iReco", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<float>("pt_denom", pt_denom, "pt_denom", nanoaod::FlatTable::FloatColumn);
+    BKTable->addColumn<int>("nEntry_dipole", nEntry_dipole, "nEntry dipole", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nEntry_tee", nEntry_tee, "nEntry tee", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nEntry_triangle", nEntry_triangle, "nEntry triangle", nanoaod::FlatTable::IntColumn);
     event.put(std::move(BKTable), name_ + "BK");
 }
 

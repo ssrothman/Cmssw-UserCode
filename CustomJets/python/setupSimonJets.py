@@ -74,11 +74,19 @@ def setupRecoSimonJets(process,
         verbose=False,
     ))
 
+    setattr(process, name+"CHSTable", cms.EDProducer("CHSSumTableProducer",
+        src = cms.InputTag(name),
+        name = cms.string(name+"BK"),
+        CHSsrc = cms.InputTag(CHSjets),
+        verbose = cms.int32(0)
+    ))
+
     setattr(process, name+'Task', cms.Task(
         getattr(process, name),
         getattr(process, name+'Preselection'),
         getattr(process, name+'OverlapVeto'),
         getattr(process, name+'Table'),
+        getattr(process, name+'CHSTable')
     ))
     process.schedule.associate(getattr(process, name+'Task'))
 

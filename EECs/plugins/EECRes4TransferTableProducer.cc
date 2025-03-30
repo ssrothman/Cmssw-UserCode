@@ -120,42 +120,77 @@ void EECRes4TransferTableProducer::produce(edm::Event& event, const edm::EventSe
         const auto& dipole_transfered = dipole.get_data();
         const auto& tee_transfered = tee.get_data();
         const auto& triangle_transfered = triangle.get_data();
-
-        nEntries_dipole.push_back(dipole_transfered.size());
-        nEntries_tee.push_back(tee_transfered.size());
-        nEntries_triangle.push_back(triangle_transfered.size());
             
-        for (const auto& entry : dipole_transfered){
-            transfered_R_dipole_reco.push_back(entry.iR_reco);
-            transfered_r_dipole_reco.push_back(entry.ir_reco);
-            transfered_c_dipole_reco.push_back(entry.ic_reco);
-            transfered_R_dipole_gen.push_back(entry.iR_gen);
-            transfered_r_dipole_gen.push_back(entry.ir_gen);
-            transfered_c_dipole_gen.push_back(entry.ic_gen);
-            transfered_dipole_wt_reco.push_back(entry.wt_reco);
-            transfered_dipole_wt_gen.push_back(entry.wt_gen);
+        if (dipole_transfered.size() > 0){
+            nEntries_dipole.push_back(dipole_transfered.size());
+            for (const auto& entry : dipole_transfered){
+                transfered_R_dipole_reco.push_back(entry.iR_reco);
+                transfered_r_dipole_reco.push_back(entry.ir_reco);
+                transfered_c_dipole_reco.push_back(entry.ic_reco);
+                transfered_R_dipole_gen.push_back(entry.iR_gen);
+                transfered_r_dipole_gen.push_back(entry.ir_gen);
+                transfered_c_dipole_gen.push_back(entry.ic_gen);
+                transfered_dipole_wt_reco.push_back(entry.wt_reco);
+                transfered_dipole_wt_gen.push_back(entry.wt_gen);
+            }
+        } else {
+            nEntries_dipole.push_back(1);
+            transfered_R_dipole_reco.push_back(-1);
+            transfered_r_dipole_reco.push_back(-1);
+            transfered_c_dipole_reco.push_back(-1);
+            transfered_R_dipole_gen.push_back(-1);
+            transfered_r_dipole_gen.push_back(-1);
+            transfered_c_dipole_gen.push_back(-1);
+            transfered_dipole_wt_reco.push_back(-1);
+            transfered_dipole_wt_gen.push_back(-1);
         }
 
-        for (const auto& entry : tee_transfered){
-            transfered_R_tee_reco.push_back(entry.iR_reco);
-            transfered_r_tee_reco.push_back(entry.ir_reco);
-            transfered_c_tee_reco.push_back(entry.ic_reco);
-            transfered_R_tee_gen.push_back(entry.iR_gen);
-            transfered_r_tee_gen.push_back(entry.ir_gen);
-            transfered_c_tee_gen.push_back(entry.ic_gen);
-            transfered_tee_wt_reco.push_back(entry.wt_reco);
-            transfered_tee_wt_gen.push_back(entry.wt_gen);
+        if(tee_transfered.size() > 0){
+            nEntries_tee.push_back(tee_transfered.size());
+            for (const auto& entry : tee_transfered){
+                transfered_R_tee_reco.push_back(entry.iR_reco);
+                transfered_r_tee_reco.push_back(entry.ir_reco);
+                transfered_c_tee_reco.push_back(entry.ic_reco);
+                transfered_R_tee_gen.push_back(entry.iR_gen);
+                transfered_r_tee_gen.push_back(entry.ir_gen);
+                transfered_c_tee_gen.push_back(entry.ic_gen);
+                transfered_tee_wt_reco.push_back(entry.wt_reco);
+                transfered_tee_wt_gen.push_back(entry.wt_gen);
+            }
+        } else {
+            nEntries_tee.push_back(1);
+            transfered_R_tee_reco.push_back(-1);
+            transfered_r_tee_reco.push_back(-1);
+            transfered_c_tee_reco.push_back(-1);
+            transfered_R_tee_gen.push_back(-1);
+            transfered_r_tee_gen.push_back(-1);
+            transfered_c_tee_gen.push_back(-1);
+            transfered_tee_wt_reco.push_back(-1);
+            transfered_tee_wt_gen.push_back(-1);
         }
 
-        for (const auto& entry : triangle_transfered){
-            transfered_R_triangle_reco.push_back(entry.iR_reco);
-            transfered_r_triangle_reco.push_back(entry.ir_reco);
-            transfered_c_triangle_reco.push_back(entry.ic_reco);
-            transfered_R_triangle_gen.push_back(entry.iR_gen);
-            transfered_r_triangle_gen.push_back(entry.ir_gen);
-            transfered_c_triangle_gen.push_back(entry.ic_gen);
-            transfered_triangle_wt_reco.push_back(entry.wt_reco);
-            transfered_triangle_wt_gen.push_back(entry.wt_gen);
+        if(triangle_transfered.size() > 0){
+            nEntries_triangle.push_back(triangle_transfered.size());
+            for (const auto& entry : triangle_transfered){
+                transfered_R_triangle_reco.push_back(entry.iR_reco);
+                transfered_r_triangle_reco.push_back(entry.ir_reco);
+                transfered_c_triangle_reco.push_back(entry.ic_reco);
+                transfered_R_triangle_gen.push_back(entry.iR_gen);
+                transfered_r_triangle_gen.push_back(entry.ir_gen);
+                transfered_c_triangle_gen.push_back(entry.ic_gen);
+                transfered_triangle_wt_reco.push_back(entry.wt_reco);
+                transfered_triangle_wt_gen.push_back(entry.wt_gen);
+            }
+        } else {
+            nEntries_triangle.push_back(1);
+            transfered_R_triangle_reco.push_back(-1);
+            transfered_r_triangle_reco.push_back(-1);
+            transfered_c_triangle_reco.push_back(-1);
+            transfered_R_triangle_gen.push_back(-1);
+            transfered_r_triangle_gen.push_back(-1);
+            transfered_c_triangle_gen.push_back(-1);
+            transfered_triangle_wt_reco.push_back(-1);
+            transfered_triangle_wt_gen.push_back(-1);
         }
     }
 
