@@ -4,19 +4,12 @@ from SRothman.CustomJets.SimonJetProducer_cfi import *
 
 def setupGenSimonJets(process,
                       genjets,
-                      chargedOnly,
-                      eventSelection,
                       name):
-
-    doEventSel = len(eventSelection) > 0
 
     setattr(process, 'Gen'+name, GenSimonJetProducer.clone(
         jetSrc = genjets,
-        eventSelection = eventSelection,
-        doEventSelection = doEventSel,
         addCHSindex = False,
         verbose = False,
-        onlyCharged = chargedOnly
     ))
 
     setattr(process, 'Gen'+name+'Table', SimonJetTableProducer.clone(
@@ -36,22 +29,17 @@ def setupGenSimonJets(process,
 def setupRecoSimonJets(process,
                        jets,
                        CHSjets,
-                       chargedOnly,
-                       eventSelection,
                        name,
                        ak8):
-    doEventSel = len(eventSelection) > 0
+
     doCHS = len(CHSjets) > 0
 
     setattr(process, name, PatSimonJetProducer.clone(
         jetSrc = jets,
-        eventSelection = eventSelection,
-        doEventSelection = doEventSel,
         CHSsrc = CHSjets,
         addCHSindex = doCHS,
         CHSmatchDR = 0.4 if ak8 else 0.2,
         verbose = False,
-        onlyCharged = chargedOnly
     ))
 
     setattr(process, name+"Preselection", cms.EDProducer("JetSelectionFlagTranslator",
@@ -96,8 +84,6 @@ def setupSimonJets(process,
                    jets, 
                    genjets,
                    CHSjets,
-                   chargedOnly,
-                   eventSelection,
                    name,
                    ak8,
                    isMC,
@@ -105,15 +91,11 @@ def setupSimonJets(process,
     if isMC:
         process = setupGenSimonJets(process,
                                     genjets,
-                                    chargedOnly,
-                                    eventSelection,
                                     name)
     if not genOnly:
         process = setupRecoSimonJets(process,
                                      jets,
                                      CHSjets,
-                                     chargedOnly,
-                                     eventSelection,
                                      name,
                                      ak8)
     return process

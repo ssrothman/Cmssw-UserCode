@@ -43,9 +43,6 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeMC(process)
 
-#from SRothman.Analysis.setupRoccoR import setupRoccoR
-#process = setupRoccoR(process, isMC=True)
-
 from SRothman.Analysis.addParticlesTable import addParticlesTable
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
@@ -67,25 +64,11 @@ process = setupSimonJets(process,
     jets = 'selectedUpdatedJetsAK8',
     genjets = 'arbitratedGenJetsAK8', 
     CHSjets = 'finalJets',
-    chargedOnly = True,
-    eventSelection = '',
     name = 'ChargedSimonJets',
     ak8 = True,
     isMC = True,
     genOnly = False
 )
-
-#process = setupSimonJets(process,
-#    jets = 'selectedUpdatedJetsAK8',
-#    genjets = 'arbitratedGenJetsAK8', 
-#    CHSjets = 'finalJets',
-#    chargedOnly = False,
-#    eventSelection = '',
-#    name = 'SimonJets',
-#    ak8 = True,
-#    isMC = True,
-#    genOnly = False
-#)
 
 from SRothman.Matching.setupMatching import setupMatching
 process = setupMatching(process,
@@ -97,15 +80,6 @@ process = setupMatching(process,
     naive = False
 )
 
-#process = setupMatching(process,
-#    verbose = 0,
-#    ak8 = True,
-#    name = 'GenMatch',
-#    reco = 'SimonJets',
-#    gen = 'GenSimonJets',
-#    naive = False
-#)
-
 from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
 process = setupEECRes4_MC(process,
     name = 'ChargedEECs',
@@ -114,15 +88,6 @@ process = setupEECRes4_MC(process,
     recojets = 'ChargedSimonJets',
     verbose = 0,
 )
-
-#process = setupEECRes4(process,
-#    name = 'EECs',
-#    genMatch = 'GenMatch',
-#    genjets = 'GenSimonJets',
-#    recojets = 'SimonJets',
-#    verbose = 0,
-#    isMC = True
-#)
 
 # End of customisation functions
 

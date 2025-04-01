@@ -19,8 +19,8 @@ systematics_parameters = cms.PSet(
     HADCHthresholds = cms.vdouble(0.0, 0.0, 0.0), # NOM, UP, DN
 
     #vertexing selections
-    fromPVcut = cms.int32(0),
-    puppiCut = cms.double(0.5),
+    minFromPV = cms.int32(0),
+    minPuppiWt = cms.double(0.5),
     maxDZ = cms.double(0.1),
     maxDXY = cms.double(0.1),
 )
@@ -38,7 +38,7 @@ NOM = cms.PSet(
     MUthreshold = cms.string("NOM"),
     HADCHthreshold = cms.string("NOM"),
 
-    requireVertex = cms.bool(True),
+    requireVertex = cms.string("ON"),
     
     applyPuppi = cms.bool(True),
     onlyCharged = cms.bool(True)
