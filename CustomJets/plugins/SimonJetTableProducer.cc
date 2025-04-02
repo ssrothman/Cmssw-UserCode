@@ -98,7 +98,7 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   unsigned iJ=0;
   for(const auto& j : *jets){
       pt.push_back(j.pt);
-      rawPt.push_back(j.sumpt);
+      rawPt.push_back(j.rawpt);
       jecfactor.push_back(j.jecfactor);
       eta.push_back(j.eta);
       phi.push_back(j.phi);

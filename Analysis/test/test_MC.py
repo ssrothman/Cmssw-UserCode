@@ -60,34 +60,34 @@ process = setupAK8Jets(process,
    genOnly = False)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
-process = setupSimonJets(process,
-    jets = 'selectedUpdatedJetsAK8',
-    genjets = 'arbitratedGenJetsAK8', 
-    CHSjets = 'finalJets',
-    name = 'ChargedSimonJets',
-    ak8 = True,
-    isMC = True,
-    genOnly = False
-)
+for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
+    suffix = syst.replace('_', ''); # remove underscores for the suffix
+    process = setupSimonJets(process,
+        jets = 'selectedUpdatedJetsAK8',
+        genjets = 'arbitratedGenJetsAK8', 
+        CHSjets = 'finalJets',
+        name = 'ChargedSimonJets'+suffix,
+        syst = syst,
+        isMC = True,
+        genOnly = False
+    )
 
-from SRothman.Matching.setupMatching import setupMatching
-process = setupMatching(process,
-    verbose = 0,
-    ak8 = True,
-    name = 'ChargedGenMatch',
-    reco = 'ChargedSimonJets',
-    gen = 'GenChargedSimonJets',
-    naive = False
-)
+    from SRothman.Matching.setupMatching import setupMatching
+    process = setupMatching(process,
+        verbose = 0,
+        name = 'ChargedGenMatch'+suffix,
+        reco = 'ChargedSimonJets'+suffix,
+        gen = 'GenChargedSimonJets'+suffix,
+    )
 
-from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
-process = setupEECRes4_MC(process,
-    name = 'ChargedEECs',
-    genMatch = 'ChargedGenMatch',
-    genjets = 'GenChargedSimonJets',
-    recojets = 'ChargedSimonJets',
-    verbose = 0,
-)
+    from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
+    process = setupEECRes4_MC(process,
+        name = 'ChargedEECs'+suffix,
+        genMatch = 'ChargedGenMatch'+suffix,
+        genjets = 'GenChargedSimonJets'+suffix,
+        recojets = 'ChargedSimonJets'+suffix,
+        verbose = 0,
+    )
 
 # End of customisation functions
 

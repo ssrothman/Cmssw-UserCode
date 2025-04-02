@@ -2,6 +2,8 @@ import FWCore.ParameterSet.Config as cms
 from SRothman.CustomJets.SimonJetTableProducer_cfi import *
 from SRothman.CustomJets.SimonJetProducer_cfi import *
 
+from SRothman.CustomJets.systematics import variations
+
 def setupGenSimonJets(process,
                       genjets,
                       name):
@@ -30,7 +32,7 @@ def setupRecoSimonJets(process,
                        jets,
                        CHSjets,
                        name,
-                       ak8):
+                       syst):
 
     doCHS = len(CHSjets) > 0
 
@@ -38,9 +40,10 @@ def setupRecoSimonJets(process,
         jetSrc = jets,
         CHSsrc = CHSjets,
         addCHSindex = doCHS,
-        CHSmatchDR = 0.4 if ak8 else 0.2,
+        CHSmatchDR = 0.4,
         verbose = False,
     ))
+    getattr(process, name).selector.settings = variations[syst]
 
     setattr(process, name+"Preselection", cms.EDProducer("JetSelectionFlagTranslator",
         src = cms.InputTag(jets),
@@ -85,7 +88,7 @@ def setupSimonJets(process,
                    genjets,
                    CHSjets,
                    name,
-                   ak8,
+                   syst,
                    isMC,
                    genOnly):
     if isMC:
@@ -97,7 +100,7 @@ def setupSimonJets(process,
                                      jets,
                                      CHSjets,
                                      name,
-                                     ak8)
+                                     syst)
     return process
 
 

@@ -6,6 +6,35 @@ from SRothman.EECs.EECRes4TransferProducer_cfi import *
 from SRothman.EECs.EECRes4TableProducer_cfi import *
 from SRothman.EECs.EECRes4TransferTableProducer_cfi import *
 
+def setupEECRes4_data(process,
+                      name,
+                      recojets,
+                      verbose=0):
+
+    setattr(process, name,
+        EECRes4Producer.clone(
+            jets = recojets,
+            flags = [recojets+"Preselection",
+                     recojets+"OverlapVeto"],
+        )
+    )
+    setattr(process, "Reco%sTable"%name,
+        EECRes4TableProducer.clone(
+            EECs = "%s:reco"%name,
+            name = "Reco%s"%name,
+        )
+    )
+
+    setattr(process, "Reco%sTask"%name,
+        cms.Task(
+            getattr(process, name),
+            getattr(process, "Reco%sTable"%name),
+        )
+    )
+    process.schedule.associate(getattr(process, "Reco%sTask"%name))
+
+    return process
+
 def setupEECRes4_MC(process, 
               name, genMatch,
               genjets, recojets,
@@ -15,6 +44,8 @@ def setupEECRes4_MC(process,
         EECRes4MatchedProducer.clone(
             jets = recojets,
             matches = genMatch,
+            flags = [recojets+"Preselection",
+                     recojets+"OverlapVeto"]
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -42,7 +73,9 @@ def setupEECRes4_MC(process,
         EECRes4TransferProducer.clone(
             genJets = genjets,
             recoJets = recojets,
-            matches = genMatch
+            matches = genMatch,
+            flags = [recojets+"Preselection", 
+                     recojets+"OverlapVeto"],
         )
     )
     setattr(process, 'Gen%sTable'%name,

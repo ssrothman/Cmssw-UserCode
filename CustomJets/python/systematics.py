@@ -12,17 +12,17 @@ systematics_parameters = cms.PSet(
     trkDropSmear = cms.double(0.10),
 
     #reconstruction thresholds
-    EM0thresholds = cms.vdouble(0.0, 0.0, 0.0),   # NOM, UP, DN
-    HAD0thresholds = cms.vdouble(0.0, 0.0, 0.0),  # NOM, UP, DN
-    ELEthresholds = cms.vdouble(0.0, 0.0, 0.0),   # NOM, UP, DN
-    MUthresholds = cms.vdouble(0.0, 0.0, 0.0),    # NOM, UP, DN
-    HADCHthresholds = cms.vdouble(0.0, 0.0, 0.0), # NOM, UP, DN
+    EM0thresholds = cms.vdouble(0.0, 0.0, 0.0),   # DN, NOM, UP
+    HAD0thresholds = cms.vdouble(0.0, 0.0, 0.0),  # DN, NOM, UP
+    ELEthresholds = cms.vdouble(0.0, 0.0, 0.0),   # DN, NOM, UP
+    MUthresholds = cms.vdouble(0.0, 0.0, 0.0),    # DN, NOM, UP
+    HADCHthresholds = cms.vdouble(0.0, 0.0, 0.0), # DN, NOM, UP
 
     #vertexing selections
     minFromPV = cms.int32(0),
     minPuppiWt = cms.double(0.5),
-    maxDZ = cms.double(0.1),
-    maxDXY = cms.double(0.1),
+    maxDZ = cms.double(0.2),
+    maxDXY = cms.double(999999),
 )
 
 NOM = cms.PSet(
@@ -44,70 +44,57 @@ NOM = cms.PSet(
     onlyCharged = cms.bool(True)
 )
 
-EM0_UP = NOM.clone(
-    EM0scale = cms.string("UP"),
-)
-
-EM0_DOWN = NOM.clone(
-    EM0scale = cms.string("DOWN"),
-)
-
-HAD0_UP = NOM.clone(
-    HAD0scale = cms.string("UP"),
-)
-
-HAD0_DOWN = NOM.clone(
-    HAD0scale = cms.string("DOWN"),
-)
-
-CH_UP = NOM.clone(
-    CHscale = cms.string("UP"),
-)
-
-CH_DOWN = NOM.clone(
-    CHscale = cms.string("DOWN"),
-)
-
-TRK_EFF = NOM.clone(
-    trkDrop = cms.string("ON"),
-)
-
-HAD0_THRESH_UP = NOM.clone(
-    HAD0threshold = cms.string("UP"),
-)
-
-HAD0_THRESH_DOWN = NOM.clone(
-    HAD0threshold = cms.string("DOWN"),
-)
-
-EM0_THRESH_UP = NOM.clone(
-    EM0threshold = cms.string("UP"),
-)
-
-EM0_THRESH_DOWN = NOM.clone(
-    EM0threshold = cms.string("DOWN"),
-)
-
-ELE_THRESH_UP = NOM.clone(
-    ELEthreshold = cms.string("UP"),
-)
-
-ELE_THRESH_DOWN = NOM.clone(
-    ELEthreshold = cms.string("DOWN"),
-)
-
-MU_THRESH_UP = NOM.clone(
-    MUthreshold = cms.string("UP"),
-)
-
-MU_THRESH_DOWN = NOM.clone(
-    MUthreshold = cms.string("DOWN"),
-)
-
-HADCH_THRESH_UP = NOM.clone(
-    HADCHthreshold = cms.string("UP"),
-)
-
-HADCH_THRESH_DOWN = NOM.clone(
-    HADCHthreshold = cms.string("DOWN"),
-)
+variations = {
+    'NOM': NOM,
+    'EM0_UP': NOM.clone(
+        EM0scale = cms.string("UP"),
+    ),
+    'EM0_DN': NOM.clone(
+        EM0scale = cms.string("DN"),
+    ),
+    'HAD0_UP': NOM.clone(
+        HAD0scale = cms.string("UP"),
+    ),
+    'HAD0_DN': NOM.clone(
+        HAD0scale = cms.string("DN"),
+    ),
+    'CH_UP': NOM.clone(
+        CHscale = cms.string("UP"),
+    ),
+    'CH_DN': NOM.clone(
+        CHscale = cms.string("DN"),
+    ),
+    'TRK_EFF': NOM.clone(
+        trkDrop = cms.string("ON"),
+    ),
+    'HAD0_THRESH_UP': NOM.clone(
+        HAD0threshold = cms.string("UP"),
+    ),
+    'HAD0_THRESH_DN': NOM.clone(
+        HAD0threshold = cms.string("DN"),
+    ),
+    'EM0_THRESH_UP': NOM.clone(
+        EM0threshold = cms.string("UP"),
+    ),
+    'EM0_THRESH_DN': NOM.clone(
+        EM0threshold = cms.string("DN"),
+    ),
+    'ELE_THRESH_UP': NOM.clone(
+        ELEthreshold = cms.string("UP"),
+    ),
+    'ELE_THRESH_DN': NOM.clone(
+        ELEthreshold = cms.string("DN"),
+    ),
+    'MU_THRESH_UP': NOM.clone(
+        MUthreshold = cms.string("UP"),
+    ),
+    'MU_THRESH_DN': NOM.clone(
+        MUthreshold = cms.string("DN"),
+    ),
+    'HADCH_THRESH_UP': NOM.clone(
+        HADCHthreshold = cms.string("UP"),
+    ),
+    'HADCH_THRESH_DN': NOM.clone(
+        HADCHthreshold = cms.string("DN"),
+    ),
+}

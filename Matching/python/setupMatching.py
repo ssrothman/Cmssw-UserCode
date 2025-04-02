@@ -3,11 +3,9 @@ import FWCore.ParameterSet.Config as cms
 from SRothman.Matching.TrackMatchProducer_cfi import TrackMatchProducer
 
 def setupMatching(process, verbose=0,
-                  ak8=True,
                   name='GenMatch',
                   reco = 'SimonJets',
-                  gen = 'GenSimonJets',
-                  naive=False):
+                  gen = 'GenSimonJets'):
                    
     setattr(process, name, 
         TrackMatchProducer.clone(

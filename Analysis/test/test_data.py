@@ -62,46 +62,20 @@ process = setupAK8Jets(process,
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
 process = setupSimonJets(process,
-    jets = 'finalSelectedJetsAK8',
+    jets = 'selectedUpdatedJetsAK8',
     genjets = '',
     CHSjets = 'finalJets',
-    chargedOnly = True,
-    eventSelection = '',
     name = 'ChargedSimonJets',
-    ak8 = True,
+    syst = 'NOM',
     isMC = False,
     genOnly = False
 )
 
-process = setupSimonJets(process,
-    jets = 'finalSelectedJetsAK8',
-    genjets = '',
-    CHSjets = 'finalJets',
-    chargedOnly = False,
-    eventSelection = '',
-    name = 'SimonJets',
-    ak8 = True,
-    isMC = False,
-    genOnly = False
-)
-
-from SRothman.EECs.setupEECs import setupEECs
-process = setupEECs(process,
+from SRothman.EECs.setupEECRes4 import setupEECRes4_data
+process = setupEECRes4_data(process,
     name = 'ChargedEECs',
-    genMatch = '',
-    genjets = '',
     recojets = 'ChargedSimonJets',
     verbose = 0,
-    isMC = False
-)
-
-process = setupEECs(process,
-    name = 'EECs',
-    genMatch = '',
-    genjets = '',
-    recojets = 'SimonJets',
-    verbose = 0,
-    isMC = False
 )
 
 # End of customisation functions

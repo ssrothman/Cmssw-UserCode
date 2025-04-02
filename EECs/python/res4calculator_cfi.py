@@ -9,8 +9,8 @@ c_dipole_bins_reco = np.linspace(0, np.pi/2, 21)
 r_tee_bins_reco = np.linspace(0, 1.0, 21)
 c_tee_bins_reco = np.linspace(0, np.pi/2, 21)
 
-r_triangle_bins_reco = np.linspace(0, 2.0, 31)
-c_triangle_bins_reco = np.linspace(-np.pi, np.pi, 41)
+r_triangle_bins_reco = np.linspace(0, 2.0, 21)
+c_triangle_bins_reco = np.linspace(-np.pi, np.pi, 31)
 
 R_bins_gen = np.linspace(0, 1.0, 11)
 
@@ -20,8 +20,8 @@ c_dipole_bins_gen = np.linspace(0, np.pi/2, 21)
 r_tee_bins_gen = np.linspace(0, 1.0, 21)
 c_tee_bins_gen = np.linspace(0, np.pi/2, 21)
 
-r_triangle_bins_gen = np.linspace(0, 2.0, 31)
-c_triangle_bins_gen = np.linspace(-np.pi, np.pi, 41)
+r_triangle_bins_gen = np.linspace(0, 2.0, 21)
+c_triangle_bins_gen = np.linspace(-np.pi, np.pi, 31)
 
 res4calculator = cms.PSet(
     tolerance = cms.double(0.05),
