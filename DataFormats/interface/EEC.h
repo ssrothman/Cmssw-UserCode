@@ -8,7 +8,7 @@
 namespace EEC{
     struct CMSSWRes4Result{
         unsigned iJet, iReco;
-        Res4Result_Vector result;
+        Res4Result_Unbinned result;
 
         CMSSWRes4Result() : iJet(0), iReco(0), result() {}
 
@@ -28,7 +28,7 @@ namespace EEC{
 
     struct CMSSWRes4TransferResult{
         unsigned iReco, iGen;
-        Res4TransferResult_Vector result;
+        Res4TransferResult_Unbinned result;
 
         CMSSWRes4TransferResult() : iReco(0), iGen(0), result() {}
 
