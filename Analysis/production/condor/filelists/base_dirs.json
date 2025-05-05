@@ -46,6 +46,20 @@
         "herwig_1jet_nobdecay_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nobdecay_v2",
         "herwig_1jet_nohad_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nohad_v2",
         "herwig_1jet_nospin_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_v2",
-        "herwig_1jet_nospin_nohad_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_nohad_v2"
+        "herwig_1jet_nospin_nohad_v2" : "/store/cmst3/group/exovv/precision/dy1jet_herwig_nospin_nohad_v2",
+        "herwig_glu_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig",
+        "herwig_glu_TeV_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig_gg",
+        "herwig_glu_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig_nospin",
+        "herwig_glu_TeV_nospin_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig_nospin_gg",
+        "pythia_glu_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia",
+        "pythia_glu_TeV_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia_gg",
+        "pythia_glu_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia_nospin",
+        "pythia_glu_TeV_nospin_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia_nospin_gg",
+        "herwig_q_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig",
+        "herwig_q_TeV_nogg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig_nogg",
+        "herwig_q_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig_nospin",
+        "herwig_q_TeV_nospin_nogg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig_nospin_nogg",
+        "pythia_q_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_pythia",
+        "pythia_q_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_pythia_nospin"
     }
 }

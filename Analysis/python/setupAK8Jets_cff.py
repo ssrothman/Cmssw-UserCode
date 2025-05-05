@@ -15,11 +15,11 @@ def setupAK8GenJets(process, genParticles, partonMode,
                 " abs(eta) < %g"%config['GenJets']['GenJetEta']
 
     if applyExtraGenSelections: #fakes the tight jet ID + lepton veto
-        cutstring += " && muonEnergy/(pt*cosh(eta)) < 0.8"
-        cutstring += " && chargedEmEnergy/(pt*cosh(eta)) < 0.8"
-        #cutstring += " && neutralEmEnergy/(pt*cosh(eta)) < 0.9"
-        #cutstring += " && neutralHadronEnergy/(pt*cosh(eta)) < 0.9"
-        cutstring += ' && numberOfDaughters > 1'
+        cutstring += " && muonEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['muEF']
+        cutstring += " && chargedEmEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['chEmEF']
+        cutstring += " && neutralEmEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['nEmEF']
+        cutstring += " && neutralHadronEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['nHadEF']
+        cutstring += ' && numberOfDaughters > %d'%config['GenJets']['nConstituents']
 
     print("Cutstring: %s"%cutstring)
 
@@ -42,7 +42,8 @@ def setupAK8GenJets(process, genParticles, partonMode,
             vetoer = cms.InputTag("ZMuMu:daughters"),
             minDeltaR = cms.double(config['Jets']['JetMuonVetoDR']),
             filter = cms.bool(False),
-            verbose = cms.int32(0)
+            verbose = cms.int32(0),
+            makeValueMap = cms.bool(False)
         )
         print("YES overlap veto")
 

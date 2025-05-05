@@ -38,8 +38,9 @@ def setupEventSelections(process, isMC,
         muoncut = "abs(eta) < %0.2f && "%config['EventSelection']['MuEta'] + \
                   " pt > %0.2f && "%config['EventSelection']['MuSubPt'] + \
                   " passed('%s') && "%config['EventSelection']['MuID'] + \
-                  " passed('%s') && " % config['EventSelection']['MuISO'] + \
-                  " abs(dB('PVDZ')) < 0.5 && abs(dB('PV2D')) < 0.2" 
+                  " passed('%s') && "%config['EventSelection']['MuISO'] + \
+                  " abs(dB('PVDZ')) < %0.2f && "%config['EventSelection']['MuDZ'] + \
+                  " abs(dB('PV2D')) < %0.2f"%config['EventSelection']['MuDXY']
 
         print("Muon cut: %s" % muoncut)
 

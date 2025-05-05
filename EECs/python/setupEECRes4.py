@@ -9,13 +9,15 @@ from SRothman.EECs.EECRes4TransferTableProducer_cfi import *
 def setupEECRes4_data(process,
                       name,
                       recojets,
+                      flags=['Preselection', 'OverlapVeto'],
                       verbose=0):
+    
+    flags = [recojets + flag for flag in flags]
 
     setattr(process, name,
         EECRes4Producer.clone(
             jets = recojets,
-            flags = [recojets+"Preselection",
-                     recojets+"OverlapVeto"],
+            flags = flags,
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -38,14 +40,16 @@ def setupEECRes4_data(process,
 def setupEECRes4_MC(process, 
               name, genMatch,
               genjets, recojets,
+              flags=['Preselection', 'OverlapVeto'],
               verbose=0):
+
+    flags = [recojets + flag for flag in flags]
 
     setattr(process, name,
         EECRes4MatchedProducer.clone(
             jets = recojets,
             matches = genMatch,
-            flags = [recojets+"Preselection",
-                     recojets+"OverlapVeto"]
+            flags = flags
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -74,8 +78,7 @@ def setupEECRes4_MC(process,
             genJets = genjets,
             recoJets = recojets,
             matches = genMatch,
-            flags = [recojets+"Preselection", 
-                     recojets+"OverlapVeto"],
+            flags = flags,
         )
     )
     setattr(process, 'Gen%sTable'%name,

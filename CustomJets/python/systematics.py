@@ -1,22 +1,23 @@
 import FWCore.ParameterSet.Config as cms
+from SRothman.Analysis.config.config import config
 
 systematics_parameters = cms.PSet(
     #particle energy scale uncertainties
-    EM0scale = cms.double(0.03),
-    HAD0scale = cms.double(0.05),
-    CHscale = cms.double(0.01),
+    EM0scale = cms.double(config['Systematics']['EM0scale']),
+    HAD0scale = cms.double(config['Systematics']['HAD0scale']),
+    CHscale = cms.double(config['Systematics']['CHscale']),
 
     #track efficiency uncertiainty
-    trkDropProb = cms.double(0.03),
+    trkDropProb = cms.double(config['Systematics']['trkDropProb']),
     #pT smearing for dropped tracks
-    trkDropSmear = cms.double(0.10),
+    trkDropSmear = cms.double(config['Systematics']['trkDropSmear']),
 
     #reconstruction thresholds
-    EM0thresholds = cms.vdouble(0.0, 0.0, 0.0),   # DN, NOM, UP
-    HAD0thresholds = cms.vdouble(0.0, 0.0, 0.0),  # DN, NOM, UP
-    ELEthresholds = cms.vdouble(0.0, 0.0, 0.0),   # DN, NOM, UP
-    MUthresholds = cms.vdouble(0.0, 0.0, 0.0),    # DN, NOM, UP
-    HADCHthresholds = cms.vdouble(0.0, 0.0, 0.0), # DN, NOM, UP
+    EM0thresholds = cms.vdouble(*config['Systematics']['EM0thresholds']),   # DN, NOM, UP
+    HAD0thresholds =  cms.vdouble(*config['Systematics']['HAD0thresholds']),  # DN, NOM, UP
+    ELEthresholds =   cms.vdouble(*config['Systematics']['ELEthresholds']),   # DN, NOM, UP
+    MUthresholds =    cms.vdouble(*config['Systematics']['MUthresholds']),    # DN, NOM, UP
+    HADCHthresholds = cms.vdouble(*config['Systematics']['HADCHthresholds']), # DN, NOM, UP
 
     #vertexing selections
     minFromPV = cms.int32(0),

@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 
-from SRothman.CustomJets.cuts_cff import *
 from SRothman.CustomJets.systematics import *
 
 _maxNumPart = 4096

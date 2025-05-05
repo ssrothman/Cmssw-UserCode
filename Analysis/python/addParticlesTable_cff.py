@@ -5,6 +5,7 @@ def addParticlesTable(process,
                       src,
                       name, 
                       singleton=False):
+
     setattr(process, name+"particlesTable", cms.EDProducer("SimpleCandidateFlatTableProducer",
         src = cms.InputTag(src),
         cut = cms.string(""),
@@ -23,4 +24,5 @@ def addParticlesTable(process,
 
     setattr(process, name+'particlesTableTask', cms.Task(getattr(process, name+'particlesTable')))
     process.schedule.associate(getattr(process, name+'particlesTableTask'))
+
     return process
