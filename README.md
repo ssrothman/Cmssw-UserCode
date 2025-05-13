@@ -79,6 +79,9 @@ run
 ```bash
 > python submit.py -y <your yaml>
 ```
+# Running with condor
+
+There is a framework for running on condor in Analysis/production/condor. 
 
 # Configuration
 
