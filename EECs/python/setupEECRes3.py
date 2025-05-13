@@ -19,9 +19,17 @@ def setupEECRes3_data(process,
     elif resulttype=='Vector':
         theProducer = EECRes3VectorProducer
         tableProducer = EECRes3VectorTableProducer
+
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECRes3VectorProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rbinsReco = cms.string(repr(EECRes3VectorProducer.calculator.bins.r.value()))
+        process.nanoMetadata.strings.cbinsReco = cms.string(repr(EECRes3VectorProducer.calculator.bins.c.value()))
     elif resulttype=='Array':
         theProducer = EECRes3ArrayProducer
         tableProducer = EECRes3ArrayTableProducer
+
+        process.nanoMetadata.strings.RbinRreco = cms.string(repr(EECRes3ArrayProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rbinRreco = cms.string(repr(EECRes3ArrayProducer.calculator.bins.r.value()))
+        process.nanoMetadata.strings.cbinRreco = cms.string(repr(EECRes3ArrayProducer.calculator.bins.c.value()))
     else:
         raise ValueError("Unknown result type %s"%resulttype)
     
@@ -67,11 +75,25 @@ def setupEECRes3_MC(process,
         tableProducer = EECRes3VectorTableProducer
         transferProducer = EECRes3TransferVectorProducer
         transferTableProducer = EECRes3TransferVectorTableProducer
+
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.rbinsReco = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_reco.r.value()))
+        process.nanoMetadata.strings.rbinsGen = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_gen.r.value()))
+        process.nanoMetadata.strings.cbinsReco = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_reco.c.value()))
+        process.nanoMetadata.strings.cbinsGen = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_gen.c.value()))
     elif resulttype=='Array':
         theProducer = EECRes3MatchedArrayProducer
         tableProducer = EECRes3ArrayTableProducer
         transferProducer = EECRes3TransferArrayProducer
         transferTableProducer = EECRes3TransferArrayTableProducer
+
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.rbinsReco = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_reco.r.value()))
+        process.nanoMetadata.strings.rbinsGen = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_gen.r.value()))
+        process.nanoMetadata.strings.cbinsReco = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_reco.c.value()))
+        process.nanoMetadata.strings.cbinsGen = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_gen.c.value()))
 
     flags = [recojets + flag for flag in flags]
 

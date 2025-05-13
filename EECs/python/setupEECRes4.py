@@ -19,9 +19,25 @@ def setupEECRes4_data(process,
     elif resulttype=='Vector':
         theProducer = EECRes4VectorProducer
         tableProducer = EECRes4VectorTableProducer
+
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4VectorProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_triangle.value()))
     elif resulttype=='Array':
         theProducer = EECRes4ArrayProducer
         tableProducer = EECRes4ArrayTableProducer
+
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4ArrayProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_triangle.value()))
     else:
         raise ValueError("Unknown result type %s"%resulttype)
     
@@ -67,11 +83,43 @@ def setupEECRes4_MC(process,
         tableProducer = EECRes4VectorTableProducer
         transferProducer = EECRes4TransferVectorProducer
         transferTableProducer = EECRes4TransferVectorTableProducer
+
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4VectorProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_triangle.value()))
+
+        process.nanoMetadata.strings.RbinsGen         = cms.string(repr(EECRes4VectorProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsGen   = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsGen   = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsGen      = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsGen      = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsGen = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsGen = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_triangle.value()))
     elif resulttype=='Array':
         theProducer = EECRes4MatchedArrayProducer
         tableProducer = EECRes4ArrayTableProducer
         transferProducer = EECRes4TransferArrayProducer
         transferTableProducer = EECRes4TransferArrayTableProducer
+
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4ArrayProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_triangle.value()))
+
+        process.nanoMetadata.strings.RbinsGen         = cms.string(repr(EECRes4ArrayProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsGen   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsGen   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsGen      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsGen      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsGen = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsGen = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_triangle.value()))
 
     flags = [recojets + flag for flag in flags]
 

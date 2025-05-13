@@ -19,9 +19,13 @@ def setupEECProj_data(process,
     elif resulttype=='Vector':
         theProducer = EECProjVectorProducer
         tableProducer = EECProjVectorTableProducer
+
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECProjVectorProducer.calculator.bins.R.value()))
     elif resulttype=='Array':
         theProducer = EECProjArrayProducer
         tableProducer = EECProjArrayTableProducer
+
+        process.nanoMetadata.strings.RbinRreco = cms.string(repr(EECProjArrayProducer.calculator.bins.R.value()))
     else:
         raise ValueError("Unknown result type %s"%resulttype)
     
@@ -57,6 +61,7 @@ def setupEECProj_MC(process,
               resulttype = 'Unbinned',
               verbose=0):
 
+
     if resulttype=='Unbinned':
         theProducer = EECProjMatchedUnbinnedProducer
         tableProducer = EECProjUnbinnedTableProducer
@@ -67,11 +72,17 @@ def setupEECProj_MC(process,
         tableProducer = EECProjVectorTableProducer
         transferProducer = EECProjTransferVectorProducer
         transferTableProducer = EECProjTransferVectorTableProducer
+
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECProjTransferVectorProducer.calculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECProjTransferVectorProducer.calculator.bins_gen.R.value()))
     elif resulttype=='Array':
         theProducer = EECProjMatchedArrayProducer
         tableProducer = EECProjArrayTableProducer
         transferProducer = EECProjTransferArrayProducer
         transferTableProducer = EECProjTransferArrayTableProducer
+
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECProjTransferArrayProducer.calculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECProjTransferArrayProducer.calculator.bins_gen.R.value()))
 
     flags = [recojets + flag for flag in flags]
 
