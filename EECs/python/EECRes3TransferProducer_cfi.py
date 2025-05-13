@@ -1,30 +1,31 @@
 import FWCore.ParameterSet.Config as cms
 
-from res4calculator_cfi import res4transfercalculator
+from res3calculator_cfi import res3transfercalculator
 
-EECRes4TransferVectorProducer = cms.EDProducer("EECRes4TransferVectorProducer",
+EECRes3TransferVectorProducer = cms.EDProducer("EECRes3TransferVectorProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = res4transfercalculator,
+    calculator = res3transfercalculator,
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
 
-EECRes4TransferUnbinnedProducer = cms.EDProducer("EECRes4TransferUnbinnedProducer",
+EECRes3TransferUnbinnedProducer = cms.EDProducer("EECRes3TransferUnbinnedProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = res4transfercalculator,
+    calculator = res3transfercalculator,
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
 
-EECRes4TransferArrayProducer = cms.EDProducer("EECRes4TransferArrayProducer",
+EECRes3TransferArrayProducer = cms.EDProducer("EECRes3TransferArrayProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = res4transfercalculator,
+    calculator = res3transfercalculator,
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
+

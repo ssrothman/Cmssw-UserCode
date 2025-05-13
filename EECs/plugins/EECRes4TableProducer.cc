@@ -22,6 +22,9 @@
 
 #include "SRothman/DataFormats/interface/EEC.h"
 
+#include "SRothman/EECs/src/Res4Result.h"
+
+template <class ResultType>
 class EECRes4TableProducer : public edm::stream::EDProducer<> {
 public:
     explicit EECRes4TableProducer(const edm::ParameterSet&);
@@ -31,12 +34,13 @@ public:
 private:
     std::string name_;
 
-    edm::EDGetTokenT<std::vector<EEC::CMSSWRes4Result>> EECToken_;
+    edm::EDGetTokenT<std::vector<ResultType>> EECToken_;
 };
 
-EECRes4TableProducer::EECRes4TableProducer(const edm::ParameterSet& conf) :
+template <class ResultType>
+EECRes4TableProducer<ResultType>::EECRes4TableProducer(const edm::ParameterSet& conf) :
         name_(conf.getParameter<std::string>("name")),
-        EECToken_(consumes<std::vector<EEC::CMSSWRes4Result>>(conf.getParameter<edm::InputTag>("EECs"))) {
+        EECToken_(consumes<std::vector<ResultType>>(conf.getParameter<edm::InputTag>("EECs"))) {
 
     produces<nanoaod::FlatTable>(name_+"dipole");
     produces<nanoaod::FlatTable>(name_+"tee");
@@ -44,33 +48,35 @@ EECRes4TableProducer::EECRes4TableProducer(const edm::ParameterSet& conf) :
     produces<nanoaod::FlatTable>(name_+"BK");
 }
 
-void EECRes4TableProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+template <class ResultType>
+void EECRes4TableProducer<ResultType>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
 
     desc.add<std::string>("name");
     desc.add<edm::InputTag>("EECs");
-    descriptions.add("EECRes4TableProducer", desc);
+    descriptions.addWithDefaultLabel(desc);
 }
 
-void EECRes4TableProducer::produce(edm::Event& event, const edm::EventSetup& setup){
-    edm::Handle<std::vector<EEC::CMSSWRes4Result>> EECs;
+template <class ResultType>
+void EECRes4TableProducer<ResultType>::produce(edm::Event& event, const edm::EventSetup& setup){
+    edm::Handle<std::vector<ResultType>> EECs;
     event.getByToken(EECToken_, EECs);
 
-    std::vector<float> dipole_R, dipole_r, dipole_c;
+    std::vector<typename ResultType::T> dipole_R, dipole_r, dipole_c;
     std::vector<float> dipole_wt;
 
-    std::vector<float> tee_R, tee_r, tee_c;
+    std::vector<typename ResultType::T> tee_R, tee_r, tee_c;
     std::vector<float> tee_wt;
 
-    std::vector<float> triangle_R, triangle_r, triangle_c;
+    std::vector<typename ResultType::T> triangle_R, triangle_r, triangle_c;
     std::vector<float> triangle_wt;
 
-    std::vector<float> nR_dipole, nr_dipole, nc_dipole;
-    std::vector<float> nR_tee, nr_tee, nc_tee;
-    std::vector<float> nR_triangle, nr_triangle, nc_triangle;
-    std::vector<float> nEntry_dipole, nEntry_tee, nEntry_triangle;
+    std::vector<int> nR_dipole, nr_dipole, nc_dipole;
+    std::vector<int> nR_tee, nr_tee, nc_tee;
+    std::vector<int> nR_triangle, nr_triangle, nc_triangle;
+    std::vector<int> nEntry_dipole, nEntry_tee, nEntry_triangle;
 
-    std::vector<float> iJet, iReco;
+    std::vector<int> iJet, iReco;
     std::vector<float> pt_denom;
 
     for (const auto& EEC : *EECs){
@@ -94,93 +100,173 @@ void EECRes4TableProducer::produce(edm::Event& event, const edm::EventSetup& set
         iReco.push_back(EEC.iReco);
         pt_denom.push_back(EEC.result.get_pt_denom());
 
-        if (dipole.get_data().empty()){
-            nEntry_dipole.push_back(1);
-            dipole_R.push_back(-1);  
-            dipole_r.push_back(-1);
-            dipole_c.push_back(-1);
-            dipole_wt.push_back(-1);
-        } else {
-            nEntry_dipole.push_back(dipole.get_data().size());
-            for (const auto& [R, r, c, wt] : dipole.get_data()){
-                dipole_R.push_back(R);
-                dipole_r.push_back(r);
-                dipole_c.push_back(c);
-                dipole_wt.push_back(wt);
+        if constexpr (ResultType::IS_ARRAY){
+            int dipole_entries = 0;
+            for (unsigned iR = 0; iR < dipole.get_data().shape()[0]; ++iR){
+                for (unsigned ir = 0; ir < dipole.get_data().shape()[1]; ir++){
+                    for (unsigned ic = 0; ic < dipole.get_data().shape()[2]; ic++){
+                        if (dipole.get_data()[iR][ir][ic] > 0){
+                            dipole_entries++;
+                            dipole_R.push_back(iR);
+                            dipole_r.push_back(ir);
+                            dipole_c.push_back(ic);
+                            dipole_wt.push_back(dipole.get_data()[iR][ir][ic]);
+                        }
+                    }
+                }
             }
-        }
-
-        if (tee.get_data().empty()){
-            nEntry_tee.push_back(1);
-            tee_R.push_back(-1);
-            tee_r.push_back(-1);
-            tee_c.push_back(-1);
-            tee_wt.push_back(-1);
-        } else {
-            nEntry_tee.push_back(tee.get_data().size());
-            for (const auto& [R, r, c, wt] : tee.get_data()){
-                tee_R.push_back(R);
-                tee_r.push_back(r);
-                tee_c.push_back(c);
-                tee_wt.push_back(wt);
+            if (dipole_entries == 0){
+                nEntry_dipole.push_back(1);
+                dipole_R.push_back(-1);
+                dipole_r.push_back(-1);
+                dipole_c.push_back(-1);
+                dipole_wt.push_back(-1);
+            } else {
+                nEntry_dipole.push_back(dipole_entries);
             }
-        }
 
-        if (triangle.get_data().empty()){
-            nEntry_triangle.push_back(1);
-            triangle_R.push_back(-1);
-            triangle_r.push_back(-1);
-            triangle_c.push_back(-1);
-            triangle_wt.push_back(-1);
+            int tee_entries = 0;
+            for (unsigned iR = 0; iR < tee.get_data().shape()[0]; ++iR){
+                for (unsigned ir = 0; ir < tee.get_data().shape()[1]; ir++){
+                    for (unsigned ic = 0; ic < tee.get_data().shape()[2]; ic++){
+                        if (tee.get_data()[iR][ir][ic] > 0){
+                            tee_entries++;
+                            tee_R.push_back(iR);
+                            tee_r.push_back(ir);
+                            tee_c.push_back(ic);
+                            tee_wt.push_back(tee.get_data()[iR][ir][ic]);
+                        }
+                    }
+                }
+            }
+            if (tee_entries == 0){
+                nEntry_tee.push_back(1);
+                tee_R.push_back(-1);
+                tee_r.push_back(-1);
+                tee_c.push_back(-1);
+                tee_wt.push_back(-1);
+            } else {
+                nEntry_tee.push_back(tee_entries);
+            }
+
+            int triangle_entries = 0;
+            for (unsigned iR = 0; iR < triangle.get_data().shape()[0]; ++iR){
+                for (unsigned ir = 0; ir < triangle.get_data().shape()[1]; ir++){
+                    for (unsigned ic = 0; ic < triangle.get_data().shape()[2]; ic++){
+                        if (triangle.get_data()[iR][ir][ic] > 0){
+                            triangle_entries++;
+                            triangle_R.push_back(iR);
+                            triangle_r.push_back(ir);
+                            triangle_c.push_back(ic);
+                            triangle_wt.push_back(triangle.get_data()[iR][ir][ic]);
+                        }
+                    }
+                }
+            }
+            if (triangle_entries == 0){
+                nEntry_triangle.push_back(1);
+                triangle_R.push_back(-1);
+                triangle_r.push_back(-1);
+                triangle_c.push_back(-1);
+                triangle_wt.push_back(-1);
+            } else {
+                nEntry_triangle.push_back(triangle_entries);
+            }
         } else {
-            nEntry_triangle.push_back(triangle.get_data().size());
-            for (const auto& [R, r, c, wt] : triangle.get_data()){
-                triangle_R.push_back(R);
-                triangle_r.push_back(r);
-                triangle_c.push_back(c);
-                triangle_wt.push_back(wt);
+            if (dipole.get_data().empty()){
+                nEntry_dipole.push_back(1);
+                dipole_R.push_back(-1);  
+                dipole_r.push_back(-1);
+                dipole_c.push_back(-1);
+                dipole_wt.push_back(-1);
+            } else {
+                nEntry_dipole.push_back(dipole.get_data().size());
+                for (const auto& [R, r, c, wt] : dipole.get_data()){
+                    dipole_R.push_back(R);
+                    dipole_r.push_back(r);
+                    dipole_c.push_back(c);
+                    dipole_wt.push_back(wt);
+                }
+            }
+
+            if (tee.get_data().empty()){
+                nEntry_tee.push_back(1);
+                tee_R.push_back(-1);
+                tee_r.push_back(-1);
+                tee_c.push_back(-1);
+                tee_wt.push_back(-1);
+            } else {
+                nEntry_tee.push_back(tee.get_data().size());
+                for (const auto& [R, r, c, wt] : tee.get_data()){
+                    tee_R.push_back(R);
+                    tee_r.push_back(r);
+                    tee_c.push_back(c);
+                    tee_wt.push_back(wt);
+                }
+            }
+
+            if (triangle.get_data().empty()){
+                nEntry_triangle.push_back(1);
+                triangle_R.push_back(-1);
+                triangle_r.push_back(-1);
+                triangle_c.push_back(-1);
+                triangle_wt.push_back(-1);
+            } else {
+                nEntry_triangle.push_back(triangle.get_data().size());
+                for (const auto& [R, r, c, wt] : triangle.get_data()){
+                    triangle_R.push_back(R);
+                    triangle_r.push_back(r);
+                    triangle_c.push_back(c);
+                    triangle_wt.push_back(wt);
+                }
             }
         }
     }
 
-    auto dipoleTable = std::make_unique<nanoaod::FlatTable>(dipole_R.size(), name_ + "dipole", false);
-    dipoleTable->addColumn<float>("R", dipole_R, "R values", nanoaod::FlatTable::FloatColumn);
-    dipoleTable->addColumn<float>("r", dipole_r, "r values", nanoaod::FlatTable::FloatColumn);
-    dipoleTable->addColumn<float>("c", dipole_c, "c values", nanoaod::FlatTable::FloatColumn);
-    dipoleTable->addColumn<float>("wt", dipole_wt, "wt values", nanoaod::FlatTable::FloatColumn);
+    auto dipoleTable = std::make_unique<nanoaod::FlatTable>(dipole_R.size(), name_ + "dipole", false);    
+    dipoleTable->template addColumn<typename ResultType::T>("R", dipole_R, "R values", ResultType::COLUMN_TYPE);
+    dipoleTable->template addColumn<typename ResultType::T>("r", dipole_r, "r values", ResultType::COLUMN_TYPE);
+    dipoleTable->template addColumn<typename ResultType::T>("c", dipole_c, "c values", ResultType::COLUMN_TYPE);
+    dipoleTable->template addColumn<float>("wt", dipole_wt, "wt values", nanoaod::FlatTable::FloatColumn);
     event.put(std::move(dipoleTable), name_ + "dipole");
 
     auto teeTable = std::make_unique<nanoaod::FlatTable>(tee_R.size(), name_ + "tee", false);
-    teeTable->addColumn<float>("R", tee_R, "R values", nanoaod::FlatTable::FloatColumn);
-    teeTable->addColumn<float>("r", tee_r, "r values", nanoaod::FlatTable::FloatColumn);
-    teeTable->addColumn<float>("c", tee_c, "c values", nanoaod::FlatTable::FloatColumn);
-    teeTable->addColumn<float>("wt", tee_wt, "wt values", nanoaod::FlatTable::FloatColumn);
+    teeTable->template addColumn<typename ResultType::T>("R", tee_R, "R values", ResultType::COLUMN_TYPE);
+    teeTable->template addColumn<typename ResultType::T>("r", tee_r, "r values", ResultType::COLUMN_TYPE);
+    teeTable->template addColumn<typename ResultType::T>("c", tee_c, "c values", ResultType::COLUMN_TYPE);
+    teeTable->template addColumn<float>("wt", tee_wt, "wt values", nanoaod::FlatTable::FloatColumn);
     event.put(std::move(teeTable), name_ + "tee");
 
     auto triangleTable = std::make_unique<nanoaod::FlatTable>(triangle_R.size(), name_ + "triangle", false);    
-    triangleTable->addColumn<float>("R", triangle_R, "R values", nanoaod::FlatTable::FloatColumn);
-    triangleTable->addColumn<float>("r", triangle_r, "r values", nanoaod::FlatTable::FloatColumn);
-    triangleTable->addColumn<float>("c", triangle_c, "c values", nanoaod::FlatTable::FloatColumn);
-    triangleTable->addColumn<float>("wt", triangle_wt, "wt values", nanoaod::FlatTable::FloatColumn);
+    triangleTable->template addColumn<typename ResultType::T>("R", triangle_R, "R values", ResultType::COLUMN_TYPE);
+    triangleTable->template addColumn<typename ResultType::T>("r", triangle_r, "r values", ResultType::COLUMN_TYPE);
+    triangleTable->template addColumn<typename ResultType::T>("c", triangle_c, "c values", ResultType::COLUMN_TYPE);
+    triangleTable->template addColumn<float>("wt", triangle_wt, "wt values", nanoaod::FlatTable::FloatColumn);
     event.put(std::move(triangleTable), name_ + "triangle");
 
-    auto BKTable = std::make_unique<nanoaod::FlatTable>(EECs->size(), name_ + "BK", false);
-    BKTable->addColumn<float>("nR_dipole", nR_dipole, "nR dipole", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nr_dipole", nr_dipole, "nr dipole", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nc_dipole", nc_dipole, "nc dipole", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nR_tee", nR_tee, "nR tee", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nr_tee", nr_tee, "nr tee", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nc_tee", nc_tee, "nc tee", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nR_triangle", nR_triangle, "nR triangle", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nr_triangle", nr_triangle, "nr triangle", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nc_triangle", nc_triangle, "nc triangle", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("iJet", iJet, "iJet", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("iReco", iReco, "iReco", nanoaod::FlatTable::FloatColumn);
+    auto BKTable = std::make_unique<nanoaod::FlatTable>(nR_dipole.size(), name_ + "BK", false);    
+    BKTable->addColumn<int>("nR_dipole", nR_dipole, "nR dipole", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nr_dipole", nr_dipole, "nr dipole", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nc_dipole", nc_dipole, "nc dipole", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nR_tee", nR_tee, "nR tee", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nr_tee", nr_tee, "nr tee", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nc_tee", nc_tee, "nc tee", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nR_triangle", nR_triangle, "nR triangle", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nr_triangle", nr_triangle, "nr triangle", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nc_triangle", nc_triangle, "nc triangle", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("iJet", iJet, "iJet", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("iReco", iReco, "iReco", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<float>("pt_denom", pt_denom, "pt_denom", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nEntry_dipole", nEntry_dipole, "nEntry dipole", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nEntry_tee", nEntry_tee, "nEntry tee", nanoaod::FlatTable::FloatColumn);
-    BKTable->addColumn<float>("nEntry_triangle", nEntry_triangle, "nEntry triangle", nanoaod::FlatTable::FloatColumn);
+    BKTable->addColumn<int>("nEntry_dipole", nEntry_dipole, "nEntry dipole", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nEntry_tee", nEntry_tee, "nEntry tee", nanoaod::FlatTable::IntColumn);
+    BKTable->addColumn<int>("nEntry_triangle", nEntry_triangle, "nEntry triangle", nanoaod::FlatTable::IntColumn);
     event.put(std::move(BKTable), name_ + "BK");
 }
 
-DEFINE_FWK_MODULE(EECRes4TableProducer);
+typedef EECRes4TableProducer<EEC::CMSSWResult<EEC::Res4Result<EEC::ResVectorContainer<double>>>> EECRes4UnbinnedTableProducer;
+typedef EECRes4TableProducer<EEC::CMSSWResult<EEC::Res4Result<EEC::ResVectorContainer<unsigned>>>> EECRes4VectorTableProducer;
+typedef EECRes4TableProducer<EEC::CMSSWResult<EEC::Res4Result<EEC::ResMultiArrayContainer>>> EECRes4ArrayTableProducer;
+
+DEFINE_FWK_MODULE(EECRes4UnbinnedTableProducer);
+DEFINE_FWK_MODULE(EECRes4VectorTableProducer);
+DEFINE_FWK_MODULE(EECRes4ArrayTableProducer);

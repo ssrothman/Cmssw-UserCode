@@ -15,7 +15,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '106X_upgrade2018_realistic_v16_L1v1', '')
 
 # Shrink NANOAOD
-from SRothman.Analysis.shrinkNano import shrink_nanoAOD_MC
+from SRothman.Analysis.shrinkNano_cff import shrink_nanoAOD_MC
 process = shrink_nanoAOD_MC(process)
 
 # Path and EndPath definitions
@@ -24,7 +24,7 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 process.DroppedEventsSimOutput_step = cms.EndPath(process.DroppedEventsSimOutput)
 
-from SRothman.Analysis.EventSelections_cff import setupEventSelections
+from SRothman.Analysis.setupEventSelections_cff import setupEventSelections
 process = setupEventSelections(process, isMC=True)
 # Schedule definition
 process.schedule = cms.Schedule(process.selections_path,
@@ -43,7 +43,7 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeMC(process)
 
-from SRothman.Analysis.addParticlesTable import addParticlesTable
+from SRothman.Analysis.addParticlesTable_cff import addParticlesTable
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
     "ZMuMuMuons",
@@ -53,7 +53,7 @@ process = addParticlesTable(process,
     "ZMuMuZ", 
     singleton=True)
 
-from SRothman.Analysis.setupAK8Jets import setupAK8Jets
+from SRothman.Analysis.setupAK8Jets_cff import setupAK8Jets
 process = setupAK8Jets(process,
    isMC = True,
    skipJTB = False,
@@ -80,12 +80,33 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
         gen = 'GenChargedSimonJets'+suffix,
     )
 
-    from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
-    process = setupEECRes4_MC(process,
+    #from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
+    #process = setupEECRes4_MC(process,
+    #    name = 'ChargedEECs'+suffix,
+    #    genMatch = 'ChargedGenMatch'+suffix,
+    #    genjets = 'GenChargedSimonJets'+suffix,
+    #    recojets = 'ChargedSimonJets'+suffix,
+    #    resulttype='Unbinned',
+    #    verbose = 0,
+    #)
+
+    #from SRothman.EECs.setupEECRes3 import setupEECRes3_MC
+    #process = setupEECRes3_MC(process,
+    #    name = 'ChargedEECs'+suffix,
+    #    genMatch = 'ChargedGenMatch'+suffix,
+    #    genjets = 'GenChargedSimonJets'+suffix,
+    #    recojets = 'ChargedSimonJets'+suffix,
+    #    resulttype='Unbinned',
+    #    verbose = 0,
+    #)
+
+    from SRothman.EECs.setupEECProj import setupEECProj_MC
+    process = setupEECProj_MC(process,
         name = 'ChargedEECs'+suffix,
         genMatch = 'ChargedGenMatch'+suffix,
         genjets = 'GenChargedSimonJets'+suffix,
         recojets = 'ChargedSimonJets'+suffix,
+        resulttype='Unbinned',
         verbose = 0,
     )
 

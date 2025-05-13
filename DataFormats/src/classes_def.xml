@@ -11,16 +11,99 @@
     <class name="edm::Wrapper<matching::jetmatch>"/>
     <class name="std::vector<matching::jetmatch>"/>
     <class name="edm::Wrapper<std::vector<matching::jetmatch>>"/>
-    <class name="EEC::CMSSWRes4Result"/>
-    <class name="edm::Wrapper<EEC::CMSSWRes4Result>"/>
-    <class name="std::vector<EEC::CMSSWRes4Result>"/>
-    <class name="edm::Wrapper<std::vector<EEC::CMSSWRes4Result>>"/>
-    <class name="EEC::CMSSWRes4TransferResult"/>
-    <class name="edm::Wrapper<EEC::CMSSWRes4TransferResult>"/>
-    <class name="std::vector<EEC::CMSSWRes4TransferResult>"/>
-    <class name="edm::Wrapper<std::vector<EEC::CMSSWRes4TransferResult>>"/>
-<class name="simon::etaPhiCoords"/>
-<class name="edm::Wrapper<simon::etaPhiCoords>"/>
-<class name="std::vector<simon::etaPhiCoords>"/>
-<class name="edm::Wrapper<std::vector<simon::etaPhiCoords>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::Res4Result_Vector>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::Res4Result_Vector>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::Res4Result_Vector>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::Res4Result_Vector>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::Res4Result_Unbinned>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::Res4Result_Unbinned>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::Res4Result_Unbinned>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::Res4Result_Unbinned>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::Res4Result_MultiArray>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::Res4Result_MultiArray>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::Res4Result_MultiArray>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::Res4Result_MultiArray>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::Res3Result_Vector>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::Res3Result_Vector>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::Res3Result_Vector>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::Res3Result_Vector>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::Res3Result_Unbinned>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::Res3Result_Unbinned>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::Res3Result_Unbinned>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::Res3Result_Unbinned>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::Res3Result_MultiArray>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::Res3Result_MultiArray>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::Res3Result_MultiArray>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::Res3Result_MultiArray>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::ProjResult_Vector>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::ProjResult_Vector>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::ProjResult_Vector>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::ProjResult_Vector>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::ProjResult_Unbinned>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::ProjResult_Unbinned>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::ProjResult_Unbinned>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::ProjResult_Unbinned>>>"/>
+
+    <class name="EEC::CMSSWResult<EEC::ProjResult_Array>"/>
+    <class name="edm::Wrapper<EEC::CMSSWResult<EEC::ProjResult_Array>>"/>
+    <class name="std::vector<EEC::CMSSWResult<EEC::ProjResult_Array>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWResult<EEC::ProjResult_Array>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::Res4TransferResult_Vector>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::Res4TransferResult_Vector>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::Res4TransferResult_Vector>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::Res4TransferResult_Vector>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::Res4TransferResult_Unbinned>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::Res4TransferResult_Unbinned>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::Res4TransferResult_Unbinned>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::Res4TransferResult_Unbinned>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::Res4TransferResult_MultiArray>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::Res4TransferResult_MultiArray>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::Res4TransferResult_MultiArray>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::Res4TransferResult_MultiArray>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::Res3TransferResult_Vector>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::Res3TransferResult_Vector>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::Res3TransferResult_Vector>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::Res3TransferResult_Vector>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::Res3TransferResult_Unbinned>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::Res3TransferResult_Unbinned>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::Res3TransferResult_Unbinned>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::Res3TransferResult_Unbinned>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::Res3TransferResult_MultiArray>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::Res3TransferResult_MultiArray>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::Res3TransferResult_MultiArray>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::Res3TransferResult_MultiArray>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::ProjTransferResult_Vector>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Vector>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Vector>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Vector>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::ProjTransferResult_Unbinned>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Unbinned>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Unbinned>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Unbinned>>>"/>
+
+    <class name="EEC::CMSSWTransferResult<EEC::ProjTransferResult_Array>"/>
+    <class name="edm::Wrapper<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Array>>"/>
+    <class name="std::vector<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Array>>"/>
+    <class name="edm::Wrapper<std::vector<EEC::CMSSWTransferResult<EEC::ProjTransferResult_Array>>>"/>
+
+    <class name="simon::etaPhiCoords"/>
+    <class name="edm::Wrapper<simon::etaPhiCoords>"/>
+    <class name="std::vector<simon::etaPhiCoords>"/>
+    <class name="edm::Wrapper<std::vector<simon::etaPhiCoords>>"/>
 </lcgdict>

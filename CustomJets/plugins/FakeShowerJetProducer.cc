@@ -56,6 +56,7 @@ private:
     std::string theta_mode_;
     double zcut_;
     double theta_min_, theta_max_;
+    bool angular_ordered_;
     simon::ToyShowerer showerer_;
 };
 
@@ -72,8 +73,9 @@ FakeShowerJetProducerT<T>::FakeShowerJetProducerT(const edm::ParameterSet& conf)
           zcut_(conf.getParameter<double>("zcut")),
           theta_min_(conf.getParameter<double>("theta_min")),
           theta_max_(conf.getParameter<double>("theta_max")),
+          angular_ordered_(conf.getParameter<bool>("angular_ordered")),
           showerer_(phi_mode_, z_mode_, theta_mode_, 
-                    zcut_, theta_min_, theta_max_){
+                    zcut_, theta_min_, theta_max_, angular_ordered_){
 
     //std::string moduleName = conf.getParameter<std::string>("@module_label");
     //showerer_.enable_logging(moduleName + ".log");
@@ -97,6 +99,7 @@ void FakeShowerJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions&
   desc.add<double>("zcut");
   desc.add<double>("theta_min");
   desc.add<double>("theta_max");
+  desc.add<bool>("angular_ordered");
 
   descriptions.addWithDefaultLabel(desc);
 }

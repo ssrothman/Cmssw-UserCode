@@ -1,12 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
-from SRothman.EECs.EECRes4Producer_cfi import *
-from SRothman.EECs.EECRes4MatchedProducer_cfi import *
-from SRothman.EECs.EECRes4TransferProducer_cfi import *
-from SRothman.EECs.EECRes4TableProducer_cfi import *
-from SRothman.EECs.EECRes4TransferTableProducer_cfi import *
+from SRothman.EECs.EECProjProducer_cfi import *
+from SRothman.EECs.EECProjMatchedProducer_cfi import *
+from SRothman.EECs.EECProjTransferProducer_cfi import *
+from SRothman.EECs.EECProjTableProducer_cfi import *
+from SRothman.EECs.EECProjTransferTableProducer_cfi import *
 
-def setupEECRes4_data(process,
+def setupEECProj_data(process,
                       name,
                       recojets,
                       flags=['Preselection', 'OverlapVeto'],
@@ -14,14 +14,14 @@ def setupEECRes4_data(process,
                       verbose=0):
 
     if resulttype=='Unbinned':
-        theProducer = EECRes4UnbinnedProducer
-        tableProducer = EECRes4UnbinnedTableProducer
+        theProducer = EECProjUnbinnedProducer
+        tableProducer = EECProjUnbinnedTableProducer
     elif resulttype=='Vector':
-        theProducer = EECRes4VectorProducer
-        tableProducer = EECRes4VectorTableProducer
+        theProducer = EECProjVectorProducer
+        tableProducer = EECProjVectorTableProducer
     elif resulttype=='Array':
-        theProducer = EECRes4ArrayProducer
-        tableProducer = EECRes4ArrayTableProducer
+        theProducer = EECProjArrayProducer
+        tableProducer = EECProjArrayTableProducer
     else:
         raise ValueError("Unknown result type %s"%resulttype)
     
@@ -50,7 +50,7 @@ def setupEECRes4_data(process,
 
     return process
 
-def setupEECRes4_MC(process, 
+def setupEECProj_MC(process, 
               name, genMatch,
               genjets, recojets,
               flags=['Preselection', 'OverlapVeto'],
@@ -58,20 +58,20 @@ def setupEECRes4_MC(process,
               verbose=0):
 
     if resulttype=='Unbinned':
-        theProducer = EECRes4MatchedUnbinnedProducer
-        tableProducer = EECRes4UnbinnedTableProducer
-        transferProducer = EECRes4TransferUnbinnedProducer
-        transferTableProducer = EECRes4TransferUnbinnedTableProducer
+        theProducer = EECProjMatchedUnbinnedProducer
+        tableProducer = EECProjUnbinnedTableProducer
+        transferProducer = EECProjTransferUnbinnedProducer
+        transferTableProducer = EECProjTransferUnbinnedTableProducer
     elif resulttype=='Vector':
-        theProducer = EECRes4MatchedVectorProducer
-        tableProducer = EECRes4VectorTableProducer
-        transferProducer = EECRes4TransferVectorProducer
-        transferTableProducer = EECRes4TransferVectorTableProducer
+        theProducer = EECProjMatchedVectorProducer
+        tableProducer = EECProjVectorTableProducer
+        transferProducer = EECProjTransferVectorProducer
+        transferTableProducer = EECProjTransferVectorTableProducer
     elif resulttype=='Array':
-        theProducer = EECRes4MatchedArrayProducer
-        tableProducer = EECRes4ArrayTableProducer
-        transferProducer = EECRes4TransferArrayProducer
-        transferTableProducer = EECRes4TransferArrayTableProducer
+        theProducer = EECProjMatchedArrayProducer
+        tableProducer = EECProjArrayTableProducer
+        transferProducer = EECProjTransferArrayProducer
+        transferTableProducer = EECProjTransferArrayTableProducer
 
     flags = [recojets + flag for flag in flags]
 
@@ -129,18 +129,6 @@ def setupEECRes4_MC(process,
             name =  "UnmatchedGen%s"%name,
         )
     )
-    setattr(process, 'UntransferedGen%sTable'%name,
-        tableProducer.clone(
-            EECs = "Gen%s:untransferedGen"%name,
-            name =  "UntransferedGen%s"%name,
-        )
-    )
-    setattr(process, 'UntransferedReco%sTable'%name,
-        tableProducer.clone(
-            EECs = "Gen%s:untransferedReco"%name,
-            name =  "UntransferedReco%s"%name,
-        )
-    )
 
     setattr(process, "%sGenTask"%name,
         cms.Task(
@@ -148,10 +136,10 @@ def setupEECRes4_MC(process,
             getattr(process, 'Gen%sTable'%name),
             getattr(process, 'Transfer%sTable'%name),
             getattr(process, 'UnmatchedGen%sTable'%name),
-            getattr(process, 'UntransferedGen%sTable'%name),
-            getattr(process, 'UntransferedReco%sTable'%name),
         )
     )
     process.schedule.associate(getattr(process, '%sGenTask'%name))
 
     return process
+
+
