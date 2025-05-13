@@ -26,6 +26,7 @@ NB the version of the boost libraries that ships with CMSSW_10_26 does not have 
 #setup CMSSW release area
 > cmsrel CMSSW_10_6_26
 > cd CMSSW_10_6_26/src/
+> cmsenv
 > git clone git@github.com:ssrothman/Cmssw-UserCode.git SRothman --branch EECs_106x
 
 #setup usercode
