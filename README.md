@@ -16,7 +16,7 @@ scram b
 
 # setup instructions
 
-NB the version of the boost libraries that ships with CMSSW_10_26 does not have some of the functionality we need, so we have to trick the build system into using a local copy of boost 1.82.0. We only use the header-only libraries
+NB the version of the boost libraries that ships with CMSSW_10_26 does not have some of the functionality we need, so we have to trick the build system into using a local copy of boost 1.82.0. We only use the header-only libraries, so no need to actually build anything
 
 ```bash
 
@@ -65,8 +65,11 @@ First, ensure that RUNNING_CRAB = True in Analysis/python/common_cmsRun.py
 Then, cd Analysis/production/crab/
 
 edit production_tag.py to be some unique name 
+
 edit submit.py to point to an allocation you have at some T2 or T3
+
 create a .yaml file with the datasets, config files, global tag, and crab config you want to use
+
 run
 ```bash
 > python submit.py -y <your yaml>
