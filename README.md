@@ -80,4 +80,18 @@ run
 > python submit.py -y <your yaml>
 ```
 
+# Configuration
 
+A half-hearted attempt has been made to consolidate configuration options into Analysis/python/config/config.json. This has not been entirely successful, and some options are currently hard-coded in some python cfi files. I'm not happy with this, but it's the current state of affairs. 
+
+# EEC output dataformat
+
+There are three options for how the EECs are computed and stored. They are:
+
+1. "Unbinned": each N-tuple of particles contributes its own entry with floating-point EEC coordinates and weight
+2. "Vector": each N-tuple of particles contributes its own entry with binned integer values for the EEC coordintes, and floating point weights
+3. "Array": tuples sharing the same EEC coordinate bins are combined into a single entry (ie as though filling a histogram). The result is integer values for the EEC coordinates and floating point summed weights
+
+The binning for the pre-binned coordinates is controlled in the EECs/python/<X>calcultor_cfi.py files
+
+In any case the output in the NanoAOD flat table is a (zero-suppressed) list of (EEC coordinates, weight) entries. For the Vector and Array options the EEC coordinates are the integer bin indices, while for the Unbinned option they are floating-point. 
