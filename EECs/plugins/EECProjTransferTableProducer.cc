@@ -65,10 +65,6 @@ void EECProjTransferTableProducer<ResultType>::produce(edm::Event& event, const 
     edm::Handle<std::vector<ResultType>> EECTransfer_vec;
     event.getByToken(EECTransferToken_, EECTransfer_vec);
 
-    std::vector<typename ResultType::T> transfered_R_reco;
-    std::vector<typename ResultType::T> transfered_R_gen;
-    std::vector<float> transfered_wt_reco, transfered_wt_gen;
-
     std::vector<int> nR_reco;
     std::vector<int> nR_gen;
 
@@ -82,6 +78,10 @@ void EECProjTransferTableProducer<ResultType>::produce(edm::Event& event, const 
     }};
 
     for (unsigned order=2; order<=6; ++order){
+        std::vector<typename ResultType::T> transfered_R_reco;
+        std::vector<typename ResultType::T> transfered_R_gen;
+        std::vector<float> transfered_wt_reco, transfered_wt_gen;
+
         for (const auto& EEC : *EECTransfer_vec){
             const auto& data = EEC.result.get_data()[order-2];
 

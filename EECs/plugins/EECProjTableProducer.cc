@@ -64,9 +64,6 @@ void EECProjTableProducer<ResultType>::produce(edm::Event& event, const edm::Eve
     edm::Handle<std::vector<ResultType>> EECs;
     event.getByToken(EECToken_, EECs);
 
-    std::vector<typename ResultType::T> R;
-    std::vector<float> wt;
-
     std::vector<int> nR;
     std::array<std::vector<int>, 5> nEntry;
 
@@ -78,6 +75,9 @@ void EECProjTableProducer<ResultType>::produce(edm::Event& event, const edm::Eve
     }};
 
     for (unsigned order = 2; order <= 6; ++order){
+        std::vector<typename ResultType::T> R;
+        std::vector<float> wt;
+
         for (const auto& EEC : *EECs){
             const auto& data = EEC.result.get_data()[order-2];
 
