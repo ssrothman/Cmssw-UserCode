@@ -1,8 +1,0 @@
-<bin name="testshower" file="testshower.cc"/>
-  <use name="Eigen"/>
-  <use name="root"/>
-  <use name="rootmath"/>
-  <use name="rootcore"/>
-  <use name="rootgeom"/>
-  <use name="SRothman/SimonTools"/>
-</bin>
