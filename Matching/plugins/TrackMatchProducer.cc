@@ -11,7 +11,7 @@
 
 #include "SRothman/SimonTools/src/jet.h"
 
-#include "SRothman/Matching/src/v2/TrackMatcher.h"
+#include "SRothman/Matching/src/TrackMatcher.h"
 
 #include "SRothman/DataFormats/interface/matching.h"
 
