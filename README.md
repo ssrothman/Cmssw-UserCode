@@ -26,6 +26,7 @@ NB the version of the boost libraries that ships with CMSSW_10_26 does not have 
 #setup CMSSW release area
 > cmsrel CMSSW_10_6_26
 > cd CMSSW_10_6_26/src/
+> cmsenv
 > git clone git@github.com:ssrothman/Cmssw-UserCode.git SRothman --branch EECs_106x
 
 #setup usercode
@@ -36,18 +37,22 @@ NB the version of the boost libraries that ships with CMSSW_10_26 does not have 
 > wget https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.gz
 > tar -xf boost_1_82_0.tar.gz #this takes a while. there is probably a better way to do this
 > rm boost_1_82_0.tar.gz
+```
+Then, in a text editor:
 
-# edit $CMSSW_BASE/config/toolbox/slc7_amd64_gcc700/tools/selected/boost.xml
-# such that 
-# BOOST_BASE = $CMSSW_BASE/src/SRothman/boost_1_82_0
-# INCLUDE = $BOOST_BASE
-# LIB = $BOOST_BASE
-#
-# and similarly edit $CMSSW_BASE/config/toolbox/slc7_amd64_gcc700/tools/selected/boost_header.xml
-# such that
-# BOSTHEADER_BASE = $CMSSW_BASE/src/SRothman/boost_1_82_0
-# INCLUDE = $BOOSTHEADER_BASE
+edit $CMSSW_BASE/config/toolbox/slc7_amd64_gcc700/tools/selected/boost.xml such that:
+ - BOOST_BASE = $CMSSW_BASE/src/SRothman/boost_1_82_0
+ - INCLUDE = $BOOST_BASE
+ - LIB = $BOOST_BASE
+ - CMSSW_FWLITE_INCLUD_PATH = $BOOST_BASE
 
+and similarly edit $CMSSW_BASE/config/toolbox/slc7_amd64_gcc700/tools/selected/boost_header.xml such that
+ - BOSTHEADER_BASE = $CMSSW_BASE/src/SRothman/boost_1_82_0
+ - INCLUDE = $BOOSTHEADER_BASE
+
+Then, back in bash:
+
+``` bash
 #build
 > cd $CMSSW_BASE/src
 > scram setup #tell it to re-read the xml files and learn about the local copy of boost. When rebuilding later you don't need to do this
