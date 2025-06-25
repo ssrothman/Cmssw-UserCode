@@ -5,6 +5,7 @@ from SRothman.EECs.EECProjMatchedProducer_cfi import *
 from SRothman.EECs.EECProjTransferProducer_cfi import *
 from SRothman.EECs.EECProjTableProducer_cfi import *
 from SRothman.EECs.EECProjTransferTableProducer_cfi import *
+from SRothman.EECs.projcalculator_cfi import *
 
 def setupEECProj_data(process,
                       name,
@@ -20,12 +21,12 @@ def setupEECProj_data(process,
         theProducer = EECProjVectorProducer
         tableProducer = EECProjVectorTableProducer
 
-        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECProjVectorProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(projcalculator_reco.bins.R.value()))
     elif resulttype=='Array':
         theProducer = EECProjArrayProducer
         tableProducer = EECProjArrayTableProducer
 
-        process.nanoMetadata.strings.RbinRreco = cms.string(repr(EECProjArrayProducer.calculator.bins.R.value()))
+        process.nanoMetadata.strings.RbinRreco = cms.string(repr(projcalculator_reco.bins.R.value()))
     else:
         raise ValueError("Unknown result type %s"%resulttype)
     
@@ -35,6 +36,7 @@ def setupEECProj_data(process,
         theProducer.clone(
             jets = recojets,
             flags = flags,
+            calculator = projcalculator_reco,
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -73,16 +75,16 @@ def setupEECProj_MC(process,
         transferProducer = EECProjTransferVectorProducer
         transferTableProducer = EECProjTransferVectorTableProducer
 
-        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECProjTransferVectorProducer.calculator.bins_reco.R.value()))
-        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECProjTransferVectorProducer.calculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(projtransfercalculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.RbinsGen  = cms.string(repr(projtransfercalculator.bins_gen.R.value()))
     elif resulttype=='Array':
         theProducer = EECProjMatchedArrayProducer
         tableProducer = EECProjArrayTableProducer
         transferProducer = EECProjTransferArrayProducer
         transferTableProducer = EECProjTransferArrayTableProducer
 
-        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECProjTransferArrayProducer.calculator.bins_reco.R.value()))
-        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECProjTransferArrayProducer.calculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(projtransfercalculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.RbinsGen  = cms.string(repr(projtransfercalculator.bins_gen.R.value()))
 
     flags = [recojets + flag for flag in flags]
 
@@ -90,7 +92,8 @@ def setupEECProj_MC(process,
         theProducer.clone(
             jets = recojets,
             matches = genMatch,
-            flags = flags
+            flags = flags,
+            calculator = projcalculator_reco,
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -120,6 +123,7 @@ def setupEECProj_MC(process,
             recoJets = recojets,
             matches = genMatch,
             flags = flags,
+            calculator = projtransfercalculator
         )
     )
     setattr(process, 'Gen%sTable'%name,

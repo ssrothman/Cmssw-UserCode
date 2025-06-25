@@ -110,6 +110,7 @@ process = setupEECRes4_data(process,
     recojets = 'GenSimonJets',
     verbose = 0,
     flags = [],
+    resulttype='Array' 
 )
 
 #process = setupEECRes4_data(process,

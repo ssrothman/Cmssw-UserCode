@@ -1,11 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
-from projcalculator_cfi import projcalculator
-
 EECProjMatchedVectorProducer = cms.EDProducer("EECProjMatchedVectorProducer",
     jets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = projcalculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
@@ -13,7 +11,7 @@ EECProjMatchedVectorProducer = cms.EDProducer("EECProjMatchedVectorProducer",
 EECProjMatchedUnbinnedProducer = cms.EDProducer("EECProjMatchedUnbinnedProducer",
     jets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = projcalculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
@@ -21,7 +19,7 @@ EECProjMatchedUnbinnedProducer = cms.EDProducer("EECProjMatchedUnbinnedProducer"
 EECProjMatchedArrayProducer = cms.EDProducer("EECProjMatchedArrayProducer",
     jets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = projcalculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )

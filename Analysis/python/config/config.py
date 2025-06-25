@@ -2,25 +2,30 @@ import json
 import io
 import os
 
-CMSSW_BASE = os.environ['CMSSW_BASE']
-print("CMSSW_BASE: %s" % CMSSW_BASE)
+config = None
 
-with io.open("%s/src/SRothman/Analysis/python/config/config.json"%CMSSW_BASE, 'r') as f:
-    config = json.load(f)
+def SETUP_CONFIG(configname):
+    CMSSW_BASE = os.environ['CMSSW_BASE']
+    print("CMSSW_BASE: %s" % CMSSW_BASE)
+ 
+    global config
 
-def encode_level(config):
-    if type(config) is dict:
-        for key in config:
-            config[key] = encode_level(config[key])
-    elif type(config) is list:
-        for i in range(len(config)):
-            config[i] = encode_level(config[i])
-    elif type(config) is unicode:
-        config = config.encode('ascii')
-    elif type(config) in [int, float, bool, str]:
-        pass
-    else:
-        raise TypeError("Unknown type: %s" % type(config))
-    return config
+    with io.open("%s/src/SRothman/Analysis/python/config/%s.json"%(CMSSW_BASE, configname), 'r') as f:
+        config = json.load(f)
 
-config = encode_level(config)
+    def encode_level(config):
+        if type(config) is dict:
+            for key in config:
+                config[key] = encode_level(config[key])
+        elif type(config) is list:
+            for i in range(len(config)):
+                config[i] = encode_level(config[i])
+        elif type(config) is unicode:
+            config = config.encode('ascii')
+        elif type(config) in [int, float, bool, str]:
+            pass
+        else:
+            raise TypeError("Unknown type: %s" % type(config))
+        return config
+
+    config = encode_level(config)

@@ -1,12 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
-from res4calculator_cfi import res4transfercalculator
-
 EECRes4TransferVectorProducer = cms.EDProducer("EECRes4TransferVectorProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = res4transfercalculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
@@ -15,7 +13,7 @@ EECRes4TransferUnbinnedProducer = cms.EDProducer("EECRes4TransferUnbinnedProduce
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = res4transfercalculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
@@ -24,7 +22,7 @@ EECRes4TransferArrayProducer = cms.EDProducer("EECRes4TransferArrayProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
-    calculator = res4transfercalculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )

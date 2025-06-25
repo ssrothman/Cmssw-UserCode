@@ -80,15 +80,15 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
         gen = 'GenChargedSimonJets'+suffix,
     )
 
-    #from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
-    #process = setupEECRes4_MC(process,
-    #    name = 'ChargedEECs'+suffix,
-    #    genMatch = 'ChargedGenMatch'+suffix,
-    #    genjets = 'GenChargedSimonJets'+suffix,
-    #    recojets = 'ChargedSimonJets'+suffix,
-    #    resulttype='Unbinned',
-    #    verbose = 0,
-    #)
+    from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
+    process = setupEECRes4_MC(process,
+        name = 'ChargedEECs'+suffix,
+        genMatch = 'ChargedGenMatch'+suffix,
+        genjets = 'GenChargedSimonJets'+suffix,
+        recojets = 'ChargedSimonJets'+suffix,
+        resulttype='Array',
+        verbose = 0,
+    )
 
     #from SRothman.EECs.setupEECRes3 import setupEECRes3_MC
     #process = setupEECRes3_MC(process,
@@ -100,15 +100,15 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
     #    verbose = 0,
     #)
 
-    from SRothman.EECs.setupEECProj import setupEECProj_MC
-    process = setupEECProj_MC(process,
-        name = 'ChargedEECs'+suffix,
-        genMatch = 'ChargedGenMatch'+suffix,
-        genjets = 'GenChargedSimonJets'+suffix,
-        recojets = 'ChargedSimonJets'+suffix,
-        resulttype='Unbinned',
-        verbose = 0,
-    )
+    #from SRothman.EECs.setupEECProj import setupEECProj_MC
+    #process = setupEECProj_MC(process,
+    #    name = 'ChargedEECs'+suffix,
+    #    genMatch = 'ChargedGenMatch'+suffix,
+    #    genjets = 'GenChargedSimonJets'+suffix,
+    #    recojets = 'ChargedSimonJets'+suffix,
+    #    resulttype='Vector',
+    #    verbose = 0,
+    #)
 
 # End of customisation functions
 

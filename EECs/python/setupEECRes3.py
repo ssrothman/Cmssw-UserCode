@@ -5,6 +5,7 @@ from SRothman.EECs.EECRes3MatchedProducer_cfi import *
 from SRothman.EECs.EECRes3TransferProducer_cfi import *
 from SRothman.EECs.EECRes3TableProducer_cfi import *
 from SRothman.EECs.EECRes3TransferTableProducer_cfi import *
+from SRothman.EECs.res3calculator_cfi import *
 
 def setupEECRes3_data(process,
                       name,
@@ -20,16 +21,16 @@ def setupEECRes3_data(process,
         theProducer = EECRes3VectorProducer
         tableProducer = EECRes3VectorTableProducer
 
-        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECRes3VectorProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rbinsReco = cms.string(repr(EECRes3VectorProducer.calculator.bins.r.value()))
-        process.nanoMetadata.strings.cbinsReco = cms.string(repr(EECRes3VectorProducer.calculator.bins.c.value()))
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(res3calculator_reco.bins.R.value()))
+        process.nanoMetadata.strings.rbinsReco = cms.string(repr(res3calculator_reco.bins.r.value()))
+        process.nanoMetadata.strings.cbinsReco = cms.string(repr(res3calculator_reco.bins.c.value()))
     elif resulttype=='Array':
         theProducer = EECRes3ArrayProducer
         tableProducer = EECRes3ArrayTableProducer
 
-        process.nanoMetadata.strings.RbinRreco = cms.string(repr(EECRes3ArrayProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rbinRreco = cms.string(repr(EECRes3ArrayProducer.calculator.bins.r.value()))
-        process.nanoMetadata.strings.cbinRreco = cms.string(repr(EECRes3ArrayProducer.calculator.bins.c.value()))
+        process.nanoMetadata.strings.RbinRreco = cms.string(repr(res3calculator_reco.bins.R.value()))
+        process.nanoMetadata.strings.rbinRreco = cms.string(repr(res3calculator_reco.bins.r.value()))
+        process.nanoMetadata.strings.cbinRreco = cms.string(repr(res3calculator_reco.bins.c.value()))
     else:
         raise ValueError("Unknown result type %s"%resulttype)
     
@@ -39,6 +40,7 @@ def setupEECRes3_data(process,
         theProducer.clone(
             jets = recojets,
             flags = flags,
+            calculator = res3calculator_reco,
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -76,24 +78,24 @@ def setupEECRes3_MC(process,
         transferProducer = EECRes3TransferVectorProducer
         transferTableProducer = EECRes3TransferVectorTableProducer
 
-        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_reco.R.value()))
-        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_gen.R.value()))
-        process.nanoMetadata.strings.rbinsReco = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_reco.r.value()))
-        process.nanoMetadata.strings.rbinsGen = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_gen.r.value()))
-        process.nanoMetadata.strings.cbinsReco = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_reco.c.value()))
-        process.nanoMetadata.strings.cbinsGen = cms.string(repr(EECRes3TransferVectorProducer.calculator.bins_gen.c.value()))
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(res3transfercalculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.rbinsReco = cms.string(repr(res3transfercalculator.bins_reco.r.value()))
+        process.nanoMetadata.strings.cbinsReco = cms.string(repr(res3transfercalculator.bins_reco.c.value()))
+        process.nanoMetadata.strings.RbinsGen  = cms.string(repr(res3transfercalculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.rbinsGen  = cms.string(repr(res3transfercalculator.bins_gen.r.value()))
+        process.nanoMetadata.strings.cbinsGen  = cms.string(repr(res3transfercalculator.bins_gen.c.value()))
     elif resulttype=='Array':
         theProducer = EECRes3MatchedArrayProducer
         tableProducer = EECRes3ArrayTableProducer
         transferProducer = EECRes3TransferArrayProducer
         transferTableProducer = EECRes3TransferArrayTableProducer
 
-        process.nanoMetadata.strings.RbinsReco = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_reco.R.value()))
-        process.nanoMetadata.strings.RbinsGen = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_gen.R.value()))
-        process.nanoMetadata.strings.rbinsReco = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_reco.r.value()))
-        process.nanoMetadata.strings.rbinsGen = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_gen.r.value()))
-        process.nanoMetadata.strings.cbinsReco = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_reco.c.value()))
-        process.nanoMetadata.strings.cbinsGen = cms.string(repr(EECRes3TransferArrayProducer.calculator.bins_gen.c.value()))
+        process.nanoMetadata.strings.RbinsReco = cms.string(repr(res3transfercalculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.rbinsReco = cms.string(repr(res3transfercalculator.bins_reco.r.value()))
+        process.nanoMetadata.strings.cbinsReco = cms.string(repr(res3transfercalculator.bins_reco.c.value()))
+        process.nanoMetadata.strings.RbinsGen  = cms.string(repr(res3transfercalculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.rbinsGen  = cms.string(repr(res3transfercalculator.bins_gen.r.value()))
+        process.nanoMetadata.strings.cbinsGen  = cms.string(repr(res3transfercalculator.bins_gen.c.value()))
 
     flags = [recojets + flag for flag in flags]
 
@@ -101,7 +103,8 @@ def setupEECRes3_MC(process,
         theProducer.clone(
             jets = recojets,
             matches = genMatch,
-            flags = flags
+            flags = flags,
+            calculator = res3calculator_reco,
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -131,6 +134,7 @@ def setupEECRes3_MC(process,
             recoJets = recojets,
             matches = genMatch,
             flags = flags,
+            calculator = res3transfercalculator,
         )
     )
     setattr(process, 'Gen%sTable'%name,

@@ -5,6 +5,7 @@ from SRothman.EECs.EECRes4MatchedProducer_cfi import *
 from SRothman.EECs.EECRes4TransferProducer_cfi import *
 from SRothman.EECs.EECRes4TableProducer_cfi import *
 from SRothman.EECs.EECRes4TransferTableProducer_cfi import *
+from SRothman.EECs.res4calculator_cfi import *
 
 def setupEECRes4_data(process,
                       name,
@@ -20,24 +21,24 @@ def setupEECRes4_data(process,
         theProducer = EECRes4VectorProducer
         tableProducer = EECRes4VectorTableProducer
 
-        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4VectorProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_dipole.value()))
-        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_dipole.value()))
-        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_tee.value()))
-        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_tee.value()))
-        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_triangle.value()))
-        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_triangle.value()))
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(res4calculator_reco.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(res4calculator_reco.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(res4calculator_reco.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(res4calculator_reco.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(res4calculator_reco.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(res4calculator_reco.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(res4calculator_reco.bins.c_triangle.value()))
     elif resulttype=='Array':
         theProducer = EECRes4ArrayProducer
         tableProducer = EECRes4ArrayTableProducer
 
-        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4ArrayProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_dipole.value()))
-        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_dipole.value()))
-        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_tee.value()))
-        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_tee.value()))
-        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_triangle.value()))
-        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_triangle.value()))
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(res4calculator_reco.bins.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(res4calculator_reco.bins.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(res4calculator_reco.bins.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(res4calculator_reco.bins.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(res4calculator_reco.bins.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(res4calculator_reco.bins.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(res4calculator_reco.bins.c_triangle.value()))
     else:
         raise ValueError("Unknown result type %s"%resulttype)
     
@@ -47,6 +48,7 @@ def setupEECRes4_data(process,
         theProducer.clone(
             jets = recojets,
             flags = flags,
+            calculator = res4calculator_reco,
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -84,42 +86,42 @@ def setupEECRes4_MC(process,
         transferProducer = EECRes4TransferVectorProducer
         transferTableProducer = EECRes4TransferVectorTableProducer
 
-        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4VectorProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_dipole.value()))
-        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_dipole.value()))
-        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_tee.value()))
-        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_tee.value()))
-        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_triangle.value()))
-        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_triangle.value()))
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(res4transfercalculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(res4transfercalculator.bins_reco.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(res4transfercalculator.bins_reco.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(res4transfercalculator.bins_reco.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(res4transfercalculator.bins_reco.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(res4transfercalculator.bins_reco.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(res4transfercalculator.bins_reco.c_triangle.value()))
 
-        process.nanoMetadata.strings.RbinsGen         = cms.string(repr(EECRes4VectorProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rDIPOLEbinsGen   = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_dipole.value()))
-        process.nanoMetadata.strings.cDIPOLEbinsGen   = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_dipole.value()))
-        process.nanoMetadata.strings.rTEEbinsGen      = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_tee.value()))
-        process.nanoMetadata.strings.cTEEbinsGen      = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_tee.value()))
-        process.nanoMetadata.strings.rTRIANGLEbinsGen = cms.string(repr(EECRes4VectorProducer.calculator.bins.r_triangle.value()))
-        process.nanoMetadata.strings.cTRIANGLEbinsGen = cms.string(repr(EECRes4VectorProducer.calculator.bins.c_triangle.value()))
+        process.nanoMetadata.strings.RbinsGen          = cms.string(repr(res4transfercalculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsGen    = cms.string(repr(res4transfercalculator.bins_gen.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsGen    = cms.string(repr(res4transfercalculator.bins_gen.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsGen       = cms.string(repr(res4transfercalculator.bins_gen.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsGen       = cms.string(repr(res4transfercalculator.bins_gen.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsGen  = cms.string(repr(res4transfercalculator.bins_gen.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsGen  = cms.string(repr(res4transfercalculator.bins_gen.c_triangle.value()))
     elif resulttype=='Array':
         theProducer = EECRes4MatchedArrayProducer
         tableProducer = EECRes4ArrayTableProducer
         transferProducer = EECRes4TransferArrayProducer
         transferTableProducer = EECRes4TransferArrayTableProducer
 
-        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(EECRes4ArrayProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_dipole.value()))
-        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_dipole.value()))
-        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_tee.value()))
-        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_tee.value()))
-        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_triangle.value()))
-        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_triangle.value()))
+        process.nanoMetadata.strings.RbinsReco         = cms.string(repr(res4transfercalculator.bins_reco.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsReco   = cms.string(repr(res4transfercalculator.bins_reco.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsReco   = cms.string(repr(res4transfercalculator.bins_reco.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsReco      = cms.string(repr(res4transfercalculator.bins_reco.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsReco      = cms.string(repr(res4transfercalculator.bins_reco.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsReco = cms.string(repr(res4transfercalculator.bins_reco.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsReco = cms.string(repr(res4transfercalculator.bins_reco.c_triangle.value()))
 
-        process.nanoMetadata.strings.RbinsGen         = cms.string(repr(EECRes4ArrayProducer.calculator.bins.R.value()))
-        process.nanoMetadata.strings.rDIPOLEbinsGen   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_dipole.value()))
-        process.nanoMetadata.strings.cDIPOLEbinsGen   = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_dipole.value()))
-        process.nanoMetadata.strings.rTEEbinsGen      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_tee.value()))
-        process.nanoMetadata.strings.cTEEbinsGen      = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_tee.value()))
-        process.nanoMetadata.strings.rTRIANGLEbinsGen = cms.string(repr(EECRes4ArrayProducer.calculator.bins.r_triangle.value()))
-        process.nanoMetadata.strings.cTRIANGLEbinsGen = cms.string(repr(EECRes4ArrayProducer.calculator.bins.c_triangle.value()))
+        process.nanoMetadata.strings.RbinsGen          = cms.string(repr(res4transfercalculator.bins_gen.R.value()))
+        process.nanoMetadata.strings.rDIPOLEbinsGen    = cms.string(repr(res4transfercalculator.bins_gen.r_dipole.value()))
+        process.nanoMetadata.strings.cDIPOLEbinsGen    = cms.string(repr(res4transfercalculator.bins_gen.c_dipole.value()))
+        process.nanoMetadata.strings.rTEEbinsGen       = cms.string(repr(res4transfercalculator.bins_gen.r_tee.value()))
+        process.nanoMetadata.strings.cTEEbinsGen       = cms.string(repr(res4transfercalculator.bins_gen.c_tee.value()))
+        process.nanoMetadata.strings.rTRIANGLEbinsGen  = cms.string(repr(res4transfercalculator.bins_gen.r_triangle.value()))
+        process.nanoMetadata.strings.cTRIANGLEbinsGen  = cms.string(repr(res4transfercalculator.bins_gen.c_triangle.value()))
 
     flags = [recojets + flag for flag in flags]
 
@@ -127,7 +129,8 @@ def setupEECRes4_MC(process,
         theProducer.clone(
             jets = recojets,
             matches = genMatch,
-            flags = flags
+            flags = flags,
+            calculator = res4calculator_reco,
         )
     )
     setattr(process, "Reco%sTable"%name,
@@ -157,6 +160,7 @@ def setupEECRes4_MC(process,
             recoJets = recojets,
             matches = genMatch,
             flags = flags,
+            calculator = res4transfercalculator,
         )
     )
     setattr(process, 'Gen%sTable'%name,

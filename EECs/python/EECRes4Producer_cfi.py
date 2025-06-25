@@ -1,24 +1,22 @@
 import FWCore.ParameterSet.Config as cms
 
-from res4calculator_cfi import res4calculator
-
 EECRes4VectorProducer = cms.EDProducer("EECRes4VectorProducer",
     jets = cms.InputTag(""),
-    calculator = res4calculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
 
 EECRes4UnbinnedProducer = cms.EDProducer("EECRes4UnbinnedProducer",
     jets = cms.InputTag(""),
-    calculator = res4calculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
 
 EECRes4ArrayProducer = cms.EDProducer("EECRes4ArrayProducer",
     jets = cms.InputTag(""),
-    calculator = res4calculator,
+    calculator = cms.PSet(),
     flags = cms.VInputTag("ChargedSimonJetsPreselection",
                           "ChargedSimonJetsOverlapVeto"),
 )
