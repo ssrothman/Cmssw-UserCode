@@ -1,0 +1,142 @@
+DEBUG 2025-06-11 19:19:56.993 UTC: 	 CRAB Client version: v3.250409
+DEBUG 2025-06-11 19:19:56.993 UTC: 	 Running on: Linux lxplus956.cern.ch 5.14.0-570.17.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Tue May 13 06:41:18 EDT 2025 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2025-06-11 19:19:56.993 UTC: 	 Using SINGULARITY image: el7:x86_64
+DEBUG 2025-06-11 19:19:56.993 UTC: 	 Operating System: CentOS Linux 7 (Core)
+DEBUG 2025-06-11 19:19:56.993 UTC: 	 Executing command: 'tasks'
+DEBUG 2025-06-11 19:19:56.995 UTC: 	 Found CRAB cache file /afs/cern.ch/user/d/dponman/.crab3
+DEBUG 2025-06-11 19:19:56.996 UTC: 	 Checking credentials
+DEBUG 2025-06-11 19:19:57.001 UTC: 	 Proxy file /tmp/x509up_u174499 not found
+DEBUG 2025-06-11 19:19:57.001 UTC: 	 Creating new proxy for 172:00 hours
+DEBUG 2025-06-11 19:19:57.001 UTC: 	 Executing command :
+ voms-proxy-init --rfc --cert ~/.globus/usercert.pem --key ~/.globus/userkey.pem --out /tmp/x509up_u174499 --valid 192:00 --voms cms:/cms
+DEBUG 2025-06-11 19:20:04.420 UTC: 	 output : 
+ error: 
+ retcode : 0
+DEBUG 2025-06-11 19:20:04.420 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /tmp/x509up_u174499
+DEBUG 2025-06-11 19:20:04.460 UTC: 	 output : 691200
+691200
+
+ error: 
+ retcode : 0
+DEBUG 2025-06-11 19:20:04.461 UTC: 	 Proxy created.
+DEBUG 2025-06-11 19:20:04.461 UTC: 	 Encoded data for curl request: subresource=delegatedn
+DEBUG 2025-06-11 19:20:04.520 UTC: 	 Registering user credentials on myproxy for /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod)-tw(01|02).cern.ch|/DC=ch/DC=cern/OU=computers/CN=crab-dev-tw(01|02|03|04).cern.ch|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+DEBUG 2025-06-11 19:20:04.520 UTC: 	 Executing command :
+ voms-proxy-info --identity --file /tmp/x509up_u174499
+DEBUG 2025-06-11 19:20:04.555 UTC: 	 output : /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=dponman/CN=879555/CN=Dylan Ponman
+
+ error: 
+ retcode : 0
+DEBUG 2025-06-11 19:20:04.555 UTC: 	 Getting myproxy life time left for b1a6d39eb3b3adbf56f003016c4ed7fb1a462de3
+DEBUG 2025-06-11 19:20:04.555 UTC: 	 Executing command :
+ myproxy-info -s myproxy.cern.ch -l b1a6d39eb3b3adbf56f003016c4ed7fb1a462de3
+DEBUG 2025-06-11 19:20:04.928 UTC: 	 output : username: b1a6d39eb3b3adbf56f003016c4ed7fb1a462de3
+owner: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=dponman/CN=879555/CN=Dylan Ponman
+  renewal policy: /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod)-tw(01|02).cern.ch|/DC=ch/DC=cern/OU=computers/CN=crab-dev-tw(01|02|03|04).cern.ch|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  trusted retrieval policy: /DC=ch/DC=cern/OU=computers/CN=crab-(preprod|prod)-tw(01|02).cern.ch|/DC=ch/DC=cern/OU=computers/CN=crab-dev-tw(01|02|03|04).cern.ch|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  timeleft: 552:41:30  (23.0 days)
+
+ error: 
+ retcode : 0
+DEBUG 2025-06-11 19:20:04.928 UTC: 	 Myproxy is valid: 1989660
+DEBUG 2025-06-11 19:20:04.928 UTC: 	 Result of myproxy credential check:
+  Credential exists on myproxy: username: b1a6d39eb3b3adbf56f003016c4ed7fb1a462de3  - validity: 23 days, 0:41:00
+DEBUG 2025-06-11 19:20:04.928 UTC: 	 Command use: tasks
+DEBUG 2025-06-11 19:20:04.929 UTC: 	 Options use: []
+DEBUG 2025-06-11 19:20:04.929 UTC: 	 Encoded data for curl request: subresource=version
+DEBUG 2025-06-11 19:20:04.999 UTC: 	 CRABClient version: v3.250409
+DEBUG 2025-06-11 19:20:04.999 UTC: 	 Instance is prod
+DEBUG 2025-06-11 19:20:04.999 UTC: 	 Server base url is cmsweb.cern.ch
+DEBUG 2025-06-11 19:20:05.000 UTC: 	 Command api workflow
+DEBUG 2025-06-11 19:20:05.000 UTC: 	 Encoded data for curl request: timestamp=2025-05-12
+INFO 2025-06-11 19:20:05.118 UTC: 	 
+List of tasks from 2025-05-12 until 2025-06-11
+INFO 2025-06-11 19:20:05.118 UTC: 	 Beware that STATUS here does not include information from grid jobs
+INFO 2025-06-11 19:20:05.118 UTC: 	 ================================================================================
+INFO 2025-06-11 19:20:05.118 UTC: 	 NAME								STATUS
+INFO 2025-06-11 19:20:05.118 UTC: 	 ================================================================================
+INFO 2025-06-11 19:20:05.118 UTC: 	 250611_184128:dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive
+								SUBMITTED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250611_183020:dponman_crab_srothman_crab_test_jun5_2018_Pythia_inclusive
+								SUBMITTED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250611_164701:dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive
+								SUBMITREFUSED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250611_163430:dponman_crab_srothman_crab_test_jun5_2018_Pythia_inclusive
+								SUBMITREFUSED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250606_203919:dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive
+								SUBMITTED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250606_203218:dponman_crab_srothman_crab_test_jun5_2018_Pythia_inclusive
+								SUBMITTED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250606_200850:dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive
+								KILLED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250606_200402:dponman_crab_srothman_crab_test_jun5_2018_Pythia_inclusive
+								KILLED
+INFO 2025-06-11 19:20:05.118 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.118 UTC: 	 250606_191450:dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive
+								SUBMITFAILED
+INFO 2025-06-11 19:20:05.119 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.119 UTC: 	 250606_191158:dponman_crab_srothman_crab_test_jun5_2018_Pythia_inclusive
+								SUBMITFAILED
+INFO 2025-06-11 19:20:05.119 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.119 UTC: 	 250606_173931:dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive
+								SUBMITFAILED
+INFO 2025-06-11 19:20:05.119 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.119 UTC: 	 250606_173525:dponman_crab_srothman_crab_test_jun5_2018_Pythia_inclusive
+								SUBMITFAILED
+INFO 2025-06-11 19:20:05.119 UTC: 	 --------------------------------------------------------------------------------
+INFO 2025-06-11 19:20:05.119 UTC: 	 
+
+WARNING 2025-06-11 19:20:05.119 UTC: 	 ATTENTION return value for 'tasks' has been changed to a dictionary
+ format is {'commandStatus': 'SUCCESS' or 'FAILED',
+            'tasklist': list of [task, status] lists as before}
+INFO 2025-06-11 19:20:05.232 UTC: 	 Log file is /afs/cern.ch/user/d/dponman/CMSSW_10_6_26/src/SRothman/Analysis/production/crab.log
+DEBUG 2025-06-11 19:20:28.799 UTC: 	 CRAB Client version: v3.250409
+DEBUG 2025-06-11 19:20:28.799 UTC: 	 Running on: Linux lxplus956.cern.ch 5.14.0-570.17.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Tue May 13 06:41:18 EDT 2025 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2025-06-11 19:20:28.799 UTC: 	 Using SINGULARITY image: el7:x86_64
+DEBUG 2025-06-11 19:20:28.799 UTC: 	 Operating System: CentOS Linux 7 (Core)
+DEBUG 2025-06-11 19:20:28.799 UTC: 	 Executing command: 'status'
+DEBUG 2025-06-11 19:20:28.799 UTC: 	 Found CRAB cache file /afs/cern.ch/user/d/dponman/.crab3
+ERROR 2025-06-11 19:20:28.800 UTC: 	 Error: dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive is not a valid CRAB project directory.
+ERROR 2025-06-11 19:20:28.800 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/bin/crab.py", line 157, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/bin/crab.py", line 135, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])  # the crab command to be executed
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/lib/CRABClient/Commands/status.py", line 48, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/lib/CRABClient/Commands/SubCommand.py", line 281, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/lib/CRABClient/Commands/SubCommand.py", line 691, in validateOptions
+    raise ConfigurationException(msg)
+CRABClient.ClientExceptions.ConfigurationException: [91mError[0m: dponman_crab_srothman_crab_test_jun5_2018_Herwig_inclusive is not a valid CRAB project directory.
+INFO 2025-06-11 19:20:28.803 UTC: 	 Log file is /afs/cern.ch/user/d/dponman/CMSSW_10_6_26/src/SRothman/Analysis/production/crab.log
+DEBUG 2025-06-11 19:21:15.422 UTC: 	 CRAB Client version: v3.250409
+DEBUG 2025-06-11 19:21:15.422 UTC: 	 Running on: Linux lxplus956.cern.ch 5.14.0-570.17.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Tue May 13 06:41:18 EDT 2025 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2025-06-11 19:21:15.423 UTC: 	 Using SINGULARITY image: el7:x86_64
+DEBUG 2025-06-11 19:21:15.423 UTC: 	 Operating System: CentOS Linux 7 (Core)
+DEBUG 2025-06-11 19:21:15.423 UTC: 	 Executing command: 'status'
+DEBUG 2025-06-11 19:21:15.423 UTC: 	 Found CRAB cache file /afs/cern.ch/user/d/dponman/.crab3
+ERROR 2025-06-11 19:21:15.423 UTC: 	 Error: srothman_crab_test_jun5_2018_Herwig_inclusive is not a valid CRAB project directory.
+ERROR 2025-06-11 19:21:15.424 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/bin/crab.py", line 157, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/bin/crab.py", line 135, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])  # the crab command to be executed
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/lib/CRABClient/Commands/status.py", line 48, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/lib/CRABClient/Commands/SubCommand.py", line 281, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.250409.00/lib/CRABClient/Commands/SubCommand.py", line 691, in validateOptions
+    raise ConfigurationException(msg)
+CRABClient.ClientExceptions.ConfigurationException: [91mError[0m: srothman_crab_test_jun5_2018_Herwig_inclusive is not a valid CRAB project directory.
+INFO 2025-06-11 19:21:15.428 UTC: 	 Log file is /afs/cern.ch/user/d/dponman/CMSSW_10_6_26/src/SRothman/Analysis/production/crab.log

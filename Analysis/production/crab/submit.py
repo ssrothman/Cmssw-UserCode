@@ -21,8 +21,8 @@ from production_tag import production_tag # Get from a text file
 #production_tag = "vTEST9" # Specify by hand
 requestname_base = "srothman"
 #output_site = "T3_US_FNALLPC"
-output_site = "T3_US_FNALLPC"
-output_lfn_base = "/store/group/lpcpfnano/srothman/crab/{production_tag}".format(
+output_site = "T3_CH_CERNBOX"
+output_lfn_base = "/store/user/{username}/crab/{production_tag}".format(
                                                     username=getUsername(), 
                                                     production_tag=production_tag)
 
@@ -103,12 +103,17 @@ if __name__ == '__main__':
                 if not splitting_mode in ["Automatic", "FileBased", "LumiBased", "EventBased"]:
                     raise ValueError("Unrecognized splitting mode: {}".format(splitting_mode))
                 this_config.Data.splitting = splitting_mode
-
+###########################################
                 if not isMC:
                         this_config.Data.lumiMask = info.get('lumimask', None)
                 else:
-                        this_config.Data.lumiMask = ''
-
+                    if "Pythia" in dataset_shortname:
+                        this_config.Data.lumiMask = "/afs/cern.ch/user/d/dponman/CMSSW_10_6_26/crab/srothman_crab_v2/crab_srothman_crab_v2_2018_Pythia_inclusive/results/notFinishedLumis.json"
+                    elif "Herwig" in dataset_shortname:
+                        this_config.Data.lumiMask = "/afs/cern.ch/user/d/dponman/CMSSW_10_6_26/crab/srothman_crab_v2/crab_srothman_crab_v2_2018_Herwig_inclusive/results/notFinishedLumis.json"
+                    else:
+                        raise ValueError("Unrecognized dataset_shortname: {}".format(dataset_shortname))
+###########################################
                 unitsPerJob = info.get("unitsPerJob", None)
                 if unitsPerJob is not None:
                     this_config.Data.unitsPerJob = unitsPerJob
