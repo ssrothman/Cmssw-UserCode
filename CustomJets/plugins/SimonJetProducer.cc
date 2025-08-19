@@ -100,11 +100,20 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
     }
 
     auto result = std::make_unique<std::vector<simon::jet>>();
+    simon::jet evt_jet;
+    evt_jet.pt = 1;
+    evt_jet.eta = 0;
+    evt_jet.phi = 0;
+    evt_jet.mass = 1;
+    evt_jet.iJet = 0;
+
+    std::vector<reco::Jet::Constituent> evt_const;
 
     for(unsigned iJet=0; iJet < jets->size(); ++iJet){//for each jet
         const auto& j = jets->at(iJet);
 
         const auto& constituents = j.getJetConstituents();
+	evt_const.insert(evt_const.end(), constituents.begin(), constituents.end());
 
         simon::jet ans;
         ans.pt = j.pt();
@@ -143,6 +152,8 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             printf("pushed back\n");
         }
     }  // end for jet
+    selector_.buildJet(evt_const, evt_jet);
+    result->push_back(std::move(evt_jet));
     evt.put(std::move(result));
     if(verbose_){
         printf("put into event\n");
