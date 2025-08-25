@@ -46,6 +46,9 @@ private:
     edm::InputTag jetSrc_;
     edm::EDGetTokenT<edm::View<T>> jetSrcToken_;
 
+    edm::InputTag pfCand_;
+    edm::EDGetTokenT<edm::View<pat::PackedCandidate>> pfCandToken_;
+
     edm::InputTag CHSsrc_;
     edm::EDGetTokenT<edm::View<T>> CHSsrcToken_;
     bool addCHSindex_;
@@ -59,6 +62,8 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf) :
           selector_(conf.getParameter<edm::ParameterSet>("selector")),
           jetSrc_(conf.getParameter<edm::InputTag>("jetSrc")),
           jetSrcToken_(consumes<edm::View<T>>(jetSrc_)),
+	  pfCand_(conf.getParameter<edm::InputTag>("pfCandidates")),
+          pfCandToken_(consumes<edm::View<pat::PackedCandidate>>(pfCand_)),
           CHSsrc_(conf.getParameter<edm::InputTag>("CHSsrc")),
           CHSsrcToken_(consumes<edm::View<T>>(CHSsrc_)),
           addCHSindex_(conf.getParameter<bool>("addCHSindex")),
@@ -77,6 +82,7 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
 
   desc.add<edm::InputTag>("jetSrc");
   desc.add<edm::InputTag>("CHSsrc");
+  desc.add<edm::InputTag>("pfCandidates");
   desc.add<bool>("addCHSindex");
   desc.add<double>("CHSmatchDR");
 
@@ -94,26 +100,28 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
     edm::Handle<edm::View<T>> jets;
     evt.getByToken(jetSrcToken_, jets);
 
+    edm::Handle<edm::View<pat::PackedCandidate>> candidates;
+    evt.getByToken(pfCandToken_, candidates);
+
     edm::Handle<edm::View<T>> CHSjets;
     if(addCHSindex_){
         evt.getByToken(CHSsrcToken_, CHSjets);
     }
 
+    std::cout << "SimonJetProducer::produce called" << std::endl;    
     auto result = std::make_unique<std::vector<simon::jet>>();
     simon::jet evt_jet;
+    //Need to add proper kinetic info
     evt_jet.pt = 1;
     evt_jet.eta = 0;
     evt_jet.phi = 0;
     evt_jet.mass = 1;
     evt_jet.iJet = 0;
 
-    std::vector<reco::Jet::Constituent> evt_const;
-
     for(unsigned iJet=0; iJet < jets->size(); ++iJet){//for each jet
         const auto& j = jets->at(iJet);
 
         const auto& constituents = j.getJetConstituents();
-	evt_const.insert(evt_const.end(), constituents.begin(), constituents.end());
 
         simon::jet ans;
         ans.pt = j.pt();
@@ -134,7 +142,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             }
         }
 
-        selector_.buildJet(constituents, ans);
+ //       selector_.buildJet(constituents, ans);
 
         if (verbose_){
             printf("\tjet: (%f, %f, %f)\n", ans.pt, ans.eta, ans.phi);
@@ -146,14 +154,25 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             printf("sumpt = %f\n", ans.sumpt);
         }
 
-        result->push_back(std::move(ans));
+//        result->push_back(std::move(ans));
 
         if(verbose_){
             printf("pushed back\n");
         }
     }  // end for jet
-    selector_.buildJet(evt_const, evt_jet);
+    std::vector<edm::Ptr<pat::PackedCandidate>> candPtrs;
+    candPtrs.reserve(candidates->size());
+    for (size_t i = 0; i < candidates->size(); ++i) {
+        candPtrs.emplace_back(candidates->ptrAt(i));
+    }
+
+    selector_.buildJet(candPtrs, evt_jet);
+    printf("###################################");
+    printf("evt_jet is built\n");
+    printf("###################################");
+    result->clear();
     result->push_back(std::move(evt_jet));
+    printf("result has %zu entries\n", result->size());
     evt.put(std::move(result));
     if(verbose_){
         printf("put into event\n");
