@@ -10,7 +10,7 @@ from Configuration.Eras.Modifier_run2_nanoAOD_106Xv2_cff import run2_nanoAOD_106
 
 #configname = 'config_genonly'
 configname = 'config'
-RUNNING_CRAB = False
+RUNNING_CRAB = True
 
 import SRothman.Analysis.config.config
 SRothman.Analysis.config.config.SETUP_CONFIG(configname)
@@ -30,7 +30,7 @@ if not RUNNING_CRAB:
                      VarParsing.varType.string,
                      "Input file list")
     options.register('N',
-                     50,
+                     100,
                      VarParsing.multiplicity.singleton,
                      VarParsing.varType.int,
                      'Number of events to process')

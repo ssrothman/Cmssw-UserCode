@@ -106,13 +106,18 @@ if __name__ == '__main__':
 ###########################################
                 if not isMC:
                         this_config.Data.lumiMask = info.get('lumimask', None)
+
+
+                #Temporary hack, make sure to comment out one of the else statements, must make this less stupid in the future
                 else:
-                    if "Pythia" in dataset_shortname:
-                        this_config.Data.lumiMask = "/afs/cern.ch/user/d/dponman/CMSSW_10_6_26/crab/srothman_crab_v2/crab_srothman_crab_v2_2018_Pythia_inclusive/results/notFinishedLumis.json"
-                    elif "Herwig" in dataset_shortname:
-                        this_config.Data.lumiMask = "/afs/cern.ch/user/d/dponman/CMSSW_10_6_26/crab/srothman_crab_v2/crab_srothman_crab_v2_2018_Herwig_inclusive/results/notFinishedLumis.json"
-                    else:
-                        raise ValueError("Unrecognized dataset_shortname: {}".format(dataset_shortname))
+                        this_config.Data.lumiMask = ''
+#                else:
+#                    if "Pythia" in dataset_shortname:
+#                        this_config.Data.lumiMask = "/afs/cern.ch/user/d/dponman/CMSSW_10_6_26/crab/srothman_crab_v2/crab_srothman_crab_v2_2018_Pythia_inclusive/results/notFinishedLumis.json"
+#                    elif "Herwig" in dataset_shortname:
+#                        this_config.Data.lumiMask = "/afs/cern.ch/user/d/dponman/CMSSW_10_6_26/crab/srothman_crab_v2/crab_srothman_crab_v2_2018_Herwig_inclusive/results/notFinishedLumis.json"
+#                    else:
+#                        raise ValueError("Unrecognized dataset_shortname: {}".format(dataset_shortname))
 ###########################################
                 unitsPerJob = info.get("unitsPerJob", None)
                 if unitsPerJob is not None:

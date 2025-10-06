@@ -1,1 +1,1 @@
-production_tag = "crab_v3"
+production_tag = "full_event_v4"

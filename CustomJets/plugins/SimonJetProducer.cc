@@ -160,13 +160,15 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             printf("pushed back\n");
         }
     }  // end for jet
-    std::vector<edm::Ptr<pat::PackedCandidate>> candPtrs;
-    candPtrs.reserve(candidates->size());
+    std::vector<edm::Ptr<pat::PackedCandidate>> chargedPtrs;
+    chargedPtrs.reserve(candidates->size());
     for (size_t i = 0; i < candidates->size(); ++i) {
-        candPtrs.emplace_back(candidates->ptrAt(i));
+        const auto& cand = candidates->at(i);
+        if (cand.charge() == 0) continue;
+        chargedPtrs.emplace_back(candidates->ptrAt(i));
     }
 
-    selector_.buildJet(candPtrs, evt_jet);
+    selector_.buildJet(chargedPtrs, evt_jet);
     printf("###################################");
     printf("evt_jet is built\n");
     printf("###################################");
