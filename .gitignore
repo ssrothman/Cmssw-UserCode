@@ -42,3 +42,5 @@ EECs/condor2/output/*
 */production/crab/crab.log
 Analysis/production/condor/working/*
 boost_1_82_0/
+
+.vscode/*
