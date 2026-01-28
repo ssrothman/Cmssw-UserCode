@@ -1,5 +1,8 @@
 from SRothman.Analysis.common_cmsRun import *
 
+from SRothman.Analysis.config.config import load_config
+cfg = load_config('config copy')
+
 # Input source
 if input_fname is None:
     input_fname = '/store/mc/RunIISummer20UL18MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/120000/015753DA-CD2E-F546-9A7B-9DD451DEA159.root'
@@ -80,35 +83,34 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
         gen = 'GenChargedSimonJets'+suffix,
     )
 
-    from SRothman.EECs.setupEECRes4 import setupEECRes4_MC
-    process = setupEECRes4_MC(process,
+    from SRothman.EECs.setupEEC import setupEEC_MC
+    process = setupEEC_MC(process,
         name = 'ChargedEECs'+suffix,
         genMatch = 'ChargedGenMatch'+suffix,
         genjets = 'GenChargedSimonJets'+suffix,
         recojets = 'ChargedSimonJets'+suffix,
-        resulttype='Array',
+        whichEEC='proj',
+        config = cfg['EECproj'],
         verbose = 0,
     )
-
-    #from SRothman.EECs.setupEECRes3 import setupEECRes3_MC
-    #process = setupEECRes3_MC(process,
-    #    name = 'ChargedEECs'+suffix,
-    #    genMatch = 'ChargedGenMatch'+suffix,
-    #    genjets = 'GenChargedSimonJets'+suffix,
-    #    recojets = 'ChargedSimonJets'+suffix,
-    #    resulttype='Unbinned',
-    #    verbose = 0,
-    #)
-
-    #from SRothman.EECs.setupEECProj import setupEECProj_MC
-    #process = setupEECProj_MC(process,
-    #    name = 'ChargedEECs'+suffix,
-    #    genMatch = 'ChargedGenMatch'+suffix,
-    #    genjets = 'GenChargedSimonJets'+suffix,
-    #    recojets = 'ChargedSimonJets'+suffix,
-    #    resulttype='Vector',
-    #    verbose = 0,
-    #)
+    process = setupEEC_MC(process,
+        name = 'ChargedEECs'+suffix,
+        genMatch = 'ChargedGenMatch'+suffix,
+        genjets = 'GenChargedSimonJets'+suffix,
+        recojets = 'ChargedSimonJets'+suffix,
+        whichEEC='res3',
+        config = cfg['EECres3'],
+        verbose = 0,
+    )
+    process = setupEEC_MC(process,
+        name = 'ChargedEECs'+suffix,
+        genMatch = 'ChargedGenMatch'+suffix,
+        genjets = 'GenChargedSimonJets'+suffix,
+        recojets = 'ChargedSimonJets'+suffix,
+        whichEEC='res4',
+        config = cfg['EECres4'],
+        verbose = 0,
+    )
 
 # End of customisation functions
 

@@ -5,8 +5,7 @@ EECProjTransferVectorProducer = cms.EDProducer("EECProjTransferVectorProducer",
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
     calculator = cms.PSet(),
-    flags = cms.VInputTag("ChargedSimonJetsPreselection",
-                          "ChargedSimonJetsOverlapVeto"),
+    flags = cms.VInputTag(),
 )
 
 EECProjTransferUnbinnedProducer = cms.EDProducer("EECProjTransferUnbinnedProducer",
@@ -14,8 +13,7 @@ EECProjTransferUnbinnedProducer = cms.EDProducer("EECProjTransferUnbinnedProduce
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
     calculator = cms.PSet(),
-    flags = cms.VInputTag("ChargedSimonJetsPreselection",
-                          "ChargedSimonJetsOverlapVeto"),
+    flags = cms.VInputTag(),
 )
 
 EECProjTransferArrayProducer = cms.EDProducer("EECProjTransferArrayProducer",
@@ -23,7 +21,6 @@ EECProjTransferArrayProducer = cms.EDProducer("EECProjTransferArrayProducer",
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
     calculator = cms.PSet(),
-    flags = cms.VInputTag("ChargedSimonJetsPreselection",
-                          "ChargedSimonJetsOverlapVeto"),
+    flags = cms.VInputTag(),
 )
 

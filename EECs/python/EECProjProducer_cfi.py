@@ -3,21 +3,18 @@ import FWCore.ParameterSet.Config as cms
 EECProjVectorProducer = cms.EDProducer("EECProjVectorProducer",
     jets = cms.InputTag(""),
     calculator = cms.PSet(),
-    flags = cms.VInputTag("ChargedSimonJetsPreselection",
-                          "ChargedSimonJetsOverlapVeto"),
+    flags = cms.VInputTag(),
 )
 
 EECProjUnbinnedProducer = cms.EDProducer("EECProjUnbinnedProducer",
     jets = cms.InputTag(""),
     calculator = cms.PSet(),
-    flags = cms.VInputTag("ChargedSimonJetsPreselection",
-                          "ChargedSimonJetsOverlapVeto"),
+    flags = cms.VInputTag(),
 )
 
 EECProjArrayProducer = cms.EDProducer("EECProjArrayProducer",
     jets = cms.InputTag(""),
     calculator = cms.PSet(),
-    flags = cms.VInputTag("ChargedSimonJetsPreselection",
-                          "ChargedSimonJetsOverlapVeto"),
+    flags = cms.VInputTag(),
 )
 
