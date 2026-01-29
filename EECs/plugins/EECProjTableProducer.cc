@@ -44,9 +44,9 @@ EECProjTableProducer<ResultType>::EECProjTableProducer(const edm::ParameterSet& 
 
     produces<nanoaod::FlatTable>(name_ + "Order2");
     produces<nanoaod::FlatTable>(name_ + "Order3");
-    produces<nanoaod::FlatTable>(name_ + "Order4");
-    produces<nanoaod::FlatTable>(name_ + "Order5");
-    produces<nanoaod::FlatTable>(name_ + "Order6");
+//    produces<nanoaod::FlatTable>(name_ + "Order4");
+//    produces<nanoaod::FlatTable>(name_ + "Order5");
+//    produces<nanoaod::FlatTable>(name_ + "Order6");
     produces<nanoaod::FlatTable>(name_+"BK");
 }
 
@@ -65,16 +65,16 @@ void EECProjTableProducer<ResultType>::produce(edm::Event& event, const edm::Eve
     event.getByToken(EECToken_, EECs);
 
     std::vector<int> nR;
-    std::array<std::vector<int>, 5> nEntry;
+    std::array<std::vector<int>, 2> nEntry;
 
     std::vector<int> iJet, iReco;
     std::vector<float> pt_denom;
 
-    const static std::array<std::string, 5> orderNames = {{
-        "Order2", "Order3", "Order4", "Order5", "Order6"
+    const static std::array<std::string, 2> orderNames = {{
+        "Order2", "Order3"
     }};
 
-    for (unsigned order = 2; order <= 6; ++order){
+    for (unsigned order = 2; order <= 3; ++order){
         std::vector<typename ResultType::T> R;
         std::vector<float> wt;
 
@@ -131,7 +131,7 @@ void EECProjTableProducer<ResultType>::produce(edm::Event& event, const edm::Eve
     BKTable->addColumn<int>("iJet", iJet, "iJet", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<int>("iReco", iReco, "iReco", nanoaod::FlatTable::IntColumn);
     BKTable->addColumn<float>("pt_denom", pt_denom, "pt_denom", nanoaod::FlatTable::FloatColumn);
-    for (unsigned order = 2; order<=6; ++order){
+    for (unsigned order = 2; order<=3; ++order){
         BKTable->addColumn<int>("nEntry"+orderNames[order-2], nEntry[order-2], "nEntry", nanoaod::FlatTable::IntColumn);
     }
     event.put(std::move(BKTable), name_ + "BK");

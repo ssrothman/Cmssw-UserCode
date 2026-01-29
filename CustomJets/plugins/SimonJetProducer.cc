@@ -111,60 +111,44 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
     std::cout << "SimonJetProducer::produce called" << std::endl;    
     auto result = std::make_unique<std::vector<simon::jet>>();
     simon::jet evt_jet;
-    //Need to add proper kinetic info
-    evt_jet.pt = 1;
+        
+    size_t mu1 = 999999;
+    size_t mu2 = 999999;
+    float pt1 = -1.0;
+    float pt2 = -1.0;
+    float zpt = 0.0;
+
+    for (size_t i = 0; i < candidates->size(); ++i) {
+       const auto& cand = candidates->at(i);
+       if (std::abs(cand.pdgId()) != 13) continue;
+
+       float pt = cand.pt();
+       if (pt > pt1) {
+           pt2 = pt1;
+           mu2 = mu1;
+           pt1 = pt;
+           mu1 = i;
+       } else if (pt > pt2) {
+           pt2 = pt;
+           mu2 = i;
+       }
+    }
+
+    if (mu1 != 999999) zpt += pt1;
+    if (mu2 != 999999) zpt += pt2;
+
+    evt_jet.pt = zpt;
     evt_jet.eta = 0;
     evt_jet.phi = 0;
     evt_jet.mass = 1;
     evt_jet.iJet = 0;
 
-    for(unsigned iJet=0; iJet < jets->size(); ++iJet){//for each jet
-        const auto& j = jets->at(iJet);
-
-        const auto& constituents = j.getJetConstituents();
-
-        simon::jet ans;
-        ans.pt = j.pt();
-        ans.eta = j.eta();
-        ans.phi = j.phi();
-        ans.mass = j.mass();
-        ans.iJet = iJet;
-
-        if(addCHSindex_){
-            for(unsigned iCHS=0; iCHS < CHSjets->size(); ++iCHS){
-                const auto& jCHS = CHSjets->at(iCHS);
-                if(deltaR(j, jCHS) < CHSmatchDR_){//if the CHS jet matches the jet
-                    ans.iCHS.push_back(iCHS);
-                }
-            }
-            if(ans.iCHS.empty()){
-                ans.iCHS.push_back(99999999);
-            }
-        }
-
- //       selector_.buildJet(constituents, ans);
-
-        if (verbose_){
-            printf("\tjet: (%f, %f, %f)\n", ans.pt, ans.eta, ans.phi);
-        }
-
-        if(verbose_){
-            printf("rawPt = %f\n", ans.rawpt);
-            printf("pt = %f\n", ans.pt);
-            printf("sumpt = %f\n", ans.sumpt);
-        }
-
-//        result->push_back(std::move(ans));
-
-        if(verbose_){
-            printf("pushed back\n");
-        }
-    }  // end for jet
     std::vector<edm::Ptr<pat::PackedCandidate>> chargedPtrs;
     chargedPtrs.reserve(candidates->size());
     for (size_t i = 0; i < candidates->size(); ++i) {
         const auto& cand = candidates->at(i);
         if (cand.charge() == 0) continue;
+	if (i == mu1 || i == mu2) continue;
         chargedPtrs.emplace_back(candidates->ptrAt(i));
     }
 
