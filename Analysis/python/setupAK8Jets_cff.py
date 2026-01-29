@@ -2,26 +2,28 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 from SRothman.JetToolbox.jetToolbox_cff import jetToolbox
 
-from SRothman.Analysis.config.config import config
+def setupAK8GenJets(process,
+                    genParticles,
+                    partonMode,
+                    config):
 
-def setupAK8GenJets(process, genParticles, partonMode,
-                    applyExtraGenSelections):
-
-    print("")
-    print(" --------- SETTING UP GEN JETS --------- ")
-    print("")
-
-    cutstring = "pt > %g &&"%config['GenJets']['GenJetPt'] + \
-                " abs(eta) < %g"%config['GenJets']['GenJetEta']
-
-    if applyExtraGenSelections: #fakes the tight jet ID + lepton veto
-        cutstring += " && muonEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['muEF']
-        cutstring += " && chargedEmEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['chEmEF']
-        cutstring += " && neutralEmEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['nEmEF']
-        cutstring += " && neutralHadronEnergy/(pt*cosh(eta)) < %g"%config['GenJets']['nHadEF']
-        cutstring += ' && numberOfDaughters > %d'%config['GenJets']['nConstituents']
-
-    print("Cutstring: %s"%cutstring)
+    cutstring = ''
+    if config['minPt'] > 0:
+        cutstring += 'pt > %g && '%config['minPt']
+    if config['maxEta'] > 0:
+        cutstring += 'abs(eta) < %g && '%config['maxEta']
+    if config['maxMuEF'] < 1:
+        cutstring += 'muonEnergy/(pt*cosh(eta)) < %g && '%config['maxMuEF']
+    if config['maxChEmEF'] < 1:
+        cutstring += 'chargedEmEnergy/(pt*cosh(eta)) < %g && '%config['maxChEmEF']
+    if config['maxNEmEF'] < 1:
+        cutstring += 'neutralEmEnergy/(pt*cosh(eta)) < %g && '%config['maxNEmEF']
+    if config['maxNHadEF'] < 1:
+        cutstring += 'neutralHadronEnergy/(pt*cosh(eta)) < %g && '%config['maxNHadEF']
+    if config['minConstituents'] > 0:
+        cutstring += 'numberOfDaughters >= %d && '%config['minConstituents']
+    if cutstring.endswith(' && '):
+        cutstring = cutstring[:-4] # remove trailing ' && '
 
     process.cutGenJetsAK8 = cms.EDFilter("GenJetSelector",
         src = cms.InputTag("ak8GenJetsNoNu"),
@@ -29,49 +31,37 @@ def setupAK8GenJets(process, genParticles, partonMode,
         filter = cms.bool(False)
     )
 
-    if not applyExtraGenSelections:
+    if config['muonVetoDR'] <= 0:
         process.selectedGenJetsAK8 = cms.EDFilter("GenJetSelector",
             src = cms.InputTag("cutGenJetsAK8"),
             cut = cms.string(""),
             filter = cms.bool(False)
         )
-        print("NO overlap veto")
     else:
         process.selectedGenJetsAK8 = cms.EDFilter("GENJetOverlapCandidateVetoSelector",
             src = cms.InputTag("cutGenJetsAK8"),
             vetoer = cms.InputTag("ZMuMu:daughters"),
-            minDeltaR = cms.double(config['Jets']['JetMuonVetoDR']),
+            minDeltaR = cms.double(config['muonVetoDR']),
             filter = cms.bool(False),
             verbose = cms.int32(0),
             makeValueMap = cms.bool(False)
         )
-        print("YES overlap veto")
 
-    if applyExtraGenSelections:
-        arbitration = config['Jets']['Arbitration']
-        if arbitration.startswith("Leading"):
-            process.arbitratedGenJetsAK8 = cms.EDFilter("LeadingGenJetSelector",
-                src = cms.InputTag("selectedGenJetsAK8"),
-                maxNumber = cms.uint32(int(arbitration[7:])),
-                filter = cms.bool(False)
-            )
-            print("Applying %s arbitration"%arbitration)
-        elif arbitration == 'None':
-            process.arbitratedGenJetsAK8 = cms.EDFilter("GenJetSelector",
-                src = cms.InputTag("selectedGenJetsAK8"),
-                cut = cms.string(""),
-                filter = cms.bool(False)
-            )
-            print("No jet arbitration")
-        else:
-            raise ValueError("Invalid jet arbitration %s"%arbitration)
-    else:
+    arbitration = config['arbitration']
+    if arbitration.startswith('Leading'):
+        process.arbitratedGenJetsAK8 = cms.EDFilter("LeadingGenJetSelector",
+            src = cms.InputTag("selectedGenJetsAK8"),
+            maxNumber = cms.uint32(int(arbitration[7:])),
+            filter = cms.bool(False)
+        )
+    elif arbitration == 'None':
         process.arbitratedGenJetsAK8 = cms.EDFilter("GenJetSelector",
             src = cms.InputTag("selectedGenJetsAK8"),
             cut = cms.string(""),
             filter = cms.bool(False)
         )
-        print("No jet arbitration")
+    else:
+        raise ValueError("Invalid jet arbitration %s"%arbitration)
 
     process.BigAK8GenJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         src = cms.InputTag("arbitratedGenJetsAK8"),
@@ -138,17 +128,9 @@ def setupAK8GenJets(process, genParticles, partonMode,
     )
     process.schedule.associate(process.MCak8jetstask)
 
-    print("")
-    print(" --------- FINISHED SETTING UP GEN JETS --------- ")
-    print("")
-
     return process
 
-def setupAK8RecoJets(process):
-    print("")
-    print(" --------- SETTING UP RECO JETS --------- ")
-    print("")
-
+def setupAK8RecoJets(process, config):
     process.jetIdLepVetoAK8 = cms.EDProducer("PatJetIDValueMapProducer",
         filterParams = cms.PSet(
             quality = cms.string("TIGHTLEPVETO"),
@@ -173,11 +155,17 @@ def setupAK8RecoJets(process):
         )
     )
 
-    jetcut = "pt > %f &&"%config['Jets']['JetPt'] + \
-             " abs(eta) < %f &&"%config['Jets']['JetEta'] + \
-             " userInt('%s') &&"%config['Jets']['JetID'] + \
-             " numberOfDaughters >= %d"%config['Jets']['JetNDaughters']
-    print("custring: %s"%jetcut)
+    jetcut = ''
+    if config['minPt'] > 0:
+        jetcut += 'pt > %g && '%config['minPt']
+    if config['maxEta'] > 0:
+        jetcut += 'abs(eta) < %g && '%config['maxEta']
+    if config['jetID'] != 'none':
+        jetcut += "userInt('%s') && "%config['jetID']
+    if config['minConstituents'] > 0:
+        jetcut += 'numberOfDaughters >= %d && '%config['minConstituents']
+    if jetcut.endswith(' && '):
+        jetcut = jetcut[:-4] # remove trailing ' && '
 
     process.preselectJetsAK8 = cms.EDProducer("PATJetSelectionFlagProducer",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
@@ -188,12 +176,11 @@ def setupAK8RecoJets(process):
     process.overlapVetoJetsAK8 = cms.EDFilter("PATJetOverlapCandidateVetoSelector",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
         vetoer = cms.InputTag("ZMuMu:daughters"),
-        minDeltaR = cms.double(config['Jets']['JetMuonVetoDR']),
+        minDeltaR = cms.double(config['muonVetoDR']),
         filter = cms.bool(False),
         makeValueMap = cms.bool(True),
         verbose = cms.int32(0)
     )
-    print("YES overlap veto")
 
     process.BigAK8JetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
@@ -250,19 +237,16 @@ def setupAK8RecoJets(process):
     )
     process.schedule.associate(process.ak8jetstask)
 
-    print("")
-    print(" --------- FINISHED SETTING UP RECO JETS --------- ")
-    print("")
-
     return process
 
 def setupAK8Jets(process, 
                  isMC,
                  skipJTB,
                  genOnly,
+                 config,
                  genParticles='prunedGenParticles',
-                 partonMode='Auto',
-                 applyExtraGenSelections=False):
+                 partonMode='Auto'):
+    
     if not skipJTB:
         jetToolbox(process, 'ak8', 'dummy', 'noOutput',
                    PUMethod='Puppi', dataTier='miniAOD',
@@ -270,14 +254,14 @@ def setupAK8Jets(process,
                    JETCorrPayload = 'AK8PFPuppi',
                    JETCorrLevels = ['L1FastJet', 'L2Relative', 'L3Absolute'],
                    GetJetMCFlavour = True,
-                   Cut = "pt > %f && abs(eta) < %f"%(config['GenJets']['GenJetPt'], config['GenJets']['GenJetEta']), 
+                   Cut = '', 
                    runOnMC=isMC)
-    
+
     if isMC:
         setupAK8GenJets(process, genParticles, partonMode,
-                        applyExtraGenSelections)
+                        config=config['GenJets'])
 
     if not genOnly:
-        setupAK8RecoJets(process)
+        setupAK8RecoJets(process, config=config['Jets'])
 
     return process

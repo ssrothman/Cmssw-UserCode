@@ -16,7 +16,13 @@ def SETUP_CONFIG(configname):
     def encode_level(config):
         if type(config) is dict:
             for key in config:
-                config[key] = encode_level(config[key])
+                if type(key) is unicode:
+                    new_key = key.encode('ascii')
+                else:
+                    new_key = key
+                config[new_key] = encode_level(config[key])
+                if new_key != key:
+                    del config[key]
         elif type(config) is list:
             for i in range(len(config)):
                 config[i] = encode_level(config[i])
@@ -40,7 +46,13 @@ def load_config(configname):
     def encode_level(config):
         if type(config) is dict:
             for key in config:
+                if type(key) is unicode:
+                    new_key = key.encode('ascii')
+                    config[new_key] = config.pop(key)
+                    key = new_key
+
                 config[key] = encode_level(config[key])
+
         elif type(config) is list:
             for i in range(len(config)):
                 config[i] = encode_level(config[i])

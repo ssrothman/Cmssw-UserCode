@@ -1,45 +1,150 @@
 {
     "EventSelection" : {
-        "MuEta" : 2.4,
-        "MuLeadPt" : 26,
-        "MuSubPt" : 15,
-        "MuID" : "CutBasedIdMedium",
-        "MuISO" : "PFIsoLoose",
+        "maxMuEta" : 2.4,
+        "leadMuPt" : 26,
+        "subMuPt" : 15,
+        "muID" : "CutBasedIdMedium",
+        "muISO" : "PFIsoLoose",
         "Zmass" : 91.1876,
         "ZmassWindow" : 20.0,
-        "RequireOppositeSignMuons" : true,
-        "OnlyCheckLeadingMuons" : false,
-        "CoarsePuppiMETCut" : 75,
-        "MuDZ" : 0.5,
-        "MuDXY" : 0.2
+        "requireOppositeSignMuons" : true,
+        "onlyCheckLeading" : false,
+        "maxMET" : 75,
+        "muDZ" : 0.5,
+        "muDXY" : 0.2
     },
     "Jets" : {
-        "JetPt" : 20,
-        "JetEta" : 1.7,
-        "JetID" : "jetIdLepVeto",
-        "JetNDaughters" : 2,
-        "JetMuonVetoDR" : 0.8,
-        "Arbitration" : "None"
+        "minPt" : 20,
+        "maxEta" : 1.7,
+        "jetID" : "jetIdLepVeto",
+        "minConstituents" : 2,
+        "muonVetoDR" : 0.8,
+        "arbitration" : "None",
+        "CHSmatchDR" : 0.8
     },
     "GenJets" : {
-        "GenJetPt" : 10,
-        "GenJetEta" : 3.0
+        "minPt" : 10,
+        "maxEta" : 3.0,
+        "maxMuEF" : 0.8,
+        "maxChEmEF" : 0.8,
+        "maxNEmEF" : 0.9,
+        "maxNHadEF" : 0.9,
+        "minConstituents" : 1,
+        "muonVetoDR" : 0.8,
+        "arbitration" : "Leading1"
+    },
+    "Matching" : {
+        "jet_dR_threshold" : 0.4,
+        "max_chisq" : 999999.0,
+        "Electrons" : {
+            "dr_mode" : "Const",
+            "dr_param1" : 0.08,
+            "dr_param2" : 0.0,
+            "dr_param3" : 0.0,
+            "ptres_mode" : "ConstFrac",
+            "ptres_param1" : 0.02,
+            "ptres_param2" : 0.0,
+            "angres_mode" : "TrackAng",
+            "angres_param1" : 0.0003,
+            "angres_param2" : 0.0015,
+            "opp_charge_penalty" : 3.0,
+            "no_charge_penalty" : 0.0,
+            "charge_filter_mode" : "Any",
+            "flavor_filter_mode" : "Any"
+        },
+        "Muons" : {
+            "dr_mode" : "Const",
+            "dr_param1" : 0.08,
+            "dr_param2" : 0.0,
+            "dr_param3" : 0.0,
+            "ptres_mode" : "ConstFrac",
+            "ptres_param1" : 0.02,
+            "ptres_param2" : 0.0,
+            "angres_mode" : "TrackAng",
+            "angres_param1" : 0.0003,
+            "angres_param2" : 0.0015,
+            "opp_charge_penalty" : 3.0,
+            "no_charge_penalty" : 0.0,
+            "charge_filter_mode" : "Any",
+            "flavor_filter_mode" : "Any"
+        },
+        "ChargedHadrons" : {
+            "dr_mode" : "Const",
+            "dr_param1" : 0.08,
+            "dr_param2" : 0.0,
+            "dr_param3" : 0.0,
+            "ptres_mode" : "ConstFrac",
+            "ptres_param1" : 0.02,
+            "ptres_param2" : 0.0,
+            "angres_mode" : "TrackAng",
+            "angres_param1" : 0.0003,
+            "angres_param2" : 0.0015,
+            "opp_charge_penalty" : 3.0,
+            "no_charge_penalty" : 0.0,
+            "charge_filter_mode" : "Any",
+            "flavor_filter_mode" : "Any"
+        }
     },
     "Systematics" : {
-        "EM0scale" : 0.03,
-        "HAD0scale" : 0.05,
-        "CHscale" : 0.01,
-        "trkDropProb" : 0.03,
-        "trkDropSmear" : 0.10,
-        "EM0thresholds" : [0, 0, 0],
-        "HAD0thresholds" : [0, 0, 0],
-        "ELEthresholds" : [0, 0, 0],
-        "MUthresholds" : [0, 0, 0],
-        "HADCHthresholds" : [0, 0, 0],
-        "minFromPV" : 0,
-        "minPUppiWt" : 0.5,
-        "maxDZ" : 9999999,
-        "maxDXY" : 99999999
+        "parameters" : {
+            "EM0scale" : 0.03,
+            "HAD0scale" : 0.05,
+            "CHscale" : 0.01,
+            "trkDropProb" : 0.03,
+            "trkDropSmear" : 0.10,
+            "EM0thresholds" : [0.0, 0.0, 0.0],
+            "HAD0thresholds" : [0.0, 0.0, 0.0],
+            "ELEthresholds" : [0.0, 0.0, 0.0],
+            "MUthresholds" : [0.0, 0.0, 0.0],
+            "HADCHthresholds" : [0.0, 0.0, 0.0],
+            "minFromPV" : 0,
+            "minPuppiWt" : 0.5,
+            "maxDZ" : 9999999.9,
+            "maxDXY" : 99999999.9
+        },
+        "nominal" : {
+            "EM0scale" : "NOM",
+            "HAD0scale" : "NOM",
+            "CHscale" : "NOM",
+            "trkDrop" : "OFF",
+            "EM0threshold" : "NOM",
+            "HAD0threshold" : "NOM",
+            "ELEthreshold" : "NOM",
+            "MUthreshold" : "NOM",
+            "HADCHthreshold" : "NOM",
+            "requireVertex" : "ON",
+            "applyPuppi" : true,
+            "onlyCharged" : true
+        },
+        "variations" : {
+            "EM0_UP" : {
+                "EM0scale" : "UP"
+            },
+            "EM0_DN" : {
+                "EM0scale" : "DN"
+            },
+            "HAD0_UP" : {
+                "HAD0scale" : "UP"
+            },
+            "HAD0_DN" : {
+                "HAD0scale" : "DN"
+            },
+            "CH_UP" : {
+                "CHscale" : "UP"
+            },
+            "CH_DN" : {
+                "CHscale" : "DN"
+            },
+            "TRK_EFF" : {
+                "trkDrop" : "ON"
+            },
+            "NO_VTX" : {
+                "requireVertex" : "OFF"
+            },
+            "NO_PUPPI" : {
+                "applyPuppi" : false
+            }
+        }
     },
     "EECproj" : {
         "flags" : ["Preselection", "OverlapVeto"],

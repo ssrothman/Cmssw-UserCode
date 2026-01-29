@@ -28,7 +28,7 @@ process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 process.DroppedEventsSimOutput_step = cms.EndPath(process.DroppedEventsSimOutput)
 
 from SRothman.Analysis.setupEventSelections_cff import setupEventSelections
-process = setupEventSelections(process, isMC=True)
+process = setupEventSelections(process, "linkedObjects:muons", config=cfg['EventSelection'], isMC=True)
 # Schedule definition
 process.schedule = cms.Schedule(process.selections_path,
                                 process.nanoAOD_step,
@@ -60,7 +60,8 @@ from SRothman.Analysis.setupAK8Jets_cff import setupAK8Jets
 process = setupAK8Jets(process,
    isMC = True,
    skipJTB = False,
-   genOnly = False)
+   genOnly = False,
+   config=cfg)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
 for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
@@ -70,6 +71,7 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
         genjets = 'arbitratedGenJetsAK8', 
         CHSjets = 'finalJets',
         name = 'ChargedSimonJets'+suffix,
+        config = cfg,
         syst = syst,
         isMC = True,
         genOnly = False
@@ -77,10 +79,10 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
 
     from SRothman.Matching.setupMatching import setupMatching
     process = setupMatching(process,
-        verbose = 0,
         name = 'ChargedGenMatch'+suffix,
         reco = 'ChargedSimonJets'+suffix,
         gen = 'GenChargedSimonJets'+suffix,
+        config = cfg['Matching']
     )
 
     from SRothman.EECs.setupEEC import setupEEC_MC

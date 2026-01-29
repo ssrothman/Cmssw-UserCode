@@ -1,16 +1,18 @@
 import FWCore.ParameterSet.Config as cms
 
-from SRothman.Matching.TrackMatchProducer_cfi import TrackMatchProducer
+from SRothman.Matching.TrackMatchProducer_cfi import track_matcher_from_config
 
-def setupMatching(process, verbose=0,
-                  name='GenMatch',
-                  reco = 'SimonJets',
-                  gen = 'GenSimonJets'):
+def setupMatching(process, 
+                  config,
+                  name,
+                  reco,
+                  gen):
                    
     setattr(process, name, 
-        TrackMatchProducer.clone(
-            recoJets = cms.InputTag(reco),
-            genJets = cms.InputTag(gen),
+        track_matcher_from_config(
+            recojets = reco,
+            genjets = gen,
+            config = config
         )
     )
 

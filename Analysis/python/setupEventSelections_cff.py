@@ -2,20 +2,18 @@ import FWCore.ParameterSet.Config as cms
 
 from SRothman.Analysis.CorrectedMuonProducer_cfi import CorrectedMuonProducer
 from SRothman.Analysis.RoccoRValueMapProducer_cfi import RoccoRValueMapProducer
-from SRothman.Analysis.ZMuMuEventSelectionFilter_cfi import RECOZMuMuFilter
-from SRothman.Analysis.config.config import config
+from SRothman.Analysis.ZMuMuEventSelectionFilter_cfi import getZMuMuFilter
 
-def setupEventSelections(process, isMC, 
-                         genmuons=False,
-                         skipMET=False):
-    print("")
-    print(" ------------ SETUP EVENT SELECTIONS ------------ ")
-    print("")
+def setupEventSelections(process,
+                         muons,
+                         isMC, 
+                         config,
+                         genmuons=False):
 
     if not genmuons:
-        print("RECO Muons")
+        #setup Rochester corrections table
         process.RoccoR = RoccoRValueMapProducer.clone(
-            src = cms.InputTag('linkedObjects', 'muons'),
+            src = cms.InputTag(muons),
             isMC = isMC
         )
 
@@ -28,109 +26,66 @@ def setupEventSelections(process, isMC,
             type = cms.string('float')
         )
 
-        process.CorrectedMuons = CorrectedMuonProducer.clone(
-            src = cms.InputTag('linkedObjects', 'muons'),
-            RoccoR = cms.InputTag('RoccoR'),
-            verbose = 0
-        )
-        print("YES ROCCOR")
-
-        muoncut = "abs(eta) < %0.2f && "%config['EventSelection']['MuEta'] + \
-                  " pt > %0.2f && "%config['EventSelection']['MuSubPt'] + \
-                  " passed('%s') && "%config['EventSelection']['MuID'] + \
-                  " passed('%s') && "%config['EventSelection']['MuISO'] + \
-                  " abs(dB('PVDZ')) < %0.2f && "%config['EventSelection']['MuDZ'] + \
-                  " abs(dB('PV2D')) < %0.2f"%config['EventSelection']['MuDXY']
-
-        print("Muon cut: %s" % muoncut)
-
-        process.SelectedMuons = cms.EDFilter(
-            "PATMuonRefSelector",
-            src = cms.InputTag("CorrectedMuons"),
-            cut = cms.string(muoncut)
-        )
-        muoncut = muoncut.encode('utf-8')
-
+        selectorclass = "PATMuonSelector"
     else:
-        print("GEN Muons")
-        print("NO ROCCOR")
+        selectorclass = "GenParticleSelector"
+        
+    muoncut = ''
+    if config['maxMuEta'] > 0:
+        muoncut += "abs(eta) < %0.2f && "%config['maxMuEta']
+    if config['subMuPt'] > 0:
+        muoncut += " pt > %0.2f && "%config['subMuPt']
+    if config['muID'] not in ['', 'none']:
+        muoncut += " passed('%s') && "%config['muID']
+    if config['muISO'] not in ['', 'none']:
+        muoncut += " passed('%s') && "%config['muISO']
+    if config['muDZ'] > 0:
+        muoncut += " abs(dB('PVDZ')) < %0.2f && "%config['muDZ']
+    if config['muDXY'] > 0:
+        muoncut += " abs(dB('PV2D')) < %0.2f && "%config['muDXY']
+    
+    if muoncut.endswith(' && '):
+        muoncut = muoncut[:-4]  # remove trailing ' && '
 
-        muoncut = 'abs(eta) < %0.2f && '%config['EventSelection']['MuEta'] + \
-                  ' pt > %0.2f &&'%config['EventSelection']['MuSubPt'] + \
-                  ' abs(pdgId) == 13 &&' + \
-                  ' status == 1'
-
-        print("Muon cut: %s" % muoncut)
-
-        process.SelectedMuons = cms.EDFilter(
-            'GenParticleSelector',
-            src = cms.InputTag('genParticles'),
-            cut = cms.string(muoncut)
-        )
+    process.SelectedMuons = cms.EDFilter(
+        selectorclass,
+        src = cms.InputTag(muons),
+        cut = cms.string(muoncut)
+    )
 
     process.DiMuonFilter = cms.EDFilter(
         "CandViewCountFilter",
         src = cms.InputTag("SelectedMuons"),
         minNumber = cms.uint32(2)
     )
-    print("Selecting events with >= 2 muons")
 
-    process.ZMuMu = RECOZMuMuFilter.clone(
-        src = cms.InputTag("SelectedMuons"),
-        verbose = 0
-    )
-    print("Running ZMuMu filter")
+    process.ZMuMu = getZMuMuFilter(config, cms.InputTag("SelectedMuons"))
 
-    if not skipMET:
+    if config['maxMET'] > 0:
         process.METselector = cms.EDFilter(
             'CandViewSelector',
             src = cms.InputTag('slimmedMETsPuppi'),
-            cut = cms.string('pt < %f' % config['EventSelection']['CoarsePuppiMETCut'])
+            cut = cms.string('pt < %f' % config['maxMET'])
         )
-        print("Selecting events with MET < %f" % config['EventSelection']['CoarsePuppiMETCut'])
         process.METfilter = cms.EDFilter(
             'CandViewCountFilter',
             src = cms.InputTag('METselector'),
             minNumber = cms.uint32(1)
         )
-    else:
-        print("NO MET cut")
 
-    if not genmuons and not skipMET:
-        process.selections_path = cms.Path(
-            process.RoccoR +
-            process.CorrectedMuons +
-            process.SelectedMuons +
-            process.DiMuonFilter +
-            process.ZMuMu + 
-            process.METselector +
-            process.METfilter
-        )
-    elif not genmuons:
-        process.selections_path = cms.Path(
-            process.RoccoR +
-            process.CorrectedMuons +
-            process.SelectedMuons +
-            process.DiMuonFilter +
-            process.ZMuMu
-        )
-    elif not skipMET:
-        process.selections_path = cms.Path(
-            process.SelectedMuons +
-            process.DiMuonFilter +
-            process.ZMuMu + 
-            process.METselector +
-            process.METfilter
-        )
-    else:
-        process.selections_path = cms.Path(
-            process.SelectedMuons +
-            process.DiMuonFilter +
-            process.ZMuMu
-        )
+    path = []
+    if not genmuons:
+        path.append(process.RoccoR)
 
-    print("")
-    print(" ------------ END SETUP EVENT SELECTIONS ------------ ")
-    print("")
+    path.append(process.SelectedMuons)
+    path.append(process.DiMuonFilter)
+    path.append(process.ZMuMu)
+    if config['maxMET'] > 0:
+        path.append(process.METselector)
+        path.append(process.METfilter)
+
+    process.selections_path = cms.Path()
+    for module in path:
+        process.selections_path += module
 
     return process

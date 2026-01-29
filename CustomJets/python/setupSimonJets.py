@@ -1,17 +1,48 @@
 import FWCore.ParameterSet.Config as cms
-from SRothman.CustomJets.SimonJetTableProducer_cfi import *
-from SRothman.CustomJets.SimonJetProducer_cfi import *
 
-from SRothman.CustomJets.systematics import variations
+from SRothman.CustomJets.SimonJetProducer_cfi import GenSimonJetProducer, PatSimonJetProducer
+from SRothman.CustomJets.SimonJetTableProducer_cfi import SimonJetTableProducer
+from SRothman.Analysis.util import pyval_to_cmsval
+
+def syst_params_from_config(config):
+    result = cms.PSet()
+    for key, value in config['parameters'].items():
+        result.__setattr__(key, pyval_to_cmsval(value))
+    return result
+
+def syst_settings_from_config(config, syst):
+    result = cms.PSet()
+    for key, value in config['nominal'].items():
+        result.__setattr__(key, pyval_to_cmsval(value))
+
+    # Apply systematic variations
+    if syst in config['variations']:
+        for key, value in config['variations'][syst].items():
+            result.__setattr__(key, pyval_to_cmsval(value))
+
+    elif syst != 'NOM':
+        raise ValueError("Systematic variation %s not found in config." % syst)
+    
+    return result
+
+def selector_from_config(config, syst):
+    parameters = syst_params_from_config(config)
+    settings = syst_settings_from_config(config, syst)
+    return cms.PSet(
+        parameters = parameters,
+        settings = settings,
+    )
 
 def setupGenSimonJets(process,
                       genjets,
-                      name):
+                      name,
+                      config):
 
     setattr(process, 'Gen'+name, GenSimonJetProducer.clone(
         jetSrc = genjets,
         addCHSindex = False,
         verbose = False,
+        selector = selector_from_config(config['Systematics'], 'NOM')
     ))
 
     setattr(process, 'Gen'+name+'Table', SimonJetTableProducer.clone(
@@ -32,6 +63,7 @@ def setupRecoSimonJets(process,
                        jets,
                        CHSjets,
                        name,
+                       config,
                        syst):
 
     doCHS = len(CHSjets) > 0
@@ -40,10 +72,10 @@ def setupRecoSimonJets(process,
         jetSrc = jets,
         CHSsrc = CHSjets,
         addCHSindex = doCHS,
-        CHSmatchDR = 0.4,
+        CHSmatchDR = config['Jets']['CHSmatchDR'],
         verbose = False,
+        selector = selector_from_config(config['Systematics'], syst)
     ))
-    getattr(process, name).selector.settings = variations[syst]
 
     setattr(process, name+"Preselection", cms.EDProducer("JetSelectionFlagTranslator",
         src = cms.InputTag(jets),
@@ -88,18 +120,21 @@ def setupSimonJets(process,
                    genjets,
                    CHSjets,
                    name,
+                   config,
                    syst,
                    isMC,
                    genOnly):
     if isMC:
         process = setupGenSimonJets(process,
                                     genjets,
-                                    name)
+                                    name,
+                                    config)
     if not genOnly:
         process = setupRecoSimonJets(process,
                                      jets,
                                      CHSjets,
                                      name,
+                                     config,
                                      syst)
     return process
 

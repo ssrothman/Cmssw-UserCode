@@ -56,3 +56,10 @@ TrackMatchProducer = cms.EDProducer('TrackMatchProducer',
         )
     )
 )
+
+def track_matcher_from_config(config, recojets, genjets):
+    return TrackMatchProducer.clone(
+        recoJets = recojets,
+        genJets = genjets,
+        matcher = pyval_to_cmsval(config)
+    )
