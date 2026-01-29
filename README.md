@@ -14,35 +14,36 @@ Details on all of this are below
 ##  Table of contents <!-- omit from toc -->
 
 - [1. setup instructions](#1-setup-instructions)
-- [Event selection](#event-selection)
-- [Jet building and preselection](#jet-building-and-preselection)
-  - [CMSSW products](#cmssw-products)
-  - [NanoAOD products](#nanoaod-products)
-- [SimonJets](#simonjets)
-  - [Systematic variations](#systematic-variations)
-  - [SimonJets from CMSSW jets](#simonjets-from-cmssw-jets)
-  - [NANO tables](#nano-tables)
-- [3. Gen-matching](#3-gen-matching)
-  - [Delta-R controls](#delta-r-controls)
-  - [Resolutions](#resolutions)
-  - [Charge matching](#charge-matching)
-  - [Flavor matching](#flavor-matching)
-- [4. EEC calculations](#4-eec-calculations)
-  - [4.1 Types of EEC observables:](#41-types-of-eec-observables)
-    - [4.1.1 Projected EECs (referred to throughout the code as "proj")](#411-projected-eecs-referred-to-throughout-the-code-as-proj)
-    - [4.1.2 Resolved three-point EECs (referred to throughout the code as "res3")](#412-resolved-three-point-eecs-referred-to-throughout-the-code-as-res3)
-    - [4.1.3 Resolved four-point EECs (referred to throughout the code as "res4")](#413-resolved-four-point-eecs-referred-to-throughout-the-code-as-res4)
-  - [4.2 EEC calculator data formats ("resultType")](#42-eec-calculator-data-formats-resulttype)
-    - [4.2.1 Unbinned EECs (resultType="Unbinned")](#421-unbinned-eecs-resulttypeunbinned)
-    - [4.2.2 Prebinned, unmerged EECs (resultType="Vector")](#422-prebinned-unmerged-eecs-resulttypevector)
-    - [4.2.3 Prebinned, merged EECs (resultType="Array")](#423-prebinned-merged-eecs-resulttypearray)
-  - [EEC denominators](#eec-denominators)
-  - [Jet preselections](#jet-preselections)
-  - [4.3 Running EEC calculations](#43-running-eec-calculations)
-  - [NANO contents](#nano-contents)
-- [Scaleout](#scaleout)
-  - [Running with crab](#running-with-crab)
-  - [Running with condor](#running-with-condor)
+- [2. Event selection](#2-event-selection)
+- [3. Jet building and preselection](#3-jet-building-and-preselection)
+  - [3.1 CMSSW products](#31-cmssw-products)
+  - [3.2 NanoAOD products](#32-nanoaod-products)
+- [4. SimonJets](#4-simonjets)
+  - [4.1 Systematic variations](#41-systematic-variations)
+  - [4.2 SimonJets from CMSSW jets](#42-simonjets-from-cmssw-jets)
+  - [4.3 NANO tables](#43-nano-tables)
+- [5. Gen-matching](#5-gen-matching)
+  - [5.1 Delta-R controls](#51-delta-r-controls)
+  - [5.2 Resolutions](#52-resolutions)
+  - [5.3 Charge matching](#53-charge-matching)
+  - [5.4 Flavor matching](#54-flavor-matching)
+  - [5.5 NANO tables](#55-nano-tables)
+- [6. EEC calculations](#6-eec-calculations)
+  - [6.1 Types of EEC observables:](#61-types-of-eec-observables)
+    - [6.1.1 Projected EECs (referred to throughout the code as "proj")](#611-projected-eecs-referred-to-throughout-the-code-as-proj)
+    - [6.1.2 Resolved three-point EECs (referred to throughout the code as "res3")](#612-resolved-three-point-eecs-referred-to-throughout-the-code-as-res3)
+    - [6.1.3 Resolved four-point EECs (referred to throughout the code as "res4")](#613-resolved-four-point-eecs-referred-to-throughout-the-code-as-res4)
+  - [6.2 EEC calculator data formats ("resultType")](#62-eec-calculator-data-formats-resulttype)
+    - [6.2.1 Unbinned EECs (resultType="Unbinned")](#621-unbinned-eecs-resulttypeunbinned)
+    - [6.2.2 Prebinned, unmerged EECs (resultType="Vector")](#622-prebinned-unmerged-eecs-resulttypevector)
+    - [6.2.3 Prebinned, merged EECs (resultType="Array")](#623-prebinned-merged-eecs-resulttypearray)
+  - [6.3 EEC denominators](#63-eec-denominators)
+  - [6.4 Jet preselections](#64-jet-preselections)
+  - [6.5 Running EEC calculations](#65-running-eec-calculations)
+  - [6.6 NANO contents](#66-nano-contents)
+- [7. Scaleout](#7-scaleout)
+  - [7.1 Running with crab](#71-running-with-crab)
+  - [7.2 Running with condor](#72-running-with-condor)
 
 
 ## 1. setup instructions
@@ -95,7 +96,7 @@ Then, back in bash:
 > cmsRun SRothman/Analysis/test/test_MC.py
 ```
 
-## Event selection
+## 2. Event selection
 
 In order to optimize performance and disk requirements, only events that pass event selection are fully processed. However, we need to keep track of the total number of events in each dataset (eg for lumi weighting), so we actually produce two output files per event:
  - `NANO_selected.root` for events passing event selection, including the full needed information
@@ -116,7 +117,7 @@ process = setupEventSelections(
 
 Changing the event selection is as easy as replacing the `setupEventSelections()` function with a different one that also creates a `process.selections_path` `cms.Path()` object. 
 
-## Jet building and preselection
+## 3. Jet building and preselection
 
 CMSSW jet objects are setup as follows:
 ``` python
@@ -165,7 +166,7 @@ For reco jets, the config dictionary must look like:
 }
 ```
 
-### CMSSW products
+### 3.1 CMSSW products
 
 This process modifier builds:
 
@@ -177,7 +178,7 @@ This process modifier builds:
 
 The preselection ValueMaps can be used downstream to avoid expensive calculations on jets that fail preselection (ie of EEC quantities)
 
-### NanoAOD products
+### 3.2 NanoAOD products
 
 In addition, this also sets up NanoAOD tables. 
 
@@ -227,12 +228,12 @@ overlapVeto : bool # overlap veto preselection flag
 preselection : bool # kinematic preselection flag
 ```
 
-## SimonJets
+## 4. SimonJets
 
 All of my code works off a custom datatype `simon::jet` ("SimonJets"). These represent collections of jet constituents, with all collections and systematics "baked in".
 
 
-### Systematic variations
+### 4.1 Systematic variations
 
 The SimonJets include any relevant systematic variations on the jet constituents "baked in". The particle selection is implemented in `SimonTools/src/particleSelector.h`, and includes:
  - An option to select only charged particles
@@ -292,7 +293,7 @@ Concretely, this looks like:
 }
 ```
 
-### SimonJets from CMSSW jets
+### 4.2 SimonJets from CMSSW jets
 
 There is a producer to build SimonJets from CMSSW jets at `CustomJets/plugins/SimonJetProducer.cc`. 
 
@@ -320,7 +321,7 @@ In addition to building the SimonJets, this producer also optionally produces a 
 }
 ```
 
-### NANO tables
+### 4.3 NANO tables
 
 There is also a producer to build NANO tables from SimonJets (`CustomJets/plugins/SimonJetTableProducer.cc`). This is automatically setup by the `setupSimonJets` function, and produces three tables:
 
@@ -378,7 +379,7 @@ CHSbtagDeepFlavQG : float # max of b-tagging discriminator (DeepFlav QG)
 CHSqgl : float # max of quark/gluon likelihood
 ```
 
-## 3. Gen-matching
+## 5. Gen-matching
 
 The gen-matching is implemented in another backend submodule `Matching/src` and wrapped in a CMSSW producer `Matching/plugins/TrackMatchProducer.cc`. The current implementation only supports charged particles, and is best thought of as a greedy kinematic fit. The logic is as follows:
 
@@ -388,6 +389,17 @@ For each gen particle (descending in pT):
   2. Identify the "best" match according to a chi^2 likelihood
            (Delta pT/sigma pT)^2 + (delta eta/sigma_eta)^2 + (delta phi/sigma_phi)^2
   3. Create the match, and remove the matched reco particle from contention
+```
+
+This can be set up with a process modifier:
+```python
+from SRothman.Matching.setupMatching import setupMatching
+process = setupMatching(process,
+    name : str, # name to use for the matching process
+    reco : str, # reco SimonJets name
+    gen : str, # gen SimonJets name
+    config : dict # configuration dict
+)
 ```
 
 The matching algorithm is highly configurable, with the option to control the behavior differently for reco-level electrons, muons, and charged hadrons. The available parameters are:
@@ -418,14 +430,14 @@ The matching algorithm is highly configurable, with the option to control the be
 # ----- flavor matching --------
 "flavor_filter_mode" : str  # Flavor filtering mode ("Any", etc.)
 ```
-### Delta-R controls
+### 5.1 Delta-R controls
 
 The currently supported dr_modes are: 
 1. `"Const"` - constant delta R cone size with radius `dr_param1`. The other two parameters are ignored
 2. `"TrackPt"` - delta R cone size proportional to tracker resolution accounting for multiple scattering. The functional form is `A+B/pT`, with `A` = `dr_param1` and `B` = `dr_param2`. This is clipped to a maximum cone size given by `dr_param3`. 
 
 
-### Resolutions
+### 5.2 Resolutions
 
 The resolutions in the denominator of the chi^2 in the matching are parameterized by the reco particle kinematics. The avilable modes are:
 1. `"Const"` - constant resolution given by `param1`, with `param2` ignored
@@ -433,7 +445,7 @@ The resolutions in the denominator of the chi^2 in the matching are parameterize
 3. `"TrackPt"` - resolution is parameterized according to standard track pT resolution function `param1 + param2 * pT`.
 4. `"TrackAng"` - resolution is parameterized according to standard track angular resolution function `param1 + param2 / pT`
 
-### Charge matching
+### 5.3 Charge matching
 
 Three charge matching filters available:
 1. `"Any"` - allow matches independent of charge
@@ -444,7 +456,7 @@ If the charge matching filter is not strict, there is also an option to add pena
  - `opp_charge_penalty` for matches between charged particles with opposite sign
  - `no_charge_penalty` for matches between a charged particle and a neutral particle
 
-### Flavor matching
+### 5.4 Flavor matching
 
 Several flavor matching filters are avilable:
 1. `"Any"` - allow matches independent of flavor
@@ -459,21 +471,61 @@ Several flavor matching filters are avilable:
 10. `"AnyChargedHadron"` - allow matches to any charged hadron (pdgId > 100 and charge!=0)
 11. `"AnyNeutralHadron"` - allow matches to any neutral hadron (pdgId > 100 and charge==0)
 
-## 4. EEC calculations
+### 5.5 NANO tables
+
+The `TrackMatchTableProducer` creates extension tables for the gen and reco SimonJet tables, with extra branches relating to the matching. 
+
+The reco-level jet constituents get the extra branches:
+```python
+matchPt : float # matched pT
+matchEta : float # matched eta
+matchPhi : float # matched phi
+matchCharge : int # matched charge
+nMatches : int # number of matched particles
+matchTypes : int # matched particle type flag
+                 # this is a bitmask:
+                 # MATCH_MUON = 1;
+                 # MATCH_ELE = 2;
+                 # MATCH_PHO = 4;
+                 # MATCH_HADCH = 8;
+                 # MATCH_PI0 = 16;
+                 # MATCH_HAD0 = 32;
+```
+and the global jet (`<name>BK`) gets the extra branches
+```python
+jetMatchPt : float # matched jet pT
+jetMatchEta : float # matched jet eta
+jetMatchPhi : float # matched jet phi
+jetMatched : int # match boolean
+iGen : int # index of matched gen jet
+```
+
+The gen-level jet constituents get the extra branches
+```python
+nMatches : int # number of matched particles
+matchTypes : int # matched particle types bitmask
+```
+And the gen-level jet (`<name>BK`) gets the extra branches
+```python
+genJetMatched : int # match boolean
+iReco : int # index of matched reco jet
+```
+
+## 6. EEC calculations
 
 The actual EEC calculations are implemented in the EEC backend submodule `EECs/src`. These are wrapped in CMSSW producers in `EECs/plugins`, and NANO table producers are also provided. 
 
-### 4.1 Types of EEC observables:
+### 6.1 Types of EEC observables:
 
 There are three different kinds of EEC calculators:
 
-#### 4.1.1 Projected EECs (referred to throughout the code as "proj")
+#### 6.1.1 Projected EECs (referred to throughout the code as "proj")
 
  By default this calculates the projected EECs from 2-point through 6-point. 
  These are 1-dimensional histograms, binned in delta R ("R" in the code).
  This coordinate lives in the domain `0 < R < \infty`
 
-#### 4.1.2 Resolved three-point EECs (referred to throughout the code as "res3")
+#### 6.1.2 Resolved three-point EECs (referred to throughout the code as "res3")
 
  This calculates the resolved three-point EECs. 
  This is a three-dimensional histogram. The binning is according to equation (3) of https://arxiv.org/pdf/2201.07800
@@ -487,16 +539,16 @@ and they live in the domains:
  - `0 < r < 1`
  - `0 < c < pi/2`
 
-#### 4.1.3 Resolved four-point EECs (referred to throughout the code as "res4")
+#### 6.1.3 Resolved four-point EECs (referred to throughout the code as "res4")
 
 This calculates the resolved four-point EECs. 
 In principle the full four-point EECs live in a five-dimensional space. This is practically infeasible, so instead we have picked out three three-dimensional subspaces of this space. These are: the "dipole", the "tee", and the "triangle". Each of these lives in a 3-dimensional space with coordinates naned `R`, `r`, and `c`
 
-### 4.2 EEC calculator data formats ("resultType")
+### 6.2 EEC calculator data formats ("resultType")
 
 The EEC calculator can run in three different modes, yielding output with different amounts of pre-applied binning.
 
-#### 4.2.1 Unbinned EECs (resultType="Unbinned")
+#### 6.2.1 Unbinned EECs (resultType="Unbinned")
 
 This mode keeps the most information, at the cost of the most computational expense (both in terms of memory/cpu in the calculation, but also disk space required for the resulting NANO files). In this mode the EECs are completely unbinned (any bin edges passed in the configuration are ignored), and a distinct row is created in the NANO tables for each distinct N-tuple of jet constituents. 
 
@@ -510,7 +562,7 @@ R       wt
 ```
 Note that there will be repeated values in the `R` column because we are binning in only the "largest" `R` coordinate, which can be the same in different triples of particles. The trivial example of this is that when we take all three particles to be the same, the `R` coordinate will always be zero, so there will be four entries with `R=0`. 
 
-#### 4.2.2 Prebinned, unmerged EECs (resultType="Vector")
+#### 6.2.2 Prebinned, unmerged EECs (resultType="Vector")
 
 In this mode, the EECs are pre-binned in the angular coordinates, but a distinct row is still created for each distinct N-tuple of particles. Here the binning passed in the config is used, and the output values for the angular coordinates are integer bin indices (indexed such that underflow is bin 0, the first bin is bin 1, etc). 
 
@@ -523,7 +575,7 @@ R       wt
 ...
 ```
 
-#### 4.2.3 Prebinned, merged EECs (resultType="Array")
+#### 6.2.3 Prebinned, merged EECs (resultType="Array")
 
 This mode has the most aggressive optimization, and can give dramatically smaller files on disk than the other modes. This is achieved by pre-binning in the angular coordinates (just as for the "vector" resulttype), and merging entries which fall in the same bin. The output to the NANO table is the zero-suppressed total histogram counts in each angular bin. 
 
@@ -536,7 +588,7 @@ R       wt
 ...
 ```
 
-### EEC denominators
+### 6.3 EEC denominators
 
 EEC entries are weighted by `pt_part / pt_jet`. There are in principle a few different options for what value to put for `pt_jet`, controlled by the `normType` parameter in the configuration. These options are:
 
@@ -547,11 +599,11 @@ EEC entries are weighted by `pt_part / pt_jet`. There are in principle a few dif
  
  In any case the code tracks which value of `pt_jet` was used in the denominator, and writes this to the NANO, so post-hoc corrections or changes to this normalization can be applied trivially (this is needed, e.g. for JES/JER variations).
 
- ### Jet preselections
+ ### 6.4 Jet preselections
 
  In order to avoid running expensive calculations of jets that fail selections, the EEC producers accept a list of preselection flags (such as the OverlapVeto and Preselection flags discussed when building CMSSW jets). If a jet fails any of the passed flags, the EEC calculations are skipped.
 
-### 4.3 Running EEC calculations
+### 6.5 Running EEC calculations
 
 A generic process modifier for setting up EEC calculations in data or MC is avilable in `SRothman/EECs/setupEEC.py`. This can be called as
 ``` python
@@ -580,7 +632,7 @@ process = setupEEC_data(process,
 
 This automatically sets up the correct CMSSW producers, and names everything consistently such that there are no name clashes. Note that it is possible to run multiple EEC calculations at once, just by calling the process modifier multiple times with different `whichEEC` values. An example of this can be found in `Analysis/test/test_MC.py` or `Analysis/test/test_data.py`.
 
-### NANO contents
+### 6.6 NANO contents
 
 The EEC table producers write two NANO tables. One is just the list of EEC entries, in the format
 ```csv
@@ -619,9 +671,9 @@ pt_denom_reco: float # the value of pt_jet used in the denominator for EEC calcu
 pt_denom_gen: float # the value of pt_jet used in the denominator for EEC calculation
 ```
 
-## Scaleout
+## 7. Scaleout
 
-### Running with crab
+### 7.1 Running with crab
 
 First, ensure that RUNNING_CRAB = True in Analysis/python/common_cmsRun.py
 
@@ -637,6 +689,6 @@ run
 ```bash
 > python submit.py -y <your yaml>
 ```
-### Running with condor
+### 7.2 Running with condor
 
 There is a framework for running on condor in Analysis/production/condor. 

@@ -1,15 +1,15 @@
 {
     "EventSelection" : {
         "maxMuEta" : 2.4,
-        "leadMuPt" : 26,
-        "subMuPt" : 15,
+        "leadMuPt" : 10,
+        "subMuPt" : 10,
         "muID" : "CutBasedIdMedium",
         "muISO" : "PFIsoLoose",
         "Zmass" : 91.1876,
         "ZmassWindow" : 20.0,
         "requireOppositeSignMuons" : true,
         "onlyCheckLeading" : false,
-        "maxMET" : 75,
+        "maxMET" : -1,
         "muDZ" : 0.5,
         "muDXY" : 0.2
     },
@@ -20,27 +20,27 @@
         "minConstituents" : 2,
         "muonVetoDR" : 0.8,
         "arbitration" : "None",
-        "CHSmatchDR" : 0.8
+        "CHSmatchDR" : 0.4
     },
     "GenJets" : {
         "minPt" : 10,
-        "maxEta" : 3.0,
-        "maxMuEF" : 0.8,
-        "maxChEmEF" : 0.8,
-        "maxNEmEF" : 0.9,
-        "maxNHadEF" : 0.9,
+        "maxEta" : 2.5,
+        "maxMuEF" : 1.0,
+        "maxChEmEF" : 1.0,
+        "maxNEmEF" : 1.0,
+        "maxNHadEF" : 1.0,
         "minConstituents" : 1,
-        "muonVetoDR" : 0.8,
-        "arbitration" : "Leading1"
+        "muonVetoDR" : -1,
+        "arbitration" : "None"
     },
     "Matching" : {
         "jet_dR_threshold" : 0.4,
         "max_chisq" : 999999.0,
         "Electrons" : {
-            "dr_mode" : "Const",
-            "dr_param1" : 0.08,
-            "dr_param2" : 0.0,
-            "dr_param3" : 0.0,
+            "dr_mode" : "TrackPt",
+            "dr_param1" : 0.01,
+            "dr_param2" : 0.05,
+            "dr_param3" : 0.1,
             "ptres_mode" : "ConstFrac",
             "ptres_param1" : 0.02,
             "ptres_param2" : 0.0,
@@ -49,14 +49,14 @@
             "angres_param2" : 0.0015,
             "opp_charge_penalty" : 3.0,
             "no_charge_penalty" : 0.0,
-            "charge_filter_mode" : "Any",
+            "charge_filter_mode" : "Sign",
             "flavor_filter_mode" : "Any"
         },
         "Muons" : {
-            "dr_mode" : "Const",
-            "dr_param1" : 0.08,
-            "dr_param2" : 0.0,
-            "dr_param3" : 0.0,
+            "dr_mode" : "TrackPt",
+            "dr_param1" : 0.01,
+            "dr_param2" : 0.05,
+            "dr_param3" : 0.1,
             "ptres_mode" : "ConstFrac",
             "ptres_param1" : 0.02,
             "ptres_param2" : 0.0,
@@ -65,14 +65,14 @@
             "angres_param2" : 0.0015,
             "opp_charge_penalty" : 3.0,
             "no_charge_penalty" : 0.0,
-            "charge_filter_mode" : "Any",
+            "charge_filter_mode" : "Sign",
             "flavor_filter_mode" : "Any"
         },
         "ChargedHadrons" : {
-            "dr_mode" : "Const",
-            "dr_param1" : 0.08,
-            "dr_param2" : 0.0,
-            "dr_param3" : 0.0,
+            "dr_mode" : "TrackPt",
+            "dr_param1" : 0.01,
+            "dr_param2" : 0.05,
+            "dr_param3" : 0.1,
             "ptres_mode" : "ConstFrac",
             "ptres_param1" : 0.02,
             "ptres_param2" : 0.0,
@@ -81,7 +81,7 @@
             "angres_param2" : 0.0015,
             "opp_charge_penalty" : 3.0,
             "no_charge_penalty" : 0.0,
-            "charge_filter_mode" : "Any",
+            "charge_filter_mode" : "Sign",
             "flavor_filter_mode" : "Any"
         }
     },
@@ -99,7 +99,7 @@
             "HADCHthresholds" : [0.0, 0.0, 0.0],
             "minFromPV" : 0,
             "minPuppiWt" : 0.5,
-            "maxDZ" : 9999999.9,
+            "maxDZ" : 0.5,
             "maxDXY" : 99999999.9
         },
         "nominal" : {

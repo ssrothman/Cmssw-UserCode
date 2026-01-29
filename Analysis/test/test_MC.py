@@ -1,7 +1,7 @@
 from SRothman.Analysis.common_cmsRun import *
 
 from SRothman.Analysis.config.config import load_config
-cfg = load_config('config copy')
+cfg = load_config('config_basic')
 
 # Input source
 if input_fname is None:

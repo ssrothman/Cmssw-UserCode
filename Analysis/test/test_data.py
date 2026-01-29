@@ -1,5 +1,8 @@
 from SRothman.Analysis.common_cmsRun import *
 
+from SRothman.Analysis.config.config import load_config
+cfg = load_config('config_basic')
+
 # Input source
 if input_fname is None:
     input_fname = '/store/data/Run2018A/SingleMuon/MINIAOD/UL2018_MiniAODv2_GT36-v1/2820000/000EE25A-A8E8-1444-8A0B-0DBEBE5634FB.root'
@@ -15,7 +18,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v37', '')
 
 # Shrink NANOAOD
-from SRothman.Analysis.shrinkNano import shrink_nanoAOD_data
+from SRothman.Analysis.shrinkNano_cff import shrink_nanoAOD_data
 process = shrink_nanoAOD_data(process)
 
 # Path and EndPath definitions
@@ -23,8 +26,8 @@ process.nanoAOD_step = cms.Path(process.nanoSequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 
-from SRothman.Analysis.EventSelections_cff import setupEventSelections
-process = setupEventSelections(process, isMC=False)
+from SRothman.Analysis.setupEventSelections_cff import setupEventSelections
+process = setupEventSelections(process, "linkedObjects:muons", isMC=False, config=cfg['EventSelection'])
 # Schedule definition
 process.schedule = cms.Schedule(process.selections_path,
                                 process.nanoAOD_step,
@@ -44,7 +47,7 @@ process = nanoAOD_customizeData(process)
 #from SRothman.Analysis.setupRoccoR import setupRoccoR
 #process = setupRoccoR(process, isMC=False)
 
-from SRothman.Analysis.addParticlesTable import addParticlesTable
+from SRothman.Analysis.addParticlesTable_cff import addParticlesTable
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
     "ZMuMuMuons",
@@ -54,11 +57,12 @@ process = addParticlesTable(process,
     "ZMuMuZ", 
     singleton=True)
 
-from SRothman.Analysis.setupAK8Jets import setupAK8Jets
+from SRothman.Analysis.setupAK8Jets_cff import setupAK8Jets
 process = setupAK8Jets(process,
    isMC = False,
    skipJTB = False,
-   genOnly = False)
+   genOnly = False,
+   config=cfg)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
 process = setupSimonJets(process,
@@ -68,13 +72,30 @@ process = setupSimonJets(process,
     name = 'ChargedSimonJets',
     syst = 'NOM',
     isMC = False,
-    genOnly = False
+    genOnly = False,
+    config=cfg
 )
 
-from SRothman.EECs.setupEECRes4 import setupEECRes4_data
-process = setupEECRes4_data(process,
+from SRothman.EECs.setupEEC import setupEEC_data
+process = setupEEC_data(process,
     name = 'ChargedEECs',
     recojets = 'ChargedSimonJets',
+    whichEEC='proj',
+    config = cfg['EECproj'],
+    verbose = 0,
+)
+process = setupEEC_data(process,
+    name = 'ChargedEECs',
+    recojets = 'ChargedSimonJets',
+    whichEEC='res3',
+    config = cfg['EECres3'],
+    verbose = 0,
+)
+process = setupEEC_data(process,
+    name = 'ChargedEECs',
+    recojets = 'ChargedSimonJets',
+    whichEEC='res4',
+    config = cfg['EECres4'],
     verbose = 0,
 )
 

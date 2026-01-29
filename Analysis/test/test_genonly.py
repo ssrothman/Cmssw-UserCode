@@ -1,5 +1,8 @@
 from SRothman.Analysis.common_cmsRun import *
 
+from SRothman.Analysis.config.config import load_config
+cfg = load_config('config_genonly')
+
 # Input source
 if input_fname is None:
     input_fname = "root://eoscms.cern.ch//store/cmst3/group/exovv/precision/dyjets_herwig/dyjets_herwig_1000.root"
@@ -15,9 +18,9 @@ process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 process.DroppedEventsSimOutput_step = cms.EndPath(process.DroppedEventsSimOutput)
 
 from SRothman.Analysis.setupEventSelections_cff import setupEventSelections
-process = setupEventSelections(process, isMC=True,
+process = setupEventSelections(process, 'genParticles', isMC=True,
                                genmuons=True,
-                               skipMET=True)
+                               config=cfg['EventSelection'])
 # Schedule definition
 process.schedule = cms.Schedule(process.selections_path,
                                 process.NANOAODSIMoutput_step,
@@ -43,7 +46,7 @@ process = setupAK8Jets(process,
     skipJTB = True,
     genOnly = True,
     genParticles='genParticles',
-    applyExtraGenSelections=True)
+    config=cfg)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
 process = setupSimonJets(process,
@@ -53,6 +56,7 @@ process = setupSimonJets(process,
     name = 'SimonJets',
     isMC = True,
     syst = "NOM",
+    config=cfg,
     genOnly = True
 )
 
@@ -104,13 +108,27 @@ process = setupSimonJets(process,
 #                        thetamode="LNX",
 #                        phimode="COS2PHI")
 
-from SRothman.EECs.setupEECRes4 import setupEECRes4_data
-process = setupEECRes4_data(process,
+from SRothman.EECs.setupEEC import setupEEC_data
+process = setupEEC_data(process,
     name = 'EECs',
     recojets = 'GenSimonJets',
     verbose = 0,
-    flags = [],
-    resulttype='Array' 
+    config = cfg['EECproj'],
+    whichEEC='proj'
+)
+process = setupEEC_data(process,
+    name = 'EECs',
+    recojets = 'GenSimonJets',
+    verbose = 0,
+    config = cfg['EECres3'],
+    whichEEC='res3'
+)
+process = setupEEC_data(process,
+    name = 'EECs',
+    recojets = 'GenSimonJets',
+    verbose = 0,
+    config = cfg['EECres4'],
+    whichEEC='res4'
 )
 
 #process = setupEECRes4_data(process,
