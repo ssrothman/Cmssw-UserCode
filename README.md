@@ -23,6 +23,10 @@ Details on all of this are below
   - [SimonJets from CMSSW jets](#simonjets-from-cmssw-jets)
   - [NANO tables](#nano-tables)
 - [3. Gen-matching](#3-gen-matching)
+  - [Delta-R controls](#delta-r-controls)
+  - [Resolutions](#resolutions)
+  - [Charge matching](#charge-matching)
+  - [Flavor matching](#flavor-matching)
 - [4. EEC calculations](#4-eec-calculations)
   - [4.1 Types of EEC observables:](#41-types-of-eec-observables)
     - [4.1.1 Projected EECs (referred to throughout the code as "proj")](#411-projected-eecs-referred-to-throughout-the-code-as-proj)
@@ -375,6 +379,85 @@ CHSqgl : float # max of quark/gluon likelihood
 ```
 
 ## 3. Gen-matching
+
+The gen-matching is implemented in another backend submodule `Matching/src` and wrapped in a CMSSW producer `Matching/plugins/TrackMatchProducer.cc`. The current implementation only supports charged particles, and is best thought of as a greedy kinematic fit. The logic is as follows:
+
+```
+For each gen particle (descending in pT):
+  1. Find all reco particles with deltaR < dR_threshold(reco pT)
+  2. Identify the "best" match according to a chi^2 likelihood
+           (Delta pT/sigma pT)^2 + (delta eta/sigma_eta)^2 + (delta phi/sigma_phi)^2
+  3. Create the match, and remove the matched reco particle from contention
+```
+
+The matching algorithm is highly configurable, with the option to control the behavior differently for reco-level electrons, muons, and charged hadrons. The available parameters are:
+```python
+# ------- delta-R cone -----------
+"dr_mode" : str,  # Delta-R matching mode 
+"dr_param1" : float,  # Delta-R parameter 1
+"dr_param2" : float,  # Delta-R parameter 2
+"dr_param3" : float,  # Delta-R parameter 3
+
+
+# ------ pT resolution ----------
+"ptres_mode" : str,  # pT resolution mode ("ConstFrac", etc.)
+"ptres_param1" : float,  # pT resolution parameter 1
+"ptres_param2" : float,  # pT resolution parameter 2
+
+
+# ----- angular resolution ------
+"angres_mode" : str,  # Angular resolution mode ("TrackAng", etc.)
+"angres_param1" : float,  # Angular resolution parameter 1
+"angres_param2" : float,  # Angular resolution parameter 2
+
+# ----- charge matching --------
+"opp_charge_penalty" : float,  # Penalty for opposite charge matches
+"no_charge_penalty" : float,  # Penalty for matching with neutrals
+"charge_filter_mode" : str,  # Charge filtering mode ("Any", etc.)
+
+# ----- flavor matching --------
+"flavor_filter_mode" : str  # Flavor filtering mode ("Any", etc.)
+```
+### Delta-R controls
+
+The currently supported dr_modes are: 
+1. `"Const"` - constant delta R cone size with radius `dr_param1`. The other two parameters are ignored
+2. `"TrackPt"` - delta R cone size proportional to tracker resolution accounting for multiple scattering. The functional form is `A+B/pT`, with `A` = `dr_param1` and `B` = `dr_param2`. This is clipped to a maximum cone size given by `dr_param3`. 
+
+
+### Resolutions
+
+The resolutions in the denominator of the chi^2 in the matching are parameterized by the reco particle kinematics. The avilable modes are:
+1. `"Const"` - constant resolution given by `param1`, with `param2` ignored
+2. `"ConstFrac"` - resolution is constant fraction of the reco pT, with the fraction given by `param1`, and `param2` ignored
+3. `"TrackPt"` - resolution is parameterized according to standard track pT resolution function `param1 + param2 * pT`.
+4. `"TrackAng"` - resolution is parameterized according to standard track angular resolution function `param1 + param2 / pT`
+
+### Charge matching
+
+Three charge matching filters available:
+1. `"Any"` - allow matches independent of charge
+2. `"Magnitude"` - only allow matches with the same charge magnitude, independent of charge sign
+3. `"Sign"` - only allow matches with the same charge sign (ie both neutral, both negative, or both positive)
+
+If the charge matching filter is not strict, there is also an option to add penalty terms to the chi^2 for charge mismatches. These penalties are:
+ - `opp_charge_penalty` for matches between charged particles with opposite sign
+ - `no_charge_penalty` for matches between a charged particle and a neutral particle
+
+### Flavor matching
+
+Several flavor matching filters are avilable:
+1. `"Any"` - allow matches independent of flavor
+2. `"AnyHadron"` - allow matches to any hadron (pdgId > 100)
+3. `"AnyLepton"` - allow matches to any leptop (pdgid in [11, 13, 15])
+4. `"Electron"` - allow matches only to electrons (pdgid 11)
+5. `"Muon"` - allow matches only to muons (pdgid 13)
+6. `"ElectronMuon"` - allow matches to either electrons or muons (pdgid in [11, 13])
+7. `"Electromagnetic"` - allow matches to electrons, photons, and pi0s (pdgid in [11, 22, 111])
+8. `"AnyCharged"` - allow matches to any charged flavor
+9. `"AnyNeutral"` - allow matches to any neutral flavor
+10. `"AnyChargedHadron"` - allow matches to any charged hadron (pdgId > 100 and charge!=0)
+11. `"AnyNeutralHadron"` - allow matches to any neutral hadron (pdgId > 100 and charge==0)
 
 ## 4. EEC calculations
 
