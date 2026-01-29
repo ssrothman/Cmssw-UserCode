@@ -57,6 +57,8 @@ TrackMatchProducer = cms.EDProducer('TrackMatchProducer',
     )
 )
 
+from SRothman.Analysis.util import pyval_to_cmsval
+
 def track_matcher_from_config(config, recojets, genjets):
     return TrackMatchProducer.clone(
         recoJets = recojets,

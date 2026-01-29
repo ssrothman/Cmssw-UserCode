@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 import numpy as np
-from SRothman.Analysis.config.config import config
 
 def get_res4_calculator(config, genreco):
     edges = config['edges_gen'] if genreco == 'gen' else config['edges_reco']
