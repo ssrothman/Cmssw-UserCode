@@ -14,8 +14,8 @@
         "muDXY" : -1
     },
     "GenJets" : {
-        "minPt" : 10,
-        "maxEta" : 2.5,
+        "minPt" : 30,
+        "maxEta" : 1.7,
         "maxMuEF" : 0.8,
         "maxChEmEF" : 0.8,
         "maxNEmEF" : 0.9,
@@ -60,7 +60,7 @@
     "EECproj" : {
         "flags" : [],
         "normType" : "RAWPT",
-        "resultType" : "Unbinned",
+        "resultType" : "Array",
         "edges_reco" : {
             "R" : [0.001     , 0.00141254, 0.00199526, 
                      0.00281838, 0.00398107,
@@ -87,7 +87,7 @@
     "EECres3" : {
         "flags" : [],
         "normType" : "RAWPT",
-        "resultType" : "Unbinned",
+        "resultType" : "Array",
         "edges_reco" : {
             "R" : [0.0, 0.1, 0.2, 0.3, 0.4,
                     0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
@@ -112,7 +112,7 @@
     "EECres4" : {
         "flags" : [],
         "normType" : "RAWPT",
-        "resultType" : "Unbinned",
+        "resultType" : "Array",
         "tolerance" : 0.05,
         "tri_tolerance" : 0.05,
         "edges_reco" : {
