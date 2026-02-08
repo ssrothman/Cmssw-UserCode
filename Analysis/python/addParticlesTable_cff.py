@@ -1,3 +1,4 @@
+from bz2 import compress
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
@@ -13,6 +14,7 @@ def addParticlesTable(process,
         doc = cms.string("Basic candidate table"),
         singleton=cms.bool(singleton), 
         extension=cms.bool(False),
+        externalVariables = cms.PSet(),
         variables=cms.PSet(
             pt = Var("pt", float, doc="pt", precision=-1),
             eta = Var("eta", float, doc="eta", precision=-1),
@@ -24,5 +26,29 @@ def addParticlesTable(process,
 
     setattr(process, name+'particlesTableTask', cms.Task(getattr(process, name+'particlesTable')))
     process.schedule.associate(getattr(process, name+'particlesTableTask'))
+
+    return process
+
+def addCollectionIndices(process, 
+                         src, 
+                         name,
+                         collection):
+    setattr(process, name+"collectionIndexProducer", 
+            cms.EDProducer("LeafCandidateCollectionIndexProducer",
+                src = cms.InputTag(src),
+                searchCollection = cms.InputTag(collection),
+            )
+    )
+    setattr(process, name+'collectionIndexTask', cms.Task(getattr(process, name+"collectionIndexProducer")))
+    process.schedule.associate(getattr(process, name+'collectionIndexTask'))
+
+    getattr(process, name+"particlesTable").externalVariables.collectionIndex = cms.PSet(
+        compression = cms.string('none'),
+        doc = cms.string("Index of the particle in the original collection"),
+        mcOnly = cms.bool(False),
+        precision = cms.int32(-1),
+        src = cms.InputTag(name+"collectionIndexProducer"),
+        type = cms.string('int')
+    )
 
     return process

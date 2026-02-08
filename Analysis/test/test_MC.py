@@ -46,11 +46,16 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeMC(process)
 
-from SRothman.Analysis.addParticlesTable_cff import addParticlesTable
+from SRothman.Analysis.addParticlesTable_cff import addParticlesTable, addCollectionIndices
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
     "ZMuMuMuons",
     singleton=False)
+process = addCollectionIndices(process,
+    "ZMuMu:daughters",
+    "ZMuMuMuons",
+    "linkedObjects:muons"
+)
 process = addParticlesTable(process, 
     "ZMuMu:Z", 
     "ZMuMuZ", 

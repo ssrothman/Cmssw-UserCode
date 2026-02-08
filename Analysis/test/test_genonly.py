@@ -30,11 +30,16 @@ process.schedule = cms.Schedule(process.selections_path,
 from SRothman.Analysis.setupGenTables_cff import setupGenTables
 process = setupGenTables(process)
 
-from SRothman.Analysis.addParticlesTable_cff import addParticlesTable
+from SRothman.Analysis.addParticlesTable_cff import addParticlesTable, addCollectionIndices
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
     "ZMuMuMuons",
     singleton=False)
+process = addCollectionIndices(process,
+    "ZMuMu:daughters",
+    "ZMuMuMuons",
+    "genParticles"
+)
 process = addParticlesTable(process, 
     "ZMuMu:Z", 
     "ZMuMuZ", 

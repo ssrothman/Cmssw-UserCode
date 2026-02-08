@@ -47,11 +47,16 @@ process = nanoAOD_customizeData(process)
 #from SRothman.Analysis.setupRoccoR import setupRoccoR
 #process = setupRoccoR(process, isMC=False)
 
-from SRothman.Analysis.addParticlesTable_cff import addParticlesTable
+from SRothman.Analysis.addParticlesTable_cff import addParticlesTable, addCollectionIndices
 process = addParticlesTable(process, 
     "ZMuMu:daughters", 
     "ZMuMuMuons",
     singleton=False)
+process = addCollectionIndices(process,
+    "ZMuMu:daughters",
+    "ZMuMuMuons",
+    "linkedObjects:muons"
+)
 process = addParticlesTable(process, 
     "ZMuMu:Z", 
     "ZMuMuZ", 
