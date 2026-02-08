@@ -136,6 +136,9 @@ process = setupEEC_data(process,
     whichEEC='res4'
 )
 
+from SRothman.Analysis.addDeltaPsi import addDeltaPsi
+process = addDeltaPsi(process, 'GenSimonJets')
+
 #process = setupEECRes4_data(process,
 #    name = 'UGEECs',
 #    genMatch = '',

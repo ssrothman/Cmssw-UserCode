@@ -4,4 +4,6 @@ SimonJetTableProducer = cms.EDProducer("SimonJetTableProducer",
     src = cms.InputTag(""),
     name = cms.string(""),
     verbose = cms.int32(0),
+    extraFloats = cms.VInputTag(),
+    extraFloatNames = cms.vstring()
 )

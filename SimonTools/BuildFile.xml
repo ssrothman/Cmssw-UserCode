@@ -5,6 +5,8 @@
 <use name="rootmath"/>
 <use name="rootcore"/>
 <use name="rootgeom"/>
+<use name="fastjet"/>
+<use name="fastjet-contrib"/>
 <export>
   <lib name="1"/>
 </export>

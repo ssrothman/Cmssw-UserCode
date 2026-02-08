@@ -43,6 +43,10 @@ private:
     edm::InputTag src_;
     edm::EDGetTokenT<edm::View<simon::jet>> srcToken_;
 
+    std::vector<std::string> extraFloatNames_;
+    std::vector<edm::InputTag> extraFloatTags_;
+    std::vector<edm::EDGetTokenT<edm::ValueMap<float>>> extraFloatTokens_;
+
     int verbose_;
 };
 
@@ -50,7 +54,17 @@ SimonJetTableProducer::SimonJetTableProducer(const edm::ParameterSet& conf)
         : name_(conf.getParameter<std::string>("name")),
           src_(conf.getParameter<edm::InputTag>("src")),
           srcToken_(consumes<edm::View<simon::jet>>(src_)),
+          extraFloatNames_(conf.getParameter<std::vector<std::string>>("extraFloatNames")),
+          extraFloatTags_(conf.getParameter<std::vector<edm::InputTag>>("extraFloats")),
           verbose_(conf.getParameter<int>("verbose")){
+
+    if(extraFloatNames_.size() != extraFloatTags_.size()){
+        throw cms::Exception("Configuration") << "extraFloatNames and extraFloats must have the same size";
+    }
+
+    for(const auto& tag : extraFloatTags_){
+        extraFloatTokens_.push_back(consumes<edm::ValueMap<float>>(tag));
+    }
 
     produces<nanoaod::FlatTable>(name_);
     produces<nanoaod::FlatTable>(name_+"CHS");
@@ -62,6 +76,8 @@ void SimonJetTableProducer::fillDescriptions(edm::ConfigurationDescriptions& des
   desc.add<std::string>("name");
   desc.add<int>("verbose");
   desc.add<edm::InputTag>("src");
+  desc.add<std::vector<std::string>>("extraFloatNames", std::vector<std::string>())->setComment("Names for ValueMap<float> columns in BK table");
+  desc.add<std::vector<edm::InputTag>>("extraFloats", std::vector<edm::InputTag>())->setComment("InputTags for ValueMap<float> to add to BK table");
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -95,6 +111,15 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   std::vector<int> iCHS;
   std::vector<int> nCHS;
 
+  // Get ValueMaps
+  std::vector<edm::Handle<edm::ValueMap<float>>> extrafloats;
+  std::vector<std::vector<float>> extraFloatData(extraFloatTokens_.size());
+  for(size_t i = 0; i < extraFloatTokens_.size(); ++i){
+      edm::Handle<edm::ValueMap<float>> handle;
+      evt.getByToken(extraFloatTokens_[i], handle);
+      extrafloats.push_back(handle);
+  }
+
   unsigned iJ=0;
   for(const auto& j : *jets){
       pt.push_back(j.pt);
@@ -108,6 +133,11 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
 
       iCHS.insert(iCHS.end(), j.iCHS.begin(), j.iCHS.end());
       nCHS.push_back(j.iCHS.size());
+
+      // Get ValueMap values for this jet
+      for(size_t i = 0; i < extrafloats.size(); ++i){
+          extraFloatData[i].push_back((*extrafloats[i])[jets->refAt(iJ)]);
+      }
 
       for(const auto& p : j.particles){
           partPt.push_back(p.pt);
@@ -162,6 +192,12 @@ void SimonJetTableProducer::produce(edm::Event& evt, const edm::EventSetup& setu
   tableBK->addColumn<float>("jetMass", mass, "jet mass", nanoaod::FlatTable::FloatColumn);
   tableBK->addColumn<int>("nPart", nPart, "number of particles in jet", nanoaod::FlatTable::IntColumn);
   tableBK->addColumn<int>("nCHS", nCHS, "number of matched CHS jets", nanoaod::FlatTable::IntColumn);
+  
+  // Add ValueMap columns
+  for(size_t i = 0; i < extraFloatNames_.size(); ++i){
+      tableBK->addColumn<float>(extraFloatNames_[i], extraFloatData[i], extraFloatNames_[i], nanoaod::FlatTable::FloatColumn);
+  }
+  
   evt.put(std::move(tableBK), name_+"BK");
   if(verbose_){
     printf("made tableBK with %lu elements\n", pt.size());

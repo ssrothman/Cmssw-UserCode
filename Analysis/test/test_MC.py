@@ -119,6 +119,10 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
         verbose = 0,
     )
 
+    from SRothman.Analysis.addDeltaPsi import addDeltaPsi
+    process = addDeltaPsi(process, 'ChargedSimonJets'+suffix)
+    process = addDeltaPsi(process, 'GenChargedSimonJets'+suffix)
+
 # End of customisation functions
 
 #`process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",

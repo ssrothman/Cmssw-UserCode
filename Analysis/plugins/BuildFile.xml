@@ -19,6 +19,9 @@
 <use name="boost"/>
 <use name="SRothman/Analysis"/>
 <use name="CommonTools/CandUtils"/>
+<use name="SRothman/SimonTools"/>
+<use name="fastjet"/>
+<use name="fastjet-contrib"/>
 <Flags ADD_SUBDIR="1"/>
 <export>
   <lib name="1"/>
