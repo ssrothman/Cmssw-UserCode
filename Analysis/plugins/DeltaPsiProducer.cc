@@ -36,7 +36,7 @@ DeltaPsiProducer::DeltaPsiProducer(const edm::ParameterSet& iConfig):
     jetToken_(consumes<edm::View<simon::jet>>(jetTag_)),
     verbose_(iConfig.getParameter<int>("verbose"))
 {
-    produces<edm::ValueMap<float>>();
+    produces<std::vector<simon::SplittingInfo>>();
 }
 
 void DeltaPsiProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -50,32 +50,36 @@ void DeltaPsiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     edm::Handle<edm::View<simon::jet>> jets;
     iEvent.getByToken(jetToken_, jets);
 
-    std::vector<float> values;
-    values.reserve(jets->size());
+    auto values = std::make_unique<std::vector<simon::SplittingInfo>>();
+    values->resize(jets->size());
 
     for(size_t i = 0; i < jets->size(); ++i){
         const auto& jet = jets->at(i);
         
-        double dpsi = simon::get_dpsi(jet);
+        simon::hardest_splitting_info(
+            jet,
+            values->at(i)
+        );
         
         if(verbose_ > 0){
             std::cout << "Jet " << i 
                       << ": pt=" << jet.pt 
                       << ", eta=" << jet.eta 
                       << ", phi=" << jet.phi 
-                      << ", deltaPsi=" << dpsi 
+                      << ", deltaPsi=" << values->at(i).deltaPsi
                       << std::endl;
         }
-        
-        values.push_back(dpsi); // downcast to float because NanoAOD expects floats
     }
 
-    std::unique_ptr<edm::ValueMap<float>> out = std::make_unique<edm::ValueMap<float>>();
-    edm::ValueMap<float>::Filler filler(*out);
-    filler.insert(jets, values.begin(), values.end());
-    filler.fill();
-
-    iEvent.put(std::move(out));
+    iEvent.put(std::move(values));
 }
 
 DEFINE_FWK_MODULE(DeltaPsiProducer);
+
+// NanoAOD Simple Table Producer Template for simon::SplittingInfo
+#include "PhysicsTools/NanoAOD/interface/SimpleFlatTableProducer.h"
+
+typedef SimpleFlatTableProducer<simon::SplittingInfo> SimpleSplittingInfoFlatTableProducer;
+
+DEFINE_FWK_MODULE(SimpleSplittingInfoFlatTableProducer);
+

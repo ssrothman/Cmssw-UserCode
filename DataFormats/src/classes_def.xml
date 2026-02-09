@@ -106,4 +106,9 @@
     <class name="edm::Wrapper<simon::etaPhiCoords>"/>
     <class name="std::vector<simon::etaPhiCoords>"/>
     <class name="edm::Wrapper<std::vector<simon::etaPhiCoords>>"/>
+
+    <class name="simon::SplittingInfo"/>
+    <class name="edm::Wrapper<simon::SplittingInfo>"/>
+    <class name="std::vector<simon::SplittingInfo>"/>
+    <class name="edm::Wrapper<std::vector<simon::SplittingInfo>>"/>
 </lcgdict>

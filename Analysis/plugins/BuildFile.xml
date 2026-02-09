@@ -16,6 +16,7 @@
 <use name="RecoEcal/EgammaCoreTools"/>
 <use name="DataFormats/ParticleFlowReco"/>
 <use name="PhysicsTools/TensorFlow" />
+<use name="PhysicsTools/NanoAOD"/>
 <use name="boost"/>
 <use name="SRothman/Analysis"/>
 <use name="CommonTools/CandUtils"/>
