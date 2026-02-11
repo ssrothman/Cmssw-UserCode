@@ -1,7 +1,11 @@
 <use name="DataFormats/Common"/>
+<use name="DataFormats/Math"/>
 <use name="FWCore/Utilities"/>
 <use name="Eigen"/>
 <use name="fastjet"/>
+<use name="fastjet-contrib"/>
+<use name="roottmva"/>
+<use name="root"/>
 <export>
   <lib name="1"/>
 </export>

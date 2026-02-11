@@ -186,12 +186,20 @@ process = addDeltaPsi(process, 'GenSimonJets')
 #
 
 
-process.ShowerTreeInfoTable = cms.EDProducer("ShowerTreeInfoTableProducer",
+process.HardShowerTreeInfoTable = cms.EDProducer("ShowerTreeInfoTableProducer",
     src = cms.InputTag("genParticles"),
     jets = cms.InputTag('arbitratedGenJetsAK8'),
-    verbose = cms.int32(0)
+    verbose = cms.int32(0),
+    hardSide = cms.bool(True)
+)
+process.SoftShowerTreeInfoTable = cms.EDProducer("ShowerTreeInfoTableProducer",
+    src = cms.InputTag("genParticles"),
+    jets = cms.InputTag('arbitratedGenJetsAK8'),
+    verbose = cms.int32(0),
+    hardSide = cms.bool(False)
 )
 process.ShowerTreeInfoTask = cms.Task(
-    process.ShowerTreeInfoTable
+    process.HardShowerTreeInfoTable,
+    process.SoftShowerTreeInfoTable
 )
 process.schedule.associate(process.ShowerTreeInfoTask)

@@ -6,39 +6,85 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 def addDeltaPsi(process, jetsname):
     # Add DeltaPsiProducer
-    setattr(process, jetsname+"DeltaPsiProducer", DeltaPsiProducer.clone(
-        src = cms.InputTag(jetsname)
+    setattr(process, jetsname+"HardSideDeltaPsiProducer", DeltaPsiProducer.clone(
+        src = cms.InputTag(jetsname),
+        hardSide = cms.bool(True),
+        zcut1 = cms.double(0.1),
+        zcut2 = cms.double(0.2)
     ))
-    setattr(process, jetsname+'DeltaPsiTable', cms.EDProducer("SimpleSplittingInfoFlatTableProducer",
-        src = cms.InputTag(jetsname+"DeltaPsiProducer"),
+    setattr(process, jetsname+"SoftSideDeltaPsiProducer", DeltaPsiProducer.clone(
+        src = cms.InputTag(jetsname),
+        hardSide = cms.bool(False),
+        zcut1 = cms.double(0.1),
+        zcut2 = cms.double(0.2)
+    ))
+    setattr(process, jetsname+'HardSideDeltaPsiTable', cms.EDProducer("SimpleSplittingInfoFlatTableProducer",
+        src = cms.InputTag(jetsname+"HardSideDeltaPsiProducer"),
         cut = cms.string(""),
-        name = cms.string(jetsname+'BK'),
-        extension=cms.bool(True),
+        name = cms.string('DeltaPsiHardSide'),
+        extension=cms.bool(False),
         singleton = cms.bool(False),
         variables = cms.PSet(
-            splitting_pt1 = Var("pt1", float, precision=-1),
-            splitting_pt2 = Var("pt2", float, precision=-1),
-            splitting_pt3 = Var("pt3", float, precision=-1),
-            splitting_pt4 = Var("pt4", float, precision=-1),
-            splitting_pt5 = Var("pt5", float, precision=-1),
-            splitting_dR23 = Var('delta_R23', float, precision=-1),
-            splitting_z23 = Var('z23', float, precision=-1),
-            splitting_kt23 = Var('kt23', float, precision=-1),
-            splitting_phi23 = Var('phi23', float, precision=-1),
-            splitting_dR45 = Var('delta_R45', float, precision=-1),
-            splitting_z45 = Var('z45', float, precision=-1),
-            splitting_kt45 = Var('kt45', float, precision=-1),
-            splitting_phi45 = Var('phi45', float, precision=-1),
-            splitting_deltaPsi = Var('deltaPsi', float, precision=-1)
+            pt1 = Var("split123.p1.pt()", float, precision=-1),
+            pt4 = Var("split456.p1.pt()", float, precision=-1),
+            pdgId1 = Var("split123.pdgId1", int),
+            pdgId2 = Var("split123.pdgId2", int),
+            pdgId3 = Var("split123.pdgId3", int),
+            pdgId4 = Var("split456.pdgId1", int),
+            pdgId5 = Var("split456.pdgId2", int),
+            pdgId6 = Var("split456.pdgId3", int),
+            deltaR23 = Var('split123.deltaR', float, precision=-1),
+            deltaR56 = Var('split456.deltaR', float, precision=-1),
+            z23 = Var('split123.z', float, precision=-1),
+            z56 = Var('split456.z', float, precision=-1),
+            kt23 = Var('split123.kt', float, precision=-1),
+            kt56 = Var('split456.kt', float, precision=-1),
+            deltaPsi_type1 = Var('deltaPsi_type1()', float, precision=-1),
+            deltaPsi_type2 = Var('deltaPsi_type2()', float, precision=-1),
+            deltaPsi_type3 = Var('deltaPsi_type3()', float, precision=-1),
+            deltaPsi_type4 = Var('deltaPsi_type4()', float, precision=-1),
+            psi123_type1 = Var('split123.psi_type1()', float, precision=-1),
+            psi456_type1 = Var('split456.psi_type1()', float, precision=-1),
         ),
     ))
+    setattr(process, jetsname+'SoftSideDeltaPsiTable', cms.EDProducer("SimpleSplittingInfoFlatTableProducer",
+        src = cms.InputTag(jetsname+"SoftSideDeltaPsiProducer"),
+        cut = cms.string(""),
+        name = cms.string('DeltaPsiSoftSide'),
+        extension=cms.bool(False),
+        singleton = cms.bool(False),
+        variables = cms.PSet(
+            pt1 = Var("split123.p1.pt()", float, precision=-1),
+            pt4 = Var("split456.p1.pt()", float, precision=-1),
+            pdgId1 = Var("split123.pdgId1", int),
+            pdgId2 = Var("split123.pdgId2", int),
+            pdgId3 = Var("split123.pdgId3", int),
+            pdgId4 = Var("split456.pdgId1", int),
+            pdgId5 = Var("split456.pdgId2", int),
+            pdgId6 = Var("split456.pdgId3", int),
+            deltaR23 = Var('split123.deltaR', float, precision=-1),
+            deltaR56 = Var('split456.deltaR', float, precision=-1),
+            z23 = Var('1-split123.z', float, precision=-1),
+            z56 = Var('split456.z', float, precision=-1),
+            kt23 = Var('split123.kt', float, precision=-1),
+            kt56 = Var('split456.kt', float, precision=-1),
+            deltaPsi_type1 = Var('deltaPsi_type1()', float, precision=-1),
+            deltaPsi_type2 = Var('deltaPsi_type2()', float, precision=-1),
+            deltaPsi_type3 = Var('deltaPsi_type3()', float, precision=-1),
+            deltaPsi_type4 = Var('deltaPsi_type4()', float, precision=-1),
+            psi123_type1 = Var('split123.psi_type1()', float, precision=-1),
+            psi456_type1 = Var('split456.psi_type1()', float, precision=-1),
+        ),
+    ))
+
     
     setattr(process, jetsname+"DeltaPsiTask", cms.Task(
-        getattr(process, jetsname+"DeltaPsiProducer"),
-        getattr(process, jetsname+'DeltaPsiTable')
+        getattr(process, jetsname+"HardSideDeltaPsiProducer"),
+        getattr(process, jetsname+'HardSideDeltaPsiTable'),
+        getattr(process, jetsname+"SoftSideDeltaPsiProducer"),
+        getattr(process, jetsname+'SoftSideDeltaPsiTable')
     ))
     process.schedule.associate(getattr(process, jetsname+"DeltaPsiTask"))
-    
     
     #getattr(process, jetsname+"Table").extraFloatNames.append("DeltaPsi")
     #getattr(process, jetsname+"Table").extraFloats.append(cms.InputTag(jetsname+"DeltaPsiProducer"))
