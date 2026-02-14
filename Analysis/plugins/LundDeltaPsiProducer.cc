@@ -15,10 +15,10 @@
 #include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/SimonTools/src/lund2.h"
 
-class DeltaPsiProducer : public edm::stream::EDProducer<>{
+class LundDeltaPsiProducer : public edm::stream::EDProducer<>{
 public:
-    explicit DeltaPsiProducer(const edm::ParameterSet&);
-    ~DeltaPsiProducer() override { }
+    explicit LundDeltaPsiProducer(const edm::ParameterSet&);
+    ~LundDeltaPsiProducer() override { }
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -34,7 +34,7 @@ private:
     int verbose_;
 };
 
-DeltaPsiProducer::DeltaPsiProducer(const edm::ParameterSet& iConfig):
+LundDeltaPsiProducer::LundDeltaPsiProducer(const edm::ParameterSet& iConfig):
     jetTag_(iConfig.getParameter<edm::InputTag>("src")),
     jetToken_(consumes<edm::View<simon::jet>>(jetTag_)),
     hardSide_(iConfig.getParameter<bool>("hardSide")),
@@ -45,7 +45,7 @@ DeltaPsiProducer::DeltaPsiProducer(const edm::ParameterSet& iConfig):
     produces<std::vector<simon::DoubleSplittingInfo>>();
 }
 
-void DeltaPsiProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void LundDeltaPsiProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("src")->setComment("Input jet collection");
     desc.add<int>("verbose", 0)->setComment("Verbosity level");
@@ -55,7 +55,7 @@ void DeltaPsiProducer::fillDescriptions(edm::ConfigurationDescriptions& descript
     descriptions.addWithDefaultLabel(desc);
 }
 
-void DeltaPsiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
+void LundDeltaPsiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::Handle<edm::View<simon::jet>> jets;
     iEvent.getByToken(jetToken_, jets);
 
@@ -86,7 +86,7 @@ void DeltaPsiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     iEvent.put(std::move(values));
 }
 
-DEFINE_FWK_MODULE(DeltaPsiProducer);
+DEFINE_FWK_MODULE(LundDeltaPsiProducer);
 
 // NanoAOD Simple Table Producer Template for simon::DoubleSplittingInfo
 #include "PhysicsTools/NanoAOD/interface/SimpleFlatTableProducer.h"

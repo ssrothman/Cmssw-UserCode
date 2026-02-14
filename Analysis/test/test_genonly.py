@@ -136,8 +136,8 @@ process = setupEEC_data(process,
     whichEEC='res4'
 )
 
-from SRothman.Analysis.addDeltaPsi import addDeltaPsi
-process = addDeltaPsi(process, 'GenSimonJets')
+from SRothman.Analysis.addDeltaPsi import addLundDeltaPsi
+process = addLundDeltaPsi(process, 'GenSimonJets')
 
 #process = setupEECRes4_data(process,
 #    name = 'UGEECs',
@@ -185,21 +185,5 @@ process = addDeltaPsi(process, 'GenSimonJets')
 #)
 #
 
-
-process.HardShowerTreeInfoTable = cms.EDProducer("ShowerTreeInfoTableProducer",
-    src = cms.InputTag("genParticles"),
-    jets = cms.InputTag('arbitratedGenJetsAK8'),
-    verbose = cms.int32(0),
-    hardSide = cms.bool(True)
-)
-process.SoftShowerTreeInfoTable = cms.EDProducer("ShowerTreeInfoTableProducer",
-    src = cms.InputTag("genParticles"),
-    jets = cms.InputTag('arbitratedGenJetsAK8'),
-    verbose = cms.int32(0),
-    hardSide = cms.bool(False)
-)
-process.ShowerTreeInfoTask = cms.Task(
-    process.HardShowerTreeInfoTable,
-    process.SoftShowerTreeInfoTable
-)
-process.schedule.associate(process.ShowerTreeInfoTask)
+from SRothman.Analysis.addDeltaPsi import addGenDeltaPsi
+process = addGenDeltaPsi(process, 'genParticles', 'arbitratedGenJetsAK8')
