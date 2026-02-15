@@ -139,6 +139,9 @@ process = setupEEC_data(process,
 from SRothman.Analysis.addDeltaPsi import addLundDeltaPsi
 process = addLundDeltaPsi(process, 'GenSimonJets')
 
+from SRothman.Analysis.addDeltaPsi import addGenDeltaPsi
+process = addGenDeltaPsi(process, 'genParticles', 'arbitratedGenJetsAK8')
+
 #process = setupEECRes4_data(process,
 #    name = 'UGEECs',
 #    genMatch = '',
@@ -184,6 +187,3 @@ process = addLundDeltaPsi(process, 'GenSimonJets')
 #    isMC=False
 #)
 #
-
-from SRothman.Analysis.addDeltaPsi import addGenDeltaPsi
-process = addGenDeltaPsi(process, 'genParticles', 'arbitratedGenJetsAK8')
