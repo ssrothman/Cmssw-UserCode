@@ -41,6 +41,7 @@ def _createDeltaPsiTable(deltapsi, tablename):
             deltaPsi_type4 = Var('deltaPsi_type4()', float, precision=-1),
             psi123_type1 = Var('split123.psi_type1()', float, precision=-1),
             psi456_type1 = Var('split456.psi_type1()', float, precision=-1),
+            C2 = Var('C2()', float, precision=-1)
         ),
     )
 
