@@ -35,10 +35,10 @@
 #include <cmath>
 
 template <typename T>
-class SimonJetProducerT : public edm::stream::EDProducer<> {
+class EventJetProducerT : public edm::stream::EDProducer<> {
 public:
-    explicit SimonJetProducerT(const edm::ParameterSet&);
-    ~SimonJetProducerT() override {}
+    explicit EventJetProducerT(const edm::ParameterSet&);
+    ~EventJetProducerT() override {}
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
@@ -59,7 +59,7 @@ private:
 };
 
 template <typename T>
-SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf) :
+EventJetProducerT<T>::EventJetProducerT(const edm::ParameterSet& conf) :
           selector_(conf.getParameter<edm::ParameterSet>("selector")),
           jetSrc_(conf.getParameter<edm::InputTag>("jetSrc")),
           jetSrcToken_(consumes<edm::View<T>>(jetSrc_)),
@@ -74,7 +74,7 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf) :
 }
 
 template <typename T>
-void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void EventJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
 
   edm::ParameterSetDescription selectorDesc;
@@ -93,10 +93,10 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
 }
 
 template <typename T>
-void SimonJetProducerT<T>::produce(edm::Event& evt, 
+void EventJetProducerT<T>::produce(edm::Event& evt, 
                                    const edm::EventSetup& setup) {
     if(verbose_){
-        printf("top of SimonJetProducerT<T>::produce()\n");
+        printf("top of EventJetProducerT<T>::produce()\n");
     }
     edm::Handle<edm::View<T>> jets;
     evt.getByToken(jetSrcToken_, jets);
@@ -109,7 +109,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
         evt.getByToken(CHSsrcToken_, CHSjets);
     }
 
-    std::cout << "SimonJetProducer::produce called" << std::endl;    
+    std::cout << "EventJetProducer::produce called" << std::endl;    
     auto result = std::make_unique<std::vector<simon::jet>>();
     simon::jet evt_jet;
         
@@ -188,8 +188,8 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
     }
 }  // end produce()
 
-typedef SimonJetProducerT<pat::Jet> PatSimonJetProducer;
-typedef SimonJetProducerT<reco::GenJet> GenSimonJetProducer;
+typedef EventJetProducerT<pat::Jet> PatEventJetProducer;
+typedef EventJetProducerT<reco::GenJet> GenEventJetProducer;
 
-DEFINE_FWK_MODULE(PatSimonJetProducer);
-DEFINE_FWK_MODULE(GenSimonJetProducer);
+DEFINE_FWK_MODULE(PatEventJetProducer);
+DEFINE_FWK_MODULE(GenEventJetProducer);

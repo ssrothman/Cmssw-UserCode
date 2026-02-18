@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from SRothman.CustomJets.setupPuppiJets import *
 from SRothman.CustomJets.setupSimonJets import *
+from SRothman.CustomJets.setupEventJets import *
 from SRothman.CustomJets.setupShadowJets import *
 from SRothman.CustomJets.setupFullEventJets import *
 from SRothman.CustomJets.setupFixedConeJets import *
@@ -27,6 +28,13 @@ def setupCustomJets(process, verbose=False, ak8 = False,
     process = setupSimonJets(process, jets, genJets,
                              CHSjets, True, 'ZMuMu',
                              'ChargedSimonJets', ak8, isMC=isMC)
+   
+    process = setupEventJets(process, jets, genJets,
+                             CHSjets, False, 'ZMuMu',
+                             'EventJets', ak8, isMC=isMC)
+    process = setupEventJets(process, jets, genJets,
+                             CHSjets, True, 'ZMuMu',
+                             'ChargedEventJets', ak8, isMC=isMC)
 
     process = setupFullEventJets(process, parts, genParts,
                                  False, 'ZMuMu',
