@@ -44,7 +44,7 @@ Analysis/production/condor/working/*
 boost_1_82_0/
 Analysis/production/crab.log
 Analysis/production/crab/production_tag.py
-Analysis/python/config/config.jsonc
+Analysis/python/config/config.json
 Analysis/python/config/dump
 Analysis/test/output
 CustomJets/plugins/.SimonJetProducer.cc.swp

@@ -32,7 +32,6 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <cmath>
 
 template <typename T>
 class SimonJetProducerT : public edm::stream::EDProducer<> {
@@ -47,9 +46,6 @@ private:
     edm::InputTag jetSrc_;
     edm::EDGetTokenT<edm::View<T>> jetSrcToken_;
 
-    edm::InputTag pfCand_;
-    edm::EDGetTokenT<edm::View<pat::PackedCandidate>> pfCandToken_;
-
     edm::InputTag CHSsrc_;
     edm::EDGetTokenT<edm::View<T>> CHSsrcToken_;
     bool addCHSindex_;
@@ -63,8 +59,6 @@ SimonJetProducerT<T>::SimonJetProducerT(const edm::ParameterSet& conf) :
           selector_(conf.getParameter<edm::ParameterSet>("selector")),
           jetSrc_(conf.getParameter<edm::InputTag>("jetSrc")),
           jetSrcToken_(consumes<edm::View<T>>(jetSrc_)),
-	  pfCand_(conf.getParameter<edm::InputTag>("pfCandidates")),
-          pfCandToken_(consumes<edm::View<pat::PackedCandidate>>(pfCand_)),
           CHSsrc_(conf.getParameter<edm::InputTag>("CHSsrc")),
           CHSsrcToken_(consumes<edm::View<T>>(CHSsrc_)),
           addCHSindex_(conf.getParameter<bool>("addCHSindex")),
@@ -83,7 +77,6 @@ void SimonJetProducerT<T>::fillDescriptions(edm::ConfigurationDescriptions& desc
 
   desc.add<edm::InputTag>("jetSrc");
   desc.add<edm::InputTag>("CHSsrc");
-  desc.add<edm::InputTag>("pfCandidates");
   desc.add<bool>("addCHSindex");
   desc.add<double>("CHSmatchDR");
 
@@ -101,87 +94,55 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
     edm::Handle<edm::View<T>> jets;
     evt.getByToken(jetSrcToken_, jets);
 
-    edm::Handle<edm::View<pat::PackedCandidate>> candidates;
-    evt.getByToken(pfCandToken_, candidates);
-
     edm::Handle<edm::View<T>> CHSjets;
     if(addCHSindex_){
         evt.getByToken(CHSsrcToken_, CHSjets);
     }
 
-    std::cout << "SimonJetProducer::produce called" << std::endl;    
     auto result = std::make_unique<std::vector<simon::jet>>();
-    simon::jet evt_jet;
-        
-    size_t mu1 = 999999;
-    size_t mu2 = 999999;
-    float pt1 = -1.0;
-    float pt2 = -1.0;
-    float zpt = 0.0;
 
-    for (size_t i = 0; i < candidates->size(); ++i) {
-       const auto& cand = candidates->at(i);
-       if (std::abs(cand.pdgId()) != 13) continue;
+    for(unsigned iJet=0; iJet < jets->size(); ++iJet){//for each jet
+        const auto& j = jets->at(iJet);
 
-       float pt = cand.pt();
-       if (pt > pt1) {
-           pt2 = pt1;
-           mu2 = mu1;
-           pt1 = pt;
-           mu1 = i;
-       } else if (pt > pt2) {
-           pt2 = pt;
-           mu2 = i;
-       }
-    }
+        const auto& constituents = j.getJetConstituents();
 
+        simon::jet ans;
+        ans.pt = j.pt();
+        ans.eta = j.eta();
+        ans.phi = j.phi();
+        ans.mass = j.mass();
+        ans.iJet = iJet;
 
+        if(addCHSindex_){
+            for(unsigned iCHS=0; iCHS < CHSjets->size(); ++iCHS){
+                const auto& jCHS = CHSjets->at(iCHS);
+                if(deltaR(j, jCHS) < CHSmatchDR_){//if the CHS jet matches the jet
+                    ans.iCHS.push_back(iCHS);
+                }
+            }
+            if(ans.iCHS.empty()){
+                ans.iCHS.push_back(99999999);
+            }
+        }
 
-    if (mu1 == 999999 || mu2 == 999999) {
-    evt_jet.pt = 1;
-    std::cout << "Fewer than two muons in event, setting jet pt to one." << std::endl;
-    }
-    else {
-    const auto& cand1 = candidates->at(mu1);
-    const auto& cand2 = candidates->at(mu2);
-    evt_jet.pt = std::sqrt(std::pow((cand1.pt()*std::cos(cand1.phi())+cand2.pt()*std::cos(cand2.phi())), 2)+std::pow((cand1.pt()*std::sin(cand1.phi())+cand2.pt()*std::sin(cand2.phi())),2));
-    std::cout << "----------The zpt for this event (PRE BUILDING) is " << evt_jet.pt << "-------------" << std::endl;
-    }
-//   cand1 = candidates->at(mu1);
-//   cand2 = candidates->at(mu2);
-//   evt_jet.pt = std::sqrt(std::pow((cand1.pt()*std::cos(cand1.phi())+cand2.pt()*std::cos(cand2.phi())), 2)+std::pow((cand1.pt()*std::sin(cand1.phi())+cand2.pt()*std::sin(cand2.phi())),2));
-//   std::cout << "----------The zpt for this event (PRE BUILDING) is " << evt_jet.pt << "-------------" << std::endl;
-//   if (mu1 == 999999 || mu2 == 999999) {
-//   	evt_jet.pt = 0;
-//       std::cout << "Fewer than two muons in event, setting jet pt to zero." << std::endl;
-//   }
-    evt_jet.eta = 0;
-    evt_jet.phi = 0;
-    evt_jet.mass = 1;
-    evt_jet.iJet = 0;
+        selector_.buildJet(constituents, ans);
 
-    std::vector<edm::Ptr<pat::PackedCandidate>> chargedPtrs;
-    chargedPtrs.reserve(candidates->size());
-    for (size_t i = 0; i < candidates->size(); ++i) {
-        const auto& cand = candidates->at(i);
-        if (cand.charge() == 0) continue;
-	if (i == mu1 || i == mu2) continue;
-	if (cand.pt() < 2) continue;
-        chargedPtrs.emplace_back(candidates->ptrAt(i));
-    }
+        if (verbose_){
+            printf("\tjet: (%f, %f, %f)\n", ans.pt, ans.eta, ans.phi);
+        }
 
-    selector_.buildJet(chargedPtrs, evt_jet);
-    std::cout << "+++++++++++The zpt for this event (POST BUILDING) is " << evt_jet.pt << "+++++++++" << std::endl;
-    printf("###################################\n");
-    printf("evt_jet is built\n");
-    printf("###################################\n");
-    result->clear();
-    if (evt_jet.pt >= 40) {
-        result->push_back(std::move(evt_jet));
-    } else {
-        printf("Skipping evt_jet with zpt = %.2f (< 40)\n", evt_jet.pt);
-    }
-    printf("result has %zu entries\n", result->size());
+        if(verbose_){
+            printf("rawPt = %f\n", ans.rawpt);
+            printf("pt = %f\n", ans.pt);
+            printf("sumpt = %f\n", ans.sumpt);
+        }
+
+        result->push_back(std::move(ans));
+
+        if(verbose_){
+            printf("pushed back\n");
+        }
+    }  // end for jet
     evt.put(std::move(result));
     if(verbose_){
         printf("put into event\n");

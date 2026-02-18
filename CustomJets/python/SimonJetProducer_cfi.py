@@ -13,7 +13,7 @@ PatSimonJetProducer = cms.EDProducer("PatSimonJetProducer",
     ),
 
     jetSrc = cms.InputTag("selectedPatJets"),
-    pfCandidates = cms.InputTag("packedPFCandidates"),
+
     CHSsrc = cms.InputTag(""),
     addCHSindex = cms.bool(False),
     CHSmatchDR = cms.double(0.4),
@@ -28,7 +28,6 @@ GenSimonJetProducer = cms.EDProducer("GenSimonJetProducer",
     ),
 
     jetSrc = cms.InputTag("ak4GenJetsNoNu"),
-    pfCandidates = cms.InputTag("packedPFCandidates"),
 
     CHSsrc = cms.InputTag(""),
     addCHSindex = cms.bool(False),
