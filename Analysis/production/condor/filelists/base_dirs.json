@@ -64,30 +64,50 @@
 
 
 
-        "NEW_herwig_glu" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig",
-        "NEW_herwig_glu_gg" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig_gg",
-        "NEW_herwig_glu_nospin_5X" :{
+        "OLD_herwig_glu_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig",
+        "OLD_herwig_glu_gg_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig_gg",
+        "OLD_herwig_glu_nospin_5X_EOS" :{
             "path" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig_nospin",
             "maxindex" : 6000
         },
-        "NEW_herwig_glu_nospin_6X" :{
+        "OLD_herwig_glu_nospin_6X_EOS" :{
             "path" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig_nospin",
-            "minindex" : 6000
+            "minindex" : 6000,
+            "maxindex" : 8000
         },
-        "NEW_herwig_glu_nospin_gg" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig_nospin_gg",
+        "OLD_herwig_glu_nospin_8X_EOS" :{
+            "path" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig_nospin",
+            "minindex" : 8000
+        },
+        "OLD_herwig_glu_nospin_gg_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_herwig_nospin_gg",
 
-        "NEW_pythia_glu" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia",
-        "NEW_pythia_glu_gg" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia_gg",
-        "NEW_pythia_glu_nospin" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia_nospin",
-        "NEW_pythia_glu_nospin_gg" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia_nospin_gg",
+        "OLD_pythia_glu_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia",
+        "OLD_pythia_glu_gg_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia_gg",
+        "OLD_pythia_glu_nospin_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia_nospin",
+        "OLD_pythia_glu_nospin_gg_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyglu_pythia_nospin_gg",
         
-        "NEW_herwig_q" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig",
-        "NEW_herwig_q_nogg" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig_nogg",
-        "NEW_herwig_q_nospin" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig_nospin",
-        "NEW_herwig_q_nospin_nogg" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig_nospin_nogg",
+        "OLD_herwig_q_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig",
+        "OLD_herwig_q_nogg_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig_nogg",
+        "OLD_herwig_q_nospin_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig_nospin",
+        "OLD_herwig_q_nospin_nogg_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyq_herwig_nospin_nogg",
 
-        "NEW_pythia_q" : "/eos/cms/store/user/pharris/dy_TeV/dyq_pythia",
-        "NEW_pythia_q_nospin" : "/eos/cms/store/user/pharris/dy_TeV/dyq_pythia_nospin"
-        
+        "OLD_pythia_q_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyq_pythia",
+        "OLD_pythia_q_nospin_EOS" : "/eos/cms/store/user/pharris/dy_TeV/dyq_pythia_nospin",
+
+
+        "FINAL_herwig_glu_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig",
+        "FINAL_herwig_glu_TeV_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig_gg",
+        "FINAL_herwig_glu_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig_nospin",
+        "FINAL_herwig_glu_TeV_nospin_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig_nospin_gg",
+        "FINAL_pythia_glu_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia",
+        "FINAL_pythia_glu_TeV_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia_gg",
+        "FINAL_pythia_glu_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia_nospin",
+        "FINAL_pythia_glu_TeV_nospin_gg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyglu_pythia_nospin_gg",
+        "FINAL_herwig_q_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig",
+        "FINAL_herwig_q_TeV_nogg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig_nogg",
+        "FINAL_herwig_q_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig_nospin",
+        "FINAL_herwig_q_TeV_nospin_nogg" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_herwig_nospin_nogg",
+        "FINAL_pythia_q_TeV" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_pythia",
+        "FINAL_pythia_q_TeV_nospin" : "/store/cmst3/group/exovv/precision/dy_TeV/dyq_pythia_nospin"
     }
 }
