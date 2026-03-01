@@ -12,13 +12,13 @@ def setupAK8GenJets(process,
         cutstring += 'pt > %g && '%config['minPt']
     if config['maxEta'] > 0:
         cutstring += 'abs(eta) < %g && '%config['maxEta']
-    if config['maxMuEF'] < 1:
+    if config['maxMuEF'] > 0:
         cutstring += 'muonEnergy/(pt*cosh(eta)) < %g && '%config['maxMuEF']
-    if config['maxChEmEF'] < 1:
+    if config['maxChEmEF'] > 0:
         cutstring += 'chargedEmEnergy/(pt*cosh(eta)) < %g && '%config['maxChEmEF']
-    if config['maxNEmEF'] < 1:
+    if config['maxNEmEF'] > 0:
         cutstring += 'neutralEmEnergy/(pt*cosh(eta)) < %g && '%config['maxNEmEF']
-    if config['maxNHadEF'] < 1:
+    if config['maxNHadEF'] > 0:
         cutstring += 'neutralHadronEnergy/(pt*cosh(eta)) < %g && '%config['maxNHadEF']
     if config['minConstituents'] > 0:
         cutstring += 'numberOfDaughters >= %d && '%config['minConstituents']
