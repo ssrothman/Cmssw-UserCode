@@ -39,14 +39,14 @@
         "Electrons" : {
             "dr_mode" : "TrackPt",
             "dr_param1" : 0.01,
-            "dr_param2" : 0.05,
-            "dr_param3" : 0.1,
-            "ptres_mode" : "ConstFrac",
-            "ptres_param1" : 0.02,
-            "ptres_param2" : 0.0,
+            "dr_param2" : 0.01,
+            "dr_param3" : 0.05,
+            "ptres_mode" : "TrackPt",
+            "ptres_param1" : 0.015,
+            "ptres_param2" : 0.005,
             "angres_mode" : "TrackAng",
             "angres_param1" : 0.0003,
-            "angres_param2" : 0.0015,
+            "angres_param2" : 0.003,
             "opp_charge_penalty" : 3.0,
             "no_charge_penalty" : 0.0,
             "charge_filter_mode" : "Sign",
@@ -55,14 +55,14 @@
         "Muons" : {
             "dr_mode" : "TrackPt",
             "dr_param1" : 0.01,
-            "dr_param2" : 0.05,
-            "dr_param3" : 0.1,
-            "ptres_mode" : "ConstFrac",
-            "ptres_param1" : 0.02,
-            "ptres_param2" : 0.0,
+            "dr_param2" : 0.01,
+            "dr_param3" : 0.05,
+            "ptres_mode" : "TrackPt",
+            "ptres_param1" : 0.015,
+            "ptres_param2" : 0.005,
             "angres_mode" : "TrackAng",
             "angres_param1" : 0.0003,
-            "angres_param2" : 0.0015,
+            "angres_param2" : 0.003,
             "opp_charge_penalty" : 3.0,
             "no_charge_penalty" : 0.0,
             "charge_filter_mode" : "Sign",
@@ -71,14 +71,14 @@
         "ChargedHadrons" : {
             "dr_mode" : "TrackPt",
             "dr_param1" : 0.01,
-            "dr_param2" : 0.05,
-            "dr_param3" : 0.1,
-            "ptres_mode" : "ConstFrac",
-            "ptres_param1" : 0.02,
-            "ptres_param2" : 0.0,
+            "dr_param2" : 0.01,
+            "dr_param3" : 0.05,
+            "ptres_mode" : "TrackPt",
+            "ptres_param1" : 0.015,
+            "ptres_param2" : 0.005,
             "angres_mode" : "TrackAng",
             "angres_param1" : 0.0003,
-            "angres_param2" : 0.0015,
+            "angres_param2" : 0.003,
             "opp_charge_penalty" : 3.0,
             "no_charge_penalty" : 0.0,
             "charge_filter_mode" : "Sign",
@@ -98,8 +98,8 @@
             "MUthresholds" : [0.0, 0.0, 0.0],
             "HADCHthresholds" : [0.0, 0.0, 0.0],
             "minFromPV" : 0,
-            "minPuppiWt" : 0.5,
-            "maxDZ" : 0.5,
+            "minPuppiWt" : 0.99,
+            "maxDZ" : 0.2,
             "maxDXY" : 99999999.9
         },
         "nominal" : {
@@ -113,10 +113,10 @@
             "MUthreshold" : "NOM",
             "HADCHthreshold" : "NOM",
             "applyPuppiCut" : true,
-            "applyFromPVCut" : true,
+            "applyFromPVCut" : false,
             "applyDZCut" : true,
-            "applyDXYCut" : true,
-            "applyPuppi" : true,
+            "applyDXYCut" : false,
+            "applyPuppi" : false,
             "onlyCharged" : true
         },
         "variations" : {
@@ -141,8 +141,8 @@
             "TRK_EFF" : {
                 "trkDrop" : "ON"
             },
-            "NO_PUPPI" : {
-                "applyPuppi" : false
+            "YES_PUPPI" : {
+                "applyPuppi" : true
             },
             "NO_PUPPICUT" : {
                 "applyPuppiCut" : false
@@ -163,10 +163,10 @@
         "normType" : "RAWPT",
         "resultType" : "Unbinned",
         "edges_reco" : {
-            "R" : []
+            "R" : [0.0, 1.0]
         },
         "edges_gen" : {
-            "R" : []
+            "R" : [0.0, 1.0]
         }
     },
     "EECres3" : {
@@ -174,14 +174,14 @@
         "normType" : "RAWPT",
         "resultType" : "Unbinned",
         "edges_reco" : {
-            "R" : [],
-            "r" : [],
-            "c" : []
+            "R" : [0.0, 1.0],
+            "r" : [0.0, 1.0],
+            "c" : [0.0, 1.0]
         },
         "edges_gen" : {
-            "R" : [],
-            "r" : [],
-            "c" : []
+            "R" : [0.0, 1.0],
+            "r" : [0.0, 1.0],
+            "c" : [0.0, 1.0]
         }
     },
     "EECres4" : {
@@ -191,22 +191,22 @@
         "tolerance" : 0.05,
         "tri_tolerance" : 0.05,
         "edges_reco" : {
-            "R" : [],
-            "r_dipole" : [],
-            "c_dipole" : [],
-            "r_tee" : [],
-            "c_tee" : [],
-            "r_triangle" : [], 
-            "c_triangle" : []
+            "R" : [0.0, 1.0],
+            "r_dipole" : [0.0, 1.0],
+            "c_dipole" : [0.0, 1.0],
+            "r_tee" : [0.0, 1.0],
+            "c_tee" : [0.0, 1.0],
+            "r_triangle" : [0.0, 1.0], 
+            "c_triangle" : [0.0, 1.0]
         },
         "edges_gen" : {
-            "R" : [],
-            "r_dipole" : [],
-            "c_dipole" : [],
-            "r_tee" : [],
-            "c_tee" : [],
-            "r_triangle" : [], 
-            "c_triangle" : []
+            "R" : [0.0, 1.0],
+            "r_dipole" : [0.0, 1.0],
+            "c_dipole" : [0.0, 1.0],
+            "r_tee" : [0.0, 1.0],
+            "c_tee" : [0.0, 1.0],
+            "r_triangle" : [0.0, 1.0], 
+            "c_triangle" : [0.0, 1.0]
         }
     }
 }
