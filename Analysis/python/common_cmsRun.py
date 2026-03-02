@@ -9,6 +9,11 @@ from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 from Configuration.Eras.Modifier_run2_nanoAOD_106Xv2_cff import run2_nanoAOD_106Xv2
 
 RUNNING_CRAB = True
+#configname = 'config_genonly'
+configname = 'config'
+
+import SRothman.Analysis.config.config
+SRothman.Analysis.config.config.SETUP_CONFIG(configname)
 
 if not RUNNING_CRAB:
     from FWCore.ParameterSet.VarParsing import VarParsing
