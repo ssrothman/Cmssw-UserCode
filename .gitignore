@@ -45,3 +45,11 @@ Analysis/production/condor/filelists/*.txt
 boost_1_82_0/
 
 .vscode/*
+Analysis/production/crab.log
+Analysis/production/crab/production_tag.py
+Analysis/python/config/config.json
+Analysis/python/config/dump
+Analysis/test/output
+CustomJets/plugins/.SimonJetProducer.cc.swp
+Analysis/production/crab/production_tag.py
+Analysis/production/crab/submit.py
