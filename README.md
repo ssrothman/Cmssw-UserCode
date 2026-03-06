@@ -685,6 +685,8 @@ edit submit.py to point to an allocation you have at some T2 or T3
 
 create a .yaml file with the datasets, config files, global tag, and crab config you want to use
 
+If it fails to make a tarball, check boost/libs for any files/directories with special characters.
+
 run
 ```bash
 > python submit.py -y <your yaml>
