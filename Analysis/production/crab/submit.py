@@ -104,10 +104,10 @@ if __name__ == '__main__':
                     raise ValueError("Unrecognized splitting mode: {}".format(splitting_mode))
                 this_config.Data.splitting = splitting_mode
 
-                if not isMC:
-                        this_config.Data.lumiMask = info.get('lumimask', None)
-                else:
-                        this_config.Data.lumiMask = ''
+                #if not isMC:
+                this_config.Data.lumiMask = info.get('lumimask', None)
+                #else:
+                #        this_config.Data.lumiMask = ''
 
                 unitsPerJob = info.get("unitsPerJob", None)
                 if unitsPerJob is not None:
