@@ -158,6 +158,9 @@ def get_table(config, name, whichEEC, what):
     else:
         tablename = '%s%s'%(capswhat, name)
 
+    if 'maxOrder' in config:
+        tableProducer.maxOrder = config['maxOrder']
+
     return tableProducer.clone(
         EECs = "%s:%s"%(name, what),
         name = tablename
