@@ -121,6 +121,7 @@ for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
 
     from SRothman.Analysis.addDeltaPsi import addLundDeltaPsi
     process = addLundDeltaPsi(process, 'ChargedSimonJets'+suffix)
+    process = addLundDeltaPsi(process, 'GenChargedSimonJets'+suffix)
 
 # End of customisation functions
 
