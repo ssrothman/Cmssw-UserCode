@@ -54,3 +54,4 @@ Analysis/test/output
 CustomJets/plugins/.SimonJetProducer.cc.swp
 Analysis/production/crab/production_tag.py
 Analysis/production/crab/submit.py
+Analysis/production/crab/Lumis*/*
