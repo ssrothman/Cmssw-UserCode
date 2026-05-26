@@ -115,7 +115,7 @@ int GenShowerSplittingsProducer::findJetInitiator(const std::vector<ShowerTreeNo
     }
 
     if (hardest < 0){
-        throw std::runtime_error("No initial-state particle found near the hardest jet");
+        return -1;
     }
 
     return hardest;
@@ -200,58 +200,60 @@ void GenShowerSplittingsProducer::produce(edm::Event& iEvent, const edm::EventSe
         }
 
         int initiator = findJetInitiator(genTree, j0);
+        if (initiator >= 0){
        
-        ShowerTreeNode& start = genTree[initiator];
-        while (start.daughters.size() == 1 && start.genPart->pdgId() == start.daughters[0]->genPart->pdgId()){
-             start = *(start.daughters[0]);
-        }
-
-        if (verbose_ > 0){
-            printf("Found an initial-state particle near the jet with (pt, eta, phi) = (%g, %f, %f)\n",
-                start.genPart->pt(), start.genPart->eta(), start.genPart->phi());
-            printf("\tand pdgid, charge = (%d, %d)\n",
-                start.genPart->pdgId(), start.genPart->charge());
-        }
-
-        if (start.daughters.size() != 2){
-            if (verbose_ > 1){
-                printf("The initial splitting has %lu daughters; skipping\n", start.daughters.size());
-            }
-        } else {
-            const ShowerTreeNode* d1;
-            
-            if (hardSide_){
-                d1 = start.daughters[0];
-            } else {
-                d1 = start.daughters[1];
-            }
-            
-            while (d1->daughters.size() == 1 && d1->genPart->pdgId() == d1->daughters[0]->genPart->pdgId()){
-                d1 = d1->daughters[0];
+            ShowerTreeNode& start = genTree[initiator];
+            while (start.daughters.size() == 1 && start.genPart->pdgId() == start.daughters[0]->genPart->pdgId()){
+                start = *(start.daughters[0]);
             }
 
-            if (d1->daughters.size() != 2){
+            if (verbose_ > 0){
+                printf("Found an initial-state particle near the jet with (pt, eta, phi) = (%g, %f, %f)\n",
+                    start.genPart->pt(), start.genPart->eta(), start.genPart->phi());
+                printf("\tand pdgid, charge = (%d, %d)\n",
+                    start.genPart->pdgId(), start.genPart->charge());
+            }
+
+            if (start.daughters.size() != 2){
                 if (verbose_ > 1){
-                    printf("The second splitting has %lu daughters; skipping\n", d1->daughters.size());
+                    printf("The initial splitting has %lu daughters; skipping\n", start.daughters.size());
                 }
             } else {
-                simon::DoubleSplittingInfo info(
-                    *start.genPart,
-                    *start.daughters[0]->genPart,
-                    *start.daughters[1]->genPart,
-                    *d1->genPart,
-                    *d1->daughters[0]->genPart,
-                    *d1->daughters[1]->genPart
-                );
-                if (verbose_ > 0){
-                    printf("First splitting is (%d) -> (%d) (%d)\n",
-                        info.split123.pdgId1, info.split123.pdgId2, info.split123.pdgId3
-                    );
-                    printf("Second splitting is (%d) -> (%d) (%d)\n",
-                        info.split456.pdgId1, info.split456.pdgId2, info.split456.pdgId3
-                    );
+                const ShowerTreeNode* d1;
+                
+                if (hardSide_){
+                    d1 = start.daughters[0];
+                } else {
+                    d1 = start.daughters[1];
                 }
-                splittinginfo->push_back(info);
+                
+                while (d1->daughters.size() == 1 && d1->genPart->pdgId() == d1->daughters[0]->genPart->pdgId()){
+                    d1 = d1->daughters[0];
+                }
+
+                if (d1->daughters.size() != 2){
+                    if (verbose_ > 1){
+                        printf("The second splitting has %lu daughters; skipping\n", d1->daughters.size());
+                    }
+                } else {
+                    simon::DoubleSplittingInfo info(
+                        *start.genPart,
+                        *start.daughters[0]->genPart,
+                        *start.daughters[1]->genPart,
+                        *d1->genPart,
+                        *d1->daughters[0]->genPart,
+                        *d1->daughters[1]->genPart
+                    );
+                    if (verbose_ > 0){
+                        printf("First splitting is (%d) -> (%d) (%d)\n",
+                            info.split123.pdgId1, info.split123.pdgId2, info.split123.pdgId3
+                        );
+                        printf("Second splitting is (%d) -> (%d) (%d)\n",
+                            info.split456.pdgId1, info.split456.pdgId2, info.split456.pdgId3
+                        );
+                    }
+                    splittinginfo->push_back(info);
+                }
             }
         }
     }
