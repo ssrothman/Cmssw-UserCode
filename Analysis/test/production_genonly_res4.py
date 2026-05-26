@@ -5,7 +5,7 @@ cfg = load_config('config_genonly')
 
 # Input source
 if input_fname is None:
-    input_fname = "root://eoscms.cern.ch//store/cmst3/group/exovv/precision/dyjets_herwig/dyjets_herwig_1000.root"
+    input_fname = "root://eoscms.cern.ch//store/cmst3/group/exovv/precision/dy_TeV/dyglu_herwig/dyglu_herwig_9985.root"
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(input_fname),
