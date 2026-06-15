@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "description" : "Test correction with MultiBinning based on Jpt, JdR, and pt",
+  "$schema" : "https://cms-nanoaod.github.io/correctionlib/_downloads/87e1187fe70c7ee30d50bbacaa2b2cb5/schemav2.json",
+  "corrections": [
+    {
+      "name": "test",
+      "description": "Test correction with MultiBinning based on Jpt, JdR, and pt",
+      "version": 0,
+      "inputs": [
+        {"name": "pt", "type": "real"},
+        {"name": "Jpt", "type": "real"},
+        {"name": "JdR", "type": "real"}
+      ],
+      "output": {"name" : "probability", "type": "real"},
+      "data": {
+        "nodetype": "multibinning",
+        "inputs" : ["Jpt", "JdR", "pt"],
+        "edges": [
+           [0.0, 50.0, 100000000000.0],
+           [0.0, 0.3, 1000.0],
+           [0.0, 1.0, 10000000000.0]
+        ],
+        "content": [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+        "flow" : 0.0
+      }
+    }
+  ]
+}

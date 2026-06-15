@@ -92,15 +92,17 @@
             "CHscale" : 0.01,
             "trkDropProb" : 0.03,
             "trkDropSmear" : 0.10,
-            "EM0thresholds" : [0.0, 0.0, 0.0],
-            "HAD0thresholds" : [0.0, 0.0, 0.0],
-            "ELEthresholds" : [0.0, 0.0, 0.0],
-            "MUthresholds" : [0.0, 0.0, 0.0],
-            "HADCHthresholds" : [0.0, 0.0, 0.0],
+            "EM0thresholds" : [0.5, 0.0, 1.0],
+            "HAD0thresholds" : [0.5, 0.0, 1.0],
+            "ELEthresholds" : [0.5, 0.0, 1.0],
+            "MUthresholds" : [0.5, 0.0, 1.0],
+            "HADCHthresholds" : [0.5, 0.0, 1.0],
             "minFromPV" : 0,
             "minPuppiWt" : 0.99,
             "maxDZ" : 0.2,
-            "maxDXY" : 99999999.9
+            "maxDXY" : 99999999.9,
+            "extraTrkUncJson" : "Analysis/data/extraTrkUncTest.json",
+            "extraTrkUncKey" : "test"
         },
         "nominal" : {
             "EM0scale" : "NOM",
@@ -117,9 +119,27 @@
             "applyDZCut" : true,
             "applyDXYCut" : false,
             "applyPuppi" : false,
-            "onlyCharged" : true
+            "onlyCharged" : true,
+            "enableExtraTrkUnc" : false
         },
         "variations" : {
+            "CORE_TRK" : {
+                "enableExtraTrkUnc" : true
+            },
+            "THRESH10" : {
+                "EM0threshold" : "UP",
+                "HAD0threshold" : "UP",
+                "ELEthreshold" : "UP",
+                "MUthreshold" : "UP",
+                "HADCHthreshold" : "UP"
+            },
+            "THRESH5" : {
+                "EM0threshold" : "DN",
+                "HAD0threshold" : "DN",
+                "ELEthreshold" : "DN",
+                "MUthreshold" : "DN",
+                "HADCHthreshold" : "DN"
+            },
             "EM0_UP" : {
                 "EM0scale" : "UP"
             },

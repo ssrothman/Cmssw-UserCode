@@ -7,6 +7,7 @@
 <use name="rootgeom"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
+<use name="SRothman/correctionlib"/>
 <export>
   <lib name="1"/>
 </export>

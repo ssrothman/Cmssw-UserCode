@@ -125,7 +125,7 @@ void SimonJetProducerT<T>::produce(edm::Event& evt,
             }
         }
 
-        selector_.buildJet(constituents, ans);
+        selector_.buildJet(constituents, ans, j.pt(), j.eta(), j.phi());
 
         if (verbose_){
             printf("\tjet: (%f, %f, %f)\n", ans.pt, ans.eta, ans.phi);

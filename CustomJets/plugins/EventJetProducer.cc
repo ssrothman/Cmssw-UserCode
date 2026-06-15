@@ -170,7 +170,7 @@ void EventJetProducerT<T>::produce(edm::Event& evt,
         chargedPtrs.emplace_back(candidates->ptrAt(i));
     }
 
-    selector_.buildJet(chargedPtrs, evt_jet);
+    selector_.buildJet(chargedPtrs, evt_jet, 0, 0, 0);
     std::cout << "+++++++++++The zpt for this event (POST BUILDING) is " << evt_jet.pt << "+++++++++" << std::endl;
     printf("###################################\n");
     printf("evt_jet is built\n");

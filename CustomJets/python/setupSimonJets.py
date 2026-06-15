@@ -19,6 +19,10 @@ def syst_settings_from_config(config, syst):
     if syst in config['variations']:
         for key, value in config['variations'][syst].items():
             result.__setattr__(key, pyval_to_cmsval(value))
+    
+        print("Settings for systematic variation %s:" % syst)
+        for key in result.parameterNames_():
+            print("  %s: %s" % (key, getattr(result, key)))
 
     elif syst != 'NOM':
         raise ValueError("Systematic variation %s not found in config." % syst)
