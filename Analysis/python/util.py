@@ -13,7 +13,12 @@ def pyval_to_cmsval(value):
     elif isinstance(value, float):
         return cms.double(value)
     elif isinstance(value, str):
-        return cms.string(value)
+        if value.endswith('.json'):
+            print("Interpreting string value as file path: %s" % value)
+            # Assume this is a file path and convert to cms.FileInPath
+            return cms.FileInPath(value)
+        else:
+            return cms.string(value)
     elif isinstance(value, list):
         if all(isinstance(v, bool) for v in value):
             return cms.vbool(value)

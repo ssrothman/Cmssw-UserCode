@@ -1,0 +1,179 @@
+{
+  "schema_version": 2,
+  "description" : "Extra tracking uncertainty for jet core and soft tracks",
+  "$schema" : "https://cms-nanoaod.github.io/correctionlib/_downloads/87e1187fe70c7ee30d50bbacaa2b2cb5/schemav2.json",
+  "corrections": [
+    {
+      "name": "SoftTrk10at1",
+      "description": "Extra tracking uncertainty for soft tracks",
+      "version": 0,
+      "inputs": [
+        {"name": "pt", "type": "real"},
+        {"name": "Jpt", "type": "real"},
+        {"name": "JdR", "type": "real"}
+      ],
+      "output": {"name" : "probability", "type": "real"},
+      "data": {
+        "nodetype": "binning",
+        "input" : "pt",
+        "edges": [0.0, 1.0, 9999999999999.9],
+        "content": [
+          0.10,
+          0.0
+        ],
+        "flow" : "clamp"
+      }
+    },
+    {
+      "name": "SoftTrk8at1",
+      "description": "Extra tracking uncertainty for soft tracks",
+      "version": 0,
+      "inputs": [
+        {"name": "pt", "type": "real"},
+        {"name": "Jpt", "type": "real"},
+        {"name": "JdR", "type": "real"}
+      ],
+      "output": {"name" : "probability", "type": "real"},
+      "data": {
+        "nodetype": "binning",
+        "input" : "pt",
+        "edges": [0.0, 1.0, 9999999999999.9],
+        "content": [
+          0.08,
+          0.0
+        ],
+        "flow" : "clamp"
+      }
+    },
+    {
+      "name": "SoftTrk20",
+      "description": "Extra tracking uncertainty for soft tracks",
+      "version": 0,
+      "inputs": [
+        {"name": "pt", "type": "real"},
+        {"name": "Jpt", "type": "real"},
+        {"name": "JdR", "type": "real"}
+      ],
+      "output": {"name" : "probability", "type": "real"},
+      "data": {
+        "nodetype": "binning",
+        "input" : "pt",
+        "edges": [0.0, 3.0, 9999999999999.9],
+        "content": [
+          0.20,
+          0.0
+        ],
+        "flow" : "clamp"
+      }
+    },
+    {
+      "name": "SoftTrk10",
+      "description": "Extra tracking uncertainty for soft tracks",
+      "version": 0,
+      "inputs": [
+        {"name": "pt", "type": "real"},
+        {"name": "Jpt", "type": "real"},
+        {"name": "JdR", "type": "real"}
+      ],
+      "output": {"name" : "probability", "type": "real"},
+      "data": {
+        "nodetype": "binning",
+        "input" : "pt",
+        "edges": [0.0, 3.0, 9999999999999.9],
+        "content": [
+          0.10,
+          0.0
+        ],
+        "flow" : "clamp"
+      }
+    },
+    {
+      "name": "CoreTrk",
+      "description": "Extra tracking uncertainty for jet core",
+      "version": 0,
+      "inputs": [
+        {"name": "pt", "type": "real"},
+        {"name": "Jpt", "type": "real"},
+        {"name": "JdR", "type": "real"}
+      ],
+      "output": {"name" : "probability", "type": "real"},
+      "data": {
+        "nodetype": "binning",
+        "input" : "Jpt",
+        "edges": [0.0, 100.0, 200.0, 400.0, 999999999999.9],
+        "content": [
+          0.0, 
+          {
+            "nodetype" : "binning",
+            "input" : "pt",
+            "edges" : [0.0, 20.0, 999999999999.9],
+            "content" : [
+              0.0,
+              {
+                "nodetype" : "binning",
+                "input" : "JdR",
+                "edges" : [0.0, 0.2, 999999999999.9],
+                "content" : [
+                  0.05,
+                  0.00
+                ],
+                "flow" : "clamp"
+              }
+            ],
+            "flow" : "clamp"
+          },
+          {
+            "nodetype" : "binning",
+            "input" : "pt",
+            "edges" : [0.0, 50.0, 999999999999.9],
+            "content" : [
+              0.0,
+              {
+                "nodetype" : "binning",
+                "input" : "JdR",
+                "edges" : [0.0, 0.2, 999999999999.9],
+                "content" : [
+                  0.05,
+                  0.00
+                ],
+                "flow" : "clamp"
+              }
+            ],
+            "flow" : "clamp"
+          },
+          {
+            "nodetype" : "binning",
+            "input" : "pt",
+            "edges" : [0.0, 1.0, 70.0, 999999999999.9],
+            "content" : [
+              0.0,
+              {
+                "nodetype" : "binning",
+                "input" : "JdR",
+                "edges" : [0.0, 0.03, 999999999999.9],
+                "content" : [
+                  0.02,
+                  0.00
+                ],
+                "flow" : "clamp"
+              },
+              {
+                "nodetype" : "binning",
+                "input" : "JdR",
+                "edges" : [0.0, 0.03, 0.2, 999999999999.9],
+                "content" : [
+                  0.08,
+                  0.06,
+                  0.00
+                ],
+                "flow" : "clamp"
+              }
+            ],
+            "flow" : "clamp"
+          }
+        ],
+        "flow" : "clamp"
+      }
+    }
+  ]
+}

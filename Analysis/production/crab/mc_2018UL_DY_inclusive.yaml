@@ -1,6 +1,7 @@
 defaults:
   isMC: True
-  splitting: Automatic
+  splitting: EventAwareLumiBased
+  unitsPerJob: 50000
   reco_version: UL
   year: 2018
   globaltag: 106X_upgrade2018_realistic_v16_L1v1

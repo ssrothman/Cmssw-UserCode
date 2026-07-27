@@ -27,6 +27,10 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 process.DroppedEventsSimOutput_step = cms.EndPath(process.DroppedEventsSimOutput)
 
+# ABOVE IS STANDARD NANO
+
+# BELOW IS ME :)
+
 from SRothman.Analysis.setupEventSelections_cff import setupEventSelections
 process = setupEventSelections(process, "linkedObjects:muons", config=cfg['EventSelection'], isMC=True)
 # Schedule definition
@@ -69,7 +73,7 @@ process = setupAK8Jets(process,
    config=cfg)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
-for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF']:
+for syst in ['CORE_TRK', 'THRESH5']:
     suffix = syst.replace('_', ''); # remove underscores for the suffix
     process = setupSimonJets(process,
         jets = 'selectedUpdatedJetsAK8',

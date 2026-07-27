@@ -1,11 +1,12 @@
 defaults:
   isMC: True
-  splitting: Automatic
+  splitting: EventAwareLumiBased
   reco_version: UL
   year: 2018
   globaltag: 106X_upgrade2018_realistic_v16_L1v1
   pset: $CMSSW_BASE/src/SRothman/Analysis/test/production_MC_res4.py
   allowInvalid: False
+  unitsPerJob: 5000
 
 samples:
   DYJetsToLL_Pythia: 

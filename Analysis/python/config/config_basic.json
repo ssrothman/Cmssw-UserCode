@@ -101,8 +101,7 @@
             "minPuppiWt" : 0.99,
             "maxDZ" : 0.2,
             "maxDXY" : 99999999.9,
-            "extraTrkUncJson" : "Analysis/data/extraTrkUncTest.json",
-            "extraTrkUncKey" : "test"
+            "extraTrkUncJson" : "SRothman/Analysis/data/extraTrkUnc.json"
         },
         "nominal" : {
             "EM0scale" : "NOM",
@@ -120,11 +119,29 @@
             "applyDXYCut" : false,
             "applyPuppi" : false,
             "onlyCharged" : true,
-            "enableExtraTrkUnc" : false
+            "enableExtraTrkUnc" : false,
+            "extraTrkUncKey" : ""
         },
         "variations" : {
+            "SOFT_TRK10at1" : {
+                "enableExtraTrkUnc" : true,
+                "extraTrkUncKey" : "SoftTrk10at1"
+            },
+            "SOFT_TRK8at1" : {
+                "enableExtraTrkUnc" : true,
+                "extraTrkUncKey" : "SoftTrk8at1"
+            },
+            "SOFT_TRK10" : {
+                "enableExtraTrkUnc" : true,
+                "extraTrkUncKey" : "SoftTrk10"
+            },
+            "SOFT_TRK20" : {
+                "enableExtraTrkUnc" : true,
+                "extraTrkUncKey" : "SoftTrk20"
+            },
             "CORE_TRK" : {
-                "enableExtraTrkUnc" : true
+                "enableExtraTrkUnc" : true,
+                "extraTrkUncKey" : "CoreTrk"
             },
             "THRESH10" : {
                 "EM0threshold" : "UP",

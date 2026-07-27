@@ -2,7 +2,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Check completion of production')
 parser.add_argument('taskid', type=str, help='Task ID')
-parser.add_argument('--destination_base', type=str, default='/store/group/lpcpfnano/srothman')
+parser.add_argument('--destination_base', type=str, default='/store/group/lpcpfnano/srothman/condor_production')
 parser.add_argument('--gateway', type=str, default='cmseos.fnal.gov')
 args = parser.parse_args()
 
@@ -18,8 +18,12 @@ with open("working/%s/filelist.txt"%taskid, 'r') as f:
     lines = f.readlines()
     N = len(lines)
 
+#taskid has form *_MONTH_DAY_YEAR
+date = '_'.join(taskid.split('_')[-3:])
+taskname = '_'.join(taskid.split('_')[:-3])
+
 fs = fsspec_xrootd.XRootDFileSystem(hostid=args.gateway)
-destination = osp.join(args.destination_base, taskid)
+destination = osp.join(args.destination_base, date, taskname)
 
 if not fs.exists(destination):
     print('destination does not exist')

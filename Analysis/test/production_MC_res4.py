@@ -69,7 +69,7 @@ process = setupAK8Jets(process,
    config=cfg)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
-for syst in ['NOM', 'CH_UP', 'CH_DN', 'TRK_EFF', 'NO_PVCUT']:
+for syst in ['SOFT_TRK10at1', 'SOFT_TRK8at1']:
     suffix = syst.replace('_', ''); # remove underscores for the suffix
     process = setupSimonJets(process,
         jets = 'selectedUpdatedJetsAK8',
