@@ -14,6 +14,7 @@ def addParticlesTable(process,
         doc = cms.string("Basic candidate table"),
         singleton=cms.bool(singleton), 
         extension=cms.bool(False),
+        skipNonExistingSrc=cms.bool(True),
         externalVariables = cms.PSet(),
         variables=cms.PSet(
             pt = Var("pt", float, doc="pt", precision=-1),
@@ -32,11 +33,16 @@ def addParticlesTable(process,
 def addCollectionIndices(process, 
                          src, 
                          name,
-                         collection):
+                         collection,
+                         genlevel):
+
+    classname = "PackedGenParticleCollectionIndexProducer" if genlevel else "LeafCandidateCollectionIndexProducer"
+
     setattr(process, name+"collectionIndexProducer", 
-            cms.EDProducer("LeafCandidateCollectionIndexProducer",
+            cms.EDProducer(classname,
                 src = cms.InputTag(src),
                 searchCollection = cms.InputTag(collection),
+                skipNonExistingSrc = cms.bool(True),
             )
     )
     setattr(process, name+'collectionIndexTask', cms.Task(getattr(process, name+"collectionIndexProducer")))
@@ -48,7 +54,7 @@ def addCollectionIndices(process,
         mcOnly = cms.bool(False),
         precision = cms.int32(-1),
         src = cms.InputTag(name+"collectionIndexProducer"),
-        type = cms.string('int')
+        type = cms.string('int'),
     )
 
     return process

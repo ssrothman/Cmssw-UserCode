@@ -25,15 +25,16 @@
 #include <memory>
 #include <vector>
 
-class ZMuMuEventSelectionFilter : public edm::stream::EDFilter<> {
+template <typename T>
+class ZMuMuEventSelectionFilterT : public edm::stream::EDFilter<> {
 public:
-    explicit ZMuMuEventSelectionFilter(const edm::ParameterSet&);
-    ~ZMuMuEventSelectionFilter() override {}
+    explicit ZMuMuEventSelectionFilterT(const edm::ParameterSet&);
+    ~ZMuMuEventSelectionFilterT() override {}
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     bool filter(edm::Event&, const edm::EventSetup&) override;
 private:
-    bool findGoodPair(const std::vector<reco::LeafCandidate>& matchedId, unsigned&, unsigned&);
-    bool pairIsGood(const reco::LeafCandidate& p1, const reco::LeafCandidate& p2);
+    bool findGoodPair(const std::vector<T>& matchedId, unsigned&, unsigned&);
+    bool pairIsGood(const T& p1, const T& p2);
 
     double leadPt_;
     double subPt_;
@@ -46,7 +47,7 @@ private:
     bool oppositeSign_;
 
     edm::InputTag src_;
-    edm::EDGetTokenT<edm::View<reco::LeafCandidate>> srcToken_;
+    edm::EDGetTokenT<edm::View<T>> srcToken_;
 
     int verbose_;
 
@@ -55,7 +56,8 @@ private:
     bool saveParticles_;
 };
 
-ZMuMuEventSelectionFilter::ZMuMuEventSelectionFilter(const edm::ParameterSet& conf)
+template <typename T>
+ZMuMuEventSelectionFilterT<T>::ZMuMuEventSelectionFilterT(const edm::ParameterSet& conf)
         : leadPt_(conf.getParameter<double>("leadPt")),
           subPt_(conf.getParameter<double>("subPt")),
           minZmass_(conf.getParameter<double>("minZmass")),
@@ -63,18 +65,19 @@ ZMuMuEventSelectionFilter::ZMuMuEventSelectionFilter(const edm::ParameterSet& co
           pdgIds_(conf.getParameter<std::vector<int>>("pdgIds")),
           oppositeSign_(conf.getParameter<bool>("oppositeSign")),
           src_(conf.getParameter<edm::InputTag>("src")),
-          srcToken_(consumes<edm::View<reco::LeafCandidate>>(src_)),
+          srcToken_(consumes<edm::View<T>>(src_)),
           verbose_(conf.getParameter<int>("verbose")),
           onlyCheckLeading_(conf.getParameter<bool>("onlyCheckLeading")),
           saveParticles_(conf.getParameter<bool>("saveParticles")){
     produces<bool>();
     if(saveParticles_){
-        produces<std::vector<reco::LeafCandidate>>("daughters");
+        produces<std::vector<T>>("daughters");
         produces<std::vector<reco::CompositeCandidate>>("Z");
     }
 }
 
-void ZMuMuEventSelectionFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+template <typename T>
+void ZMuMuEventSelectionFilterT<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<double>("leadPt");
   desc.add<double>("subPt");
@@ -89,7 +92,8 @@ void ZMuMuEventSelectionFilter::fillDescriptions(edm::ConfigurationDescriptions&
   descriptions.addWithDefaultLabel(desc);
 }
 
-bool ZMuMuEventSelectionFilter::pairIsGood(const reco::LeafCandidate& p1, const reco::LeafCandidate& p2){
+template <typename T>
+bool ZMuMuEventSelectionFilterT<T>::pairIsGood(const T& p1, const T& p2){
     if(oppositeSign_ && p1.charge() * p2.charge() > 0){
         return false;
     }
@@ -114,7 +118,8 @@ bool ZMuMuEventSelectionFilter::pairIsGood(const reco::LeafCandidate& p1, const 
     return false;
 }
 
-bool ZMuMuEventSelectionFilter::findGoodPair(const std::vector<reco::LeafCandidate>& matchedId, unsigned& ip1, unsigned& ip2){
+template <typename T>
+bool ZMuMuEventSelectionFilterT<T>::findGoodPair(const std::vector<T>& matchedId, unsigned& ip1, unsigned& ip2){
     if (onlyCheckLeading_){
         ip1 = 0;
         ip2 = 1;
@@ -132,17 +137,18 @@ bool ZMuMuEventSelectionFilter::findGoodPair(const std::vector<reco::LeafCandida
     return false;
 }
 
-bool ZMuMuEventSelectionFilter::filter(edm::Event& evt, const edm::EventSetup& setup){
+template <typename T>
+bool ZMuMuEventSelectionFilterT<T>::filter(edm::Event& evt, const edm::EventSetup& setup){
     if(verbose_){
-        printf("Top of ZMuMuEventSelectionFilter::filter()\n");
+        printf("Top of ZMuMuEventSelectionFilterT::filter()\n");
         fflush(stdout);
     }
 
-    edm::Handle<edm::View<reco::LeafCandidate>> genParticles;
+    edm::Handle<edm::View<T>> genParticles;
     evt.getByToken(srcToken_, genParticles);
 
     auto result = std::make_unique<bool>(false);
-    auto result_parts = std::make_unique<std::vector<reco::LeafCandidate>>();
+    auto result_parts = std::make_unique<std::vector<T>>();
     auto result_Z = std::make_unique<std::vector<reco::CompositeCandidate>>();
     
     for (const int& testPdgId : pdgIds_){
@@ -150,7 +156,7 @@ bool ZMuMuEventSelectionFilter::filter(edm::Event& evt, const edm::EventSetup& s
             printf("testPdgId: %d\n", testPdgId);
             fflush(stdout);
         }
-        std::vector<reco::LeafCandidate> matchedId;
+        std::vector<T> matchedId;
         for (const auto& genpart : *genParticles){
             if(std::abs(genpart.pdgId()) != testPdgId){
                 continue;
@@ -160,7 +166,7 @@ bool ZMuMuEventSelectionFilter::filter(edm::Event& evt, const edm::EventSetup& s
         if(matchedId.size() < 2){
             continue;
         }
-        std::sort(matchedId.begin(), matchedId.end(), [](const reco::LeafCandidate& a, const reco::LeafCandidate& b){
+        std::sort(matchedId.begin(), matchedId.end(), [](const T& a, const T& b){
             return a.pt() > b.pt();
         });
 
@@ -202,4 +208,10 @@ bool ZMuMuEventSelectionFilter::filter(edm::Event& evt, const edm::EventSetup& s
     return passed;
 }
 
-DEFINE_FWK_MODULE(ZMuMuEventSelectionFilter);
+#include "DataFormats/Candidate/interface/LeafCandidate.h"
+using LeafCandidateZMuMuFilter = ZMuMuEventSelectionFilterT<reco::LeafCandidate>;
+DEFINE_FWK_MODULE(LeafCandidateZMuMuFilter);
+
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
+using PackedGenParticleZMuMuFilter = ZMuMuEventSelectionFilterT<pat::PackedGenParticle>;
+DEFINE_FWK_MODULE(PackedGenParticleZMuMuFilter);

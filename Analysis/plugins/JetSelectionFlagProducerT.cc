@@ -68,3 +68,7 @@ void JetSelectionFlagProducerT<JET>::produce(edm::Event& iEvent, const edm::Even
 #include "DataFormats/PatCandidates/interface/Jet.h"
 typedef JetSelectionFlagProducerT<pat::Jet> PATJetSelectionFlagProducer;
 DEFINE_FWK_MODULE(PATJetSelectionFlagProducer);
+
+#include "DataFormats/JetReco/interface/GenJet.h"
+using GenJetSelectionFlagProducer = JetSelectionFlagProducerT<reco::GenJet>;
+DEFINE_FWK_MODULE(GenJetSelectionFlagProducer);

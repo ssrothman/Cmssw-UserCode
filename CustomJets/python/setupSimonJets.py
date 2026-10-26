@@ -40,13 +40,27 @@ def selector_from_config(config, syst):
 def setupGenSimonJets(process,
                       genjets,
                       name,
-                      config):
+                      config,
+                      gensyst):
 
     setattr(process, 'Gen'+name, GenSimonJetProducer.clone(
         jetSrc = genjets,
         addCHSindex = False,
         verbose = False,
-        selector = selector_from_config(config['Systematics'], 'NOM')
+        selector = selector_from_config(config['Systematics'], gensyst)
+    ))
+
+    setattr(process, 'Gen'+name+'Preselection', cms.EDProducer("JetSelectionFlagTranslator",
+        src = cms.InputTag(genjets),
+        target = cms.InputTag('Gen'+name),
+        map = cms.InputTag("preselectGenJetsAK8"),
+        verbose = cms.int32(0)
+    ))
+    setattr(process, 'Gen'+name+'OverlapVeto', cms.EDProducer("JetSelectionFlagTranslator",
+        src = cms.InputTag(genjets),
+        target = cms.InputTag('Gen'+name),
+        map = cms.InputTag("overlapVetoGenJetsAK8"),
+        verbose = cms.int32(0)
     ))
 
     setattr(process, 'Gen'+name+'Table', SimonJetTableProducer.clone(
@@ -57,6 +71,8 @@ def setupGenSimonJets(process,
 
     setattr(process, name+"MCTask", cms.Task(
         getattr(process, 'Gen'+name),
+        getattr(process, 'Gen'+name+'Preselection'),
+        getattr(process, 'Gen'+name+'OverlapVeto'),
         getattr(process, 'Gen'+name+'Table')
     ))
     process.schedule.associate(getattr(process, name+'MCTask'))
@@ -126,13 +142,15 @@ def setupSimonJets(process,
                    name,
                    config,
                    syst,
+                   gensyst,
                    isMC,
                    genOnly):
     if isMC:
         process = setupGenSimonJets(process,
                                     genjets,
                                     name,
-                                    config)
+                                    config,
+                                    gensyst)
     if not genOnly:
         process = setupRecoSimonJets(process,
                                      jets,

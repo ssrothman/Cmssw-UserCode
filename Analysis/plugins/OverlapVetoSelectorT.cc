@@ -37,6 +37,8 @@ private:
     bool filter_;
     bool makeValueMap_;
 
+    bool skipNonExistingVetoer_;
+
     int verbose_;
 };
 
@@ -45,10 +47,11 @@ OverlapVetoSelectorT<MainT, VetoerT>::OverlapVetoSelectorT(const edm::ParameterS
         : src_(conf.getParameter<edm::InputTag>("src")),
           srcToken_(consumes<edm::View<MainT>>(src_)),
           vetoer_(conf.getParameter<edm::InputTag>("vetoer")),
-          vetoerToken_(consumes<edm::View<VetoerT>>(vetoer_)),
+          vetoerToken_(mayConsume<edm::View<VetoerT>>(vetoer_)),
           minDeltaR_(conf.getParameter<double>("minDeltaR")),
           filter_(conf.getParameter<bool>("filter")),
           makeValueMap_(conf.getParameter<bool>("makeValueMap")),
+          skipNonExistingVetoer_(conf.getParameter<bool>("skipNonExistingVetoer")),
           verbose_(conf.getParameter<int>("verbose"))
 {
     if (makeValueMap_){
@@ -66,6 +69,7 @@ void OverlapVetoSelectorT<MainT, VetoerT>::fillDescriptions(edm::ConfigurationDe
     desc.add<double>("minDeltaR");
     desc.add<bool>("filter");
     desc.add<bool>("makeValueMap");
+    desc.add<bool>("skipNonExistingVetoer");
     desc.add<int>("verbose");
     descriptions.addWithDefaultLabel(desc);
 }
@@ -84,10 +88,12 @@ bool OverlapVetoSelectorT<MainT, VetoerT>::filter(edm::Event& iEvent, const edm:
 
     for (const auto& s : *src){
         bool keep = true;
-        for (const auto& v : *vetoer){
-            if (reco::deltaR(s, v) < minDeltaR_){
-                keep = false;
-                break;
+        if (vetoer.isValid() || !skipNonExistingVetoer_){
+            for (const auto& v : *vetoer){
+                if (reco::deltaR(s, v) < minDeltaR_){
+                    keep = false;
+                    break;
+                }
             }
         }
         if (keep){

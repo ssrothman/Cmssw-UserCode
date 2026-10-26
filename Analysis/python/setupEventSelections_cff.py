@@ -3,34 +3,46 @@ import FWCore.ParameterSet.Config as cms
 from SRothman.Analysis.CorrectedMuonProducer_cfi import CorrectedMuonProducer
 from SRothman.Analysis.RoccoRValueMapProducer_cfi import RoccoRValueMapProducer
 from SRothman.Analysis.ZMuMuEventSelectionFilter_cfi import getZMuMuFilter
+from SRothman.Analysis.addParticlesTable_cff import addParticlesTable, addCollectionIndices
 
 def setupEventSelections(process,
                          muons,
                          isMC, 
                          config,
-                         genmuons=False):
+                         nameprefix,
+                         PAT,
+                         genlevel):
 
-    if not genmuons:
+    modules = []
+
+    if not genlevel:
         #setup Rochester corrections table
-        process.RoccoR = RoccoRValueMapProducer.clone(
+        setattr(process, nameprefix + 'RoccoR', RoccoRValueMapProducer.clone(
             src = cms.InputTag(muons),
             isMC = isMC
-        )
+        ))
+        modules.append(getattr(process, nameprefix + 'RoccoR'))
 
-        process.muonTable.externalVariables.RoccoR = cms.PSet(
+        setattr(process.muonTable.externalVariables, nameprefix + 'RoccoR', cms.PSet(
             compression = cms.string('none'),
             doc = cms.string("Rochester correction factor"),
             mcOnly = cms.bool(False),
             precision = cms.int32(-1),
-            src = cms.InputTag("RoccoR"),
+            src = cms.InputTag(nameprefix + 'RoccoR'),
             type = cms.string('float')
-        )
+        ))
 
-        selectorclass = "PATMuonSelector"
+        if PAT:
+            selectorclass = "PATMuonSelector"
+        else:
+            raise NotImplementedError("reco::muon selector not implemented")
     else:
-        selectorclass = "GenParticleSelector"
+        if PAT:
+            selectorclass = "PATPackedGenParticleSelector"
+        else:
+            selectorclass = "GenParticleSelector"
         
-    muoncut = ''
+    muoncut = 'abs(pdgId) == 13 && '
     if config['maxMuEta'] > 0:
         muoncut += "abs(eta) < %0.2f && "%config['maxMuEta']
     if config['subMuPt'] > 0:
@@ -47,45 +59,75 @@ def setupEventSelections(process,
     if muoncut.endswith(' && '):
         muoncut = muoncut[:-4]  # remove trailing ' && '
 
-    process.SelectedMuons = cms.EDFilter(
+    setattr(process, nameprefix + 'SelectedMuons', cms.EDFilter(
         selectorclass,
         src = cms.InputTag(muons),
         cut = cms.string(muoncut)
-    )
+    ))
+    modules.append(getattr(process, nameprefix + 'SelectedMuons'))
 
-    process.DiMuonFilter = cms.EDFilter(
+    setattr(process, nameprefix + 'DiMuonFilter', cms.EDFilter(
         "CandViewCountFilter",
-        src = cms.InputTag("SelectedMuons"),
+        src = cms.InputTag(nameprefix + "SelectedMuons"),
         minNumber = cms.uint32(2)
-    )
+    ))
+    modules.append(getattr(process, nameprefix + 'DiMuonFilter'))
 
-    process.ZMuMu = getZMuMuFilter(config, cms.InputTag("SelectedMuons"))
+    setattr(process, nameprefix + 'ZMuMu', 
+        getZMuMuFilter(
+            config, 
+            cms.InputTag(nameprefix + "SelectedMuons"),
+            genlevel = genlevel
+        )
+    )
+    modules.append(getattr(process, nameprefix + 'ZMuMu'))
 
     if config['maxMET'] > 0:
-        process.METselector = cms.EDFilter(
+        setattr(process, nameprefix + 'METselector', cms.EDFilter(
             'CandViewSelector',
             src = cms.InputTag('slimmedMETsPuppi'),
             cut = cms.string('pt < %f' % config['maxMET'])
-        )
-        process.METfilter = cms.EDFilter(
+        ))
+        setattr(process, nameprefix + 'METfilter', cms.EDFilter(
             'CandViewCountFilter',
-            src = cms.InputTag('METselector'),
+            src = cms.InputTag(nameprefix + 'METselector'),
             minNumber = cms.uint32(1)
-        )
+        ))
+        modules.append(getattr(process, nameprefix + 'METselector'))
+        modules.append(getattr(process, nameprefix + 'METfilter'))
 
-    path = []
-    if not genmuons:
-        path.append(process.RoccoR)
+    paths = []
+    setattr(process, nameprefix + 'selections_path', cms.Path())
+    paths.append(getattr(process, nameprefix + 'selections_path'))
+    for imodule in range(len(modules)):
+        module = modules[imodule]
+        getattr(process, nameprefix + 'selections_path').__iadd__(module)
 
-    path.append(process.SelectedMuons)
-    path.append(process.DiMuonFilter)
-    path.append(process.ZMuMu)
-    if config['maxMET'] > 0:
-        path.append(process.METselector)
-        path.append(process.METfilter)
+        setattr(process, module.label() + 'Path', cms.Path())
+        for i in range(imodule + 1):
+            getattr(process, module.label() + 'Path').__iadd__(modules[i])
+        paths.append(getattr(process, module.label() + 'Path'))
 
-    process.selections_path = cms.Path()
-    for module in path:
-        process.selections_path += module
+    return process, paths
 
+def addSelectionTables(process, nameprefix, muons, genlevel):
+    process = addParticlesTable(
+        process,
+        nameprefix + 'ZMuMu:daughters',
+        nameprefix + 'ZMuMuMuons',
+        singleton=False
+    )
+    process = addCollectionIndices(
+        process,
+        nameprefix + 'ZMuMu:daughters',
+        nameprefix + 'ZMuMuMuons',
+        muons,
+        genlevel
+    )
+    process = addParticlesTable(
+        process,
+        nameprefix + 'ZMuMu:Z',
+        nameprefix + 'ZMuMuZ',
+        singleton=False
+    )
     return process

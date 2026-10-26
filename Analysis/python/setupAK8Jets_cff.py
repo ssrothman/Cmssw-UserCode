@@ -25,48 +25,26 @@ def setupAK8GenJets(process,
     if cutstring.endswith(' && '):
         cutstring = cutstring[:-4] # remove trailing ' && '
 
-    process.cutGenJetsAK8 = cms.EDFilter("GenJetSelector",
+    process.preselectGenJetsAK8 = cms.EDProducer("GenJetSelectionFlagProducer",
         src = cms.InputTag("ak8GenJetsNoNu"),
         cut = cms.string(cutstring),
-        filter = cms.bool(False)
+        verbose = cms.int32(0)                                            
     )
 
-    if config['muonVetoDR'] <= 0:
-        process.selectedGenJetsAK8 = cms.EDFilter("GenJetSelector",
-            src = cms.InputTag("cutGenJetsAK8"),
-            cut = cms.string(""),
-            filter = cms.bool(False)
-        )
-    else:
-        process.selectedGenJetsAK8 = cms.EDFilter("GENJetOverlapCandidateVetoSelector",
-            src = cms.InputTag("cutGenJetsAK8"),
-            vetoer = cms.InputTag("ZMuMu:daughters"),
-            minDeltaR = cms.double(config['muonVetoDR']),
-            filter = cms.bool(False),
-            verbose = cms.int32(0),
-            makeValueMap = cms.bool(False)
-        )
-
-    arbitration = config['arbitration']
-    if arbitration.startswith('Leading'):
-        process.arbitratedGenJetsAK8 = cms.EDFilter("LeadingGenJetSelector",
-            src = cms.InputTag("selectedGenJetsAK8"),
-            maxNumber = cms.uint32(int(arbitration[7:])),
-            filter = cms.bool(False)
-        )
-    elif arbitration == 'None':
-        process.arbitratedGenJetsAK8 = cms.EDFilter("GenJetSelector",
-            src = cms.InputTag("selectedGenJetsAK8"),
-            cut = cms.string(""),
-            filter = cms.bool(False)
-        )
-    else:
-        raise ValueError("Invalid jet arbitration %s"%arbitration)
+    process.overlapVetoGenJetsAK8 = cms.EDFilter("GENJetOverlapCandidateVetoSelector",
+        src = cms.InputTag("ak8GenJetsNoNu"),
+        vetoer = cms.InputTag("GenZMuMu:daughters"),
+        minDeltaR = cms.double(config['muonVetoDR']),
+        filter = cms.bool(False),
+        makeValueMap = cms.bool(True),
+        verbose = cms.int32(0),
+        skipNonExistingVetoer = cms.bool(True)
+    )
 
     process.BigAK8GenJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-        src = cms.InputTag("arbitratedGenJetsAK8"),
+        src = cms.InputTag("ak8GenJetsNoNu"),
         cut = cms.string(""),
-        name = cms.string('arbitratedGenJetsAK8'),
+        name = cms.string('ak8GenJetsNoNu'),
         singleton = cms.bool(False),
         extension = cms.bool(False),
         externalVariables = cms.PSet(),
@@ -90,6 +68,23 @@ def setupAK8GenJets(process,
         )
     )
 
+    process.BigAK8GenJetTable.externalVariables.overlapVeto = cms.PSet(
+        compression = cms.string('none'),
+        doc = cms.string("GenJet/GenZ->mumu overlap veto"),
+        mcOnly = cms.bool(True),
+        precision = cms.int32(-1),
+        src = cms.InputTag("overlapVetoGenJetsAK8"),
+        type = cms.string('bool')
+    )
+    process.BigAK8GenJetTable.externalVariables.preselection = cms.PSet(
+        compression = cms.string('none'),
+        doc = cms.string("GenJet preselection"),
+        mcOnly = cms.bool(True),
+        precision = cms.int32(-1),
+        src = cms.InputTag("preselectGenJetsAK8"),
+        type = cms.string('bool')
+    )
+
     process.genPartonsForFlavour = cms.EDProducer("HadronAndPartonSelector",
         fullChainPhysPartons = cms.bool(False),
         particles = cms.InputTag(genParticles),
@@ -103,7 +98,7 @@ def setupAK8GenJets(process,
         ghostRescaling = cms.double(1e-18),
         hadronFlavourHasPriority = cms.bool(True),
         jetAlgorithm = cms.string('AntiKt'),
-        jets = cms.InputTag("arbitratedGenJetsAK8"),
+        jets = cms.InputTag("ak8GenJetsNoNu"),
         leptons = cms.InputTag("genPartonsForFlavour","leptons"),
         partons = cms.InputTag("genPartonsForFlavour","physicsPartons"),
         rParam = cms.double(0.8)
@@ -113,14 +108,13 @@ def setupAK8GenJets(process,
         cut = cms.string(""),
         deltaR = cms.double(0.1),
         jetFlavourInfos = cms.InputTag("selectedGenJetAK8FlavourAssociation"),
-        name = cms.string("arbitratedGenJetsAK8"),
-        src = cms.InputTag("arbitratedGenJetsAK8"),
+        name = cms.string("ak8GenJetsNoNu"),
+        src = cms.InputTag("ak8GenJetsNoNu"),
     )
 
     process.MCak8jetstask = cms.Task(
-        process.cutGenJetsAK8,
-        process.arbitratedGenJetsAK8,
-        process.selectedGenJetsAK8,
+        process.preselectGenJetsAK8,
+        process.overlapVetoGenJetsAK8,
         process.BigAK8GenJetTable,
         process.genPartonsForFlavour,
         process.selectedAK8GenJetFlavourTable,
@@ -175,11 +169,12 @@ def setupAK8RecoJets(process, config):
 
     process.overlapVetoJetsAK8 = cms.EDFilter("PATJetOverlapCandidateVetoSelector",
         src = cms.InputTag("selectedUpdatedJetsAK8"),
-        vetoer = cms.InputTag("ZMuMu:daughters"),
+        vetoer = cms.InputTag("RecoZMuMu:daughters"),
         minDeltaR = cms.double(config['muonVetoDR']),
         filter = cms.bool(False),
         makeValueMap = cms.bool(True),
-        verbose = cms.int32(0)
+        verbose = cms.int32(0),
+        skipNonExistingVetoer = cms.bool(True)
     )
 
     process.BigAK8JetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",

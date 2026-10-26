@@ -8,9 +8,7 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 from Configuration.Eras.Modifier_run2_nanoAOD_106Xv2_cff import run2_nanoAOD_106Xv2
 
-RUNNING_CRAB = True
-#configname = 'config_genonly'
-configname = 'config'
+RUNNING_CRAB = False
 
 if not RUNNING_CRAB:
     from FWCore.ParameterSet.VarParsing import VarParsing
@@ -102,7 +100,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         filterName = cms.untracked.string('')
     ),
     SelectEvents = cms.untracked.PSet( 
-        SelectEvents = cms.vstring('selections_path')
+        SelectEvents = cms.vstring('*selections_path')
     ),
     fileName = cms.untracked.string(selected_fname),
     outputCommands = process.NANOAODSIMEventContent.outputCommands,
@@ -116,7 +114,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
         filterName = cms.untracked.string('')
     ),
     SelectEvents = cms.untracked.PSet( 
-        SelectEvents = cms.vstring('selections_path')
+        SelectEvents = cms.vstring('*selections_path')
     ),
     fileName = cms.untracked.string(selected_fname),
     outputCommands = process.NANOAODEventContent.outputCommands,
@@ -134,10 +132,13 @@ process.DroppedEventsSimOutput = cms.OutputModule("NanoAODOutputModule",
         'drop *',
         'keep nanoaodFlatTable_genTable_*_*',
         'keep nanoaodFlatTable_genWeightsTable_*_*',
-        'keep nanoaodFlatTable_lheInfoTable_*_*'
+        'keep nanoaodFlatTable_lheInfoTable_*_*',
+        'keep nanoaodFlatTable_TriggerResultsHackTable_*_*',
+        'keep nanoaodFlatTable_genParticleTable_*_*',
+        'keep nanoaodFlatTable_muonTable_*_*',
     ),
     SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring('!selections_path')
+        SelectEvents = cms.vstring('!*selections_path')
     )
 )
 

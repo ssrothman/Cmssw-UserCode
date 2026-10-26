@@ -36,19 +36,23 @@ private:
     double etaTol_;
     double phiTol_;
 
+    bool skipNonExistingSrc_ = true;
+
     bool requirePdgIdMatch_;
     bool requireChargeMatch_;
+
 };
 
 template<typename T>
 CollectionIndexMatchProducerT<T>::CollectionIndexMatchProducerT(const edm::ParameterSet& conf)
     : src_(conf.getParameter<edm::InputTag>("src")),
       searchCollection_(conf.getParameter<edm::InputTag>("searchCollection")),
-      srcToken_(consumes<edm::View<T>>(src_)),
+      srcToken_(mayConsume<edm::View<T>>(src_)),
       searchToken_(consumes<edm::View<T>>(searchCollection_)),
       ptTol_(conf.getParameter<double>("ptTolerance")),
       etaTol_(conf.getParameter<double>("etaTolerance")),
       phiTol_(conf.getParameter<double>("phiTolerance")),
+      skipNonExistingSrc_(conf.getParameter<bool>("skipNonExistingSrc")),
       requirePdgIdMatch_(conf.getParameter<bool>("requirePdgIdMatch")),
       requireChargeMatch_(conf.getParameter<bool>("requireChargeMatch")) {
     produces<edm::ValueMap<int>>();
@@ -64,6 +68,7 @@ void CollectionIndexMatchProducerT<T>::fillDescriptions(edm::ConfigurationDescri
     desc.add<double>("phiTolerance", 1e-3);
     desc.add<bool>("requirePdgIdMatch", true);
     desc.add<bool>("requireChargeMatch", true);
+    desc.add<bool>("skipNonExistingSrc", true);
     descriptions.addWithDefaultLabel(desc);
 }
 
@@ -88,8 +93,16 @@ void CollectionIndexMatchProducerT<T>::produce(edm::Event& evt, const edm::Event
     edm::Handle<edm::View<T>> srcParticles;
     edm::Handle<edm::View<T>> searchParticles;
 
-    evt.getByToken(srcToken_, srcParticles);
     evt.getByToken(searchToken_, searchParticles);
+
+    bool gotSrc = evt.getByToken(srcToken_, srcParticles);
+    if (!gotSrc && skipNonExistingSrc_) {
+
+        auto result = std::make_unique<edm::ValueMap<int>>();
+        evt.put(std::move(result));
+
+        return; 
+    }
 
     auto result = std::make_unique<edm::ValueMap<int>>();
     edm::ValueMap<int>::Filler filler(*result);
@@ -117,5 +130,8 @@ void CollectionIndexMatchProducerT<T>::produce(edm::Event& evt, const edm::Event
 }
 
 using LeafCandidateCollectionIndexProducer = CollectionIndexMatchProducerT<reco::LeafCandidate>;
-
 DEFINE_FWK_MODULE(LeafCandidateCollectionIndexProducer);
+
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
+using PackedGenParticleCollectionIndexProducer = CollectionIndexMatchProducerT<pat::PackedGenParticle>;
+DEFINE_FWK_MODULE(PackedGenParticleCollectionIndexProducer);
