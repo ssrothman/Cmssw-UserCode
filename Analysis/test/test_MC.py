@@ -91,7 +91,7 @@ for gensyst in ['NOM']:
             name = 'ChargedSimonJets'+suffix,
             config = cfg,
             syst = syst,
-            gensyst = 'NOM',
+            gensyst = gensyst,
             isMC = True,
             genOnly = False
         )

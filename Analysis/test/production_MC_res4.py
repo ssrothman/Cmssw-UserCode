@@ -27,16 +27,39 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 process.DroppedEventsSimOutput_step = cms.EndPath(process.DroppedEventsSimOutput)
 
-from SRothman.Analysis.setupEventSelections_cff import setupEventSelections
-process = setupEventSelections(process, "linkedObjects:muons", config=cfg['EventSelection'], isMC=True)
+from SRothman.Analysis.setupEventSelections_cff import setupEventSelections, addSelectionTables
+process, paths1 = setupEventSelections(
+    process, 
+    "linkedObjects:muons", 
+    config=cfg['EventSelection'], 
+    isMC=True, 
+    genlevel=False,
+    nameprefix='Reco',
+    PAT=True
+)
+process, paths2 = setupEventSelections(
+    process, 
+    "packedGenParticles", 
+    config=cfg['GenEventSelection'], 
+    isMC=True, 
+    genlevel=True,
+    nameprefix='Gen',
+    PAT=True
+)
+
+allpaths = paths1 + paths2
+
 # Schedule definition
-process.schedule = cms.Schedule(process.selections_path,
-                                process.nanoAOD_step,
+process.schedule = cms.Schedule(process.nanoAOD_step,
                                 process.endjob_step,
                                 process.NANOAODSIMoutput_step,
-                                process.DroppedEventsSimOutput_step)
+                                process.DroppedEventsSimOutput_step,
+                                *allpaths)
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
+
+process = addSelectionTables(process, 'Reco', 'linkedObjects:muons', genlevel=False)
+process = addSelectionTables(process, 'Gen', 'packedGenParticles', genlevel=True)
 
 # customisation of the process.
 
@@ -46,21 +69,6 @@ from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeMC
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_cff
 process = nanoAOD_customizeMC(process)
 
-from SRothman.Analysis.addParticlesTable_cff import addParticlesTable, addCollectionIndices
-process = addParticlesTable(process, 
-    "ZMuMu:daughters", 
-    "ZMuMuMuons",
-    singleton=False)
-process = addCollectionIndices(process,
-    "ZMuMu:daughters",
-    "ZMuMuMuons",
-    "linkedObjects:muons"
-)
-process = addParticlesTable(process, 
-    "ZMuMu:Z", 
-    "ZMuMuZ", 
-    singleton=True)
-
 from SRothman.Analysis.setupAK8Jets_cff import setupAK8Jets
 process = setupAK8Jets(process,
    isMC = True,
@@ -69,37 +77,48 @@ process = setupAK8Jets(process,
    config=cfg)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
-for syst in ['SOFT_TRK10at1', 'SOFT_TRK8at1']:
-    suffix = syst.replace('_', ''); # remove underscores for the suffix
-    process = setupSimonJets(process,
-        jets = 'selectedUpdatedJetsAK8',
-        genjets = 'arbitratedGenJetsAK8', 
-        CHSjets = 'finalJets',
-        name = 'ChargedSimonJets'+suffix,
-        config = cfg,
-        syst = syst,
-        isMC = True,
-        genOnly = False
-    )
+for gensyst in ['NOM']:
+    for syst in ['NOM']:
+        suffix = syst.replace('_', ''); # remove underscores for the suffix
+        
+        process = setupSimonJets(process,
+            jets = 'selectedUpdatedJetsAK8',
+            genjets = 'ak8GenJetsNoNu', 
+            CHSjets = 'finalJets',
+            name = 'ChargedSimonJets'+suffix,
+            config = cfg,
+            syst = syst,
+            gensyst = gensyst,
+            isMC = True,
+            genOnly = False
+        )
 
-    from SRothman.Matching.setupMatching import setupMatching
-    process = setupMatching(process,
-        name = 'ChargedGenMatch'+suffix,
-        reco = 'ChargedSimonJets'+suffix,
-        gen = 'GenChargedSimonJets'+suffix,
-        config = cfg['Matching']
-    )
+        from SRothman.Matching.setupMatching import setupMatching
+        process = setupMatching(process,
+            name = 'ChargedGenMatch'+suffix,
+            reco = 'ChargedSimonJets'+suffix,
+            gen = 'GenChargedSimonJets'+suffix,
+            config = cfg['Matching']
+        )
 
-    from SRothman.EECs.setupEEC import setupEEC_MC
-    process = setupEEC_MC(process,
-        name = 'ChargedEECs'+suffix,
-        genMatch = 'ChargedGenMatch'+suffix,
-        genjets = 'GenChargedSimonJets'+suffix,
-        recojets = 'ChargedSimonJets'+suffix,
-        whichEEC='res4',
-        config = cfg['EECres4'],
-        verbose = 0,
-    )
+        from SRothman.EECs.setupEEC import setupEEC_MC
+        process = setupEEC_MC(process,
+            name = 'ChargedEECs'+suffix,
+            genMatch = 'ChargedGenMatch'+suffix,
+            genjets = 'GenChargedSimonJets'+suffix,
+            recojets = 'ChargedSimonJets'+suffix,
+            whichEEC='res4',
+            config = cfg['EECres4'],
+            verbose = 0,
+        )
+
+process.TriggerResultsHackTable = cms.EDProducer("TriggerResultsTableProducer",
+    src = cms.InputTag("TriggerResults","","NANO"),
+    name = cms.string("NANOTriggerResults"),
+    verbose = cms.int32(0)
+)
+process.TriggerResultsHackTask = cms.Task(process.TriggerResultsHackTable)
+process.schedule.associate(process.TriggerResultsHackTask)
 
 # End of customisation functions
 
