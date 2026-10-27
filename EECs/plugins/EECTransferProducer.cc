@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string>
 
-template <class Calculator, class ResultType, class TransferResultType>
+template <class Calculator, class ResultType, class TransferResultType, class BasicCalculator>
 class EECTransferProducer : public edm::stream::EDProducer<> {
 public:
     explicit EECTransferProducer(const edm::ParameterSet&);
@@ -30,27 +30,46 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
+    bool genIsMatched(const unsigned iGen, const edm::View<matching::jetmatch>& matches) const;
+
     Calculator calc_;
+    BasicCalculator basicCalc_;
 
     edm::EDGetTokenT<edm::View<simon::jet>> recoJetsToken_;
     edm::EDGetTokenT<edm::View<simon::jet>> genJetsToken_;
     edm::EDGetTokenT<edm::View<matching::jetmatch>> matchesToken_;
 
-    std::vector<edm::EDGetTokenT<edm::ValueMap<bool>>> flagsTokens_;
+    std::vector<edm::EDGetTokenT<edm::ValueMap<bool>>> recoFlagsTokens_;
+    std::vector<edm::EDGetTokenT<edm::ValueMap<bool>>> genFlagsTokens_;
 };
 
-template <class Calculator, class ResultType, class TransferResultType>
-EECTransferProducer<Calculator, ResultType, TransferResultType>::EECTransferProducer(const edm::ParameterSet& conf) :
+template <class Calculator, class ResultType, class TransferResultType, class BasicCalculator>
+bool EECTransferProducer<Calculator, ResultType, TransferResultType, BasicCalculator>::genIsMatched(const unsigned iGen, const edm::View<matching::jetmatch>& matches) const {
+    for(const auto& match : matches){
+        if(match.iGen==iGen) return true;
+    }
+    return false;
+}
+
+template <class Calculator, class ResultType, class TransferResultType, class BasicCalculator>
+EECTransferProducer<Calculator, ResultType, TransferResultType, BasicCalculator>::EECTransferProducer(const edm::ParameterSet& conf) :
         calc_(conf.getParameter<edm::ParameterSet>("calculator")),
+        basicCalc_(conf.getParameter<edm::ParameterSet>("basicCalculator")),
         recoJetsToken_(consumes<edm::View<simon::jet>>(conf.getParameter<edm::InputTag>("recoJets"))),
         genJetsToken_(consumes<edm::View<simon::jet>>(conf.getParameter<edm::InputTag>("genJets"))),
         matchesToken_(consumes<edm::View<matching::jetmatch>>(conf.getParameter<edm::InputTag>("matches")))
 {
 
-    std::vector<edm::InputTag> flagsTags = conf.getParameter<std::vector<edm::InputTag>>("flags");
-    flagsTokens_.reserve(flagsTags.size());
-    for(const auto& tag : flagsTags){
-        flagsTokens_.push_back(consumes<edm::ValueMap<bool>>(tag));
+    std::vector<edm::InputTag> recoFlagsTags = conf.getParameter<std::vector<edm::InputTag>>("recoFlags");
+    recoFlagsTokens_.reserve(recoFlagsTags.size());
+    for(const auto& tag : recoFlagsTags){
+        recoFlagsTokens_.push_back(consumes<edm::ValueMap<bool>>(tag));
+    }
+
+    std::vector<edm::InputTag> genFlagsTags = conf.getParameter<std::vector<edm::InputTag>>("genFlags");
+    genFlagsTokens_.reserve(genFlagsTags.size());
+    for(const auto& tag : genFlagsTags){
+        genFlagsTokens_.push_back(consumes<edm::ValueMap<bool>>(tag));
     }
 
     produces<std::vector<EEC::CMSSWTransferResult<TransferResultType>>>("transfer");
@@ -60,25 +79,30 @@ EECTransferProducer<Calculator, ResultType, TransferResultType>::EECTransferProd
     produces<std::vector<EEC::CMSSWResult<ResultType>>>("untransferedReco");
 }
 
-template <class Calculator, class ResultType, class TransferResultType>
-void EECTransferProducer<Calculator, ResultType, TransferResultType>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+template <class Calculator, class ResultType, class TransferResultType, class BasicCalculator>
+void EECTransferProducer<Calculator, ResultType, TransferResultType, BasicCalculator>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
 
     edm::ParameterSetDescription calc_desc;
     Calculator::fillPSetDescription(calc_desc);
     desc.add<edm::ParameterSetDescription>("calculator", calc_desc);
 
+    edm::ParameterSetDescription basic_calc_desc;
+    BasicCalculator::fillPSetDescription(basic_calc_desc);
+    desc.add<edm::ParameterSetDescription>("basicCalculator", basic_calc_desc);
+
     desc.add<edm::InputTag>("genJets");
     desc.add<edm::InputTag>("recoJets");
     desc.add<edm::InputTag>("matches");
 
-    desc.add<std::vector<edm::InputTag>>("flags");
+    desc.add<std::vector<edm::InputTag>>("recoFlags");
+    desc.add<std::vector<edm::InputTag>>("genFlags");
 
     descriptions.addWithDefaultLabel(desc);
 }
 
-template <class Calculator, class ResultType, class TransferResultType>
-void EECTransferProducer<Calculator, ResultType, TransferResultType>::produce(edm::Event& event, const edm::EventSetup& setup) {
+template <class Calculator, class ResultType, class TransferResultType, class BasicCalculator>
+void EECTransferProducer<Calculator, ResultType, TransferResultType, BasicCalculator>::produce(edm::Event& event, const edm::EventSetup& setup) {
     edm::Handle<edm::View<simon::jet>> recoJets;
     event.getByToken(recoJetsToken_, recoJets);
 
@@ -88,13 +112,22 @@ void EECTransferProducer<Calculator, ResultType, TransferResultType>::produce(ed
     edm::Handle<edm::View<matching::jetmatch>> matches;
     event.getByToken(matchesToken_, matches);
 
-    std::vector<bool> passAllFlags(recoJets->size(), true);
-    for(const auto& token : flagsTokens_){
+    std::vector<bool> passAllFlagsRECO(recoJets->size(), true);
+    for(const auto& token : recoFlagsTokens_){
         edm::Handle<edm::ValueMap<bool>> flags;
         event.getByToken(token, flags);
 
         for(unsigned iJet=0; iJet<recoJets->size(); ++iJet){
-            passAllFlags[iJet] = passAllFlags[iJet] && (*flags)[recoJets->refAt(iJet)];
+            passAllFlagsRECO[iJet] = passAllFlagsRECO[iJet] && (*flags)[recoJets->refAt(iJet)];
+        }
+    }
+
+    std::vector<bool> passAllFlagsGEN(genJets->size(), true);
+    for(const auto& token : genFlagsTokens_){
+        edm::Handle<edm::ValueMap<bool>> flags;
+        event.getByToken(token, flags);
+        for(unsigned iJet=0; iJet<genJets->size(); ++iJet){
+            passAllFlagsGEN[iJet] = passAllFlagsGEN[iJet] && (*flags)[genJets->refAt(iJet)];
         }
     }
 
@@ -116,7 +149,7 @@ void EECTransferProducer<Calculator, ResultType, TransferResultType>::produce(ed
     }
 
     for (const auto& match : *matches){
-        if(!passAllFlags[match.iReco]) continue;
+        if(!passAllFlagsRECO[match.iReco] && !passAllFlagsGEN[match.iGen]) continue;
 
         const auto& genjet = genJets->at(match.iGen);
         const auto& recojet = recoJets->at(match.iReco);
@@ -145,6 +178,27 @@ void EECTransferProducer<Calculator, ResultType, TransferResultType>::produce(ed
                     transfer_result->back().result);
         }
     }
+
+    for(unsigned iGen=0; iGen<genJets->size(); ++iGen){
+        if (!passAllFlagsGEN[iGen] || genIsMatched(iGen, *matches)) continue;
+        
+        const auto& genjet = genJets->at(iGen);
+
+        gen_result->emplace_back(iGen, -1, calc_.get_axes_gen());
+
+        basicCalc_.compute_precomputed(
+            genjet, 
+            gen_result->back().result
+        );
+
+        if constexpr(Calculator::HAS_UNTRANSFERED){
+            untransfered_gen_result->emplace_back(iGen, -1, calc_.get_axes_gen()); // untransfered should be empty
+            untransfered_gen_result->back().result.set_pt_denom(gen_result->back().result.get_pt_denom()); // but we need to set the pt_denom for untransfered
+        }
+
+        unmatched_gen_result->push_back(gen_result->back()); // unmatched is the same as gen for unmatched gen jets
+    }
+
     event.put(std::move(gen_result), "gen");
     event.put(std::move(unmatched_gen_result), "unmatchedGen");
     event.put(std::move(transfer_result), "transfer");
@@ -160,13 +214,16 @@ void EECTransferProducer<Calculator, ResultType, TransferResultType>::produce(ed
 
 typedef EECTransferProducer<EEC::Res4TransferCalculator, 
                                EEC::Res4Result_Vector, 
-                               EEC::Res4TransferResult_Vector> EECRes4TransferVectorProducer;
+                               EEC::Res4TransferResult_Vector,
+                               EEC::Res4Calculator> EECRes4TransferVectorProducer;
 typedef EECTransferProducer<EEC::Res4TransferCalculator, 
                                EEC::Res4Result_Unbinned, 
-                               EEC::Res4TransferResult_Unbinned> EECRes4TransferUnbinnedProducer;
+                               EEC::Res4TransferResult_Unbinned,
+                               EEC::Res4Calculator> EECRes4TransferUnbinnedProducer;
 typedef EECTransferProducer<EEC::Res4TransferCalculator, 
                                EEC::Res4Result_MultiArray, 
-                               EEC::Res4TransferResult_MultiArray> EECRes4TransferArrayProducer;
+                               EEC::Res4TransferResult_MultiArray,
+                               EEC::Res4Calculator> EECRes4TransferArrayProducer;
 
 DEFINE_FWK_MODULE(EECRes4TransferVectorProducer);
 DEFINE_FWK_MODULE(EECRes4TransferUnbinnedProducer);
@@ -178,13 +235,16 @@ DEFINE_FWK_MODULE(EECRes4TransferArrayProducer);
 
 typedef EECTransferProducer<EEC::Res3TransferCalculator, 
                                EEC::Res3Result_Vector, 
-                               EEC::Res3TransferResult_Vector> EECRes3TransferVectorProducer;
+                               EEC::Res3TransferResult_Vector,
+                               EEC::Res3Calculator> EECRes3TransferVectorProducer;
 typedef EECTransferProducer<EEC::Res3TransferCalculator, 
                                EEC::Res3Result_Unbinned, 
-                               EEC::Res3TransferResult_Unbinned> EECRes3TransferUnbinnedProducer;
+                               EEC::Res3TransferResult_Unbinned,
+                               EEC::Res3Calculator> EECRes3TransferUnbinnedProducer;
 typedef EECTransferProducer<EEC::Res3TransferCalculator, 
                                EEC::Res3Result_MultiArray, 
-                               EEC::Res3TransferResult_MultiArray> EECRes3TransferArrayProducer;
+                               EEC::Res3TransferResult_MultiArray,
+                               EEC::Res3Calculator> EECRes3TransferArrayProducer;
 
 DEFINE_FWK_MODULE(EECRes3TransferVectorProducer);
 DEFINE_FWK_MODULE(EECRes3TransferUnbinnedProducer);
@@ -196,13 +256,16 @@ DEFINE_FWK_MODULE(EECRes3TransferArrayProducer);
 
 typedef EECTransferProducer<EEC::ProjTransferCalculator, 
                                EEC::ProjResult_Vector, 
-                               EEC::ProjTransferResult_Vector> EECProjTransferVectorProducer;
+                               EEC::ProjTransferResult_Vector,
+                               EEC::ProjCalculator> EECProjTransferVectorProducer;
 typedef EECTransferProducer<EEC::ProjTransferCalculator, 
                                EEC::ProjResult_Unbinned, 
-                               EEC::ProjTransferResult_Unbinned> EECProjTransferUnbinnedProducer;
+                               EEC::ProjTransferResult_Unbinned,
+                               EEC::ProjCalculator> EECProjTransferUnbinnedProducer;
 typedef EECTransferProducer<EEC::ProjTransferCalculator, 
                                EEC::ProjResult_Array, 
-                               EEC::ProjTransferResult_Array> EECProjTransferArrayProducer;
+                               EEC::ProjTransferResult_Array,
+                               EEC::ProjCalculator> EECProjTransferArrayProducer;
 
 DEFINE_FWK_MODULE(EECProjTransferVectorProducer);
 DEFINE_FWK_MODULE(EECProjTransferUnbinnedProducer);

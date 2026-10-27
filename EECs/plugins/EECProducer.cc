@@ -14,6 +14,7 @@
 
 #include "SRothman/SimonTools/src/jet.h"
 #include "SRothman/DataFormats/interface/EEC.h"
+#include "SRothman/DataFormats/interface/matching.h"
 
 #include <memory>
 #include <vector>
@@ -29,22 +30,49 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void produce(edm::Event&, const edm::EventSetup&) override;
 private:
+    int lookupGenIndex(const unsigned iReco, const edm::View<matching::jetmatch>& matches) const;
+
     Calculator calc_;
 
     edm::EDGetTokenT<edm::View<simon::jet>> jetsToken_;
 
     std::vector<edm::EDGetTokenT<edm::ValueMap<bool>>> flagsTokens_;
+
+    bool checkGenFlags_;
+    std::vector<edm::EDGetTokenT<edm::ValueMap<bool>>> genFlagsTokens_;
+    edm::EDGetTokenT<edm::View<matching::jetmatch>> matchesToken_;
+    edm::EDGetTokenT<edm::View<simon::jet>> genJetsToken_;
 };
+
+template <class Calculator, class ResultType>
+int EECProducer<Calculator, ResultType>::lookupGenIndex(const unsigned iReco, const edm::View<matching::jetmatch>& matches) const {
+    for(const auto& match : matches){
+        if(match.iReco==iReco) return match.iGen;
+    }
+    return -1;
+}
 
 template <class Calculator, class ResultType>
 EECProducer<Calculator, ResultType>::EECProducer(const edm::ParameterSet& conf) :
         calc_(conf.getParameter<edm::ParameterSet>("calculator")),
-        jetsToken_(consumes<edm::View<simon::jet>>(conf.getParameter<edm::InputTag>("jets"))) {
+        jetsToken_(consumes<edm::View<simon::jet>>(conf.getParameter<edm::InputTag>("jets"))),
+        checkGenFlags_(conf.getParameter<bool>("checkGenFlags")) {
 
     std::vector<edm::InputTag> flagsTags = conf.getParameter<std::vector<edm::InputTag>>("flags");
     flagsTokens_.reserve(flagsTags.size());
     for(const auto& tag : flagsTags){
         flagsTokens_.push_back(consumes<edm::ValueMap<bool>>(tag));
+    }
+
+    if (checkGenFlags_){
+        genJetsToken_ = consumes<edm::View<simon::jet>>(conf.getParameter<edm::InputTag>("genJets"));
+        matchesToken_ = consumes<edm::View<matching::jetmatch>>(conf.getParameter<edm::InputTag>("matches"));
+
+        std::vector<edm::InputTag> genFlagsTags = conf.getParameter<std::vector<edm::InputTag>>("genFlags");
+        genFlagsTokens_.reserve(genFlagsTags.size());
+        for(const auto& tag : genFlagsTags){
+            genFlagsTokens_.push_back(consumes<edm::ValueMap<bool>>(tag));
+        }
     }
 
     produces<std::vector<EEC::CMSSWResult<ResultType>>>("reco");
@@ -61,6 +89,11 @@ void EECProducer<Calculator, ResultType>::fillDescriptions(edm::ConfigurationDes
     desc.add<edm::InputTag>("jets");
 
     desc.add<std::vector<edm::InputTag>>("flags");
+
+    desc.add<bool>("checkGenFlags");
+    desc.add<edm::InputTag>("genJets");
+    desc.add<edm::InputTag>("matches");
+    desc.add<std::vector<edm::InputTag>>("genFlags");
 
     descriptions.addWithDefaultLabel(desc);
 }
@@ -80,11 +113,31 @@ void EECProducer<Calculator, ResultType>::produce(edm::Event& event, const edm::
         }
     }
 
+    std::vector<bool> passAllFlagsGEN;
+    if (checkGenFlags_){
+        edm::Handle<edm::View<simon::jet>> genJets;
+        event.getByToken(genJetsToken_, genJets);
+        passAllFlagsGEN.resize(genJets->size(), true);
+        for(const auto& token : genFlagsTokens_){
+            edm::Handle<edm::ValueMap<bool>> flags;
+            event.getByToken(token, flags);
+            for(size_t i = 0; i < genJets->size(); ++i){
+                passAllFlagsGEN[i] = passAllFlagsGEN[i] && (*flags)[genJets->refAt(i)];
+            }
+        }
+    }
+
     auto result = std::make_unique<std::vector<EEC::CMSSWResult<ResultType>>>();
     result->reserve(jets->size());
 
     for (unsigned iJet = 0; iJet < jets->size(); ++iJet){
-        if (!passAllFlags[iJet]) continue;
+        bool skip = !passAllFlags[iJet];
+        if (checkGenFlags_){
+            int iGen = lookupGenIndex(iJet, *event.getHandle(matchesToken_));
+            if (iGen >= 0 && !passAllFlagsGEN[iGen]) skip = true;
+        }
+
+        if (skip) continue;
 
         const auto& jet = jets->at(iJet);
         result->emplace_back(iJet, iJet, calc_);

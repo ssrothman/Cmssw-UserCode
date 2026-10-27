@@ -115,7 +115,9 @@ transfercalculator_factories = {
     'res4' : get_res4_transfer_calculator,
 }
 
-def get_producer(config, jets, whichEEC, genreco):
+def get_producer(config, jets, whichEEC, genreco, 
+                 checkGenFlags, genJets, matches):
+    
     producer = producers[whichEEC][config['resultType']]
     factory = calculator_factories[whichEEC]
 
@@ -123,9 +125,15 @@ def get_producer(config, jets, whichEEC, genreco):
         jets = jets,
         flags = [jets + flag for flag in config['flags']],
         calculator = factory(config, genreco),
+        checkGenFlags = checkGenFlags,
+        genJets = genJets,
+        matches = matches,
+        genFlags = [genjets + flag for flag in config['flags']],
     )
 
-def get_matched_producer(config, jets, matches, whichEEC, genreco):
+def get_matched_producer(config, jets, matches, whichEEC, genreco,
+                         checkGenFlags, genJets):
+    
     producer = matchedproducers[whichEEC][config['resultType']]
     factory = calculator_factories[whichEEC]
         
@@ -134,18 +142,24 @@ def get_matched_producer(config, jets, matches, whichEEC, genreco):
         matches = matches,
         flags = [jets + flag for flag in config['flags']],
         calculator = factory(config, genreco),
+        checkGenFlags = checkGenFlags,
+        genJets = genJets,
+        genFlags = [genJets + flag for flag in config['flags']],
     )
 
 def get_transfer_producer(config, genjets, recojets, matches, whichEEC):
     producer = transferproducers[whichEEC][config['resultType']]    
     factory = transfercalculator_factories[whichEEC]
+    basic_factory = calculator_factories[whichEEC]
 
     return producer.clone(
         genJets = genjets,
         recoJets = recojets,
         matches = matches,
-        flags = [recojets + flag for flag in config['flags']],
+        recoFlags = [recojets + flag for flag in config['flags']],
+        genFlags = [genjets + flag for flag in config['flags']],
         calculator = factory(config),
+        basicCalculator = basic_factory(config, 'gen')
     )
 
 def get_table(config, name, whichEEC, what):

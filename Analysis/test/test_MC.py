@@ -10,7 +10,7 @@ if input_fname is None:
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(input_fname),
     secondaryFileNames = cms.untracked.vstring(),
-    eventsToProcess = cms.untracked.VEventRange('1:8953:22381988'),
+    #eventsToProcess = cms.untracked.VEventRange('1:8953:22381988'),
 )
 
 # Other statements
@@ -146,7 +146,7 @@ for gensyst in ['NOM']:
 process.TriggerResultsHackTable = cms.EDProducer("TriggerResultsTableProducer",
     src = cms.InputTag("TriggerResults","","NANO"),
     name = cms.string("NANOTriggerResults"),
-    verbose = cms.int32(2)
+    verbose = cms.int32(0)
 )
 process.TriggerResultsHackTask = cms.Task(process.TriggerResultsHackTable)
 process.schedule.associate(process.TriggerResultsHackTask)
@@ -155,4 +155,4 @@ process.schedule.associate(process.TriggerResultsHackTask)
 # run=1
 # lumi=8953
 # event=22381988
-process.RecoZMuMu.verbose = 100
+#process.RecoZMuMu.verbose = 100

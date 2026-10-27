@@ -50,13 +50,13 @@ def setupGenSimonJets(process,
         selector = selector_from_config(config['Systematics'], gensyst)
     ))
 
-    setattr(process, 'Gen'+name+'Preselection', cms.EDProducer("JetSelectionFlagTranslator",
+    setattr(process, 'Gen'+name+'Preselection', cms.EDProducer("GenJetSelectionFlagTranslator",
         src = cms.InputTag(genjets),
         target = cms.InputTag('Gen'+name),
         map = cms.InputTag("preselectGenJetsAK8"),
         verbose = cms.int32(0)
     ))
-    setattr(process, 'Gen'+name+'OverlapVeto', cms.EDProducer("JetSelectionFlagTranslator",
+    setattr(process, 'Gen'+name+'OverlapVeto', cms.EDProducer("GenJetSelectionFlagTranslator",
         src = cms.InputTag(genjets),
         target = cms.InputTag('Gen'+name),
         map = cms.InputTag("overlapVetoGenJetsAK8"),

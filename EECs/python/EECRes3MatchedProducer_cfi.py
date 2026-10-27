@@ -5,6 +5,10 @@ EECRes3MatchedVectorProducer = cms.EDProducer("EECRes3MatchedVectorProducer",
     matches = cms.InputTag(""),
     calculator = cms.PSet(),
     flags = cms.VInputTag(),
+
+    checkGenFlags = cms.bool(False),
+    genJets = cms.InputTag(""),
+    genFlags = cms.VInputTag(),
 )
 
 EECRes3MatchedUnbinnedProducer = cms.EDProducer("EECRes3MatchedUnbinnedProducer",
@@ -12,6 +16,10 @@ EECRes3MatchedUnbinnedProducer = cms.EDProducer("EECRes3MatchedUnbinnedProducer"
     matches = cms.InputTag(""),
     calculator = cms.PSet(),
     flags = cms.VInputTag(),
+
+    checkGenFlags = cms.bool(False),
+    genJets = cms.InputTag(""),
+    genFlags = cms.VInputTag(),
 )
 
 EECRes3MatchedArrayProducer = cms.EDProducer("EECRes3MatchedArrayProducer",
@@ -19,5 +27,9 @@ EECRes3MatchedArrayProducer = cms.EDProducer("EECRes3MatchedArrayProducer",
     matches = cms.InputTag(""),
     calculator = cms.PSet(),
     flags = cms.VInputTag(),
+
+    checkGenFlags = cms.bool(False),
+    genJets = cms.InputTag(""),
+    genFlags = cms.VInputTag(),
 )
 

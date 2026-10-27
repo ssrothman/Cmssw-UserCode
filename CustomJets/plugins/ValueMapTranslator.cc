@@ -89,3 +89,6 @@ void ValueMapTranslatorT<SourceT, TargetT, Mapped>::fillDescriptions(edm::Config
 
 typedef ValueMapTranslatorT<pat::Jet, simon::jet, bool> JetSelectionFlagTranslator;
 DEFINE_FWK_MODULE(JetSelectionFlagTranslator);
+
+typedef ValueMapTranslatorT<reco::GenJet, simon::jet, bool> GenJetSelectionFlagTranslator;
+DEFINE_FWK_MODULE(GenJetSelectionFlagTranslator);

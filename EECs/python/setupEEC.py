@@ -41,7 +41,11 @@ def setupEEC_MC(process,
     name = name+whichEEC
 
     setattr(process, name,
-        get_matched_producer(config, recojets, genMatch, whichEEC, 'reco')
+        get_matched_producer(
+            config, recojets, genMatch, whichEEC, 'reco',
+            checkGenFlags = True,
+            genJets = genjets,
+        )
     )
     setattr(process, "Reco%sTable"%name,
         get_table(config, name, whichEEC, 'reco')

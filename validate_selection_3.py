@@ -7,7 +7,7 @@ import os
 import os.path
 import hist
 
-events = NanoEventsFactory.from_root('NANO_selected_2.root:Events').events()
+events = NanoEventsFactory.from_root('NANO_selected.root:Events').events()
 
 passGEN = events.NANOTriggerResults.Genselections_path == 1
 passRECO = events.NANOTriggerResults.Recoselections_path == 1
@@ -21,14 +21,6 @@ genjetsmatched = gensimonjets.genJetMatched > 0
 recojets = events.finalSelectedJetsAK8
 recosimonjets = events.ChargedSimonJetsNOMBK
 recojetsmatched = recosimonjets.jetMatched > 0
-
-genjets['preselection'] = (genjets.pt > 10.0) & \
-                      (np.abs(genjets.eta) < 1.7) & \
-                      (genjets.muonEnergy / (genjets.pt * np.cosh(genjets.eta)) < 0.8) & \
-                      (genjets.chargedEmEnergy / (genjets.pt * np.cosh(genjets.eta)) < 0.8) & \
-                      (genjets.neutralEmEnergy / (genjets.pt * np.cosh(genjets.eta)) < 0.9) & \
-                      (genjets.neutralHadronEnergy / (genjets.pt * np.cosh(genjets.eta)) < 0.9) & \
-                      (genjets.nConstituents >= 1)
 
 Hmatch_vs_pt = hist.Hist(
     hist.axis.Regular(
@@ -135,7 +127,7 @@ def evaluate_matching(jets1, jets2, idx12, matched1, matched2, mainmask,
 
 
     plt.xlabel('Jet $p_T$ [GeV]')
-    plt.ylabel('Matching rate')
+    plt.ylabel('Rate with which ' + name1 + ' jets are matched to ' + name2 + ' jets')
     plt.legend()
     plt.tight_layout()
     plt.savefig(fname, dpi=300, bbox_inches='tight')
@@ -258,6 +250,8 @@ def evaluate_matching(jets1, jets2, idx12, matched1, matched2, mainmask,
     plt.xticks(rotation=45, ha='right')
     plt.ylabel('Fraction of ' + name1 + ' jets matched to ' + name2 + ' level')
     plt.title(str(ptbin_min) + ' < ' + name1 + ' pt < ' + str(ptbin_max))
+    plt.ylim(0.0, 1.05)
+    plt.axhline(1.0, color='black', linestyle='--', alpha=0.2)
     plt.tight_layout()
     plt.savefig(
         'test_cutflow_' + name1 + '_matched_to_' + name2 + 'pt' + str(ptbin_min) + '-' + str(ptbin_max) + '.png', 

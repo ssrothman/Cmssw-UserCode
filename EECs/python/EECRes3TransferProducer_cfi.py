@@ -4,23 +4,36 @@ EECRes3TransferVectorProducer = cms.EDProducer("EECRes3TransferVectorProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
+
     calculator = cms.PSet(),
-    flags = cms.VInputTag(),
+    basicCalculator = cms.PSet(),
+
+    recoFlags = cms.VInputTag(),
+    genFlags = cms.VInputTag(),
 )
 
 EECRes3TransferUnbinnedProducer = cms.EDProducer("EECRes3TransferUnbinnedProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
+
     calculator = cms.PSet(),
-    flags = cms.VInputTag(),
+    basicCalculator = cms.PSet(),
+
+    recoFlags = cms.VInputTag(),
+    genFlags = cms.VInputTag(),
+
 )
 
 EECRes3TransferArrayProducer = cms.EDProducer("EECRes3TransferArrayProducer",
     genJets = cms.InputTag(""),
     recoJets = cms.InputTag(""),
     matches = cms.InputTag(""),
+
     calculator = cms.PSet(),
-    flags = cms.VInputTag(),
+    basicCalculator = cms.PSet(),
+
+    recoFlags = cms.VInputTag(),
+    genFlags = cms.VInputTag(),
 )
 

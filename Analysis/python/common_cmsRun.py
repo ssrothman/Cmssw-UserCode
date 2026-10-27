@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 from Configuration.Eras.Modifier_run2_nanoAOD_106Xv2_cff import run2_nanoAOD_106Xv2
 
-RUNNING_CRAB = False
+RUNNING_CRAB = True
 
 if not RUNNING_CRAB:
     from FWCore.ParameterSet.VarParsing import VarParsing
@@ -149,7 +149,7 @@ process.options.numberOfConcurrentLuminosityBlocks=cms.untracked.uint32(1)
 
 process.MessageLogger.cerr.FwkReport.reportEvery=1
 
-process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)));
+process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
