@@ -13,7 +13,10 @@ def setupEEC_data(process,
     name = name + whichEEC
 
     setattr(process, name,
-        get_producer(config, recojets, whichEEC, 'reco')
+        get_producer(config, recojets, whichEEC, 'reco',
+                     checkGenFlags=False, 
+                     genJets = '',
+                     matches = '')
     )
     setattr(process, "Reco%sTable"%name,
         get_table(config, name, whichEEC, 'reco')

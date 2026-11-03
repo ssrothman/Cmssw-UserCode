@@ -106,11 +106,11 @@
             "CHscale" : 0.01,
             "trkDropProb" : 0.03,
             "trkDropSmear" : 0.10,
-            "EM0thresholds" : [0.5, 0.0, 1.0],
-            "HAD0thresholds" : [0.5, 0.0, 1.0],
-            "ELEthresholds" : [0.5, 0.0, 1.0],
-            "MUthresholds" : [0.5, 0.0, 1.0],
-            "HADCHthresholds" : [0.5, 0.0, 1.0],
+            "EM0thresholds" : [0.0, 0.2, 0.5, 1.0, 2.0],
+            "HAD0thresholds" : [0.0, 0.2, 0.5, 1.0, 2.0],
+            "ELEthresholds" : [0.0, 0.2, 0.5, 1.0, 2.0],
+            "MUthresholds" : [0.0, 0.2, 0.5, 1.0, 2.0],
+            "HADCHthresholds" : [0.0, 0.2, 0.5, 1.0, 2.0],
             "minFromPV" : 0,
             "minPuppiWt" : 0.99,
             "maxDZ" : 0.2,
@@ -122,11 +122,11 @@
             "HAD0scale" : "NOM",
             "CHscale" : "NOM",
             "trkDrop" : "OFF",
-            "EM0threshold" : "NOM",
-            "HAD0threshold" : "NOM",
-            "ELEthreshold" : "NOM",
-            "MUthreshold" : "NOM",
-            "HADCHthreshold" : "NOM",
+            "EM0threshold" : 0,
+            "HAD0threshold" : 0,
+            "ELEthreshold" : 0,
+            "MUthreshold" : 0,
+            "HADCHthreshold" : 0,
             "applyPuppiCut" : true,
             "applyFromPVCut" : false,
             "applyDZCut" : true,
@@ -157,19 +157,33 @@
                 "enableExtraTrkUnc" : true,
                 "extraTrkUncKey" : "CoreTrk"
             },
-            "THRESH10" : {
-                "EM0threshold" : "UP",
-                "HAD0threshold" : "UP",
-                "ELEthreshold" : "UP",
-                "MUthreshold" : "UP",
-                "HADCHthreshold" : "UP"
+            "THRESH02" : {
+                "EM0threshold" : 1,
+                "HAD0threshold" : 1,
+                "ELEthreshold" : 1,
+                "MUthreshold" : 1,
+                "HADCHthreshold" : 1
             },
-            "THRESH5" : {
-                "EM0threshold" : "DN",
-                "HAD0threshold" : "DN",
-                "ELEthreshold" : "DN",
-                "MUthreshold" : "DN",
-                "HADCHthreshold" : "DN"
+            "THRESH05" : {
+                "EM0threshold" : 2,
+                "HAD0threshold" : 2,
+                "ELEthreshold" : 2,
+                "MUthreshold" : 2,
+                "HADCHthreshold" : 2
+            },
+            "THRESH10" : {
+                "EM0threshold" : 3,
+                "HAD0threshold" : 3,
+                "ELEthreshold" : 3,
+                "MUthreshold" : 3,
+                "HADCHthreshold" : 3
+            },
+            "THRESH20" : {
+                "EM0threshold" : 4,
+                "HAD0threshold" : 4,
+                "ELEthreshold" : 4,
+                "MUthreshold" : 4,
+                "HADCHthreshold" : 4
             },
             "EM0_UP" : {
                 "EM0scale" : "UP"

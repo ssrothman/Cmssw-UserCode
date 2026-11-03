@@ -77,9 +77,10 @@ process = setupAK8Jets(process,
    config=cfg)
 
 from SRothman.CustomJets.setupSimonJets import setupSimonJets
-for gensyst in ['NOM']:
-    for syst in ['NOM']:
-        suffix = syst.replace('_', ''); # remove underscores for the suffix
+
+for gensyst in ['NOM', 'THRESH02', 'THRESH05', 'THRESH10', 'THRESH20']:
+    for syst in [gensyst]:
+        suffix = syst.replace('_', '') + 'gen' + gensyst.replace('_', ''); # remove underscores for the suffix
         
         process = setupSimonJets(process,
             jets = 'selectedUpdatedJetsAK8',
@@ -125,4 +126,3 @@ process.schedule.associate(process.TriggerResultsHackTask)
 #`process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1)
 #)
-

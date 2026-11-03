@@ -128,7 +128,7 @@ def get_producer(config, jets, whichEEC, genreco,
         checkGenFlags = checkGenFlags,
         genJets = genJets,
         matches = matches,
-        genFlags = [genjets + flag for flag in config['flags']],
+        genFlags = [genJets + flag for flag in config['flags']],
     )
 
 def get_matched_producer(config, jets, matches, whichEEC, genreco,
