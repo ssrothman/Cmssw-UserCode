@@ -55,17 +55,14 @@ Analysis/production/crab/production_tag.py
 Analysis/production/crab/submit.py
 Analysis/production/crab/Lumis*/*
 
-# Submodule content (SimonTools/src is now tracked by this repo)
-SimonTools/src/.git
-SimonTools/src/.gitignore
-
 # Generated outputs
 *.png
-*.root
 plots/
+
+# Root files
 NANO_selected.root
 NANO_dropped.root
 
-# Config files (uncomment if you don't want these tracked)
-# config/
-# content/
+# Config files (untracked)
+config
+content
